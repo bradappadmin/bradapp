@@ -2,6 +2,7 @@ import { closePool, getPool, type ResultSetHeader, type RowDataPacket } from "./
 import { loadEnv } from "./env.js";
 import { hashPassword } from "./password.js";
 import { runMigrations } from "./migrate.js";
+import { seedCars } from "./seed-cars.js";
 
 loadEnv();
 
@@ -41,6 +42,8 @@ export async function seedAccounts(): Promise<void> {
       [superEmail, passwordHash, superName],
     );
   }
+
+  await seedCars();
 }
 
 export async function countUsersByRole(role: string): Promise<number> {
@@ -82,7 +85,7 @@ export async function ensureUser(
 async function main(): Promise<void> {
   try {
     await seedAccounts();
-    console.log("Seed complete (Brad admin account ensured).");
+    console.log("Seed complete (accounts + cars).");
   } finally {
     await closePool();
   }

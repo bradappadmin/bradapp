@@ -28,7 +28,7 @@ describe("HomePage", () => {
     );
 
     expect(await screen.findByText("BradApp")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Search cars" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Sign in" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sign up" })).toBeInTheDocument();
   });
 });

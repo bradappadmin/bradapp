@@ -18,7 +18,7 @@ export async function runMigrations(): Promise<void> {
   `);
 
   const migrationsDir = path.resolve(__dirname, "../migrations");
-  const files = ["001_users.sql"];
+  const files = ["001_users.sql", "002_cars.sql"];
 
   for (const file of files) {
     const [rows] = await pool.query("SELECT id FROM schema_migrations WHERE id = ?", [file]);

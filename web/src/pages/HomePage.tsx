@@ -29,20 +29,21 @@ export function HomePage() {
           </p>
           <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full" />
           <p className="mt-8 max-w-xl text-lg text-steel">
-            A midnight garage for Brad and the people who ride with him. Sign in to open the bay.
+            A midnight garage for Brad and the people who ride with him. Search real cars, or sign in
+            for your bay.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
-              to="/signin"
+              to="/cars"
               className="bay-cta rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
             >
-              Sign in
+              Search cars
             </Link>
             <Link
-              to="/signup"
+              to="/signin"
               className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
             >
-              Sign up
+              Sign in
             </Link>
           </div>
         </div>
@@ -63,15 +64,23 @@ export function HomePage() {
           Signed in as {user.email} · {roleLabel(user.role)}
         </p>
         <p className="mt-6 max-w-xl text-sm leading-relaxed text-steel">
-          Accounts are live. Cars, Brad Coins, Top Trumps, and reviews land in later slices.
+          Cars are searchable. Buy/sell with Brad Coins, Top Trumps, and reviews come next.
         </p>
-        <button
-          type="button"
-          onClick={() => void onSignOut()}
-          className="mt-10 rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist transition hover:border-rose hover:text-rose"
-        >
-          Sign out
-        </button>
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link
+            to="/cars"
+            className="bay-cta rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+          >
+            Search cars
+          </Link>
+          <button
+            type="button"
+            onClick={() => void onSignOut()}
+            className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist transition hover:border-rose hover:text-rose"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     </main>
   );

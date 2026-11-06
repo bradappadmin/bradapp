@@ -1,3 +1,4 @@
+import type { CarFilters, ListingDetail, ListingSummary, SearchQuery } from "./cars";
 import type { User } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
@@ -59,4 +60,32 @@ export function signOut(): Promise<{ ok: boolean }> {
 
 export function fetchMe(): Promise<{ user: User }> {
   return request("/auth/me");
+}
+
+function toQuery(params: SearchQuery): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value == null || value === "") continue;
+    search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
+export function fetchCarFilters(): Promise<{ filters: CarFilters }> {
+  return request("/cars/filters");
+}
+
+export function searchCars(
+  params: SearchQuery,
+): Promise<{ total: number; limit: number; offset: number; listings: ListingSummary[] }> {
+  return request(`/cars/search${toQuery(params)}`);
+}
+
+export function fetchListing(id: number): Promise<{ listing: ListingDetail }> {
+  return request(`/cars/listings/${id}`);
+}
+
+export function fetchModels(make?: string): Promise<{ models: string[] }> {
+  return request(`/cars/models${toQuery({ make: make ?? "" })}`);
 }

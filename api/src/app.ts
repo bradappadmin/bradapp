@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
 import { createAuthRouter } from "./auth-routes.js";
+import { createCarsRouter } from "./cars-routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp(): Express {
   });
 
   app.use("/auth", createAuthRouter());
+  app.use("/cars", createCarsRouter());
 
   app.use((_req, res) => {
     res.status(404).json({ error: "not_found", message: "Not found." });

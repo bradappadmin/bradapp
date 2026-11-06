@@ -1,6 +1,6 @@
 # BradApp
 
-A Carwow-style car world for Brad and friends — accounts first. Real cars later; no real money.
+A Carwow-style car world for Brad and friends. Real cars and specs; made-up garages, listings, and Brad Coin prices. No real money.
 
 ## Stack
 
@@ -16,6 +16,12 @@ A Carwow-style car world for Brad and friends — accounts first. Real cars late
 | `admin` | Brad — seeded as `bradapp.admin@gmail.com` (password hash only in repo). |
 | `member` | Friends and family via self-serve sign-up. |
 
+## What’s in this slice
+
+- Accounts: sign-up, sign-in, session cookie
+- Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
+- Filters: make, model, new/used, body, fuel, colour, year, coins, mileage, BHP
+
 ## Run locally
 
 ```bash
@@ -28,6 +34,8 @@ npm run db:seed
 npm run dev:api   # terminal 1 — http://127.0.0.1:5174
 npm run dev:web   # terminal 2 — http://127.0.0.1:5173
 ```
+
+Then open `/cars` for search.
 
 Optional Napwood seed (hashed at runtime, never logged):
 
