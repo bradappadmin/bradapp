@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bay: #0b1220;
+  --color-bay-deep: #070b14;
+  --color-bay-panel: #121a2b;
+  --color-rose: #f43f5e;
+  --color-lime: #a3e635;
+  --color-mist: #c7d2e5;
+  --color-steel: #8b9bb8;
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Rubik", sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    color: var(--color-mist);
+    font-family: var(--font-body);
+    background-color: var(--color-bay-deep);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 50% -10%, rgba(244, 63, 94, 0.18), transparent 55%),
+      radial-gradient(ellipse 90% 60% at 100% 100%, rgba(163, 230, 53, 0.08), transparent 50%),
+      linear-gradient(180deg, #0b1220 0%, #070b14 100%),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.015) 0,
+        rgba(255, 255, 255, 0.015) 1px,
+        transparent 1px,
+        transparent 48px
+      );
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+}
+
+@keyframes bay-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bay-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(163, 230, 53, 0);
+  }
+  50% {
+    box-shadow: 0 0 28px 0 rgba(163, 230, 53, 0.18);
+  }
+}
+
+@keyframes bay-sweep {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+.bay-rise {
+  animation: bay-rise 0.55s ease-out both;
+}
+
+.bay-rise-delay {
+  animation: bay-rise 0.7s ease-out 0.12s both;
+}
+
+.bay-cta {
+  animation: bay-glow 3.2s ease-in-out infinite;
+}
+
+.bay-brand-line {
+  background: linear-gradient(90deg, #f43f5e, #a3e635, #f43f5e);
+  background-size: 200% 100%;
+  animation: bay-sweep 6s linear infinite;
+}
