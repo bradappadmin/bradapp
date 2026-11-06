@@ -21,6 +21,7 @@ type SessionRow = RowDataPacket & {
   display_name: string;
   role: Role;
   coin_balance: number;
+  account_status: "active" | "closed";
   expires_at: Date;
 };
 
@@ -99,7 +100,7 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
 
   const pool = getPool();
   const [rows] = await pool.query<SessionRow[]>(
-    `SELECT s.id, s.user_id, s.expires_at, u.email, u.display_name, u.role, u.coin_balance
+    `SELECT s.id, s.user_id, s.expires_at, u.email, u.display_name, u.role, u.coin_balance, u.account_status
      FROM sessions s
      INNER JOIN users u ON u.id = s.user_id
      WHERE s.id = ?
@@ -113,6 +114,11 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
   }
 
   if (new Date(row.expires_at).getTime() <= Date.now()) {
+    await pool.query<ResultSetHeader>("DELETE FROM sessions WHERE id = ?", [sessionId]);
+    return null;
+  }
+
+  if (row.account_status === "closed") {
     await pool.query<ResultSetHeader>("DELETE FROM sessions WHERE id = ?", [sessionId]);
     return null;
   }

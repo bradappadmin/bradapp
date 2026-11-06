@@ -323,3 +323,106 @@ export function unpublishReview(id: number): Promise<{ ok: boolean; status: stri
 export function reviewVideoSrc(videoUrl: string): string {
   return `${API_BASE}${videoUrl}`;
 }
+
+export type AdminUser = {
+  id: number;
+  email: string;
+  displayName: string;
+  role: "super_admin" | "admin" | "member";
+  coinBalance: number;
+  accountStatus: "active" | "closed";
+  createdAt?: string;
+};
+
+export type AdminGarage = { id: number; name: string; city: string; tagline: string };
+
+export type AdminCarModel = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  fuel: string;
+  drivetrain: string;
+  doors: number;
+  seats: number;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
+};
+
+export type AdminListing = {
+  id: number;
+  conditionType: "new" | "used";
+  year: number;
+  colour: string;
+  mileage: number;
+  coinPrice: number;
+  ownerLabel: string;
+  status: "available" | "owned" | "sold";
+  garageId: number;
+  make: string;
+  model: string;
+  trimName: string;
+  garageName: string;
+};
+
+export function fetchAdminUsers(): Promise<{ users: AdminUser[] }> {
+  return request("/admin/users");
+}
+
+export function patchAdminUser(
+  id: number,
+  body: { displayName?: string; role?: AdminUser["role"]; accountStatus?: AdminUser["accountStatus"] },
+): Promise<{ user: AdminUser }> {
+  return request(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+export function adjustAdminCoins(
+  id: number,
+  body: { delta: number; note?: string },
+): Promise<{ balance: number; ledger: LedgerEntry[] }> {
+  return request(`/admin/users/${id}/coins`, { method: "POST", body: JSON.stringify(body) });
+}
+
+export function fetchAdminGarages(): Promise<{ garages: AdminGarage[] }> {
+  return request("/admin/garages");
+}
+
+export function patchAdminGarage(
+  id: number,
+  body: Partial<Pick<AdminGarage, "name" | "city" | "tagline">>,
+): Promise<{ garage: AdminGarage }> {
+  return request(`/admin/garages/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+export function fetchAdminCarModels(): Promise<{ models: AdminCarModel[] }> {
+  return request("/admin/car-models");
+}
+
+export function patchAdminCarModel(
+  id: number,
+  body: Partial<AdminCarModel>,
+): Promise<{ model: AdminCarModel }> {
+  return request(`/admin/car-models/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+export function fetchAdminListings(): Promise<{ listings: AdminListing[] }> {
+  return request("/admin/listings");
+}
+
+export function patchAdminListing(
+  id: number,
+  body: Partial<{
+    conditionType: "new" | "used";
+    year: number;
+    colour: string;
+    mileage: number;
+    coinPrice: number;
+    ownerLabel: string;
+    status: "available" | "owned" | "sold";
+    garageId: number;
+  }>,
+): Promise<{ listing: AdminListing }> {
+  return request(`/admin/listings/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}

@@ -30,6 +30,7 @@ type UserRow = RowDataPacket & {
   display_name: string;
   role: PublicUser["role"];
   coin_balance: number;
+  account_status: "active" | "closed";
 };
 
 function toPublicUser(row: UserRow): PublicUser {
@@ -132,7 +133,7 @@ export function createAuthRouter(): Router {
     const { email, password } = parsed.data;
     const pool = getPool();
     const [rows] = await pool.query<UserRow[]>(
-      "SELECT id, email, password_hash, display_name, role, coin_balance FROM users WHERE email = ? LIMIT 1",
+      "SELECT id, email, password_hash, display_name, role, coin_balance, account_status FROM users WHERE email = ? LIMIT 1",
       [email],
     );
     const user = rows[0];
@@ -147,6 +148,11 @@ export function createAuthRouter(): Router {
       return;
     }
 
+    if (user.account_status === "closed") {
+      res.status(403).json({ error: "account_closed", message: "This account has been closed." });
+      return;
+    }
+
     await creditSeedIfNeeded(
       Number(user.id),
       startingCoinsForRole(user.role),
@@ -154,7 +160,7 @@ export function createAuthRouter(): Router {
     );
 
     const [freshRows] = await pool.query<UserRow[]>(
-      "SELECT id, email, password_hash, display_name, role, coin_balance FROM users WHERE id = ? LIMIT 1",
+      "SELECT id, email, password_hash, display_name, role, coin_balance, account_status FROM users WHERE id = ? LIMIT 1",
       [user.id],
     );
 

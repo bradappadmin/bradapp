@@ -4,6 +4,9 @@ import { CarsPage } from "./pages/CarsPage";
 import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
 import { ListingPage } from "./pages/ListingPage";
+import { AdminHomePage } from "./pages/admin/AdminHomePage";
+import { AdminInventoryPage } from "./pages/admin/AdminInventoryPage";
+import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { RecordReviewPage } from "./pages/RecordReviewPage";
 import { ReviewDetailPage } from "./pages/ReviewDetailPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
@@ -25,6 +28,9 @@ export function App() {
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/record" element={<RecordReviewPage />} />
         <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+        <Route path="/admin" element={<AdminHomePage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/inventory" element={<AdminInventoryPage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

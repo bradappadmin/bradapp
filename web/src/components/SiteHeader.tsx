@@ -34,6 +34,11 @@ export function SiteHeader() {
               <NavLink to="/garage" className={linkClass}>
                 My garage
               </NavLink>
+              {(user.role === "admin" || user.role === "super_admin") && (
+                <NavLink to="/admin" className={linkClass}>
+                  Admin
+                </NavLink>
+              )}
               <span className="font-display text-sm text-lime">{formatCoins(user.coinBalance)}</span>
               <NavLink to="/" className={linkClass}>
                 Home

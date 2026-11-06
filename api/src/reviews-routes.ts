@@ -7,7 +7,7 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { buildCueCards } from "./cue-cards.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
-import type { Role } from "./roles.js";
+import { isAdminRole } from "./roles.js";
 import { ensureVideosDir, videoFilePath } from "./video-storage.js";
 
 const upload = multer({
@@ -20,21 +20,7 @@ const publishFields = z.object({
   title: z.string().trim().min(1).max(200),
 });
 
-function isAdminRole(role: Role): boolean {
-  switch (role) {
-    case "admin":
-    case "super_admin":
-      return true;
-    case "member":
-      return false;
-    default: {
-      const _exhaustive: never = role;
-      return _exhaustive;
-    }
-  }
-}
-
-function requireAdmin(req: AuthedRequest, res: Response): boolean {
+function requireReviewAdmin(req: AuthedRequest, res: Response): boolean {
   if (!isAdminRole(req.user.role)) {
     res.status(403).json({ error: "forbidden", message: "Only Brad or Napwood can do that." });
     return false;
@@ -240,7 +226,7 @@ export function createReviewsRouter(): Router {
 
   router.post("/", requireAuth, upload.single("video"), async (req, res: Response) => {
     const authed = req as AuthedRequest;
-    if (!requireAdmin(authed, res)) return;
+    if (!requireReviewAdmin(authed, res)) return;
 
     const parsed = publishFields.safeParse(req.body);
     if (!parsed.success) {
@@ -327,7 +313,7 @@ export function createReviewsRouter(): Router {
 
   router.post("/:id/unpublish", requireAuth, async (req, res: Response) => {
     const authed = req as AuthedRequest;
-    if (!requireAdmin(authed, res)) return;
+    if (!requireReviewAdmin(authed, res)) return;
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0) {
       res.status(400).json({ error: "validation_error", message: "Invalid review id" });

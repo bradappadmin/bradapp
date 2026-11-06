@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRole, roleLabel, type Role } from "./roles.js";
+import { isAdminRole, isRole, roleLabel, type Role } from "./roles.js";
 
 describe("roles", () => {
   it("accepts known roles only", () => {
@@ -14,5 +14,11 @@ describe("roles", () => {
     for (const role of roles) {
       expect(roleLabel(role).length).toBeGreaterThan(0);
     }
+  });
+
+  it("treats Brad and Napwood as admin-area roles", () => {
+    expect(isAdminRole("admin")).toBe(true);
+    expect(isAdminRole("super_admin")).toBe(true);
+    expect(isAdminRole("member")).toBe(false);
   });
 });

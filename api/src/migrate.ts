@@ -24,6 +24,7 @@ export async function runMigrations(): Promise<void> {
     "003_coins.sql",
     "004_play.sql",
     "005_reviews.sql",
+    "006_admin.sql",
   ];
 
 

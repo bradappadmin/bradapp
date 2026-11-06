@@ -85,6 +85,14 @@ export function HomePage() {
           >
             Top Trumps
           </Link>
+          {(user.role === "admin" || user.role === "super_admin") && (
+            <Link
+              to="/admin"
+              className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-rose hover:text-rose"
+            >
+              Admin
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => void onSignOut()}

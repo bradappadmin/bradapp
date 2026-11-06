@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
+import { createAdminRouter } from "./admin-routes.js";
 import { createAuthRouter } from "./auth-routes.js";
 import { createCarsRouter } from "./cars-routes.js";
 import { createPlayRouter } from "./play-routes.js";
@@ -29,6 +30,7 @@ export function createApp(): Express {
   app.use("/trade", createTradeRouter());
   app.use("/play", createPlayRouter());
   app.use("/reviews", createReviewsRouter());
+  app.use("/admin", createAdminRouter());
 
   app.use((_req, res) => {
     res.status(404).json({ error: "not_found", message: "Not found." });

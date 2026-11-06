@@ -25,6 +25,7 @@ A Carwow-style car world for Brad and friends. Real cars and specs; made-up gara
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins
 - Free card trades between members
 - Video reviews: record with car cue cards, publish to disk + DB; admins can take down
+- Admin area (`/admin`): accounts, coin corrections, cars/garages/listings; members blocked
 
 ## Run locally
 
@@ -39,7 +40,7 @@ npm run dev:api   # terminal 1 — http://127.0.0.1:5174
 npm run dev:web   # terminal 2 — http://127.0.0.1:5173
 ```
 
-Then open `/cars`, `/garage`, `/play`, `/trades`, and `/reviews` (admins record at `/reviews/record`).
+Then open `/cars`, `/garage`, `/play`, `/trades`, `/reviews`, and `/admin` (Brad/Napwood only).
 
 Optional Napwood seed (hashed at runtime, never logged):
 

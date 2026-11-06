@@ -20,3 +20,18 @@ export function roleLabel(role: Role): string {
     }
   }
 }
+
+/** Brad (admin) and Napwood (super_admin) share the admin area. */
+export function isAdminRole(role: Role): boolean {
+  switch (role) {
+    case "admin":
+    case "super_admin":
+      return true;
+    case "member":
+      return false;
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
+}
