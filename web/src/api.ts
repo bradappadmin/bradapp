@@ -244,3 +244,82 @@ export function declineTrade(id: number): Promise<{ ok: boolean }> {
 export function cancelTrade(id: number): Promise<{ ok: boolean }> {
   return request(`/play/trades/${id}/cancel`, { method: "POST" });
 }
+
+export type CueCard = { id: string; title: string; prompt: string };
+
+export type ReviewSummary = {
+  id: number;
+  title: string;
+  status: "published" | "unpublished";
+  createdAt: string;
+  publisher: { id: number; displayName: string };
+  car: {
+    id: number;
+    make: string;
+    model: string;
+    trimName: string;
+    bhp: number;
+    topSpeedMph: number;
+    zeroToSixtySecs: number;
+  };
+  cueCards: CueCard[];
+  videoUrl: string;
+  mimeType: string;
+};
+
+export type ReviewCarModel = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  label: string;
+};
+
+export function fetchReviews(all = false): Promise<{ reviews: ReviewSummary[] }> {
+  return request(`/reviews${all ? "?all=1" : ""}`);
+}
+
+export function fetchReview(id: number): Promise<{ review: ReviewSummary }> {
+  return request(`/reviews/${id}`);
+}
+
+export function fetchReviewModels(): Promise<{ models: ReviewCarModel[] }> {
+  return request("/reviews/models");
+}
+
+export function fetchCueCards(
+  carModelId: number,
+): Promise<{ car: { id: number; make: string; model: string; trimName: string }; cueCards: CueCard[] }> {
+  return request(`/reviews/cues/${carModelId}`);
+}
+
+export async function publishReview(input: {
+  carModelId: number;
+  title: string;
+  video: Blob;
+  filename?: string;
+}): Promise<{ review: ReviewSummary }> {
+  const body = new FormData();
+  body.append("carModelId", String(input.carModelId));
+  body.append("title", input.title);
+  body.append("video", input.video, input.filename ?? "review.webm");
+  const response = await fetch(`${API_BASE}/reviews`, {
+    method: "POST",
+    credentials: "include",
+    body,
+  });
+  const text = await response.text();
+  const parsed = text ? (JSON.parse(text) as { review?: ReviewSummary; message?: string }) : {};
+  if (!response.ok) {
+    throw new Error(parsed.message ?? "Publish failed");
+  }
+  return parsed as { review: ReviewSummary };
+}
+
+export function unpublishReview(id: number): Promise<{ ok: boolean; status: string }> {
+  return request(`/reviews/${id}/unpublish`, { method: "POST" });
+}
+
+export function reviewVideoSrc(videoUrl: string): string {
+  return `${API_BASE}${videoUrl}`;
+}

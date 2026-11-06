@@ -22,6 +22,9 @@ export function SiteHeader() {
           </NavLink>
           {user ? (
             <>
+              <NavLink to="/reviews" className={linkClass}>
+                Reviews
+              </NavLink>
               <NavLink to="/play" className={linkClass}>
                 Top Trumps
               </NavLink>

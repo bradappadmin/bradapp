@@ -64,7 +64,7 @@ export function HomePage() {
           Signed in as {user.email} · {roleLabel(user.role)} · {user.coinBalance.toLocaleString()} BC
         </p>
         <p className="mt-6 max-w-xl text-sm leading-relaxed text-steel">
-          Search cars, trade with Brad Coins, and play Top Trumps for more coins. Reviews come next.
+          Search cars, trade with Brad Coins, play Top Trumps, and watch bay reviews.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
@@ -74,16 +74,16 @@ export function HomePage() {
             Search cars
           </Link>
           <Link
-            to="/play"
+            to="/reviews"
             className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
           >
-            Top Trumps
+            Reviews
           </Link>
           <Link
-            to="/garage"
+            to="/play"
             className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
           >
-            My garage
+            Top Trumps
           </Link>
           <button
             type="button"
