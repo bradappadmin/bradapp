@@ -89,3 +89,55 @@ export function fetchListing(id: number): Promise<{ listing: ListingDetail }> {
 export function fetchModels(make?: string): Promise<{ models: string[] }> {
   return request(`/cars/models${toQuery({ make: make ?? "" })}`);
 }
+
+export type LedgerEntry = {
+  id: number;
+  delta: number;
+  balanceAfter: number;
+  reason: "seed" | "purchase" | "sale" | "admin_adjust";
+  listingId: number | null;
+  note: string;
+  createdAt: string;
+};
+
+export type GarageCar = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  conditionType: "new" | "used";
+  year: number;
+  colour: string;
+  mileage: number;
+  coinPrice: number;
+  status: "available" | "owned" | "sold";
+  ownerLabel: string;
+  garageName: string;
+  garageCity: string;
+};
+
+export function fetchWallet(): Promise<{ balance: number; ledger: LedgerEntry[] }> {
+  return request("/trade/wallet");
+}
+
+export function fetchGarage(): Promise<{ cars: GarageCar[] }> {
+  return request("/trade/garage");
+}
+
+export function buyListing(id: number): Promise<{ ok: boolean; listingId: number; coinPrice: number; balance: number }> {
+  return request(`/trade/listings/${id}/buy`, { method: "POST" });
+}
+
+export function sellListing(
+  id: number,
+  coinPrice: number,
+): Promise<{ ok: boolean; listingId: number; coinPrice: number; status: "available" }> {
+  return request(`/trade/listings/${id}/sell`, {
+    method: "POST",
+    body: JSON.stringify({ coinPrice }),
+  });
+}
+
+export function unlistListing(id: number): Promise<{ ok: boolean; listingId: number; status: "owned" }> {
+  return request(`/trade/listings/${id}/unlist`, { method: "POST" });
+}

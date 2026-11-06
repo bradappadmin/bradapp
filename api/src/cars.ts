@@ -15,6 +15,8 @@ export type ListingSummary = {
   mileage: number;
   coinPrice: number;
   ownerLabel: string;
+  ownerUserId: number | null;
+  status: "available" | "owned" | "sold";
   garageName: string;
   garageCity: string;
 };
@@ -23,7 +25,6 @@ export type ListingDetail = ListingSummary & {
   doors: number;
   seats: number;
   garageTagline: string;
-  status: "available" | "sold";
 };
 
 export type CarFilters = {
@@ -79,6 +80,7 @@ export function listingSelectSql(): string {
       l.mileage,
       l.coin_price AS coinPrice,
       l.owner_label AS ownerLabel,
+      l.owner_user_id AS ownerUserId,
       l.status,
       g.name AS garageName,
       g.city AS garageCity,
@@ -202,6 +204,8 @@ export function toListingSummary(row: Record<string, unknown>): ListingSummary {
     mileage: Number(row.mileage),
     coinPrice: Number(row.coinPrice),
     ownerLabel: String(row.ownerLabel),
+    ownerUserId: row.ownerUserId == null ? null : Number(row.ownerUserId),
+    status: row.status as "available" | "owned" | "sold",
     garageName: String(row.garageName),
     garageCity: String(row.garageCity),
   };
@@ -213,6 +217,5 @@ export function toListingDetail(row: Record<string, unknown>): ListingDetail {
     doors: Number(row.doors),
     seats: Number(row.seats),
     garageTagline: String(row.garageTagline),
-    status: row.status as "available" | "sold",
   };
 }

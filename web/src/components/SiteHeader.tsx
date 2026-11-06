@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../auth-context";
+import { formatCoins } from "../cars";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `font-display text-sm no-underline transition ${
@@ -20,9 +21,15 @@ export function SiteHeader() {
             Cars
           </NavLink>
           {user ? (
-            <NavLink to="/" className={linkClass}>
-              Home
-            </NavLink>
+            <>
+              <NavLink to="/garage" className={linkClass}>
+                My garage
+              </NavLink>
+              <span className="font-display text-sm text-lime">{formatCoins(user.coinBalance)}</span>
+              <NavLink to="/" className={linkClass}>
+                Home
+              </NavLink>
+            </>
           ) : (
             <>
               <NavLink to="/signin" className={linkClass}>

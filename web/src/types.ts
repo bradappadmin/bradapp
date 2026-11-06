@@ -5,6 +5,7 @@ export type User = {
   email: string;
   displayName: string;
   role: Role;
+  coinBalance: number;
 };
 
 export function roleLabel(role: Role): string {

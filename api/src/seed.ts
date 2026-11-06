@@ -1,3 +1,8 @@
+import {
+  ADMIN_STARTING_COINS,
+  MEMBER_STARTING_COINS,
+  creditSeedIfNeeded,
+} from "./coins.js";
 import { closePool, getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { loadEnv } from "./env.js";
 import { hashPassword } from "./password.js";
@@ -44,6 +49,15 @@ export async function seedAccounts(): Promise<void> {
   }
 
   await seedCars();
+
+  const [users] = await pool.query<(RowDataPacket & { id: number; role: string })[]>(
+    "SELECT id, role FROM users",
+  );
+  for (const user of users) {
+    const amount =
+      user.role === "member" ? MEMBER_STARTING_COINS : ADMIN_STARTING_COINS;
+    await creditSeedIfNeeded(Number(user.id), amount, "Starting Brad Coins");
+  }
 }
 
 export async function countUsersByRole(role: string): Promise<number> {
@@ -85,7 +99,7 @@ export async function ensureUser(
 async function main(): Promise<void> {
   try {
     await seedAccounts();
-    console.log("Seed complete (accounts + cars).");
+    console.log("Seed complete (accounts + cars + coins).");
   } finally {
     await closePool();
   }

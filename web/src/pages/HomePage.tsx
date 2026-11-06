@@ -61,10 +61,10 @@ export function HomePage() {
           Welcome back, {user.displayName}
         </h1>
         <p className="mt-3 text-steel">
-          Signed in as {user.email} · {roleLabel(user.role)}
+          Signed in as {user.email} · {roleLabel(user.role)} · {user.coinBalance.toLocaleString()} BC
         </p>
         <p className="mt-6 max-w-xl text-sm leading-relaxed text-steel">
-          Cars are searchable. Buy/sell with Brad Coins, Top Trumps, and reviews come next.
+          Search cars and trade them for Brad Coins. Top Trumps and reviews come next.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
@@ -72,6 +72,12 @@ export function HomePage() {
             className="bay-cta rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
           >
             Search cars
+          </Link>
+          <Link
+            to="/garage"
+            className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+          >
+            My garage
           </Link>
           <button
             type="button"

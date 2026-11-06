@@ -15,6 +15,8 @@ export type ListingSummary = {
   mileage: number;
   coinPrice: number;
   ownerLabel: string;
+  ownerUserId: number | null;
+  status: "available" | "owned" | "sold";
   garageName: string;
   garageCity: string;
 };
@@ -23,7 +25,6 @@ export type ListingDetail = ListingSummary & {
   doors: number;
   seats: number;
   garageTagline: string;
-  status: "available" | "sold";
 };
 
 export type CarFilters = {

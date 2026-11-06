@@ -1,5 +1,11 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
+import {
+  ADMIN_STARTING_COINS,
+  MEMBER_STARTING_COINS,
+  applyCoinDelta,
+  creditSeedIfNeeded,
+} from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { hashPassword, verifyPassword } from "./password.js";
 import { createSession, destroySession, readSessionUser, type PublicUser } from "./session.js";
@@ -23,6 +29,7 @@ type UserRow = RowDataPacket & {
   password_hash: string;
   display_name: string;
   role: PublicUser["role"];
+  coin_balance: number;
 };
 
 function toPublicUser(row: UserRow): PublicUser {
@@ -31,6 +38,7 @@ function toPublicUser(row: UserRow): PublicUser {
     email: row.email,
     displayName: row.display_name,
     role: row.role,
+    coinBalance: Number(row.coin_balance),
   };
 }
 
@@ -39,6 +47,20 @@ function sendValidationError(res: Response, error: z.ZodError): void {
     error: "validation_error",
     message: error.issues[0]?.message ?? "Invalid request",
   });
+}
+
+function startingCoinsForRole(role: PublicUser["role"]): number {
+  switch (role) {
+    case "member":
+      return MEMBER_STARTING_COINS;
+    case "admin":
+    case "super_admin":
+      return ADMIN_STARTING_COINS;
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
 }
 
 export function createAuthRouter(): Router {
@@ -63,19 +85,39 @@ export function createAuthRouter(): Router {
     }
 
     const passwordHash = await hashPassword(password);
-    const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO users (email, password_hash, display_name, role)
-       VALUES (?, ?, ?, 'member')`,
-      [email, passwordHash, displayName],
-    );
+    const connection = await pool.getConnection();
+    let userId: number;
+    let coinBalance: number;
+    try {
+      await connection.beginTransaction();
+      const [result] = await connection.query<ResultSetHeader>(
+        `INSERT INTO users (email, password_hash, display_name, role, coin_balance)
+         VALUES (?, ?, ?, 'member', 0)`,
+        [email, passwordHash, displayName],
+      );
+      userId = Number(result.insertId);
+      coinBalance = await applyCoinDelta(connection, {
+        userId,
+        delta: MEMBER_STARTING_COINS,
+        reason: "seed",
+        note: "Starting Brad Coins",
+      });
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
 
-    await createSession(res, Number(result.insertId));
+    await createSession(res, userId);
     res.status(201).json({
       user: {
-        id: Number(result.insertId),
+        id: userId,
         email,
         displayName,
         role: "member" as const,
+        coinBalance,
       },
     });
   });
@@ -90,7 +132,7 @@ export function createAuthRouter(): Router {
     const { email, password } = parsed.data;
     const pool = getPool();
     const [rows] = await pool.query<UserRow[]>(
-      "SELECT id, email, password_hash, display_name, role FROM users WHERE email = ? LIMIT 1",
+      "SELECT id, email, password_hash, display_name, role, coin_balance FROM users WHERE email = ? LIMIT 1",
       [email],
     );
     const user = rows[0];
@@ -105,8 +147,19 @@ export function createAuthRouter(): Router {
       return;
     }
 
+    await creditSeedIfNeeded(
+      Number(user.id),
+      startingCoinsForRole(user.role),
+      "Starting Brad Coins",
+    );
+
+    const [freshRows] = await pool.query<UserRow[]>(
+      "SELECT id, email, password_hash, display_name, role, coin_balance FROM users WHERE id = ? LIMIT 1",
+      [user.id],
+    );
+
     await createSession(res, Number(user.id));
-    res.json({ user: toPublicUser(user) });
+    res.json({ user: toPublicUser(freshRows[0] ?? user) });
   });
 
   router.post("/signout", async (req: Request, res: Response) => {

@@ -11,6 +11,7 @@ export type PublicUser = {
   email: string;
   displayName: string;
   role: Role;
+  coinBalance: number;
 };
 
 type SessionRow = RowDataPacket & {
@@ -19,6 +20,7 @@ type SessionRow = RowDataPacket & {
   email: string;
   display_name: string;
   role: Role;
+  coin_balance: number;
   expires_at: Date;
 };
 
@@ -97,7 +99,7 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
 
   const pool = getPool();
   const [rows] = await pool.query<SessionRow[]>(
-    `SELECT s.id, s.user_id, s.expires_at, u.email, u.display_name, u.role
+    `SELECT s.id, s.user_id, s.expires_at, u.email, u.display_name, u.role, u.coin_balance
      FROM sessions s
      INNER JOIN users u ON u.id = s.user_id
      WHERE s.id = ?
@@ -120,6 +122,7 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
     email: row.email,
     displayName: row.display_name,
     role: row.role,
+    coinBalance: Number(row.coin_balance),
   };
 }
 

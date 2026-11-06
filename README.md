@@ -21,6 +21,7 @@ A Carwow-style car world for Brad and friends. Real cars and specs; made-up gara
 - Accounts: sign-up, sign-in, session cookie
 - Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
 - Filters: make, model, new/used, body, fuel, colour, year, coins, mileage, BHP
+- Brad Coins: balances + ledger; members buy/sell listings (no real money)
 
 ## Run locally
 
@@ -35,7 +36,7 @@ npm run dev:api   # terminal 1 — http://127.0.0.1:5174
 npm run dev:web   # terminal 2 — http://127.0.0.1:5173
 ```
 
-Then open `/cars` for search.
+Then open `/cars` for search, `/garage` for owned cars and the coin ledger.
 
 Optional Napwood seed (hashed at runtime, never logged):
 
