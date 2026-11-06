@@ -33,6 +33,17 @@ export function SignInPage() {
 
   return (
     <AuthShell title="Sign in" subtitle="Open the bay with your BradApp account.">
+      <p className="mb-4 text-sm text-steel">
+        Brad signs in as{" "}
+        <button
+          type="button"
+          className="border-0 bg-transparent p-0 font-inherit text-lime underline"
+          onClick={() => setEmail("bradapp.admin@gmail.com")}
+        >
+          bradapp.admin@gmail.com
+        </button>
+        . Friends create their own accounts.
+      </p>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-2 text-sm text-steel">
           Email

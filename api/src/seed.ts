@@ -22,12 +22,13 @@ export async function seedAccounts(): Promise<void> {
   const pool = getPool();
 
   await pool.query(
-    `INSERT INTO users (email, password_hash, display_name, role)
-     VALUES (?, ?, ?, 'admin')
+    `INSERT INTO users (email, password_hash, display_name, role, account_status)
+     VALUES (?, ?, ?, 'admin', 'active')
      ON DUPLICATE KEY UPDATE
        password_hash = VALUES(password_hash),
        display_name = VALUES(display_name),
-       role = 'admin'`,
+       role = 'admin',
+       account_status = 'active'`,
     [BRAD_ADMIN_EMAIL, BRAD_ADMIN_PASSWORD_HASH, BRAD_ADMIN_NAME],
   );
 
@@ -58,6 +59,35 @@ export async function seedAccounts(): Promise<void> {
       user.role === "member" ? MEMBER_STARTING_COINS : ADMIN_STARTING_COINS;
     await creditSeedIfNeeded(Number(user.id), amount, "Starting Brad Coins");
   }
+
+  await seedBradStarterGarage();
+}
+
+/** Give Brad two owned cars so Top Trumps works on first walkthrough. */
+async function seedBradStarterGarage(): Promise<void> {
+  const pool = getPool();
+  const [bradRows] = await pool.query<(RowDataPacket & { id: number })[]>(
+    "SELECT id FROM users WHERE email = ? LIMIT 1",
+    [BRAD_ADMIN_EMAIL],
+  );
+  const bradId = bradRows[0]?.id;
+  if (!bradId) return;
+
+  const [owned] = await pool.query<(RowDataPacket & { count: number })[]>(
+    "SELECT COUNT(*) AS count FROM listings WHERE owner_user_id = ?",
+    [bradId],
+  );
+  if (Number(owned[0]?.count ?? 0) > 0) return;
+
+  // Prefer mid-priced stock so cheap listings stay available for buy/play tests.
+  await pool.query(
+    `UPDATE listings
+     SET owner_user_id = ?, owner_label = ?, status = 'owned'
+     WHERE status = 'available' AND owner_user_id IS NULL
+     ORDER BY coin_price DESC
+     LIMIT 2`,
+    [bradId, BRAD_ADMIN_NAME],
+  );
 }
 
 export async function countUsersByRole(role: string): Promise<number> {
