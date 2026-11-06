@@ -94,7 +94,7 @@ export type LedgerEntry = {
   id: number;
   delta: number;
   balanceAfter: number;
-  reason: "seed" | "purchase" | "sale" | "admin_adjust";
+  reason: "seed" | "purchase" | "sale" | "admin_adjust" | "play_reward";
   listingId: number | null;
   note: string;
   createdAt: string;
@@ -140,4 +140,107 @@ export function sellListing(
 
 export function unlistListing(id: number): Promise<{ ok: boolean; listingId: number; status: "owned" }> {
   return request(`/trade/listings/${id}/unlist`, { method: "POST" });
+}
+
+export type TopTrumpsCategory = "bhp" | "top_speed_mph" | "zero_to_sixty_secs";
+
+export type MemberCard = {
+  id: number;
+  ownerUserId: number;
+  ownerDisplayName: string;
+  make: string;
+  model: string;
+  trimName: string;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
+  year: number;
+  colour: string;
+};
+
+export type TradeRow = {
+  id: number;
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  fromUserId: number;
+  toUserId: number;
+  offerListingId: number;
+  requestListingId: number;
+  fromDisplayName: string;
+  toDisplayName: string;
+  offerMake: string;
+  offerModel: string;
+  requestMake: string;
+  requestModel: string;
+  createdAt: string;
+};
+
+export function fetchTopTrumpsCategories(): Promise<{
+  categories: Array<{ id: TopTrumpsCategory; label: string; direction: "higher" | "lower" }>;
+  rewards: { win: number; play: number };
+}> {
+  return request("/play/top-trumps/categories");
+}
+
+export function playTopTrumpsHouse(input: {
+  listingId: number;
+  category: TopTrumpsCategory;
+}): Promise<{
+  match: {
+    id: number;
+    winner: "challenger" | "opponent" | "draw";
+    coinReward: number;
+    challengerValue: number;
+    opponentValue: number;
+    category: TopTrumpsCategory;
+    opponent: { make: string; model: string; trimName: string };
+  };
+  balance: number;
+}> {
+  return request("/play/top-trumps/house", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function playTopTrumpsPvp(input: {
+  listingId: number;
+  opponentListingId: number;
+  category: TopTrumpsCategory;
+}): Promise<{
+  match: {
+    id: number;
+    winner: "challenger" | "opponent" | "draw";
+    coinReward: number;
+    challengerValue: number;
+    opponentValue: number;
+    category: TopTrumpsCategory;
+    opponent: { make: string; model: string; trimName: string; userId: number };
+  };
+  balance: number;
+}> {
+  return request("/play/top-trumps/pvp", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function fetchMemberCards(): Promise<{ cards: MemberCard[] }> {
+  return request("/play/cards/members");
+}
+
+export function fetchTrades(): Promise<{ trades: TradeRow[] }> {
+  return request("/play/trades");
+}
+
+export function createTrade(input: {
+  offerListingId: number;
+  requestListingId: number;
+}): Promise<{ trade: { id: number; status: string } }> {
+  return request("/play/trades", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function acceptTrade(id: number): Promise<{ ok: boolean }> {
+  return request(`/play/trades/${id}/accept`, { method: "POST" });
+}
+
+export function declineTrade(id: number): Promise<{ ok: boolean }> {
+  return request(`/play/trades/${id}/decline`, { method: "POST" });
+}
+
+export function cancelTrade(id: number): Promise<{ ok: boolean }> {
+  return request(`/play/trades/${id}/cancel`, { method: "POST" });
 }

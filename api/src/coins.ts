@@ -5,7 +5,7 @@ import { getPool } from "./db.js";
 export const MEMBER_STARTING_COINS = 200;
 export const ADMIN_STARTING_COINS = 1000;
 
-export type LedgerReason = "seed" | "purchase" | "sale" | "admin_adjust";
+export type LedgerReason = "seed" | "purchase" | "sale" | "admin_adjust" | "play_reward";
 
 export async function getCoinBalance(userId: number): Promise<number> {
   const pool = getPool();
