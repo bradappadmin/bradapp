@@ -60,28 +60,41 @@ const dragRace = {
   videoUrl: "/reviews/2/video",
 };
 
-describe("ReviewsPage type filters", () => {
+const memberUser = {
+  id: 2,
+  email: "member@example.com",
+  displayName: "Member",
+  bio: null,
+  role: "member" as const,
+  coinBalance: 200,
+};
+
+const adminUser = {
+  id: 1,
+  email: "bradapp.admin@gmail.com",
+  displayName: "Brad",
+  bio: null,
+  role: "admin" as const,
+  coinBalance: 500,
+};
+
+const dailyLogin = {
+  amount: 25,
+  claimDate: "2026-11-09",
+  claimedToday: true,
+  claimedJustNow: false,
+  balance: 200,
+};
+
+describe("ReviewsPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
 
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockResolvedValue({
-      user: {
-        id: 2,
-        email: "member@example.com",
-        displayName: "Member",
-        bio: null,
-        role: "member",
-        coinBalance: 200,
-      },
-      dailyLogin: {
-        amount: 25,
-        claimDate: "2026-11-09",
-        claimedToday: true,
-        claimedJustNow: false,
-        balance: 200,
-      },
+      user: memberUser,
+      dailyLogin,
     });
     vi.mocked(api.fetchReviews).mockImplementation(async (_all, _limit, type) => {
       if (type === "drag_race") return { reviews: [dragRace] };
@@ -90,7 +103,7 @@ describe("ReviewsPage type filters", () => {
     });
   });
 
-  it("filters the list with All / Cue card / Drag race chips", async () => {
+  it("shows bay hierarchy and keeps type filter chips", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/reviews"]}>
@@ -103,6 +116,11 @@ describe("ReviewsPage type filters", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Video reviews" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(document.querySelector(".play-bay-glow")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Browse the reel" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Record a review" })).not.toBeInTheDocument();
+
     expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.getByText("Bay drag")).toBeInTheDocument();
@@ -120,5 +138,27 @@ describe("ReviewsPage type filters", () => {
     expect(api.fetchReviews).toHaveBeenCalledWith(false, undefined, "review");
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.queryByText("Bay drag")).not.toBeInTheDocument();
+  });
+
+  it("shows a clearer Record CTA for admins", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: adminUser,
+      dailyLogin: { ...dailyLogin, balance: 500 },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const record = await screen.findByRole("link", { name: "Record a review" });
+    expect(record).toHaveAttribute("href", "/reviews/record");
+    expect(screen.getByText(/Admin bay/i)).toBeInTheDocument();
+    expect(api.fetchReviews).toHaveBeenCalledWith(true, undefined, "all");
   });
 });
