@@ -1,6 +1,11 @@
-import { Router, type Response } from "express";
+import { Router, type Request, type Response } from "express";
+import { z } from "zod";
 import { getPool, type RowDataPacket } from "./db.js";
 import { isRole, roleLabel, type Role } from "./roles.js";
+
+const membersQuerySchema = z.object({
+  q: z.string().trim().max(120).optional(),
+});
 
 type MemberListRow = RowDataPacket & {
   id: number;
@@ -65,20 +70,45 @@ function mapPublicCar(car: MemberCardRow) {
 export function createMembersRouter(): Router {
   const router = Router();
 
-  /** Active members/admins with coin balance and owned-car count. */
-  router.get("/", async (_req, res: Response) => {
+  /**
+   * Active members/admins with coin balance and owned-car count.
+   * Optional `q` matches display name, or email local-part as a fallback name
+   * (email itself is never returned).
+   */
+  router.get("/", async (req: Request, res: Response) => {
+    const parsed = membersQuerySchema.safeParse({
+      q: typeof req.query.q === "string" ? req.query.q : undefined,
+    });
+    if (!parsed.success) {
+      res.status(400).json({ error: "validation_error", message: "Invalid search query" });
+      return;
+    }
+
+    const q = parsed.data.q?.trim() ?? "";
     const pool = getPool();
+    const values: Array<string | number> = [];
+    let whereSql = `WHERE u.account_status = 'active'`;
+    if (q.length > 0) {
+      const like = `%${q}%`;
+      whereSql += ` AND (
+        u.display_name LIKE ?
+        OR SUBSTRING_INDEX(u.email, '@', 1) LIKE ?
+      )`;
+      values.push(like, like);
+    }
+
     const [rows] = await pool.query<MemberListRow[]>(
       `SELECT u.id, u.display_name, u.bio, u.role, u.coin_balance,
               COUNT(l.id) AS car_count
        FROM users u
        LEFT JOIN listings l
          ON l.owner_user_id = u.id AND l.status IN ('owned', 'available')
-       WHERE u.account_status = 'active'
+       ${whereSql}
        GROUP BY u.id, u.display_name, u.bio, u.role, u.coin_balance
        ORDER BY u.display_name ASC`,
+      values,
     );
-    res.json({ members: rows.map(mapMember) });
+    res.json({ members: rows.map(mapMember), q: q || null });
   });
 
   router.get("/:id", async (req, res: Response) => {

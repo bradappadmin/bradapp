@@ -16,6 +16,7 @@ describe.runIf(hasDb)("members routes", () => {
   const app = createApp();
   const agent = request.agent(app);
   const email = `members-${Date.now()}@example.com`;
+  let otherEmail = "";
   let selfId = 0;
   let otherId = 0;
   let otherCarId = 0;
@@ -28,7 +29,7 @@ describe.runIf(hasDb)("members routes", () => {
     expect(signup.status).toBe(201);
     selfId = Number(signup.body.user.id);
 
-    const otherEmail = `members-other-${Date.now()}@example.com`;
+    otherEmail = `members-other-${Date.now()}@example.com`;
     const other = await request(app)
       .post("/auth/signup")
       .send({ email: otherEmail, password: "MembersPass-123!", displayName: "Challenge Rival" });
@@ -97,6 +98,31 @@ describe.runIf(hasDb)("members routes", () => {
     const res = await request(app).get("/members");
     expect(res.status).toBe(200);
     expect(res.body.members.length).toBeGreaterThan(0);
+  });
+
+  it("filters members by display name with q", async () => {
+    const res = await request(app).get("/members").query({ q: "Challenge Rival" });
+    expect(res.status).toBe(200);
+    expect(res.body.q).toBe("Challenge Rival");
+    expect(res.body.members.length).toBeGreaterThanOrEqual(1);
+    expect(
+      res.body.members.every((m: { displayName: string }) =>
+        m.displayName.toLowerCase().includes("challenge rival"),
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(res.body).toLowerCase()).not.toContain("password");
+    expect(res.body.members[0]).not.toHaveProperty("email");
+  });
+
+  it("matches email local-part as a fallback name without exposing email", async () => {
+    const localPart = otherEmail.split("@")[0]!;
+    const rival = await request(app).get("/members").query({ q: localPart });
+    expect(rival.status).toBe(200);
+    const hit = rival.body.members.find((m: { id: number }) => m.id === otherId);
+    expect(hit).toBeTruthy();
+    expect(hit.displayName).toBe("Challenge Rival");
+    expect(hit).not.toHaveProperty("email");
+    expect(JSON.stringify(rival.body).toLowerCase()).not.toContain(otherEmail.toLowerCase());
   });
 
   it("filters member cards by owner for Top Trumps challenges", async () => {

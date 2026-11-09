@@ -484,8 +484,12 @@ export type MemberProfileCar = {
   coinPrice: number;
 };
 
-export function fetchMembers(): Promise<{ members: MemberSummary[] }> {
-  return request("/members");
+export function fetchMembers(params?: {
+  q?: string;
+}): Promise<{ members: MemberSummary[]; q?: string | null }> {
+  const q = params?.q?.trim();
+  const query = q ? `?q=${encodeURIComponent(q)}` : "";
+  return request(`/members${query}`);
 }
 
 export function fetchMemberProfile(
