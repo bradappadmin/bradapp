@@ -57,16 +57,22 @@ export function LatestReviews() {
       ) : null}
 
       {reviews.length > 0 ? (
-        <ul className="mt-5 divide-y divide-white/10 border-t border-white/10">
+        <ul className="mt-5 grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2">
           {reviews.map((review) => (
-            <li key={review.id}>
+            <li key={review.id} className="bay-rise">
               <Link
                 to={`/reviews/${review.id}`}
-                className="flex gap-4 py-4 no-underline transition hover:bg-white/[0.02] sm:items-center sm:justify-between"
+                className="group block overflow-hidden rounded-md border border-white/10 bg-bay-panel/50 no-underline transition hover:border-lime/35 hover:bg-bay-panel/80"
               >
-                <ReviewCarThumb car={review.car} className="shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-base font-semibold text-mist">{review.title}</p>
+                <ReviewCarThumb
+                  car={review.car}
+                  size="card"
+                  className="aspect-[16/10] w-full border-b border-white/10"
+                />
+                <div className="p-3 sm:p-4">
+                  <p className="font-display text-base font-semibold text-mist group-hover:text-white">
+                    {review.title}
+                  </p>
                   <p className="mt-1 text-sm text-steel">
                     {review.car.make} {review.car.model}
                     {review.car.trimName ? ` ${review.car.trimName}` : ""} ·{" "}
@@ -74,8 +80,8 @@ export function LatestReviews() {
                     {" · "}
                     {review.likeCount === 1 ? "1 like" : `${review.likeCount ?? 0} likes`}
                   </p>
+                  <p className="mt-3 font-display text-sm text-lime">Watch →</p>
                 </div>
-                <span className="shrink-0 font-display text-sm text-lime sm:pl-4">Watch →</span>
               </Link>
             </li>
           ))}

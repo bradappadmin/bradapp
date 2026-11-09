@@ -22,6 +22,25 @@ function kindLabel(kind: ActivityKind): string {
   }
 }
 
+function kindTone(kind: ActivityKind): string {
+  switch (kind) {
+    case "purchase":
+      return "border-rose/35 text-rose";
+    case "sale":
+      return "border-lime/40 text-lime";
+    case "trade":
+      return "border-mist/30 text-mist";
+    case "top_trumps":
+      return "border-lime/35 text-lime";
+    case "review":
+      return "border-rose/30 text-mist";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
 function formatWhen(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
@@ -58,8 +77,11 @@ export function ActivityFeed() {
   }, []);
 
   return (
-    <section className="mt-16 border-t border-white/10 pt-10">
-      <h2 className="font-display text-2xl font-semibold text-white">Family activity</h2>
+    <section
+      className="bay-rise-delay mt-12 border-t border-white/10 pt-10"
+      aria-label="Family activity"
+    >
+      <h2 className="font-display text-xl font-semibold text-mist sm:text-2xl">Family activity</h2>
       <p className="mt-2 text-sm text-steel">
         Recent buys, sells, free card trades, Top Trumps results, and published reviews.
       </p>
@@ -67,20 +89,33 @@ export function ActivityFeed() {
       {loading ? <p className="mt-6 text-sm text-steel">Loading…</p> : null}
       {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
 
-      <ul className="mt-6 divide-y divide-white/10 border-t border-white/10">
+      <ul className="mt-6 space-y-3">
         {items.map((item) => (
-          <li key={item.id} className="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-steel">{kindLabel(item.kind)}</p>
-              {item.href ? (
-                <Link to={item.href} className="mt-1 block text-sm text-mist no-underline hover:text-white">
-                  {item.summary}
-                </Link>
-              ) : (
-                <p className="mt-1 text-sm text-mist">{item.summary}</p>
-              )}
+          <li
+            key={item.id}
+            className="rounded-md border border-white/10 bg-bay-panel/45 px-4 py-3 transition hover:border-white/20 hover:bg-bay-panel/70"
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+              <div className="min-w-0">
+                <span
+                  className={`inline-flex rounded-md border px-2 py-0.5 font-display text-[11px] font-semibold uppercase tracking-wide ${kindTone(item.kind)}`}
+                >
+                  {kindLabel(item.kind)}
+                </span>
+                {item.href ? (
+                  <Link
+                    to={item.href}
+                    className="mt-2 block text-sm text-mist no-underline hover:text-white"
+                  >
+                    {item.summary}
+                  </Link>
+                ) : (
+                  <p className="mt-2 text-sm text-mist">{item.summary}</p>
+                )}
+                <p className="mt-1 text-xs text-steel">{item.actorName}</p>
+              </div>
+              <p className="shrink-0 text-xs text-steel">{formatWhen(item.createdAt)}</p>
             </div>
-            <p className="shrink-0 text-xs text-steel">{formatWhen(item.createdAt)}</p>
           </li>
         ))}
       </ul>

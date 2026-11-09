@@ -126,3 +126,46 @@
   background-size: 200% 100%;
   animation: bay-sweep 6s linear infinite;
 }
+
+/* Home-only bay atmosphere — rose + lime, no purple glow */
+@keyframes home-bay-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.home-bay-glow {
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 12%, rgba(244, 63, 94, 0.22), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 88% 18%, rgba(163, 230, 53, 0.12), transparent 55%),
+    radial-gradient(ellipse 90% 50% at 50% 100%, rgba(18, 40, 72, 0.55), transparent 70%);
+  animation: home-bay-pulse 7s ease-in-out infinite;
+}
+
+.home-bay-floor {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(7, 11, 20, 0.35) 40%, rgba(7, 11, 20, 0.85) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(199, 210, 229, 0.04) 0,
+      rgba(199, 210, 229, 0.04) 1px,
+      transparent 1px,
+      transparent 56px
+    ),
+    linear-gradient(180deg, transparent, rgba(244, 63, 94, 0.06));
+  mask-image: linear-gradient(180deg, transparent, #000 35%, #000);
+}
+
+.home-bay-rails {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(163, 230, 53, 0.18) 20%,
+    rgba(244, 63, 94, 0.14) 80%,
+    transparent
+  );
+}
