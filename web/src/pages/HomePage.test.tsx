@@ -20,6 +20,7 @@ import * as api from "../api";
 describe("HomePage", () => {
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
+    window.localStorage.clear();
   });
 
   it("shows BradApp brand and auth links when signed out", async () => {
@@ -36,5 +37,41 @@ describe("HomePage", () => {
     expect(screen.getAllByRole("link", { name: "Play" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Reviews" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Sign in" }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("region", { name: "First visit tips" })).not.toBeInTheDocument();
+  });
+
+  it("shows dismissible first-visit tips after sign-in, including Admin for admins", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 3,
+        email: "bradapp.admin@gmail.com",
+        displayName: "Brad",
+        role: "admin",
+        coinBalance: 1000,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 1000,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const tips = await screen.findByRole("region", { name: "First visit tips" });
+    expect(screen.getByRole("heading", { name: "Quick tips" })).toBeInTheDocument();
+    expect(tips).toHaveTextContent("Cars");
+    expect(tips).toHaveTextContent("Play");
+    expect(tips).toHaveTextContent("Trades");
+    expect(tips).toHaveTextContent("Reviews");
+    expect(tips).toHaveTextContent("Admin");
   });
 });

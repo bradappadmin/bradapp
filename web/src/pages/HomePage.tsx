@@ -4,6 +4,7 @@ import * as api from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { ActivityFeed } from "../components/ActivityFeed";
+import { FirstVisitTips } from "../components/FirstVisitTips";
 import { SiteHeader } from "../components/SiteHeader";
 import { roleLabel } from "../types";
 
@@ -165,6 +166,12 @@ export function HomePage() {
               Play
             </Link>
             <Link
+              to="/trades"
+              className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+            >
+              Trades
+            </Link>
+            <Link
               to="/members"
               className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
             >
@@ -199,6 +206,8 @@ export function HomePage() {
             </button>
           </div>
         </div>
+
+        <FirstVisitTips user={user} />
 
         <ActivityFeed />
       </main>
