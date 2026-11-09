@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { CarFilters, ListingSummary, SearchQuery } from "../cars";
 import {
   SORT_OPTIONS,
   activeFilterChips,
   clearFilterChip,
-  formatCoins,
-  formatMileage,
   hasActiveFilters,
-  listingTitle,
 } from "../cars";
+import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
 
 const emptyQuery: SearchQuery = {
@@ -477,30 +475,14 @@ export function CarsPage() {
             )}
           </div>
         ) : (
-          <ul className="divide-y divide-white/10 border-t border-white/10">
+          <ul className="grid gap-3 border-t border-white/10 pt-4">
             {listings.map((listing) => (
               <li key={listing.id}>
-                <Link
+                <CarCard
+                  car={listing}
                   to={`/cars/${listing.id}`}
-                  className="group flex flex-col gap-2 py-5 no-underline transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-display text-lg font-semibold text-mist group-hover:text-white">
-                      {listingTitle(listing)}
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-steel">
-                      {listing.year} · {listing.conditionType} · {listing.bodyType} · {listing.fuel}{" "}
-                      · {listing.colour} · {formatMileage(listing.mileage)}
-                    </p>
-                    <p className="mt-1 text-xs leading-relaxed text-steel">
-                      {listing.bhp} bhp · {listing.topSpeedMph} mph · {listing.zeroToSixtySecs}s
-                      0–60 · {listing.garageName}, {listing.garageCity}
-                    </p>
-                  </div>
-                  <p className="font-display text-xl font-semibold text-lime">
-                    {formatCoins(listing.coinPrice)}
-                  </p>
-                </Link>
+                  badge="price"
+                />
               </li>
             ))}
           </ul>

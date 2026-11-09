@@ -16,6 +16,7 @@ type MemberCardRow = RowDataPacket & {
   make: string;
   model: string;
   trim_name: string;
+  body_type: string;
   bhp: number;
   top_speed_mph: number;
   zero_to_sixty_secs: number;
@@ -81,8 +82,8 @@ export function createMembersRouter(): Router {
     }
 
     const [cars] = await pool.query<MemberCardRow[]>(
-      `SELECT l.id, cm.make, cm.model, cm.trim_name, cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
-              l.year, l.colour, l.status
+      `SELECT l.id, cm.make, cm.model, cm.trim_name, cm.body_type, cm.bhp, cm.top_speed_mph,
+              cm.zero_to_sixty_secs, l.year, l.colour, l.status
        FROM listings l
        INNER JOIN car_models cm ON cm.id = l.car_model_id
        WHERE l.owner_user_id = ? AND l.status IN ('owned', 'available')
@@ -97,6 +98,7 @@ export function createMembersRouter(): Router {
         make: car.make,
         model: car.model,
         trimName: car.trim_name,
+        bodyType: car.body_type,
         bhp: Number(car.bhp),
         topSpeedMph: Number(car.top_speed_mph),
         zeroToSixtySecs: Number(car.zero_to_sixty_secs),

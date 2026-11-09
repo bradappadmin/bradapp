@@ -3,23 +3,10 @@ import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
 import type { GarageCar, LedgerEntry } from "../api";
 import { useAuth } from "../auth-context";
-import { formatCoins, formatMileage, listingTitle } from "../cars";
+import { formatCoins } from "../cars";
+import { badgeForStatus } from "../car-visuals";
+import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
-
-function statusLabel(status: GarageCar["status"]): string {
-  switch (status) {
-    case "available":
-      return "For sale";
-    case "owned":
-      return "In garage";
-    case "sold":
-      return "Sold";
-    default: {
-      const _exhaustive: never = status;
-      return _exhaustive;
-    }
-  }
-}
 
 export function GaragePage() {
   const { user, loading: authLoading, setUser, refresh } = useAuth();
@@ -146,81 +133,54 @@ export function GaragePage() {
               to buy one with Brad Coins.
             </p>
           ) : null}
-          <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+          <ul className="mt-4 grid gap-3 border-t border-white/10 pt-4">
             {cars.map((car) => (
-              <li key={car.id} className="py-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      <Link
-                        to={`/cars/${car.id}`}
-                        className="font-display text-lg font-semibold text-mist no-underline hover:text-white"
-                      >
-                        {listingTitle(car)}
-                      </Link>
-                      <span
-                        className={
-                          car.status === "available"
-                            ? "text-xs font-display uppercase tracking-wide text-lime"
-                            : "text-xs font-display uppercase tracking-wide text-steel"
-                        }
-                      >
-                        {statusLabel(car.status)}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-steel">
-                      {car.year} · {car.colour} · {formatMileage(car.mileage)}
-                    </p>
-                    <p className="mt-1 text-sm text-steel">
-                      {car.status === "available" ? "Asking" : "Last price"}{" "}
-                      {formatCoins(car.coinPrice)}
-                    </p>
-                    <Link
-                      to={`/cars/${car.id}`}
-                      className="mt-2 inline-block text-sm text-lime no-underline hover:underline"
-                    >
-                      {car.status === "available" ? "View public listing" : "Open car"}
-                    </Link>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:items-end">
-                    {(car.status === "owned" || car.status === "available") && (
-                      <form
-                        className="flex flex-wrap items-end gap-2"
-                        onSubmit={(e) => void onListOrUpdatePrice(e, car)}
-                      >
-                        <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-steel">
-                          Brad Coin price
-                          <input
-                            className="w-28 rounded-md border border-white/10 bg-bay-panel px-2 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
-                            type="number"
-                            min={1}
-                            value={sellPrices[car.id] ?? String(car.coinPrice)}
-                            onChange={(e) =>
-                              setSellPrices((prev) => ({ ...prev, [car.id]: e.target.value }))
-                            }
-                          />
-                        </label>
-                        <button
-                          type="submit"
-                          disabled={busyId === car.id}
-                          className="rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white disabled:opacity-60"
+              <li key={car.id}>
+                <CarCard
+                  car={car}
+                  to={`/cars/${car.id}`}
+                  badge={badgeForStatus(car.status, "for_sale")}
+                  footer={
+                    <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3 sm:items-end">
+                      {(car.status === "owned" || car.status === "available") && (
+                        <form
+                          className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end"
+                          onSubmit={(e) => void onListOrUpdatePrice(e, car)}
                         >
-                          {car.status === "available" ? "Update price" : "List for sale"}
+                          <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-auto">
+                            Brad Coin price
+                            <input
+                              className="w-full rounded-md border border-white/10 bg-bay-panel px-2 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
+                              type="number"
+                              min={1}
+                              value={sellPrices[car.id] ?? String(car.coinPrice)}
+                              onChange={(e) =>
+                                setSellPrices((prev) => ({ ...prev, [car.id]: e.target.value }))
+                              }
+                            />
+                          </label>
+                          <button
+                            type="submit"
+                            disabled={busyId === car.id}
+                            className="w-full rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white disabled:opacity-60 sm:w-auto"
+                          >
+                            {car.status === "available" ? "Update price" : "List for sale"}
+                          </button>
+                        </form>
+                      )}
+                      {car.status === "available" ? (
+                        <button
+                          type="button"
+                          disabled={busyId === car.id}
+                          onClick={() => void onUnlist(car.id)}
+                          className="w-full rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist hover:border-lime/40 hover:text-lime disabled:opacity-60 sm:w-auto"
+                        >
+                          Unlist
                         </button>
-                      </form>
-                    )}
-                    {car.status === "available" ? (
-                      <button
-                        type="button"
-                        disabled={busyId === car.id}
-                        onClick={() => void onUnlist(car.id)}
-                        className="rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist hover:border-lime/40 hover:text-lime disabled:opacity-60"
-                      >
-                        Unlist
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
+                      ) : null}
+                    </div>
+                  }
+                />
               </li>
             ))}
           </ul>

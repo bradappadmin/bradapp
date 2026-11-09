@@ -4,6 +4,7 @@ import * as api from "../api";
 import { useAuth } from "../auth-context";
 import type { ListingDetail } from "../cars";
 import { formatCoins, formatMileage, listingTitle } from "../cars";
+import { CarHeroVisual } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
 
 export function ListingPage() {
@@ -89,6 +90,11 @@ export function ListingPage() {
             <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
               {listingTitle(listing)}
             </h1>
+            <CarHeroVisual
+              colour={listing.colour}
+              bodyType={listing.bodyType}
+              title={listingTitle(listing)}
+            />
             <p className="mt-4 font-display text-3xl font-semibold text-lime">
               {formatCoins(listing.coinPrice)}
             </p>

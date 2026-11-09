@@ -4,6 +4,8 @@ import * as api from "../api";
 import type { MemberProfileCar, MemberSummary } from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
+import { badgeForStatus } from "../car-visuals";
+import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
 
 export function MemberProfilePage() {
@@ -91,17 +93,13 @@ export function MemberProfilePage() {
           {cars.length === 0 && !loading ? (
             <p className="mt-3 text-sm text-steel">Empty garage.</p>
           ) : null}
-          <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+          <ul className="mt-4 grid gap-3 border-t border-white/10 pt-4">
             {cars.map((car) => (
-              <li key={car.id} className="py-4">
-                <p className="font-display text-lg text-mist">
-                  {car.make} {car.model}{" "}
-                  <span className="text-sm text-steel">{car.trimName}</span>
-                </p>
-                <p className="mt-1 text-sm text-steel">
-                  {car.year} · {car.colour} · {car.bhp} bhp · {car.topSpeedMph} mph · 0–60{" "}
-                  {car.zeroToSixtySecs}s
-                </p>
+              <li key={car.id}>
+                <CarCard
+                  car={car}
+                  badge={badgeForStatus(car.status, "owned")}
+                />
               </li>
             ))}
           </ul>

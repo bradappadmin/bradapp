@@ -156,6 +156,10 @@ export type GarageCar = {
   make: string;
   model: string;
   trimName: string;
+  bodyType: string;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
   conditionType: "new" | "used";
   year: number;
   colour: string;
@@ -202,6 +206,7 @@ export type MemberCard = {
   make: string;
   model: string;
   trimName: string;
+  bodyType: string;
   bhp: number;
   topSpeedMph: number;
   zeroToSixtySecs: number;
@@ -289,6 +294,7 @@ export type MemberProfileCar = {
   make: string;
   model: string;
   trimName: string;
+  bodyType: string;
   bhp: number;
   topSpeedMph: number;
   zeroToSixtySecs: number;

@@ -533,7 +533,7 @@ export function createPlayRouter(): Router {
     }
     const [rows] = await pool.query(
       `SELECT l.id, l.owner_user_id AS ownerUserId, u.display_name AS ownerDisplayName,
-              cm.make, cm.model, cm.trim_name AS trimName,
+              cm.make, cm.model, cm.trim_name AS trimName, cm.body_type AS bodyType,
               cm.bhp, cm.top_speed_mph AS topSpeedMph, cm.zero_to_sixty_secs AS zeroToSixtySecs,
               l.year, l.colour
        FROM listings l

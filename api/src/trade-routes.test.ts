@@ -57,7 +57,11 @@ describe.runIf(hasDb)("trade routes", () => {
 
     const garage = await buyer.get("/trade/garage");
     expect(garage.status).toBe(200);
-    expect(garage.body.cars.some((c: { id: number }) => c.id === cheapListingId)).toBe(true);
+    const owned = garage.body.cars.find((c: { id: number }) => c.id === cheapListingId);
+    expect(owned).toBeTruthy();
+    expect(owned.bhp).toBeGreaterThan(0);
+    expect(owned.bodyType).toBeTruthy();
+    expect(owned.topSpeedMph).toBeGreaterThan(0);
 
     const detail = await request(app).get(`/cars/listings/${cheapListingId}`);
     expect(detail.body.listing.status).toBe("owned");

@@ -32,6 +32,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 
 - Accounts: sign-up, sign-in, session cookie
 - Mobile-friendly Midnight Garage layout: collapsible nav, readable forms/lists, usable admin on phone widths
+- Car cards: original colour strip + body silhouette cues, BHP / 0–60 / top speed, price or owned badge (no stock photos)
 - Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
 - Filters: make, model, body, fuel, new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
 - Brad Coins: balances + ledger; members buy/sell listings (no real money)

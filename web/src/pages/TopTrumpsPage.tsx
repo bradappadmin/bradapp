@@ -4,6 +4,7 @@ import * as api from "../api";
 import type { GarageCar, MemberCard, MemberSummary, TopTrumpsCategory } from "../api";
 import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
+import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
 
 type CategoryMeta = { id: TopTrumpsCategory; label: string; direction: "higher" | "lower" };
@@ -34,6 +35,16 @@ export function TopTrumpsPage() {
   const challengeableMembers = useMemo(
     () => members.filter((m) => user && m.id !== user.id && m.carCount > 0),
     [members, user],
+  );
+
+  const selectedMyCar = useMemo(
+    () => myCars.find((car) => car.id === listingId) ?? null,
+    [myCars, listingId],
+  );
+
+  const selectedOpponentCard = useMemo(
+    () => opponentCards.find((card) => card.id === opponentListingId) ?? null,
+    [opponentCards, opponentListingId],
   );
 
   const selectedOpponent = useMemo(
@@ -190,6 +201,11 @@ export function TopTrumpsPage() {
                   ))}
                 </select>
               </label>
+              {selectedMyCar ? (
+                <div className="mt-3">
+                  <CarCard car={selectedMyCar} badge="owned" dense />
+                </div>
+              ) : null}
             </section>
 
             <section>
@@ -263,6 +279,11 @@ export function TopTrumpsPage() {
                         ))}
                       </select>
                     </label>
+                  ) : null}
+                  {selectedOpponentCard ? (
+                    <div className="mt-3">
+                      <CarCard car={selectedOpponentCard} badge="owned" dense />
+                    </div>
                   ) : null}
                 </div>
               ) : (
