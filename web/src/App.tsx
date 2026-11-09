@@ -23,6 +23,7 @@ import { ReviewsPage } from "./pages/ReviewsPage";
 import { SignInPage } from "./pages/SignInPage";
 import { SignUpPage } from "./pages/SignUpPage";
 import { TopTrumpsPage } from "./pages/TopTrumpsPage";
+import { TradeHistoryPage } from "./pages/TradeHistoryPage";
 import { TradesPage } from "./pages/TradesPage";
 
 export function App() {
@@ -42,6 +43,7 @@ export function App() {
         <Route path="/play" element={<TopTrumpsPage />} />
         <Route path="/play/history" element={<MatchHistoryPage />} />
         <Route path="/trades" element={<TradesPage />} />
+        <Route path="/trades/history" element={<TradeHistoryPage />} />
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/record" element={<RecordReviewPage />} />
         <Route path="/reviews/:id" element={<ReviewDetailPage />} />

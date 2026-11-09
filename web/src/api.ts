@@ -437,6 +437,29 @@ export function fetchTrades(): Promise<{ trades: TradeRow[] }> {
   return request("/play/trades");
 }
 
+export type CompletedTradeCar = {
+  listingId: number;
+  make: string;
+  model: string;
+  trimName: string;
+};
+
+export type CompletedTrade = {
+  id: number;
+  resolvedAt: string;
+  counterpartyName: string;
+  youGave: CompletedTradeCar;
+  youGot: CompletedTradeCar;
+  youWere: "offerer" | "receiver";
+};
+
+export function fetchCompletedTrades(
+  limit = 40,
+): Promise<{ trades: CompletedTrade[] }> {
+  const qs = new URLSearchParams({ limit: String(limit) }).toString();
+  return request(`/play/trades/history?${qs}`);
+}
+
 export function fetchTradeInboxCount(): Promise<{ pendingIncoming: number }> {
   return request("/play/trades/inbox-count");
 }

@@ -4,6 +4,7 @@ import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { listMatchHistory } from "./match-history.js";
+import { listCompletedTrades } from "./trade-history.js";
 import {
   PLAY_COINS,
   WIN_COINS,
@@ -339,6 +340,17 @@ export function createPlayRouter(): Router {
       [user.id, user.id],
     );
     res.json({ trades: rows });
+  });
+
+  /** Accepted free card trades only — who you swapped with and which cars. */
+  router.get("/trades/history", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const rawLimit = Number(req.query.limit ?? 40);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(Math.trunc(rawLimit), 1), 100)
+      : 40;
+    const trades = await listCompletedTrades(user.id, limit);
+    res.json({ trades });
   });
 
   router.post("/trades", requireAuth, async (req, res: Response) => {

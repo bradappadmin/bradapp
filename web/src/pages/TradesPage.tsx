@@ -56,7 +56,7 @@ export function TradesPage() {
     [trades, user],
   );
   const history = useMemo(
-    () => trades.filter((t) => t.status !== "pending"),
+    () => trades.filter((t) => t.status === "accepted"),
     [trades],
   );
 
@@ -203,15 +203,28 @@ export function TradesPage() {
             Offer one of your cars for one of theirs. They accept or decline. Ownership swaps — no Brad
             Coins change hands.
           </p>
+          <p className="mt-4">
+            <Link
+              to="/trades/history"
+              className="font-display text-sm text-lime no-underline hover:underline"
+            >
+              Completed trade history
+            </Link>
+          </p>
         </div>
 
         <section className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="font-display text-xl text-mist">Inbox</h2>
-            <p className="text-sm text-steel">
-              {incoming.length} pending{" "}
-              {incoming.length === 1 ? "offer" : "offers"} for you
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-steel">
+              <span>
+                {incoming.length} pending{" "}
+                {incoming.length === 1 ? "offer" : "offers"} for you
+              </span>
+              <Link to="/trades/history" className="text-lime no-underline hover:underline">
+                History
+              </Link>
+            </div>
           </div>
           {loading ? <p className="mt-3 text-sm text-steel">Loading…</p> : null}
           <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
@@ -377,9 +390,17 @@ export function TradesPage() {
         {message ? <p className="mt-4 text-sm text-lime">{message}</p> : null}
 
         <section className="mt-10">
-          <h2 className="font-display text-xl text-mist">Recent history</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-display text-xl text-mist">Recent completed trades</h2>
+            <Link
+              to="/trades/history"
+              className="font-display text-sm text-lime no-underline hover:underline"
+            >
+              Full history
+            </Link>
+          </div>
           <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
-            {history.map((trade) => (
+            {history.slice(0, 5).map((trade) => (
               <li key={trade.id} className="py-3 text-sm">
                 <p className="text-mist">
                   {trade.fromDisplayName} ↔ {trade.toDisplayName}: {trade.offerMake}{" "}
@@ -392,7 +413,7 @@ export function TradesPage() {
             ))}
           </ul>
           {!loading && history.length === 0 ? (
-            <p className="mt-3 text-sm text-steel">No settled trades yet.</p>
+            <p className="mt-3 text-sm text-steel">No accepted trades yet.</p>
           ) : null}
         </section>
 

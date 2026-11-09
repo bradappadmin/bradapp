@@ -29,7 +29,7 @@ const STEPS: Step[] = [
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars with family without spending Brad Coins. Offer a trade from Trades or a member’s garage, then accept or decline in your inbox.",
+    body: "Swap cars with family without spending Brad Coins. Offer a trade from Trades or a member’s garage, then accept or decline in your inbox. Completed trade history lists who you swapped with and which cars.",
     to: "/trades",
     cta: "Open Trades",
   },

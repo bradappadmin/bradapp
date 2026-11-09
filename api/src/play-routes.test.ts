@@ -191,6 +191,29 @@ describe.runIf(hasDb)("play routes", () => {
     const walletBAfter = await b.get("/trade/wallet");
     expect(walletAAfter.body.balance).toBe(walletABefore.body.balance);
     expect(walletBAfter.body.balance).toBe(walletBBefore.body.balance);
+
+    const historyA = await a.get("/play/trades/history");
+    expect(historyA.status).toBe(200);
+    const completedA = historyA.body.trades.find((t: { id: number }) => t.id === tradeId);
+    expect(completedA).toBeTruthy();
+    expect(completedA.counterpartyName).toBe("Player B");
+    expect(completedA.youWere).toBe("offerer");
+    expect(completedA.youGave.listingId).toBe(carA);
+    expect(completedA.youGot.listingId).toBe(carB);
+    expect(completedA.resolvedAt).toBeTruthy();
+
+    const historyB = await b.get("/play/trades/history");
+    const completedB = historyB.body.trades.find((t: { id: number }) => t.id === tradeId);
+    expect(completedB).toBeTruthy();
+    expect(completedB.counterpartyName).toBe("Player A");
+    expect(completedB.youWere).toBe("receiver");
+    expect(completedB.youGave.listingId).toBe(carB);
+    expect(completedB.youGot.listingId).toBe(carA);
+  });
+
+  it("requires auth for completed trade history", async () => {
+    const res = await request(app).get("/play/trades/history");
+    expect(res.status).toBe(401);
   });
 
   it("lets the recipient decline and the sender cancel pending trades", async () => {
