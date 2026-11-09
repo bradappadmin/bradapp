@@ -90,7 +90,7 @@ export function CarsPage() {
 
   useEffect(() => {
     setForm(draft);
-    if (draft.q || draft.colour || draft.mileageMax || draft.bhpMin) {
+    if (draft.colour || draft.mileageMax || draft.bhpMin) {
       setShowMore(true);
     }
   }, [draft]);
@@ -190,8 +190,8 @@ export function CarsPage() {
         <div className="bay-rise mb-8">
           <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Find a car</h1>
           <p className="mt-2 max-w-2xl text-sm text-steel">
-            Filter real makes and models by body, fuel, garage (made-up dealership), year, and Brad
-            Coins. Prices are play — including cars members list from My cars.
+            Type a make, model, or trim in the search box, or use the filters for body, fuel, garage,
+            year, and Brad Coins. Prices are play — including cars members list from My cars.
           </p>
         </div>
 
@@ -199,6 +199,18 @@ export function CarsPage() {
           onSubmit={onSubmit}
           className="bay-rise-delay mb-6 border-y border-white/10 py-6"
         >
+          <label className={`${labelClass} mb-4`}>
+            Search
+            <input
+              className={fieldClass}
+              type="search"
+              name="q"
+              value={form.q ?? ""}
+              onChange={(e) => setField("q", e.target.value)}
+              placeholder="Make, model, or trim…"
+              aria-label="Search make, model, or trim"
+            />
+          </label>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className={labelClass}>
               Make
@@ -359,15 +371,6 @@ export function CarsPage() {
 
           {showMore ? (
             <div className="mt-3 grid gap-3 border-t border-white/5 pt-4 sm:grid-cols-2 lg:grid-cols-4">
-              <label className={`${labelClass} sm:col-span-2`}>
-                Search
-                <input
-                  className={fieldClass}
-                  value={form.q ?? ""}
-                  onChange={(e) => setField("q", e.target.value)}
-                  placeholder="Make, model, garage…"
-                />
-              </label>
               <label className={labelClass}>
                 Colour
                 <select
@@ -413,7 +416,7 @@ export function CarsPage() {
               type="submit"
               className="bay-cta rounded-md bg-rose px-5 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
             >
-              Apply ranges
+              Search
             </button>
             <button
               type="button"

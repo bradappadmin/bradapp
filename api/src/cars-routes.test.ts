@@ -57,6 +57,45 @@ describe.runIf(hasDb)("cars routes", () => {
     expect(res.body.listings[0].garageName).toBeTruthy();
   });
 
+  it("free-text q matches make, model, or trim alongside other filters", async () => {
+    const byMake = await request(app).get("/cars/search").query({ q: "Porsche", limit: 20 });
+    expect(byMake.status).toBe(200);
+    expect(byMake.body.total).toBeGreaterThan(0);
+    expect(
+      byMake.body.listings.every(
+        (l: { make: string; model: string; trimName: string }) =>
+          /porsche/i.test(`${l.make} ${l.model} ${l.trimName}`),
+      ),
+    ).toBe(true);
+
+    const sample = byMake.body.listings[0] as {
+      make: string;
+      model: string;
+      trimName: string;
+    };
+    const token = (sample.model || sample.make).slice(0, 3);
+    expect(token.length).toBeGreaterThanOrEqual(2);
+    const byToken = await request(app)
+      .get("/cars/search")
+      .query({ q: token, condition: "used", limit: 20 });
+    expect(byToken.status).toBe(200);
+    expect(byToken.body.total).toBeGreaterThan(0);
+    const needle = token.toLowerCase();
+    expect(
+      byToken.body.listings.every(
+        (l: {
+          make: string;
+          model: string;
+          trimName: string;
+          garageName: string;
+          conditionType: string;
+        }) =>
+          l.conditionType === "used" &&
+          `${l.make} ${l.model} ${l.trimName} ${l.garageName}`.toLowerCase().includes(needle),
+      ),
+    ).toBe(true);
+  });
+
   it("returns a listing detail", async () => {
     const search = await request(app).get("/cars/search").query({ limit: 1 });
     const id = search.body.listings[0].id as number;

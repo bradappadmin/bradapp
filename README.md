@@ -35,7 +35,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - Mobile-friendly Midnight Garage layout: collapsible nav, readable forms/lists, usable admin on phone widths
 - Car cards: original colour strip + body silhouette cues, BHP / 0–60 / top speed, price or owned badge (no stock photos)
 - Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
-- Filters: make, model, body, fuel, garage (made-up dealership), new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
+- Filters: free-text search (make/model/trim), make, model, body, fuel, garage (made-up dealership), new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
 - Public member garages: open a member to see cars (no secrets), Brad Coin balance, car count, challenge / free-trade shortcuts
 - First-visit tips on home after sign-in (Cars, Play, Trades, Reviews, Admin if admin) — dismissible per tip or all
 - In-app `/how-to` family walkthrough (buy/sell, play, free trades, reviews, admin) — linked from home and nav

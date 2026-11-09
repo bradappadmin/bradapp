@@ -39,6 +39,14 @@ describe("buildSearchClause", () => {
     expect(clause.values).toEqual(["Midnight Motors"]);
   });
 
+  it("matches free-text q against make, model, and trim", () => {
+    const clause = buildSearchClause({ q: "GT3" });
+    expect(clause.whereSql).toContain("cm.make LIKE ?");
+    expect(clause.whereSql).toContain("cm.model LIKE ?");
+    expect(clause.whereSql).toContain("cm.trim_name LIKE ?");
+    expect(clause.values).toEqual(["%GT3%", "%GT3%", "%GT3%", "%GT3%"]);
+  });
+
   it("applies year and Brad Coin ranges with year_asc sort", () => {
     const clause = buildSearchClause({
       bodyType: "SUV",
