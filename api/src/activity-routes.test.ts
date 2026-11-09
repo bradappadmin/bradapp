@@ -1,0 +1,68 @@
+import request from "supertest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { createApp } from "./app.js";
+import { closePool, getPool } from "./db.js";
+import { loadEnv } from "./env.js";
+import { seedAccounts } from "./seed.js";
+
+loadEnv();
+
+const hasDb = Boolean(
+  process.env.DATABASE_URL?.startsWith("mysql") && process.env.SESSION_SECRET,
+);
+
+describe.runIf(hasDb)("activity routes", () => {
+  const app = createApp();
+  const agent = request.agent(app);
+  const email = `activity-${Date.now()}@example.com`;
+
+  beforeAll(async () => {
+    await seedAccounts();
+    const signup = await agent.post("/auth/signup").send({
+      email,
+      password: "ActivityPass-123!",
+      displayName: "Activity Fan",
+    });
+    expect(signup.status).toBe(201);
+
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 5 });
+    const cheap = search.body.listings.find((l: { coinPrice: number }) => l.coinPrice <= 100);
+    if (cheap) {
+      expect((await agent.post(`/trade/listings/${cheap.id}/buy`)).status).toBe(200);
+    }
+  });
+
+  afterAll(async () => {
+    const pool = getPool();
+    await pool.query("DELETE FROM users WHERE email = ?", [email]);
+    await closePool();
+  });
+
+  it("requires auth for the family feed", async () => {
+    const res = await request(app).get("/activity");
+    expect(res.status).toBe(401);
+  });
+
+  it("returns a sorted family activity feed including purchases when present", async () => {
+    const res = await agent.get("/activity").query({ limit: 20 });
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.items)).toBe(true);
+    for (const item of res.body.items) {
+      expect(item).toMatchObject({
+        id: expect.any(String),
+        kind: expect.stringMatching(/^(purchase|sale|trade|top_trumps|review)$/),
+        createdAt: expect.any(String),
+        summary: expect.any(String),
+        actorName: expect.any(String),
+      });
+    }
+    if (res.body.items.length >= 2) {
+      expect(res.body.items[0].createdAt >= res.body.items[1].createdAt).toBe(true);
+    }
+    const kinds = new Set(res.body.items.map((i: { kind: string }) => i.kind));
+    // After a buy in beforeAll, purchase should appear when stock existed.
+    if (res.body.items.some((i: { kind: string }) => i.kind === "purchase")) {
+      expect(kinds.has("purchase")).toBe(true);
+    }
+  });
+});

@@ -77,6 +77,21 @@ export function fetchDailyBonus(): Promise<{ dailyLogin: DailyLoginStatus }> {
   return request("/auth/daily-bonus");
 }
 
+export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
+
+export type ActivityItem = {
+  id: string;
+  kind: ActivityKind;
+  createdAt: string;
+  summary: string;
+  actorName: string;
+  href: string | null;
+};
+
+export function fetchActivity(limit = 30): Promise<{ items: ActivityItem[] }> {
+  return request(`/activity?limit=${limit}`);
+}
+
 export function claimDailyBonus(): Promise<{
   dailyLogin: DailyLoginStatus;
   user: User;

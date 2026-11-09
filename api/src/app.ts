@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
+import { createActivityRouter } from "./activity-routes.js";
 import { createAdminRouter } from "./admin-routes.js";
 import { createAuthRouter } from "./auth-routes.js";
 import { createCarsRouter } from "./cars-routes.js";
@@ -29,6 +30,7 @@ export function createApp(): Express {
   app.use("/auth", createAuthRouter());
   app.use("/cars", createCarsRouter());
   app.use("/members", createMembersRouter());
+  app.use("/activity", createActivityRouter());
   app.use("/trade", createTradeRouter());
   app.use("/play", createPlayRouter());
   app.use("/reviews", createReviewsRouter());

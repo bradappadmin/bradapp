@@ -11,6 +11,7 @@ vi.mock("../api", () => ({
   signUp: vi.fn(),
   claimDailyBonus: vi.fn(),
   fetchDailyBonus: vi.fn(),
+  fetchActivity: vi.fn().mockResolvedValue({ items: [] }),
 }));
 
 import * as api from "../api";

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import * as api from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
+import { ActivityFeed } from "../components/ActivityFeed";
 import { SiteHeader } from "../components/SiteHeader";
 import { roleLabel } from "../types";
 
@@ -186,6 +187,8 @@ export function HomePage() {
             </button>
           </div>
         </div>
+
+        <ActivityFeed />
       </main>
     </div>
   );
