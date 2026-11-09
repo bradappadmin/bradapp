@@ -4,6 +4,7 @@ import * as api from "../api";
 import type { GarageCar, MemberCard, MemberSummary, TradeRow } from "../api";
 import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { TradeOfferPair } from "../components/TradeOfferPair";
 import { TrumpCard } from "../components/TrumpCard";
@@ -15,6 +16,9 @@ import {
   tradeRequestCar,
 } from "../trade-cars";
 
+const fieldClass =
+  "rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
+
 function statusLabel(status: TradeRow["status"]): string {
   switch (status) {
     case "pending":
@@ -25,6 +29,23 @@ function statusLabel(status: TradeRow["status"]): string {
       return "Declined";
     case "cancelled":
       return "Cancelled";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+function statusBadgeClass(status: TradeRow["status"]): string {
+  switch (status) {
+    case "pending":
+      return "border-lime/30 text-lime";
+    case "accepted":
+      return "border-lime/40 bg-lime/10 text-lime";
+    case "declined":
+      return "border-rose/35 text-rose";
+    case "cancelled":
+      return "border-white/15 text-steel";
     default: {
       const _exhaustive: never = status;
       return _exhaustive;
@@ -244,50 +265,69 @@ export function TradesPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="bay-rise">
-          <h1 className="font-display text-3xl font-semibold text-white">Card trades</h1>
-          <p className="mt-2 text-sm text-steel">
-            Offer one of your cars for one of theirs. They accept or decline. Ownership swaps — no Brad
-            Coins change hands.
-          </p>
-          <p className="mt-4">
-            <Link
-              to="/trades/history"
-              className="font-display text-sm text-lime no-underline hover:underline"
-            >
-              Completed trade history
-            </Link>
-          </p>
-        </div>
-
-        <section className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-display text-xl text-mist">Inbox</h2>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-steel">
-              <span>
-                {incoming.length} pending{" "}
-                {incoming.length === 1 ? "offer" : "offers"} for you
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+        <header className="bay-rise flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.28em] text-steel">Midnight garage</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Card trades
+            </h1>
+            <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
+            <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
+              Offer one of your cars for one of theirs. They accept or decline. Ownership swaps — no
+              Brad Coins change hands.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2" aria-label="Trade bay notes">
+              <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
+                Free swaps
               </span>
-              <Link to="/trades/history" className="text-lime no-underline hover:underline">
-                History
-              </Link>
+              <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                {incoming.length} in inbox
+              </span>
             </div>
           </div>
-          {loading ? <p className="mt-3 text-sm text-steel">Loading…</p> : null}
-          <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Link
+              to="/trades/history"
+              className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+            >
+              Completed history
+            </Link>
+            <Link
+              to="/members"
+              className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+            >
+              Members
+            </Link>
+          </div>
+        </header>
+
+        <section className="bay-rise-delay mt-8" aria-labelledby="trades-inbox">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="trades-inbox" className="font-display text-xl text-mist">
+              Inbox
+            </h2>
+            <p className="text-sm text-steel">
+              {incoming.length} pending {incoming.length === 1 ? "offer" : "offers"} for you
+            </p>
+          </div>
+          {loading ? <p className="text-sm text-steel">Loading…</p> : null}
+          <ul className="flex flex-col gap-3">
             {incoming.map((trade) => (
-              <li key={trade.id} className="flex flex-col gap-4 py-5">
+              <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-sm text-mist">
                     <span className="font-display text-lime">{trade.fromDisplayName}</span> wants a
                     free swap
                   </p>
-                  <p className="text-xs uppercase tracking-wide text-steel">
-                    {statusLabel(trade.status)} · free swap
-                  </p>
+                  <span
+                    className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusBadgeClass(trade.status)}`}
+                  >
+                    {statusLabel(trade.status)} · free
+                  </span>
                 </div>
                 <TradeOfferPair
                   offerLabel={`${trade.fromDisplayName} offers`}
@@ -295,12 +335,12 @@ export function TradesPage() {
                   offerCar={tradeOfferCar(trade)}
                   requestCar={tradeRequestCar(trade)}
                 />
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => void onAccept(trade.id)}
-                    className="rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white disabled:opacity-60"
+                    className="rounded-md bg-rose px-4 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
                   >
                     Accept
                   </button>
@@ -308,7 +348,7 @@ export function TradesPage() {
                     type="button"
                     disabled={busy}
                     onClick={() => void onDecline(trade.id)}
-                    className="rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist disabled:opacity-60"
+                    className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-rose/40 hover:text-rose disabled:opacity-60"
                   >
                     Decline
                   </button>
@@ -317,22 +357,28 @@ export function TradesPage() {
             ))}
           </ul>
           {!loading && incoming.length === 0 ? (
-            <p className="mt-3 text-sm text-steel">No pending offers in your inbox.</p>
+            <div className="play-panel rounded-md border p-4 sm:p-5">
+              <p className="text-sm text-steel">No pending offers in your inbox.</p>
+            </div>
           ) : null}
         </section>
 
-        <section className="mt-10">
-          <h2 className="font-display text-xl text-mist">Your outgoing offers</h2>
-          <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+        <section className="mt-8" aria-labelledby="trades-outgoing">
+          <h2 id="trades-outgoing" className="mb-3 font-display text-xl text-mist">
+            Your outgoing offers
+          </h2>
+          <ul className="flex flex-col gap-3">
             {outgoing.map((trade) => (
-              <li key={trade.id} className="flex flex-col gap-4 py-5">
+              <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-sm text-mist">
                     Waiting on <span className="font-display text-lime">{trade.toDisplayName}</span>
                   </p>
-                  <p className="text-xs uppercase tracking-wide text-steel">
+                  <span
+                    className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusBadgeClass(trade.status)}`}
+                  >
                     {statusLabel(trade.status)}
-                  </p>
+                  </span>
                 </div>
                 <TradeOfferPair
                   offerLabel="You offer"
@@ -344,7 +390,7 @@ export function TradesPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => void onCancel(trade.id)}
-                  className="w-fit rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist disabled:opacity-60"
+                  className="w-fit rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-rose/40 hover:text-rose disabled:opacity-60"
                 >
                   Cancel
                 </button>
@@ -352,20 +398,29 @@ export function TradesPage() {
             ))}
           </ul>
           {!loading && outgoing.length === 0 ? (
-            <p className="mt-3 text-sm text-steel">No outgoing offers.</p>
+            <div className="play-panel rounded-md border p-4 sm:p-5">
+              <p className="text-sm text-steel">No outgoing offers.</p>
+            </div>
           ) : null}
         </section>
 
-        <section className="bay-rise-delay mt-10 border-y border-white/10 py-6">
-          <h2 className="font-display text-xl text-mist">Send a free trade</h2>
+        <section
+          id="compose-trade"
+          className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-6"
+          aria-labelledby="trades-compose"
+        >
+          <h2 id="trades-compose" className="font-display text-xl text-mist">
+            Send a free trade
+          </h2>
           <p className="mt-2 text-sm text-steel">
-            Pick a member, the card you want from them, and the card you offer.
+            Pick a member, the card you want from them, and the card you offer. Deeplinks from a
+            listing or garage land here with the partner and car pre-selected.
           </p>
-          <div className="mt-4 flex flex-col gap-4">
+          <div className="mt-5 flex flex-col gap-4">
             <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
               Member
               <select
-                className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                className={fieldClass}
                 value={partnerUserId}
                 onChange={(e) =>
                   onPartnerChange(e.target.value === "" ? "" : Number(e.target.value))
@@ -382,14 +437,16 @@ export function TradesPage() {
             <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
               You request (their car)
               <select
-                className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                className={fieldClass}
                 value={requestListingId}
                 onChange={(e) =>
                   onRequestCarChange(e.target.value === "" ? "" : Number(e.target.value))
                 }
                 disabled={partnerUserId === ""}
               >
-                <option value="">{partnerUserId === "" ? "Pick a member first" : "Pick their car"}</option>
+                <option value="">
+                  {partnerUserId === "" ? "Pick a member first" : "Pick their car"}
+                </option>
                 {memberCards.map((card) => (
                   <option key={card.id} value={card.id}>
                     {card.make} {card.model} · {card.year}
@@ -400,7 +457,7 @@ export function TradesPage() {
             <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
               You offer (your car)
               <select
-                className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                className={fieldClass}
                 value={offerListingId}
                 onChange={(e) => setOfferListingId(Number(e.target.value))}
               >
@@ -417,7 +474,9 @@ export function TradesPage() {
                 {selectedOfferCar ? (
                   <TrumpCard label="You offer" car={garageToTrumpCard(selectedOfferCar)} />
                 ) : (
-                  <p className="text-sm text-steel">Pick the car you offer.</p>
+                  <p className="rounded-md border border-white/10 bg-bay-deep/40 px-3 py-4 text-sm text-steel">
+                    Pick the car you offer.
+                  </p>
                 )}
                 {selectedRequestCard ? (
                   <TrumpCard
@@ -425,7 +484,7 @@ export function TradesPage() {
                     car={memberCardToTrumpCard(selectedRequestCard)}
                   />
                 ) : (
-                  <p className="text-sm text-steel">
+                  <p className="rounded-md border border-white/10 bg-bay-deep/40 px-3 py-4 text-sm text-steel">
                     {partnerUserId === "" ? "Pick a member first." : "Pick their car."}
                   </p>
                 )}
@@ -453,7 +512,7 @@ export function TradesPage() {
               type="button"
               disabled={busy || myCars.length === 0 || partnerUserId === ""}
               onClick={() => void onCreate()}
-              className="bay-cta w-fit rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white disabled:opacity-60"
+              className="bay-cta w-full rounded-md bg-rose px-5 py-3.5 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-fit"
             >
               {busy ? "Sending…" : "Send free trade offer"}
             </button>
@@ -463,26 +522,30 @@ export function TradesPage() {
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {message ? <p className="mt-4 text-sm text-lime">{message}</p> : null}
 
-        <section className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-display text-xl text-mist">Recent completed trades</h2>
+        <section className="mt-8" aria-labelledby="trades-recent">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="trades-recent" className="font-display text-xl text-mist">
+              Recent completed trades
+            </h2>
             <Link
               to="/trades/history"
-              className="font-display text-sm text-lime no-underline hover:underline"
+              className="font-display text-sm text-lime no-underline transition hover:underline"
             >
-              Full history
+              Full history →
             </Link>
           </div>
-          <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+          <ul className="flex flex-col gap-3">
             {history.slice(0, 5).map((trade) => (
-              <li key={trade.id} className="flex flex-col gap-3 py-5">
+              <li key={trade.id} className="play-panel flex flex-col gap-3 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
                   <p className="text-mist">
                     {trade.fromDisplayName} ↔ {trade.toDisplayName}
                   </p>
-                  <p className="text-xs uppercase tracking-wide text-steel">
+                  <span
+                    className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusBadgeClass(trade.status)}`}
+                  >
                     {statusLabel(trade.status)}
-                  </p>
+                  </span>
                 </div>
                 <TradeOfferPair
                   offerLabel={`${trade.fromDisplayName} gave`}
@@ -494,7 +557,9 @@ export function TradesPage() {
             ))}
           </ul>
           {!loading && history.length === 0 ? (
-            <p className="mt-3 text-sm text-steel">No accepted trades yet.</p>
+            <div className="play-panel rounded-md border p-4 sm:p-5">
+              <p className="text-sm text-steel">No accepted trades yet.</p>
+            </div>
           ) : null}
         </section>
 
