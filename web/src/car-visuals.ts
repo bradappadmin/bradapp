@@ -1,4 +1,4 @@
-/** Original Midnight Garage car art — layered side profiles, not stock photos. */
+/** Original Midnight Garage car art — photoreal-leaning ¾ profiles, not stock photos. */
 
 export type CarPaint = {
   base: string;
@@ -10,6 +10,7 @@ export type CarPaint = {
   glassEdge: string;
   light: string;
   rim: string;
+  chrome: string;
 };
 
 const PAINT: Record<string, CarPaint> = {
@@ -19,10 +20,11 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#b8c4d6",
     deep: "#8a97ab",
     glow: "rgba(232, 238, 247, 0.28)",
-    glass: "rgba(70, 95, 130, 0.55)",
-    glassEdge: "rgba(180, 205, 235, 0.55)",
-    light: "#fff6d6",
-    rim: "#c5ceda",
+    glass: "rgba(55, 80, 115, 0.62)",
+    glassEdge: "rgba(200, 220, 245, 0.55)",
+    light: "#fff8e0",
+    rim: "#d5dbe4",
+    chrome: "#f2f5f8",
   },
   "British Racing Green": {
     base: "#1f6b4f",
@@ -30,10 +32,11 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#134836",
     deep: "#0a2a1f",
     glow: "rgba(31, 107, 79, 0.4)",
-    glass: "rgba(20, 45, 40, 0.62)",
-    glassEdge: "rgba(120, 180, 150, 0.35)",
+    glass: "rgba(18, 40, 36, 0.7)",
+    glassEdge: "rgba(130, 190, 160, 0.35)",
     light: "#ffe9a8",
-    rim: "#9aa7b5",
+    rim: "#aeb8c4",
+    chrome: "#d7dde6",
   },
   "Laser Blue": {
     base: "#2563eb",
@@ -41,21 +44,23 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#1d4ed8",
     deep: "#12307a",
     glow: "rgba(37, 99, 235, 0.42)",
-    glass: "rgba(25, 45, 90, 0.6)",
-    glassEdge: "rgba(140, 185, 255, 0.4)",
+    glass: "rgba(20, 40, 85, 0.68)",
+    glassEdge: "rgba(150, 195, 255, 0.42)",
     light: "#fff1c2",
-    rim: "#a8b4c4",
+    rim: "#b4becb",
+    chrome: "#e4e9f0",
   },
   "Midnight Black": {
     base: "#1a1f2a",
-    highlight: "#3a4458",
+    highlight: "#4a5568",
     shade: "#0d1118",
     deep: "#05070c",
-    glow: "rgba(163, 230, 53, 0.16)",
-    glass: "rgba(15, 25, 40, 0.72)",
-    glassEdge: "rgba(120, 140, 170, 0.3)",
+    glow: "rgba(163, 230, 53, 0.14)",
+    glass: "rgba(12, 20, 32, 0.78)",
+    glassEdge: "rgba(130, 150, 180, 0.28)",
     light: "#ffe9b0",
-    rim: "#6b7585",
+    rim: "#7a8494",
+    chrome: "#c5ccd6",
   },
   "Nardo Grey": {
     base: "#6b727d",
@@ -63,32 +68,35 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#4a515c",
     deep: "#2f353e",
     glow: "rgba(107, 114, 125, 0.38)",
-    glass: "rgba(35, 45, 60, 0.58)",
-    glassEdge: "rgba(170, 185, 205, 0.35)",
+    glass: "rgba(30, 40, 55, 0.65)",
+    glassEdge: "rgba(180, 195, 215, 0.35)",
     light: "#fff0c8",
-    rim: "#b0b8c4",
+    rim: "#c0c7d0",
+    chrome: "#e8ecf1",
   },
   "Racing Red": {
     base: "#dc2626",
-    highlight: "#f87171",
+    highlight: "#fb7185",
     shade: "#991b1b",
     deep: "#5c0f0f",
     glow: "rgba(220, 38, 38, 0.4)",
-    glass: "rgba(40, 20, 30, 0.58)",
-    glassEdge: "rgba(255, 170, 170, 0.35)",
+    glass: "rgba(35, 15, 25, 0.65)",
+    glassEdge: "rgba(255, 180, 180, 0.35)",
     light: "#fff1c2",
-    rim: "#b8c0cc",
+    rim: "#c4ccd6",
+    chrome: "#eceff3",
   },
   Silver: {
     base: "#a8b0bc",
-    highlight: "#e2e7ee",
+    highlight: "#e8edf4",
     shade: "#7d8694",
     deep: "#4f5764",
     glow: "rgba(168, 176, 188, 0.38)",
-    glass: "rgba(40, 55, 75, 0.55)",
-    glassEdge: "rgba(200, 220, 240, 0.4)",
+    glass: "rgba(35, 50, 70, 0.6)",
+    glassEdge: "rgba(210, 225, 245, 0.42)",
     light: "#fff6d6",
-    rim: "#d0d6de",
+    rim: "#d8dee6",
+    chrome: "#f5f7fa",
   },
   "Storm Grey": {
     base: "#4a5564",
@@ -96,10 +104,11 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#323a46",
     deep: "#1c222c",
     glow: "rgba(74, 85, 100, 0.38)",
-    glass: "rgba(25, 35, 50, 0.62)",
-    glassEdge: "rgba(150, 170, 195, 0.35)",
+    glass: "rgba(22, 30, 45, 0.68)",
+    glassEdge: "rgba(155, 175, 200, 0.35)",
     light: "#ffeec0",
-    rim: "#9ea8b6",
+    rim: "#a8b2c0",
+    chrome: "#dde3ea",
   },
   "Sunset Orange": {
     base: "#ea7a2e",
@@ -107,10 +116,11 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#b45309",
     deep: "#6b2f08",
     glow: "rgba(234, 122, 46, 0.4)",
-    glass: "rgba(50, 30, 20, 0.55)",
-    glassEdge: "rgba(255, 200, 150, 0.35)",
+    glass: "rgba(45, 25, 18, 0.62)",
+    glassEdge: "rgba(255, 205, 160, 0.35)",
     light: "#fff4cc",
-    rim: "#b5bec9",
+    rim: "#c0c8d2",
+    chrome: "#eceff3",
   },
   "Volcano Yellow": {
     base: "#eab308",
@@ -118,10 +128,11 @@ const PAINT: Record<string, CarPaint> = {
     shade: "#a16207",
     deep: "#633806",
     glow: "rgba(234, 179, 8, 0.4)",
-    glass: "rgba(45, 40, 20, 0.5)",
-    glassEdge: "rgba(255, 235, 150, 0.4)",
+    glass: "rgba(40, 35, 15, 0.55)",
+    glassEdge: "rgba(255, 240, 160, 0.4)",
     light: "#fff8dc",
-    rim: "#c2cad4",
+    rim: "#ccd4dc",
+    chrome: "#f2f5f8",
   },
 };
 
@@ -131,85 +142,99 @@ const FALLBACK_PAINT: CarPaint = {
   shade: "#5c6b86",
   deep: "#344157",
   glow: "rgba(139, 155, 184, 0.35)",
-  glass: "rgba(35, 50, 75, 0.55)",
-  glassEdge: "rgba(170, 195, 225, 0.35)",
+  glass: "rgba(30, 45, 70, 0.6)",
+  glassEdge: "rgba(175, 200, 230, 0.35)",
   light: "#fff1c2",
-  rim: "#aeb8c6",
+  rim: "#b8c2d0",
+  chrome: "#e8edf3",
 };
 
+/**
+ * Compact ¾ front-side art in viewBox 0 0 200 120.
+ * Paths are original BradApp drawings — body type changes greenhouse / height.
+ */
 export type CarBodyArt = {
-  /** Outer body silhouette. */
+  /** Main body mass (hood → flanks → rear). */
   body: string;
-  /** Greenhouse / glass. */
+  /** Soft under-shadow glued to the body. */
+  under: string;
+  /** Cabin glass. */
   glass: string;
-  /** Soft character / shoulder line. */
-  crease: string;
-  /** Front lamp ellipse. */
+  /** Lower grille / intake. */
+  grille: string;
+  /** Front lamp. */
   headlight: { cx: number; cy: number; rx: number; ry: number };
-  /** Rear lamp ellipse. */
+  /** Rear lamp. */
   taillight: { cx: number; cy: number; rx: number; ry: number };
-  wheels: [{ cx: number; cy: number }, { cx: number; cy: number }];
+  /** Near (larger) then far wheel. */
+  wheels: [{ cx: number; cy: number; r: number }, { cx: number; cy: number; r: number }];
+  /** Optional roof rail / spoiler hint. */
+  accent?: string;
 };
 
-/** Side profiles in viewBox 0 0 240 110 — original art per body type. */
 const BODY_ART: Record<string, CarBodyArt> = {
   Coupe: {
-    body: "M28 78 C32 62 42 50 58 46 L92 40 C118 36 148 38 172 48 L198 62 C206 68 214 72 222 74 L222 82 L28 82 Z",
-    glass:
-      "M78 48 L108 44 C128 42 148 44 164 50 L172 56 L108 56 C96 56 86 54 78 48 Z",
-    crease: "M48 66 L208 66",
-    headlight: { cx: 44, cy: 68, rx: 7, ry: 3.5 },
-    taillight: { cx: 214, cy: 70, rx: 5, ry: 3 },
+    body: "M18 86 C22 70 34 54 58 48 L92 40 C118 34 142 36 160 48 L178 62 C186 70 190 78 192 86 L18 86 Z",
+    under: "M24 86 Q105 94 186 86 L186 90 Q105 100 24 90 Z",
+    glass: "M78 48 L108 42 C124 40 140 44 150 52 L154 58 L108 60 C94 60 84 56 78 48 Z",
+    grille: "M28 72 L52 70 L54 78 L30 80 Z",
+    headlight: { cx: 40, cy: 68, rx: 9, ry: 4 },
+    taillight: { cx: 180, cy: 70, rx: 5, ry: 3.5 },
     wheels: [
-      { cx: 68, cy: 82 },
-      { cx: 178, cy: 82 },
+      { cx: 58, cy: 88, r: 16 },
+      { cx: 152, cy: 88, r: 14 },
     ],
+    accent: "M96 40 C120 36 140 40 154 48",
   },
   Estate: {
-    body: "M24 78 C28 64 38 54 54 50 L88 46 L186 46 C200 46 210 54 218 64 L226 74 L226 82 L24 82 Z",
-    glass: "M78 50 L108 48 L178 48 L186 54 L108 56 C94 56 84 54 78 50 Z",
-    crease: "M46 66 L214 66",
-    headlight: { cx: 40, cy: 68, rx: 7, ry: 3.5 },
-    taillight: { cx: 218, cy: 68, rx: 5, ry: 4 },
+    body: "M16 86 C20 72 30 58 52 52 L86 46 L158 46 C170 46 180 54 186 66 L192 86 L16 86 Z",
+    under: "M22 86 Q104 96 188 86 L188 91 Q104 102 22 91 Z",
+    glass: "M74 52 L100 48 L154 48 L160 56 L100 58 C88 58 80 56 74 52 Z",
+    grille: "M26 72 L50 70 L52 78 L28 80 Z",
+    headlight: { cx: 38, cy: 68, rx: 9, ry: 4 },
+    taillight: { cx: 182, cy: 66, rx: 5, ry: 5 },
     wheels: [
-      { cx: 66, cy: 82 },
-      { cx: 176, cy: 82 },
+      { cx: 56, cy: 88, r: 16 },
+      { cx: 150, cy: 88, r: 14 },
     ],
+    accent: "M86 46 L158 46",
   },
   Hatchback: {
-    body: "M26 78 C30 64 40 52 56 48 L94 44 C120 42 148 46 168 56 L196 70 C204 74 214 76 222 78 L222 82 L26 82 Z",
-    glass:
-      "M76 50 L106 46 C126 44 146 48 160 54 L166 58 L108 58 C94 58 84 56 76 50 Z",
-    crease: "M48 66 L206 66",
-    headlight: { cx: 42, cy: 68, rx: 7, ry: 3.5 },
-    taillight: { cx: 212, cy: 72, rx: 5, ry: 3 },
+    body: "M18 86 C22 70 34 56 56 50 L90 44 C118 40 142 46 158 58 L178 72 C184 78 188 82 192 86 L18 86 Z",
+    under: "M24 86 Q104 95 186 86 L186 91 Q104 101 24 91 Z",
+    glass: "M76 50 L106 44 C124 42 140 48 150 56 L152 60 L106 62 C92 62 82 58 76 50 Z",
+    grille: "M28 72 L50 70 L52 78 L30 80 Z",
+    headlight: { cx: 40, cy: 68, rx: 9, ry: 4 },
+    taillight: { cx: 178, cy: 72, rx: 5, ry: 3.5 },
     wheels: [
-      { cx: 66, cy: 82 },
-      { cx: 174, cy: 82 },
+      { cx: 56, cy: 88, r: 16 },
+      { cx: 148, cy: 88, r: 14 },
     ],
   },
   Saloon: {
-    body: "M24 78 C28 64 38 52 54 48 L92 44 C118 42 146 46 166 56 L196 70 C206 74 216 76 224 78 L224 82 L24 82 Z",
-    glass:
-      "M74 50 L106 46 C128 44 148 46 162 52 L168 58 L108 58 C94 58 82 56 74 50 Z",
-    crease: "M46 66 L210 66",
-    headlight: { cx: 40, cy: 68, rx: 7, ry: 3.5 },
-    taillight: { cx: 214, cy: 72, rx: 5, ry: 3 },
+    body: "M16 86 C20 70 32 56 54 50 L90 44 C116 40 140 44 156 56 L178 72 C184 78 188 82 192 86 L16 86 Z",
+    under: "M22 86 Q104 95 186 86 L186 91 Q104 101 22 91 Z",
+    glass: "M74 50 L106 44 C124 42 142 46 152 54 L154 60 L106 62 C92 62 80 58 74 50 Z",
+    grille: "M26 72 L50 70 L52 78 L28 80 Z",
+    headlight: { cx: 38, cy: 68, rx: 9, ry: 4 },
+    taillight: { cx: 180, cy: 72, rx: 5, ry: 3.5 },
     wheels: [
-      { cx: 66, cy: 82 },
-      { cx: 176, cy: 82 },
+      { cx: 56, cy: 88, r: 16 },
+      { cx: 150, cy: 88, r: 14 },
     ],
   },
   SUV: {
-    body: "M22 78 C26 66 34 56 50 52 L86 48 L188 48 C202 48 212 56 220 66 L228 76 L228 82 L22 82 Z",
-    glass: "M74 52 L104 50 L180 50 L186 56 L104 58 C90 58 80 56 74 52 Z",
-    crease: "M44 66 L216 66",
-    headlight: { cx: 38, cy: 66, rx: 7, ry: 4 },
-    taillight: { cx: 220, cy: 68, rx: 5, ry: 4 },
+    body: "M14 86 C18 74 26 60 48 54 L84 48 L162 48 C174 48 182 58 188 70 L194 86 L14 86 Z",
+    under: "M20 86 Q104 98 190 86 L190 92 Q104 104 20 92 Z",
+    glass: "M72 54 L100 50 L156 50 L160 58 L100 60 C86 60 78 58 72 54 Z",
+    grille: "M24 70 L52 68 L54 78 L26 80 Z",
+    headlight: { cx: 36, cy: 66, rx: 9, ry: 4.5 },
+    taillight: { cx: 184, cy: 68, rx: 5, ry: 5 },
     wheels: [
-      { cx: 64, cy: 82 },
-      { cx: 176, cy: 82 },
+      { cx: 54, cy: 88, r: 17 },
+      { cx: 152, cy: 88, r: 15 },
     ],
+    accent: "M84 48 L162 48",
   },
 };
 

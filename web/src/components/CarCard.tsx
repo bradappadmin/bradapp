@@ -94,8 +94,10 @@ export function CarCard({
       <CarVisual
         colour={car.colour}
         bodyType={car.bodyType}
+        make={car.make}
+        model={car.model}
         size="thumb"
-        className={dense ? "h-16 w-28" : "h-20 w-32 sm:h-24 sm:w-40"}
+        className={dense ? "h-16 w-28" : "h-24 w-36 sm:h-28 sm:w-44"}
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -154,15 +156,28 @@ export function CarCard({
   );
 }
 
-/** Full-bleed bay plane + realistic silhouette for listing detail hero. */
+/** Full-bleed bay plane + realistic studio photo (SVG fallback) for listing detail. */
 export function CarHeroVisual({
   colour,
   bodyType,
+  make,
+  model,
   title,
 }: {
   colour: string;
   bodyType?: string;
+  make?: string;
+  model?: string;
   title: string;
 }) {
-  return <CarVisual colour={colour} bodyType={bodyType} size="hero" title={title} />;
+  return (
+    <CarVisual
+      colour={colour}
+      bodyType={bodyType}
+      make={make}
+      model={model}
+      size="hero"
+      title={title}
+    />
+  );
 }

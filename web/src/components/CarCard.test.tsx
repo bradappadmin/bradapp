@@ -37,12 +37,18 @@ describe("CarCard", () => {
     expect(screen.getByText("3.2s")).toBeInTheDocument();
     expect(screen.getByText("198 mph")).toBeInTheDocument();
     expect(screen.getByText(/Racing Red/)).toBeInTheDocument();
-    expect(document.querySelector("svg")).not.toBeNull();
+    expect(document.querySelector("img")).not.toBeNull();
   });
 
   it("renders a hero visual with an accessible paint label", () => {
     render(
-      <CarHeroVisual colour="Laser Blue" bodyType="SUV" title="Range Rover Sport" />,
+      <CarHeroVisual
+        colour="Laser Blue"
+        bodyType="SUV"
+        make="Land Rover"
+        model="Range Rover Sport"
+        title="Range Rover Sport"
+      />,
     );
     expect(screen.getByRole("img", { name: /Range Rover Sport in Laser Blue/i })).toBeInTheDocument();
   });

@@ -186,6 +186,8 @@ export function ComparePage() {
                 <CarHeroVisual
                   colour={left.colour}
                   bodyType={left.bodyType}
+                  make={left.make}
+                  model={left.model}
                   title={titles.left}
                 />
               </div>
@@ -202,6 +204,8 @@ export function ComparePage() {
                 <CarHeroVisual
                   colour={right.colour}
                   bodyType={right.bodyType}
+                  make={right.make}
+                  model={right.model}
                   title={titles.right}
                 />
               </div>

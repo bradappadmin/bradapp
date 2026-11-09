@@ -137,6 +137,8 @@ export function ListingPage() {
             <CarHeroVisual
               colour={listing.colour}
               bodyType={listing.bodyType}
+              make={listing.make}
+              model={listing.model}
               title={listingTitle(listing)}
             />
             <p className="mt-4 font-display text-3xl font-semibold text-lime">
