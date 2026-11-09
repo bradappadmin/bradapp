@@ -186,7 +186,7 @@ export function fetchWallet(): Promise<{ balance: number; ledger: LedgerEntry[] 
   return request("/trade/wallet");
 }
 
-export function fetchGarage(): Promise<{ cars: GarageCar[] }> {
+export function fetchGarage(): Promise<{ cars: GarageCar[]; totalValue: number }> {
   return request("/trade/garage");
 }
 

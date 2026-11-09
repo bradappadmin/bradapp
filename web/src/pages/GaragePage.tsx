@@ -7,10 +7,12 @@ import { formatCoins } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
+import { sumGarageValue } from "../garage-value";
 
 export function GaragePage() {
   const { user, loading: authLoading, setUser, refresh } = useAuth();
   const [cars, setCars] = useState<GarageCar[]>([]);
+  const [totalValue, setTotalValue] = useState(0);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -21,6 +23,9 @@ export function GaragePage() {
   async function reload() {
     const [garage, wallet] = await Promise.all([api.fetchGarage(), api.fetchWallet()]);
     setCars(garage.cars);
+    setTotalValue(
+      typeof garage.totalValue === "number" ? garage.totalValue : sumGarageValue(garage.cars),
+    );
     setLedger(wallet.ledger);
     if (user) {
       setUser({ ...user, coinBalance: wallet.balance });
@@ -94,6 +99,8 @@ export function GaragePage() {
   }
 
   const forSaleCount = cars.filter((c) => c.status === "available").length;
+  const garageValue =
+    totalValue > 0 || cars.length === 0 ? totalValue : sumGarageValue(cars);
 
   return (
     <div className="min-h-screen">
@@ -103,18 +110,24 @@ export function GaragePage() {
           <h1 className="font-display text-3xl font-semibold text-white">My cars</h1>
           <p className="mt-2 text-sm text-steel">
             List an owned car for sale in Brad Coins, change the price, or unlist it. Other members buy
-            from the Cars catalogue. No real money leaves this bay.
+            from the Cars catalogue. Garage value is the sum of each car’s list / fair Brad Coin price.
+            No real money leaves this bay.
           </p>
           {user ? (
             <p className="mt-4 font-display text-2xl text-lime">{formatCoins(user.coinBalance)}</p>
           ) : null}
-          {!loading && cars.length > 0 ? (
-            <p className="mt-2 text-sm text-steel">
-              {cars.length} {cars.length === 1 ? "car" : "cars"}
-              {forSaleCount > 0
-                ? ` · ${forSaleCount} for sale`
-                : null}
-            </p>
+          {user ? <p className="mt-1 text-xs uppercase tracking-wide text-steel">Wallet</p> : null}
+          {!loading ? (
+            <div className="mt-4">
+              <p className="font-display text-2xl text-mist">{formatCoins(garageValue)}</p>
+              <p className="mt-1 text-xs uppercase tracking-wide text-steel">Garage value</p>
+              {cars.length > 0 ? (
+                <p className="mt-2 text-sm text-steel">
+                  {cars.length} {cars.length === 1 ? "car" : "cars"}
+                  {forSaleCount > 0 ? ` · ${forSaleCount} for sale` : null}
+                </p>
+              ) : null}
+            </div>
           ) : null}
         </div>
 

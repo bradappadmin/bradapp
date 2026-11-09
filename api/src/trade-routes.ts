@@ -55,7 +55,10 @@ export function createTradeRouter(): Router {
        ORDER BY l.updated_at DESC`,
       [user.id],
     );
-    res.json({ cars: rows });
+    // Fair value = each listing's coin_price (asking price when listed, last price when owned).
+    const cars = rows as Array<{ coinPrice: number }>;
+    const totalValue = cars.reduce((sum, car) => sum + Number(car.coinPrice), 0);
+    res.json({ cars: rows, totalValue });
   });
 
   router.post("/listings/:id/buy", requireAuth, async (req, res: Response) => {

@@ -62,6 +62,12 @@ describe.runIf(hasDb)("trade routes", () => {
     expect(owned.bhp).toBeGreaterThan(0);
     expect(owned.bodyType).toBeTruthy();
     expect(owned.topSpeedMph).toBeGreaterThan(0);
+    const expectedValue = (garage.body.cars as Array<{ coinPrice: number }>).reduce(
+      (sum, car) => sum + Number(car.coinPrice),
+      0,
+    );
+    expect(garage.body.totalValue).toBe(expectedValue);
+    expect(garage.body.totalValue).toBeGreaterThan(0);
 
     const detail = await request(app).get(`/cars/listings/${cheapListingId}`);
     expect(detail.body.listing.status).toBe("owned");
