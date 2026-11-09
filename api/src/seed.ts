@@ -17,6 +17,21 @@ const BRAD_ADMIN_NAME = "Brad";
 const BRAD_ADMIN_PASSWORD_HASH =
   "$2a$12$EpJhNF5BOG5tE8Un1njOw.QPa6MGZJ.Hd264KxKounBEWe5q0aohm";
 
+/**
+ * Demo family members for challenges/trades out of the box.
+ * Shared bcrypt hash only in repo. Override at seed with DEMO_MEMBER_PASSWORD
+ * (hashed at runtime; never logged or committed).
+ */
+export const DEMO_FAMILY_MEMBERS = [
+  { email: "sam.bay@example.com", displayName: "Sam Bay", carCount: 2 },
+  { email: "jordan.lap@example.com", displayName: "Jordan Lap", carCount: 2 },
+  { email: "casey.apex@example.com", displayName: "Casey Apex", carCount: 2 },
+] as const;
+
+/** Committed fallback hash for demo members (plaintext never in this repo). */
+export const DEMO_MEMBER_PASSWORD_HASH =
+  "$2a$12$pyofT5jKX7Eq7w2jjC98p.130Irr0E1ne2t32MtocyNfFQ/1552lq";
+
 export async function seedAccounts(): Promise<void> {
   await runMigrations();
   const pool = getPool();
@@ -49,6 +64,8 @@ export async function seedAccounts(): Promise<void> {
     );
   }
 
+  await seedDemoFamilyMembers();
+
   await seedCars();
 
   const [users] = await pool.query<(RowDataPacket & { id: number; role: string })[]>(
@@ -61,6 +78,57 @@ export async function seedAccounts(): Promise<void> {
   }
 
   await seedBradStarterGarage();
+  await seedDemoFamilyGarages();
+}
+
+async function resolveDemoMemberPasswordHash(): Promise<string> {
+  const fromEnv = process.env.DEMO_MEMBER_PASSWORD;
+  if (fromEnv && fromEnv.length >= 8) {
+    return hashPassword(fromEnv);
+  }
+  return DEMO_MEMBER_PASSWORD_HASH;
+}
+
+async function seedDemoFamilyMembers(): Promise<void> {
+  const pool = getPool();
+  const passwordHash = await resolveDemoMemberPasswordHash();
+  for (const member of DEMO_FAMILY_MEMBERS) {
+    await pool.query(
+      `INSERT INTO users (email, password_hash, display_name, role, account_status)
+       VALUES (?, ?, ?, 'member', 'active')
+       ON DUPLICATE KEY UPDATE
+         password_hash = VALUES(password_hash),
+         display_name = VALUES(display_name),
+         role = 'member',
+         account_status = 'active'`,
+      [member.email, passwordHash, member.displayName],
+    );
+  }
+}
+
+/** Assign owned cars to a user until they hold at least `want` (idempotent). */
+async function ensureOwnedCars(
+  userId: number,
+  displayName: string,
+  want: number,
+): Promise<void> {
+  const pool = getPool();
+  const [owned] = await pool.query<(RowDataPacket & { count: number })[]>(
+    "SELECT COUNT(*) AS count FROM listings WHERE owner_user_id = ?",
+    [userId],
+  );
+  const have = Number(owned[0]?.count ?? 0);
+  if (have >= want) return;
+  const need = want - have;
+  // Mid-priced stock so cheap listings stay available for buy/play tests.
+  await pool.query(
+    `UPDATE listings
+     SET owner_user_id = ?, owner_label = ?, status = 'owned'
+     WHERE status = 'available' AND owner_user_id IS NULL
+     ORDER BY coin_price DESC
+     LIMIT ?`,
+    [userId, displayName, need],
+  );
 }
 
 /** Give Brad two owned cars so Top Trumps works on first walkthrough. */
@@ -72,22 +140,20 @@ async function seedBradStarterGarage(): Promise<void> {
   );
   const bradId = bradRows[0]?.id;
   if (!bradId) return;
+  await ensureOwnedCars(bradId, BRAD_ADMIN_NAME, 2);
+}
 
-  const [owned] = await pool.query<(RowDataPacket & { count: number })[]>(
-    "SELECT COUNT(*) AS count FROM listings WHERE owner_user_id = ?",
-    [bradId],
-  );
-  if (Number(owned[0]?.count ?? 0) > 0) return;
-
-  // Prefer mid-priced stock so cheap listings stay available for buy/play tests.
-  await pool.query(
-    `UPDATE listings
-     SET owner_user_id = ?, owner_label = ?, status = 'owned'
-     WHERE status = 'available' AND owner_user_id IS NULL
-     ORDER BY coin_price DESC
-     LIMIT 2`,
-    [bradId, BRAD_ADMIN_NAME],
-  );
+async function seedDemoFamilyGarages(): Promise<void> {
+  const pool = getPool();
+  for (const member of DEMO_FAMILY_MEMBERS) {
+    const [rows] = await pool.query<(RowDataPacket & { id: number })[]>(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [member.email],
+    );
+    const userId = rows[0]?.id;
+    if (!userId) continue;
+    await ensureOwnedCars(Number(userId), member.displayName, member.carCount);
+  }
 }
 
 export async function countUsersByRole(role: string): Promise<number> {

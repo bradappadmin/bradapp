@@ -14,7 +14,19 @@ A Carwow-style car world for Brad and friends. Real cars and specs; made-up gara
 | --- | --- |
 | `super_admin` | Napwood (parent). Seed optionally via `SEED_SUPER_ADMIN_*` env vars. |
 | `admin` | Brad — seeded as `bradapp.admin@gmail.com` (password hash only in repo). |
-| `member` | Friends and family via self-serve sign-up. |
+| `member` | Friends and family via self-serve sign-up, plus seeded demo family (below). |
+
+### Demo family (seeded)
+
+Three members ship with cars and Brad Coins so challenges and free trades work immediately after `npm run db:seed`. Emails only — **no plaintext passwords in this repo** (bcrypt hash, same pattern as Brad):
+
+| Email | Display name |
+| --- | --- |
+| `sam.bay@example.com` | Sam Bay |
+| `jordan.lap@example.com` | Jordan Lap |
+| `casey.apex@example.com` | Casey Apex |
+
+Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared walkthrough password at runtime (never commit it). Without that env var, the committed bcrypt hash is used — ask Napwood for the walkthrough secret.
 
 ## What’s in this slice
 
@@ -49,6 +61,13 @@ Optional Napwood seed (hashed at runtime, never logged):
 SEED_SUPER_ADMIN_EMAIL=you@example.com
 SEED_SUPER_ADMIN_PASSWORD=…   # your secret; not committed
 SEED_SUPER_ADMIN_NAME=Napwood
+```
+
+Optional demo-family password override (hashed at seed, never logged or committed):
+
+```bash
+# in .env
+DEMO_MEMBER_PASSWORD=…   # shared walkthrough secret for Sam/Jordan/Casey
 ```
 
 ## Checks
