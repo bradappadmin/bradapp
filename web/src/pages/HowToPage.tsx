@@ -136,6 +136,12 @@ export function HowToPage() {
               </Link>{" "}
               — listings you saved (sign in).
             </li>
+            <li>
+              <Link to="/compare" className="text-lime no-underline hover:underline">
+                Compare
+              </Link>{" "}
+              — pick two from Cars or Favourites for a specs + Brad Coin face-off.
+            </li>
           </ul>
         </section>
       </main>

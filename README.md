@@ -41,6 +41,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - In-app `/how-to` family walkthrough (buy/sell, play, free trades, reviews, admin) — linked from home and nav
 - Recently viewed cars on home (last few opened listings, localStorage on this device)
 - Favourites: signed-in members save/unsave listings (server-side); Favourites page in nav
+- Compare: pick two listings from Cars or Favourites for a side-by-side specs + Brad Coin price view
 - Brad Coins: balances + ledger; members buy/sell listings (no real money); My cars shows total garage value (sum of list / fair prices)
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins; rematch the same opponent with a new card pick
 - Free card trades between members; nav Trades badge shows pending inbox count

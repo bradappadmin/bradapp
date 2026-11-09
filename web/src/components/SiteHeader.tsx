@@ -56,6 +56,9 @@ export function SiteHeader() {
       <NavLink to="/cars" className={linkClass} end={false}>
         Cars
       </NavLink>
+      <NavLink to="/compare" className={linkClass}>
+        Compare
+      </NavLink>
       <NavLink to="/play" className={linkClass}>
         Play
       </NavLink>

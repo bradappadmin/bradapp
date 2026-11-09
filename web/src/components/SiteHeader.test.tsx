@@ -42,6 +42,7 @@ describe("SiteHeader", () => {
     expect(mobileNav).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close menu" })).toBeInTheDocument();
     expect(mobileNav).toHaveTextContent("Cars");
+    expect(mobileNav).toHaveTextContent("Compare");
     expect(mobileNav).toHaveTextContent("Play");
     expect(mobileNav).toHaveTextContent("How to");
     expect(mobileNav).toHaveTextContent("Members");

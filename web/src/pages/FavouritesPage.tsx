@@ -4,7 +4,14 @@ import * as api from "../api";
 import type { FavouriteCar } from "../api";
 import { useAuth } from "../auth-context";
 import { badgeForStatus } from "../car-visuals";
+import {
+  loadCompareSelection,
+  toComparePick,
+  toggleComparePick,
+  type ComparePick,
+} from "../compare-selection";
 import { CarCard } from "../components/CarCard";
+import { CompareTray } from "../components/CompareTray";
 import { SiteHeader } from "../components/SiteHeader";
 
 export function FavouritesPage() {
@@ -13,11 +20,16 @@ export function FavouritesPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
 
   async function reload() {
     const res = await api.fetchFavourites();
     setCars(res.cars);
   }
+
+  useEffect(() => {
+    setComparePicks(loadCompareSelection());
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -56,6 +68,11 @@ export function FavouritesPage() {
     }
   }
 
+  function onToggleCompare(car: FavouriteCar) {
+    const { picks } = toggleComparePick(toComparePick(car));
+    setComparePicks(picks);
+  }
+
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -65,7 +82,8 @@ export function FavouritesPage() {
           Favourites
         </h1>
         <p className="mt-3 max-w-xl text-sm text-steel">
-          Cars you saved from the catalogue. Open a listing anytime, or remove it from this list.
+          Cars you saved from the catalogue. Open a listing anytime, compare two side by side, or
+          remove from this list.
         </p>
 
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
@@ -83,28 +101,46 @@ export function FavouritesPage() {
 
         {cars.length > 0 ? (
           <ul className="mt-8 grid gap-3 border-t border-white/10 pt-6">
-            {cars.map((car) => (
-              <li key={car.id}>
-                <CarCard
-                  car={car}
-                  to={`/cars/${car.id}`}
-                  badge={badgeForStatus(car.status, "price")}
-                  dense
-                  footer={
-                    <button
-                      type="button"
-                      disabled={busyId === car.id}
-                      onClick={() => void onRemove(car.id)}
-                      className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist transition hover:border-rose hover:text-rose disabled:opacity-60"
-                    >
-                      {busyId === car.id ? "Removing…" : "Remove"}
-                    </button>
-                  }
-                />
-              </li>
-            ))}
+            {cars.map((car) => {
+              const selected = comparePicks.some((p) => p.id === car.id);
+              return (
+                <li key={car.id}>
+                  <CarCard
+                    car={car}
+                    to={`/cars/${car.id}`}
+                    badge={badgeForStatus(car.status, "price")}
+                    dense
+                    footer={
+                      <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                        <button
+                          type="button"
+                          onClick={() => onToggleCompare(car)}
+                          className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold transition ${
+                            selected
+                              ? "border-lime/50 text-lime hover:bg-lime/10"
+                              : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                          }`}
+                        >
+                          {selected ? "In compare" : "Compare"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busyId === car.id}
+                          onClick={() => void onRemove(car.id)}
+                          className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist transition hover:border-rose hover:text-rose disabled:opacity-60"
+                        >
+                          {busyId === car.id ? "Removing…" : "Remove"}
+                        </button>
+                      </div>
+                    }
+                  />
+                </li>
+              );
+            })}
           </ul>
         ) : null}
+
+        <CompareTray picks={comparePicks} onChange={setComparePicks} />
       </main>
     </div>
   );

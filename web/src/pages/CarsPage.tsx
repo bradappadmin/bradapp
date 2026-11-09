@@ -8,7 +8,14 @@ import {
   clearFilterChip,
   hasActiveFilters,
 } from "../cars";
+import {
+  loadCompareSelection,
+  toComparePick,
+  toggleComparePick,
+  type ComparePick,
+} from "../compare-selection";
 import { CarCard } from "../components/CarCard";
+import { CompareTray } from "../components/CompareTray";
 import { SiteHeader } from "../components/SiteHeader";
 
 const emptyQuery: SearchQuery = {
@@ -82,6 +89,7 @@ export function CarsPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showMore, setShowMore] = useState(false);
+  const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
 
   const draft = useMemo(() => queryFromParams(searchParams), [searchParams]);
   const [form, setForm] = useState<SearchQuery>(draft);
@@ -89,11 +97,20 @@ export function CarsPage() {
   const filtersOn = hasActiveFilters(draft);
 
   useEffect(() => {
+    setComparePicks(loadCompareSelection());
+  }, []);
+
+  useEffect(() => {
     setForm(draft);
     if (draft.colour || draft.mileageMax || draft.bhpMin) {
       setShowMore(true);
     }
   }, [draft]);
+
+  function onToggleCompare(listing: ListingSummary) {
+    const { picks } = toggleComparePick(toComparePick(listing));
+    setComparePicks(picks);
+  }
 
   useEffect(() => {
     void api
@@ -497,17 +514,37 @@ export function CarsPage() {
           </div>
         ) : (
           <ul className="grid gap-3 border-t border-white/10 pt-4">
-            {listings.map((listing) => (
-              <li key={listing.id}>
-                <CarCard
-                  car={listing}
-                  to={`/cars/${listing.id}`}
-                  badge="price"
-                />
-              </li>
-            ))}
+            {listings.map((listing) => {
+              const selected = comparePicks.some((p) => p.id === listing.id);
+              return (
+                <li key={listing.id}>
+                  <CarCard
+                    car={listing}
+                    to={`/cars/${listing.id}`}
+                    badge="price"
+                    footer={
+                      <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                        <button
+                          type="button"
+                          onClick={() => onToggleCompare(listing)}
+                          className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold transition ${
+                            selected
+                              ? "border-lime/50 text-lime hover:bg-lime/10"
+                              : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                          }`}
+                        >
+                          {selected ? "In compare" : "Compare"}
+                        </button>
+                      </div>
+                    }
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
+
+        <CompareTray picks={comparePicks} onChange={setComparePicks} />
       </main>
     </div>
   );

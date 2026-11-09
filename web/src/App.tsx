@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth-context";
 import { AccountPage } from "./pages/AccountPage";
 import { CarsPage } from "./pages/CarsPage";
+import { ComparePage } from "./pages/ComparePage";
 import { FavouritesPage } from "./pages/FavouritesPage";
 import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
@@ -30,6 +31,7 @@ export function App() {
         <Route path="/how-to" element={<HowToPage />} />
         <Route path="/cars" element={<CarsPage />} />
         <Route path="/cars/:id" element={<ListingPage />} />
+        <Route path="/compare" element={<ComparePage />} />
         <Route path="/garage" element={<GaragePage />} />
         <Route path="/favourites" element={<FavouritesPage />} />
         <Route path="/members" element={<MembersPage />} />
