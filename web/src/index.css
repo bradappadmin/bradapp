@@ -263,3 +263,49 @@
   animation: bay-toast-in 0.28s ease-out both;
   backdrop-filter: blur(10px);
 }
+
+/* Top Trumps /play bay — Midnight Garage atmosphere (rose + lime, no purple) */
+.play-bay-glow {
+  background:
+    radial-gradient(ellipse 55% 70% at 12% 0%, rgba(244, 63, 94, 0.16), transparent 58%),
+    radial-gradient(ellipse 45% 60% at 90% 8%, rgba(163, 230, 53, 0.1), transparent 55%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(18, 40, 72, 0.35), transparent 70%);
+}
+
+.play-bay-floor {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(7, 11, 20, 0.2) 40%, rgba(7, 11, 20, 0.55) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(199, 210, 229, 0.035) 0,
+      rgba(199, 210, 229, 0.035) 1px,
+      transparent 1px,
+      transparent 52px
+    );
+  mask-image: linear-gradient(180deg, transparent, #000 40%, #000);
+}
+
+.play-panel {
+  border-color: rgba(199, 210, 229, 0.1);
+  background: rgba(18, 26, 43, 0.42);
+}
+
+.play-mode-active-house {
+  border-color: rgba(163, 230, 53, 0.45);
+  background: rgba(163, 230, 53, 0.1);
+  color: var(--color-lime);
+  box-shadow: inset 0 -2px 0 0 rgba(163, 230, 53, 0.75);
+}
+
+.play-mode-active-challenge {
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.12);
+  color: #fda4af;
+  box-shadow: inset 0 -2px 0 0 rgba(244, 63, 94, 0.8);
+}
+
+.play-result-glow {
+  background:
+    radial-gradient(ellipse 70% 80% at 20% 0%, rgba(163, 230, 53, 0.1), transparent 60%),
+    radial-gradient(ellipse 60% 70% at 85% 20%, rgba(244, 63, 94, 0.08), transparent 55%);
+}

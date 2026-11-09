@@ -10,10 +10,14 @@ import type {
 } from "../api";
 import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { TrumpCard } from "../components/TrumpCard";
 import { useToast } from "../toast-context";
 import { prepareRematch, rematchPrompt } from "../top-trumps-rematch";
+
+const fieldClass =
+  "rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
 type CategoryMeta = { id: TopTrumpsCategory; label: string; direction: "higher" | "lower" };
 
@@ -264,43 +268,70 @@ export function TopTrumpsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="bay-rise">
-          <h1 className="font-display text-3xl font-semibold text-white">Top Trumps</h1>
-          <p className="mt-2 text-sm text-steel">
-            1) Pick your car. 2) Face the house or challenge a member and pick their card. 3) Choose a
-            category. Higher power and top speed win; lower 0–60 wins. Win {rewards.win} BC, or{" "}
-            {rewards.play} BC for playing. After a match, rematch the same opponent with a new card
-            pick.
-          </p>
-          <p className="mt-4">
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+        <header className="bay-rise flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.28em] text-steel">Midnight garage</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Top Trumps
+            </h1>
+            <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
+            <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
+              Pick your car, face the house or challenge a member, then choose a category. Higher
+              power and top speed win; lower 0–60 wins. After a match, rematch with a new card pick.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2" aria-label="Brad Coin rewards">
+              <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
+                Win +{rewards.win} BC
+              </span>
+              <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                Play +{rewards.play} BC
+              </span>
+            </div>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
             <Link
               to="/play/history"
-              className="font-display text-sm text-lime no-underline hover:underline"
+              className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
             >
               Match history
             </Link>
-          </p>
-        </div>
+            <Link
+              to="/members"
+              className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+            >
+              Members
+            </Link>
+          </div>
+        </header>
 
         {myCars.length === 0 ? (
-          <p className="mt-8 text-sm text-steel">
-            You need a car in{" "}
-            <Link to="/cars" className="text-lime no-underline hover:underline">
-              the shop
-            </Link>{" "}
-            before you can play.
-          </p>
+          <div className="play-panel bay-rise-delay mt-8 rounded-md border p-5 sm:p-6">
+            <p className="font-display text-lg text-mist">No car in the bay yet</p>
+            <p className="mt-2 text-sm text-steel">
+              You need a car in{" "}
+              <Link to="/cars" className="text-lime no-underline hover:underline">
+                the shop
+              </Link>{" "}
+              before you can play.
+            </p>
+          </div>
         ) : (
-          <div className="bay-rise-delay mt-8 flex flex-col gap-6 border-y border-white/10 py-6">
-            <section>
-              <h2 className="font-display text-sm uppercase tracking-wide text-steel">1. Your card</h2>
-              <label className="mt-2 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+          <div className="bay-rise-delay mt-8 flex flex-col gap-5">
+            <section className="play-panel rounded-md border p-4 sm:p-5" aria-labelledby="play-your-card">
+              <h2
+                id="play-your-card"
+                className="font-display text-sm uppercase tracking-[0.18em] text-steel"
+              >
+                1. Your card
+              </h2>
+              <label className="mt-3 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
                 Car you put up
                 <select
-                  className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                  className={fieldClass}
                   value={listingId}
                   onChange={(e) =>
                     setListingId(e.target.value === "" ? "" : Number(e.target.value))
@@ -317,45 +348,65 @@ export function TopTrumpsPage() {
                 </select>
               </label>
               {selectedMyCar ? (
-                <div className="mt-3 max-w-sm">
+                <div className="mt-4 max-w-sm">
                   <TrumpCard label="You" car={selectedMyCar} />
                 </div>
               ) : null}
             </section>
 
-            <section>
-              <h2 className="font-display text-sm uppercase tracking-wide text-steel">2. Opponent</h2>
-              <div className="mt-2 flex flex-wrap gap-2">
+            <section className="play-panel rounded-md border p-4 sm:p-5" aria-labelledby="play-opponent">
+              <h2
+                id="play-opponent"
+                className="font-display text-sm uppercase tracking-[0.18em] text-steel"
+              >
+                2. Opponent
+              </h2>
+              <p className="mt-2 text-sm text-steel">
+                House deals a random catalogue card. Challenge picks a member and their car.
+              </p>
+              <div
+                className="mt-4 grid gap-2 sm:grid-cols-2"
+                role="group"
+                aria-label="Opponent mode"
+              >
                 <button
                   type="button"
                   onClick={() => onModeChange("house")}
-                  className={`rounded-md border px-4 py-2 font-display text-sm ${
+                  aria-pressed={mode === "house"}
+                  className={`rounded-md border px-4 py-3 text-left transition ${
                     mode === "house"
-                      ? "border-lime/50 bg-lime/10 text-lime"
-                      : "border-white/15 text-mist hover:border-lime/40"
+                      ? "play-mode-active-house"
+                      : "border-white/12 text-mist hover:border-lime/35"
                   }`}
                 >
-                  Vs house
+                  <span className="block font-display text-sm font-semibold">Vs house</span>
+                  <span className="mt-1 block text-xs text-steel">
+                    Random house card · studio reveal after play
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onModeChange("challenge")}
-                  className={`rounded-md border px-4 py-2 font-display text-sm ${
+                  aria-pressed={mode === "challenge"}
+                  className={`rounded-md border px-4 py-3 text-left transition ${
                     mode === "challenge"
-                      ? "border-lime/50 bg-lime/10 text-lime"
-                      : "border-white/15 text-mist hover:border-lime/40"
+                      ? "play-mode-active-challenge"
+                      : "border-white/12 text-mist hover:border-rose/40"
                   }`}
                 >
-                  Challenge a member
+                  <span className="block font-display text-sm font-semibold">Challenge a member</span>
+                  <span className="mt-1 block text-xs text-steel">
+                    Pick who you face and which of their cars
+                  </span>
                 </button>
               </div>
 
               {mode === "challenge" ? (
-                <div className="mt-4 flex flex-col gap-3">
+                <div className="mt-5 flex flex-col gap-3 border-t border-white/8 pt-5">
                   <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
                     Opponent
                     <select
-                      className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                      className={fieldClass}
                       value={opponentUserId}
                       onChange={(e) =>
                         onOpponentChange(e.target.value === "" ? "" : Number(e.target.value))
@@ -382,7 +433,7 @@ export function TopTrumpsPage() {
                     <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
                       Their card
                       <select
-                        className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                        className={fieldClass}
                         value={opponentListingId}
                         onChange={(e) =>
                           onOpponentCarChange(
@@ -404,7 +455,7 @@ export function TopTrumpsPage() {
                     </label>
                   ) : null}
                   {selectedOpponentCard ? (
-                    <div className="mt-3 max-w-sm">
+                    <div className="mt-2 max-w-sm">
                       <TrumpCard
                         label={selectedOpponent?.displayName ?? "Opponent"}
                         car={selectedOpponentCard}
@@ -413,18 +464,23 @@ export function TopTrumpsPage() {
                   ) : null}
                 </div>
               ) : (
-                <p className="mt-3 text-sm text-steel">
-                  Random house card from the catalogue — revealed with a studio photo after you play.
+                <p className="mt-4 rounded-md border border-lime/20 bg-lime/5 px-3 py-2.5 text-sm text-steel">
+                  House mode active — a random catalogue card is dealt when you play.
                 </p>
               )}
             </section>
 
-            <section>
-              <h2 className="font-display text-sm uppercase tracking-wide text-steel">3. Category</h2>
-              <label className="mt-2 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+            <section className="play-panel rounded-md border p-4 sm:p-5" aria-labelledby="play-category">
+              <h2
+                id="play-category"
+                className="font-display text-sm uppercase tracking-[0.18em] text-steel"
+              >
+                3. Category
+              </h2>
+              <label className="mt-3 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
                 Stat to compare
                 <select
-                  className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                  className={fieldClass}
                   value={category}
                   onChange={(e) => setCategory(e.target.value as TopTrumpsCategory)}
                 >
@@ -438,35 +494,47 @@ export function TopTrumpsPage() {
             </section>
 
             {awaitingRematchPick ? (
-              <p className="text-sm text-lime">
-                {rematchPrompt(mode, selectedOpponent?.displayName ?? null)}
-              </p>
+              <p className="text-sm text-lime">{rematchPrompt(mode, selectedOpponent?.displayName ?? null)}</p>
             ) : null}
 
-            <button
-              type="button"
-              disabled={busy || !canPlay}
-              onClick={() => void onPlay()}
-              className="bay-cta w-fit rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white disabled:opacity-60"
-            >
-              {busy
-                ? "Playing…"
-                : awaitingRematchPick
-                  ? mode === "challenge"
-                    ? "Play rematch"
-                    : "Play rematch vs house"
-                  : mode === "challenge"
-                    ? "Play challenge"
-                    : "Play vs house"}
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={busy || !canPlay}
+                onClick={() => void onPlay()}
+                className="bay-cta w-full rounded-md bg-rose px-5 py-3.5 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-fit"
+              >
+                {busy
+                  ? "Playing…"
+                  : awaitingRematchPick
+                    ? mode === "challenge"
+                      ? "Play rematch"
+                      : "Play rematch vs house"
+                    : mode === "challenge"
+                      ? "Play challenge"
+                      : "Play vs house"}
+              </button>
+              <Link
+                to="/play/history"
+                className="font-display text-sm text-steel no-underline transition hover:text-lime"
+              >
+                View match history →
+              </Link>
+            </div>
           </div>
         )}
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
 
         {faceOff ? (
-          <section className="bay-rise mt-8 border-t border-white/10 pt-6" aria-label="Match result">
-            <p className="font-display text-lg font-semibold text-lime">{faceOff.outcome}</p>
+          <section
+            className="play-panel play-result-glow bay-rise relative mt-8 overflow-hidden rounded-md border p-4 sm:p-6"
+            aria-label="Match result"
+          >
+            <p className="text-xs uppercase tracking-[0.2em] text-steel">Face-off</p>
+            <p className="mt-2 font-display text-xl font-semibold text-lime sm:text-2xl">
+              {faceOff.outcome}
+            </p>
             <p className="mt-1 text-sm text-steel">
               {faceOff.categoryLabel}: {faceOff.yourValue} vs {faceOff.theirValue}
             </p>
@@ -486,13 +554,21 @@ export function TopTrumpsPage() {
                 statValue={faceOff.theirValue}
               />
             </div>
-            <button
-              type="button"
-              onClick={onRematch}
-              className="mt-5 w-fit rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime hover:bg-lime/10"
-            >
-              Rematch — new card pick
-            </button>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={onRematch}
+                className="rounded-md border border-lime/40 px-4 py-2.5 font-display text-sm font-semibold text-lime transition hover:bg-lime/10"
+              >
+                Rematch — new card pick
+              </button>
+              <Link
+                to="/play/history"
+                className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+              >
+                Match history
+              </Link>
+            </div>
           </section>
         ) : null}
 
