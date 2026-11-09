@@ -102,7 +102,22 @@ describe.runIf(hasDb)("trade routes", () => {
     const sellerWallet = await buyer.get("/trade/wallet");
     expect(sellerWallet.body.balance).toBe(sellerBalanceBefore + sellPrice);
 
+    const sold = await buyer.get("/trade/sold");
+    expect(sold.status).toBe(200);
+    const sale = sold.body.sales.find((s: { listingId: number }) => s.listingId === cheapListingId);
+    expect(sale).toBeTruthy();
+    expect(sale.soldPrice).toBe(sellPrice);
+    expect(sale.buyerDisplayName).toBe("Second Buyer");
+    expect(sale.soldAt).toBeTruthy();
+    expect(sale.make).toBeTruthy();
+    expect(sale.model).toBeTruthy();
+
     await getPool().query("DELETE FROM users WHERE email = ?", [secondEmail]);
+  });
+
+  it("requires auth for sold history", async () => {
+    const res = await request(app).get("/trade/sold");
+    expect(res.status).toBe(401);
   });
 
   it("rejects buying without enough coins", async () => {

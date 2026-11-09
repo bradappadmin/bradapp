@@ -227,6 +227,24 @@ export function fetchGarage(): Promise<{ cars: GarageCar[]; totalValue: number }
   return request("/trade/garage");
 }
 
+export type SoldCar = {
+  ledgerId: number;
+  listingId: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+  year: number;
+  soldPrice: number;
+  soldAt: string;
+  buyerDisplayName: string | null;
+};
+
+export function fetchSoldHistory(): Promise<{ sales: SoldCar[] }> {
+  return request("/trade/sold");
+}
+
 export function buyListing(id: number): Promise<{ ok: boolean; listingId: number; coinPrice: number; balance: number }> {
   return request(`/trade/listings/${id}/buy`, { method: "POST" });
 }

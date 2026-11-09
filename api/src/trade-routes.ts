@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta, getCoinBalance, listLedger } from "./coins.js";
 import { getPool, type RowDataPacket } from "./db.js";
+import { listSoldHistory } from "./sold-history.js";
 
 const sellSchema = z.object({
   coinPrice: z.number().int().min(1).max(1_000_000),
@@ -59,6 +60,12 @@ export function createTradeRouter(): Router {
     const cars = rows as Array<{ coinPrice: number }>;
     const totalValue = cars.reduce((sum, car) => sum + Number(car.coinPrice), 0);
     res.json({ cars: rows, totalValue });
+  });
+
+  router.get("/sold", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const sales = await listSoldHistory(user.id);
+    res.json({ sales });
   });
 
   router.post("/listings/:id/buy", requireAuth, async (req, res: Response) => {
@@ -125,7 +132,7 @@ export function createTradeRouter(): Router {
           delta: price,
           reason: "sale",
           listingId,
-          note: `Sold listing #${listingId}`,
+          note: `Sold listing #${listingId} to ${user.displayName}`,
         });
       }
 

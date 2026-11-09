@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
-import type { GarageCar, LedgerEntry } from "../api";
+import type { GarageCar, LedgerEntry, SoldCar } from "../api";
 import { useAuth } from "../auth-context";
-import { formatCoins } from "../cars";
+import { formatCoins, listingTitle } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
@@ -14,6 +14,7 @@ export function GaragePage() {
   const [cars, setCars] = useState<GarageCar[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
+  const [sales, setSales] = useState<SoldCar[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,12 +22,17 @@ export function GaragePage() {
   const [busyId, setBusyId] = useState<number | null>(null);
 
   async function reload() {
-    const [garage, wallet] = await Promise.all([api.fetchGarage(), api.fetchWallet()]);
+    const [garage, wallet, sold] = await Promise.all([
+      api.fetchGarage(),
+      api.fetchWallet(),
+      api.fetchSoldHistory(),
+    ]);
     setCars(garage.cars);
     setTotalValue(
       typeof garage.totalValue === "number" ? garage.totalValue : sumGarageValue(garage.cars),
     );
     setLedger(wallet.ledger);
+    setSales(sold.sales);
     if (user) {
       setUser({ ...user, coinBalance: wallet.balance });
     }
@@ -111,7 +117,8 @@ export function GaragePage() {
           <p className="mt-2 text-sm text-steel">
             List an owned car for sale in Brad Coins, change the price, or unlist it. Other members buy
             from the Cars catalogue. Garage value is the sum of each car’s list / fair Brad Coin price.
-            No real money leaves this bay.
+            Sold history lists cars you sold — price, buyer when known, and when. No real money leaves
+            this bay.
           </p>
           {user ? (
             <p className="mt-4 font-display text-2xl text-lime">{formatCoins(user.coinBalance)}</p>
@@ -197,6 +204,45 @@ export function GaragePage() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="font-display text-xl text-mist">Sold history</h2>
+          <p className="mt-2 text-sm text-steel">
+            Cars you sold to other members, newest first.
+          </p>
+          {sales.length === 0 && !loading ? (
+            <p className="mt-3 text-sm text-steel">No sales yet. List a car and wait for a buyer.</p>
+          ) : null}
+          {sales.length > 0 ? (
+            <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+              {sales.map((sale) => (
+                <li
+                  key={sale.ledgerId}
+                  className="flex flex-wrap items-baseline justify-between gap-3 py-3 text-sm"
+                >
+                  <div className="min-w-0">
+                    <Link
+                      to={`/cars/${sale.listingId}`}
+                      className="font-display text-mist no-underline hover:text-lime"
+                    >
+                      {listingTitle(sale)}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-steel">
+                      {sale.year} · {sale.colour}
+                      {sale.buyerDisplayName ? ` · Buyer: ${sale.buyerDisplayName}` : " · Buyer unknown"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-steel">
+                      {new Date(sale.soldAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <p className="font-display font-semibold text-lime">
+                    {formatCoins(sale.soldPrice)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
 
         <section className="mt-12">
