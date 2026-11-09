@@ -4,6 +4,7 @@ import * as api from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { ActivityFeed } from "../components/ActivityFeed";
+import { FeaturedReview } from "../components/FeaturedReview";
 import { FirstVisitTips } from "../components/FirstVisitTips";
 import { LatestReviews } from "../components/LatestReviews";
 import { RecentlyViewedCars } from "../components/RecentlyViewedCars";
@@ -100,6 +101,8 @@ export function HomePage() {
           </div>
 
           <RecentlyViewedCars />
+
+          <FeaturedReview />
 
           <LatestReviews />
         </main>
@@ -238,6 +241,8 @@ export function HomePage() {
         <FirstVisitTips user={user} />
 
         <RecentlyViewedCars />
+
+        <FeaturedReview />
 
         <LatestReviews />
 

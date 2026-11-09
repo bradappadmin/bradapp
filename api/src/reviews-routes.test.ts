@@ -90,6 +90,54 @@ describe.runIf(hasDb)("reviews routes", () => {
     expect(video.headers["content-type"]).toMatch(/video/);
   });
 
+  it("lets admins pin one published review as featured", async () => {
+    const guestFeature = await request(app).get("/reviews/featured");
+    expect(guestFeature.status).toBe(200);
+    expect(guestFeature.body.review).toBeNull();
+
+    const blocked = await member.post(`/reviews/${reviewId}/feature`);
+    expect(blocked.status).toBe(403);
+
+    const pinned = await admin.post(`/reviews/${reviewId}/feature`);
+    expect(pinned.status).toBe(200);
+    expect(pinned.body.review.featured).toBe(true);
+
+    const featured = await request(app).get("/reviews/featured");
+    expect(featured.status).toBe(200);
+    expect(featured.body.review?.id).toBe(reviewId);
+    expect(featured.body.review?.featured).toBe(true);
+
+    const second = await admin
+      .post("/reviews")
+      .field("carModelId", String(carModelId))
+      .field("title", "Second bay clip")
+      .attach("video", Buffer.from("fake-webm-bytes-2"), {
+        filename: "clip2.webm",
+        contentType: "video/webm",
+      });
+    expect(second.status).toBe(201);
+    const secondId = second.body.review.id as number;
+
+    const repin = await admin.post(`/reviews/${secondId}/feature`);
+    expect(repin.status).toBe(200);
+    expect(repin.body.review.featured).toBe(true);
+
+    const afterRepin = await request(app).get("/reviews/featured");
+    expect(afterRepin.body.review?.id).toBe(secondId);
+
+    const firstDetail = await admin.get(`/reviews/${reviewId}`);
+    expect(firstDetail.body.review.featured).toBe(false);
+
+    const unpinned = await admin.delete(`/reviews/${secondId}/feature`);
+    expect(unpinned.status).toBe(200);
+    expect(unpinned.body.review?.featured).toBe(false);
+
+    const empty = await request(app).get("/reviews/featured");
+    expect(empty.body.review).toBeNull();
+
+    await admin.post(`/reviews/${reviewId}/feature`);
+  });
+
   it("lets members like and unlike a published review", async () => {
     const guest = await request(app).post(`/reviews/${reviewId}/like`);
     expect(guest.status).toBe(401);
@@ -139,6 +187,12 @@ describe.runIf(hasDb)("reviews routes", () => {
 
     const cannotLike = await member.post(`/reviews/${reviewId}/like`);
     expect(cannotLike.status).toBe(404);
+
+    const cannotFeature = await admin.post(`/reviews/${reviewId}/feature`);
+    expect(cannotFeature.status).toBe(404);
+
+    const featuredGone = await request(app).get("/reviews/featured");
+    expect(featuredGone.body.review).toBeNull();
 
     const list = await member.get("/reviews");
     expect(list.body.reviews.some((r: { id: number }) => r.id === reviewId)).toBe(false);

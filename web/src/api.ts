@@ -505,6 +505,7 @@ export type ReviewSummary = {
   mimeType: string;
   likeCount: number;
   likedByMe: boolean;
+  featured: boolean;
 };
 
 export type ReviewCarModel = {
@@ -573,6 +574,18 @@ export function likeReview(id: number): Promise<{ ok: boolean; liked: true; like
 
 export function unlikeReview(id: number): Promise<{ ok: boolean; liked: false; likeCount: number }> {
   return request(`/reviews/${id}/like`, { method: "DELETE" });
+}
+
+export function fetchFeaturedReview(): Promise<{ review: ReviewSummary | null }> {
+  return request("/reviews/featured");
+}
+
+export function featureReview(id: number): Promise<{ ok: boolean; review: ReviewSummary }> {
+  return request(`/reviews/${id}/feature`, { method: "POST" });
+}
+
+export function unfeatureReview(id: number): Promise<{ ok: boolean; review: ReviewSummary | null }> {
+  return request(`/reviews/${id}/feature`, { method: "DELETE" });
 }
 
 export function reviewVideoSrc(videoUrl: string): string {

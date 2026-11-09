@@ -11,6 +11,8 @@ vi.mock("../api", () => ({
   fetchReview: vi.fn(),
   likeReview: vi.fn(),
   unlikeReview: vi.fn(),
+  featureReview: vi.fn(),
+  unfeatureReview: vi.fn(),
   unpublishReview: vi.fn(),
   reviewVideoSrc: (url: string) => url,
 }));
@@ -37,6 +39,7 @@ const publishedReview = {
   mimeType: "video/webm",
   likeCount: 0,
   likedByMe: false,
+  featured: false,
 };
 
 describe("ReviewDetailPage likes", () => {
@@ -64,6 +67,14 @@ describe("ReviewDetailPage likes", () => {
     vi.mocked(api.fetchReview).mockResolvedValue({ review: { ...publishedReview } });
     vi.mocked(api.likeReview).mockResolvedValue({ ok: true, liked: true, likeCount: 1 });
     vi.mocked(api.unlikeReview).mockResolvedValue({ ok: true, liked: false, likeCount: 0 });
+    vi.mocked(api.featureReview).mockResolvedValue({
+      ok: true,
+      review: { ...publishedReview, featured: true },
+    });
+    vi.mocked(api.unfeatureReview).mockResolvedValue({
+      ok: true,
+      review: { ...publishedReview, featured: false },
+    });
   });
 
   it("lets a member like a published review and shows the count", async () => {

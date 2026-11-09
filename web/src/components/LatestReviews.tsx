@@ -17,7 +17,7 @@ export function LatestReviews() {
       try {
         const res = await api.fetchReviews(false, HOME_REVIEW_LIMIT);
         if (!cancelled) {
-          setReviews(res.reviews.filter((r) => r.status === "published"));
+          setReviews(res.reviews.filter((r) => r.status === "published" && !r.featured));
           setError(null);
         }
       } catch (err) {

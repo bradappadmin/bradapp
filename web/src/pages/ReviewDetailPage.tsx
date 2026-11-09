@@ -17,6 +17,7 @@ export function ReviewDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [likeBusy, setLikeBusy] = useState(false);
+  const [featureBusy, setFeatureBusy] = useState(false);
 
   useEffect(() => {
     if (!user || !Number.isFinite(reviewId)) return;
@@ -72,6 +73,25 @@ export function ReviewDetailPage() {
       setError(err instanceof Error ? err.message : "Could not update like");
     } finally {
       setLikeBusy(false);
+    }
+  }
+
+  async function onToggleFeatured() {
+    if (!review || review.status !== "published") return;
+    setFeatureBusy(true);
+    setError(null);
+    try {
+      if (review.featured) {
+        const res = await api.unfeatureReview(review.id);
+        setReview(res.review ?? { ...review, featured: false });
+      } else {
+        const res = await api.featureReview(review.id);
+        setReview(res.review);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update featured pin");
+    } finally {
+      setFeatureBusy(false);
     }
   }
 
@@ -136,14 +156,33 @@ export function ReviewDetailPage() {
             </section>
 
             {user && isAdmin(user.role) && review.status === "published" ? (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void onUnpublish()}
-                className="mt-10 rounded-md border border-rose/50 px-4 py-2 font-display text-sm text-rose disabled:opacity-60"
-              >
-                {busy ? "Taking down…" : "Take down"}
-              </button>
+              <div className="mt-10 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled={featureBusy}
+                  onClick={() => void onToggleFeatured()}
+                  className={`rounded-md border px-4 py-2 font-display text-sm font-semibold transition disabled:opacity-60 ${
+                    review.featured
+                      ? "border-lime/50 text-lime hover:bg-lime/10"
+                      : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                  }`}
+                  aria-pressed={review.featured}
+                >
+                  {featureBusy
+                    ? "Updating…"
+                    : review.featured
+                      ? "Unpin from home"
+                      : "Pin as featured on home"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void onUnpublish()}
+                  className="rounded-md border border-rose/50 px-4 py-2 font-display text-sm text-rose disabled:opacity-60"
+                >
+                  {busy ? "Taking down…" : "Take down"}
+                </button>
+              </div>
             ) : null}
           </article>
         ) : null}

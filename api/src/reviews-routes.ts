@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { buildCueCards } from "./cue-cards.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
+import { pinFeaturedReview, unpinFeaturedReview } from "./review-featured.js";
 import {
   addReviewLike,
   countReviewLikes,
@@ -55,6 +56,7 @@ type ReviewRow = RowDataPacket & {
   zero_to_sixty_secs: number;
   like_count: number;
   liked_by_me: number | boolean;
+  is_featured: number | boolean;
 };
 
 type CueCardJson = Array<{ id: string; title: string; prompt: string }>;
@@ -91,6 +93,7 @@ function toReview(row: ReviewRow) {
     mimeType: row.mime_type,
     likeCount: Number(row.like_count ?? 0),
     likedByMe: Boolean(row.liked_by_me),
+    featured: Boolean(row.is_featured),
   };
 }
 
@@ -104,7 +107,7 @@ function reviewSelectSql(viewerUserId: number | null): string {
          ) AS liked_by_me`;
   return `
   SELECT r.id, r.title, r.filename, r.mime_type, r.byte_size, r.status, r.cue_cards_json, r.created_at,
-         r.publisher_user_id, u.display_name,
+         r.is_featured, r.publisher_user_id, u.display_name,
          cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
          (SELECT COUNT(*) FROM review_likes rlc WHERE rlc.review_id = r.id) AS like_count,
          ${likedExpr}
@@ -213,6 +216,18 @@ export function createReviewsRouter(): Router {
     res.json({ reviews: rows.map(toReview) });
   });
 
+  /** Public: the single pinned published review for home, if any. */
+  router.get("/featured", async (req, res: Response) => {
+    const user = await readSessionUser(req);
+    const pool = getPool();
+    const [rows] = await pool.query<ReviewRow[]>(
+      `${reviewSelectSql(user?.id ?? null)}
+       WHERE r.status = 'published' AND r.is_featured = 1
+       LIMIT 1`,
+    );
+    res.json({ review: rows[0] ? toReview(rows[0]) : null });
+  });
+
   router.get("/:id", requireAuth, async (req, res: Response) => {
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0) {
@@ -267,6 +282,48 @@ export function createReviewsRouter(): Router {
     await removeReviewLike(user.id, id);
     const likeCount = await countReviewLikes(id);
     res.json({ ok: true, liked: false, likeCount });
+  });
+
+  router.post("/:id/feature", requireAuth, async (req, res: Response) => {
+    const authed = req as AuthedRequest;
+    if (!requireReviewAdmin(authed, res)) return;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid review id" });
+      return;
+    }
+    const result = await pinFeaturedReview(id);
+    if (result === "not_found") {
+      res.status(404).json({ error: "not_found", message: "Published review not found." });
+      return;
+    }
+    const pool = getPool();
+    const [rows] = await pool.query<ReviewRow[]>(
+      `${reviewSelectSql(authed.user.id)} WHERE r.id = ? LIMIT 1`,
+      [id],
+    );
+    res.json({ ok: true, review: toReview(rows[0]!) });
+  });
+
+  router.delete("/:id/feature", requireAuth, async (req, res: Response) => {
+    const authed = req as AuthedRequest;
+    if (!requireReviewAdmin(authed, res)) return;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid review id" });
+      return;
+    }
+    const result = await unpinFeaturedReview(id);
+    if (result === "not_featured") {
+      res.status(409).json({ error: "not_featured", message: "Review is not featured." });
+      return;
+    }
+    const pool = getPool();
+    const [rows] = await pool.query<ReviewRow[]>(
+      `${reviewSelectSql(authed.user.id)} WHERE r.id = ? LIMIT 1`,
+      [id],
+    );
+    res.json({ ok: true, review: rows[0] ? toReview(rows[0]) : null });
   });
 
   router.get("/:id/video", requireAuth, async (req, res: Response) => {
@@ -399,7 +456,8 @@ export function createReviewsRouter(): Router {
     const pool = getPool();
     const [result] = await pool.query<ResultSetHeader>(
       `UPDATE video_reviews
-       SET status = 'unpublished', unpublished_at = CURRENT_TIMESTAMP, unpublished_by_user_id = ?
+       SET status = 'unpublished', is_featured = 0,
+           unpublished_at = CURRENT_TIMESTAMP, unpublished_by_user_id = ?
        WHERE id = ? AND status = 'published'`,
       [authed.user.id, id],
     );
