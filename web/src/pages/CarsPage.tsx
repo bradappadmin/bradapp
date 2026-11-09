@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { CarFilters, ListingSummary, SearchQuery } from "../cars";
 import {
@@ -16,6 +16,7 @@ import {
 } from "../compare-selection";
 import { CarCard } from "../components/CarCard";
 import { CompareTray } from "../components/CompareTray";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 
 const emptyQuery: SearchQuery = {
@@ -197,26 +198,62 @@ export function CarsPage() {
   }
 
   const fieldClass =
-    "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
+    "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
   const labelClass = "flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel";
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="bay-rise mb-8">
-          <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Find a car</h1>
-          <p className="mt-2 max-w-2xl text-sm text-steel">
-            Real makes and models with studio photos. Filter by body, fuel, garage, year, and Brad
-            Coins — prices are play money, including cars members list from My cars.
-          </p>
-        </div>
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <header className="bay-rise flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.28em] text-steel">Midnight garage</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Find a car
+            </h1>
+            <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
+            <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
+              Real makes and models with studio photos. Filter the bay by make, body, garage, year,
+              and Brad Coins — prices are play money, including cars members list from My cars.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2" aria-label="Catalogue bay notes">
+              <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
+                Photo-first grid
+              </span>
+              <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                Brad Coin prices
+              </span>
+            </div>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Link
+              to="/compare"
+              className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+            >
+              Compare
+            </Link>
+            <Link
+              to="/garage"
+              className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+            >
+              My cars
+            </Link>
+          </div>
+        </header>
 
         <form
           onSubmit={onSubmit}
-          className="bay-rise-delay mb-6 border-y border-white/10 py-6"
+          className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-6"
+          role="search"
+          aria-label="Car catalogue filters"
         >
-          <label className={`${labelClass} mb-4`}>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <h2 className="font-display text-lg text-mist sm:text-xl">Search the bay</h2>
+            <p className="text-xs text-steel">Free text first · filters apply as you pick</p>
+          </div>
+
+          <label className={`${labelClass} mt-5`}>
             Search
             <input
               className={fieldClass}
@@ -228,207 +265,218 @@ export function CarsPage() {
               aria-label="Search make, model, or trim"
             />
           </label>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className={labelClass}>
-              Make
-              <select
-                className={fieldClass}
-                value={form.make ?? ""}
-                onChange={(e) => applySelect("make", e.target.value)}
-              >
-                <option value="">Any make</option>
-                {(filters?.makes ?? []).map((make) => (
-                  <option key={make} value={make}>
-                    {make}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={labelClass}>
-              Model
-              <select
-                className={fieldClass}
-                value={form.model ?? ""}
-                onChange={(e) => applySelect("model", e.target.value)}
-              >
-                <option value="">Any model</option>
-                {models.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={labelClass}>
-              Body
-              <select
-                className={fieldClass}
-                value={form.bodyType ?? ""}
-                onChange={(e) => applySelect("bodyType", e.target.value)}
-              >
-                <option value="">Any body</option>
-                {(filters?.bodyTypes ?? []).map((body) => (
-                  <option key={body} value={body}>
-                    {body}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={labelClass}>
-              Fuel
-              <select
-                className={fieldClass}
-                value={form.fuel ?? ""}
-                onChange={(e) => applySelect("fuel", e.target.value)}
-              >
-                <option value="">Any fuel</option>
-                {(filters?.fuels ?? []).map((fuel) => (
-                  <option key={fuel} value={fuel}>
-                    {fuel}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={labelClass}>
-              Garage
-              <select
-                className={fieldClass}
-                value={form.garage ?? ""}
-                onChange={(e) => applySelect("garage", e.target.value)}
-              >
-                <option value="">Any garage</option>
-                {(filters?.garages ?? []).map((garage) => (
-                  <option key={garage.name} value={garage.name}>
-                    {garage.name} · {garage.city}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={labelClass}>
-              New / used
-              <select
-                className={fieldClass}
-                value={form.condition ?? ""}
-                onChange={(e) =>
-                  applySelect("condition", e.target.value as SearchQuery["condition"])
-                }
-              >
-                <option value="">Any condition</option>
-                <option value="new">New</option>
-                <option value="used">Used</option>
-              </select>
-            </label>
-            <label className={labelClass}>
-              Sort
-              <select
-                className={fieldClass}
-                value={form.sort ?? "price_asc"}
-                onChange={(e) => applySelect("sort", e.target.value)}
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <fieldset className="sm:col-span-2">
-              <legend className="mb-1.5 text-xs uppercase tracking-wide text-steel">Year range</legend>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  className={fieldClass}
-                  type="number"
-                  inputMode="numeric"
-                  aria-label="Minimum year"
-                  value={form.yearMin ?? ""}
-                  onChange={(e) => setField("yearMin", e.target.value)}
-                  placeholder={filters ? String(filters.yearMin) : "From"}
-                />
-                <input
-                  className={fieldClass}
-                  type="number"
-                  inputMode="numeric"
-                  aria-label="Maximum year"
-                  value={form.yearMax ?? ""}
-                  onChange={(e) => setField("yearMax", e.target.value)}
-                  placeholder={filters ? String(filters.yearMax) : "To"}
-                />
-              </div>
-            </fieldset>
-            <fieldset className="sm:col-span-2">
-              <legend className="mb-1.5 text-xs uppercase tracking-wide text-steel">
-                Brad Coin price
-              </legend>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  className={fieldClass}
-                  type="number"
-                  inputMode="numeric"
-                  aria-label="Minimum Brad Coins"
-                  value={form.coinMin ?? ""}
-                  onChange={(e) => setField("coinMin", e.target.value)}
-                  placeholder={
-                    filters ? String(filters.coinPriceMin) : "Min BC"
-                  }
-                />
-                <input
-                  className={fieldClass}
-                  type="number"
-                  inputMode="numeric"
-                  aria-label="Maximum Brad Coins"
-                  value={form.coinMax ?? ""}
-                  onChange={(e) => setField("coinMax", e.target.value)}
-                  placeholder={
-                    filters ? String(filters.coinPriceMax) : "Max BC"
-                  }
-                />
-              </div>
-            </fieldset>
-          </div>
 
-          {showMore ? (
-            <div className="mt-3 grid gap-3 border-t border-white/5 pt-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 border-t border-white/8 pt-5">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">Core filters</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <label className={labelClass}>
-                Colour
+                Make
                 <select
                   className={fieldClass}
-                  value={form.colour ?? ""}
-                  onChange={(e) => applySelect("colour", e.target.value)}
+                  value={form.make ?? ""}
+                  onChange={(e) => applySelect("make", e.target.value)}
                 >
-                  <option value="">Any colour</option>
-                  {(filters?.colours ?? []).map((colour) => (
-                    <option key={colour} value={colour}>
-                      {colour}
+                  <option value="">Any make</option>
+                  {(filters?.makes ?? []).map((make) => (
+                    <option key={make} value={make}>
+                      {make}
                     </option>
                   ))}
                 </select>
               </label>
               <label className={labelClass}>
-                Max mileage
-                <input
+                Model
+                <select
                   className={fieldClass}
-                  type="number"
-                  inputMode="numeric"
-                  value={form.mileageMax ?? ""}
-                  onChange={(e) => setField("mileageMax", e.target.value)}
-                  placeholder="e.g. 30000"
-                />
+                  value={form.model ?? ""}
+                  onChange={(e) => applySelect("model", e.target.value)}
+                >
+                  <option value="">Any model</option>
+                  {models.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className={labelClass}>
-                Min BHP
-                <input
+                Body
+                <select
                   className={fieldClass}
-                  type="number"
-                  inputMode="numeric"
-                  value={form.bhpMin ?? ""}
-                  onChange={(e) => setField("bhpMin", e.target.value)}
-                  placeholder="e.g. 300"
-                />
+                  value={form.bodyType ?? ""}
+                  onChange={(e) => applySelect("bodyType", e.target.value)}
+                >
+                  <option value="">Any body</option>
+                  {(filters?.bodyTypes ?? []).map((body) => (
+                    <option key={body} value={body}>
+                      {body}
+                    </option>
+                  ))}
+                </select>
               </label>
+              <label className={labelClass}>
+                Fuel
+                <select
+                  className={fieldClass}
+                  value={form.fuel ?? ""}
+                  onChange={(e) => applySelect("fuel", e.target.value)}
+                >
+                  <option value="">Any fuel</option>
+                  {(filters?.fuels ?? []).map((fuel) => (
+                    <option key={fuel} value={fuel}>
+                      {fuel}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={labelClass}>
+                Garage
+                <select
+                  className={fieldClass}
+                  value={form.garage ?? ""}
+                  onChange={(e) => applySelect("garage", e.target.value)}
+                >
+                  <option value="">Any garage</option>
+                  {(filters?.garages ?? []).map((garage) => (
+                    <option key={garage.name} value={garage.name}>
+                      {garage.name} · {garage.city}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={labelClass}>
+                New / used
+                <select
+                  className={fieldClass}
+                  value={form.condition ?? ""}
+                  onChange={(e) =>
+                    applySelect("condition", e.target.value as SearchQuery["condition"])
+                  }
+                >
+                  <option value="">Any condition</option>
+                  <option value="new">New</option>
+                  <option value="used">Used</option>
+                </select>
+              </label>
+              <label className={labelClass}>
+                Sort
+                <select
+                  className={fieldClass}
+                  value={form.sort ?? "price_asc"}
+                  onChange={(e) => applySelect("sort", e.target.value)}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-5 border-t border-white/8 pt-5">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">Ranges</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <fieldset>
+                <legend className="mb-1.5 text-xs uppercase tracking-wide text-steel">
+                  Year range
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    className={fieldClass}
+                    type="number"
+                    inputMode="numeric"
+                    aria-label="Minimum year"
+                    value={form.yearMin ?? ""}
+                    onChange={(e) => setField("yearMin", e.target.value)}
+                    placeholder={filters ? String(filters.yearMin) : "From"}
+                  />
+                  <input
+                    className={fieldClass}
+                    type="number"
+                    inputMode="numeric"
+                    aria-label="Maximum year"
+                    value={form.yearMax ?? ""}
+                    onChange={(e) => setField("yearMax", e.target.value)}
+                    placeholder={filters ? String(filters.yearMax) : "To"}
+                  />
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend className="mb-1.5 text-xs uppercase tracking-wide text-steel">
+                  Brad Coin price
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    className={fieldClass}
+                    type="number"
+                    inputMode="numeric"
+                    aria-label="Minimum Brad Coins"
+                    value={form.coinMin ?? ""}
+                    onChange={(e) => setField("coinMin", e.target.value)}
+                    placeholder={filters ? String(filters.coinPriceMin) : "Min BC"}
+                  />
+                  <input
+                    className={fieldClass}
+                    type="number"
+                    inputMode="numeric"
+                    aria-label="Maximum Brad Coins"
+                    value={form.coinMax ?? ""}
+                    onChange={(e) => setField("coinMax", e.target.value)}
+                    placeholder={filters ? String(filters.coinPriceMax) : "Max BC"}
+                  />
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          {showMore ? (
+            <div className="mt-5 border-t border-white/8 pt-5">
+              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">More filters</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <label className={labelClass}>
+                  Colour
+                  <select
+                    className={fieldClass}
+                    value={form.colour ?? ""}
+                    onChange={(e) => applySelect("colour", e.target.value)}
+                  >
+                    <option value="">Any colour</option>
+                    {(filters?.colours ?? []).map((colour) => (
+                      <option key={colour} value={colour}>
+                        {colour}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={labelClass}>
+                  Max mileage
+                  <input
+                    className={fieldClass}
+                    type="number"
+                    inputMode="numeric"
+                    value={form.mileageMax ?? ""}
+                    onChange={(e) => setField("mileageMax", e.target.value)}
+                    placeholder="e.g. 30000"
+                  />
+                </label>
+                <label className={labelClass}>
+                  Min BHP
+                  <input
+                    className={fieldClass}
+                    type="number"
+                    inputMode="numeric"
+                    value={form.bhpMin ?? ""}
+                    onChange={(e) => setField("bhpMin", e.target.value)}
+                    placeholder="e.g. 300"
+                  />
+                </label>
+              </div>
             </div>
           ) : null}
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-white/8 pt-5">
             <button
               type="submit"
               className="bay-cta rounded-md bg-rose px-5 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
@@ -455,13 +503,13 @@ export function CarsPage() {
         </form>
 
         {chips.length > 0 ? (
-          <ul className="mb-5 flex flex-wrap gap-2" aria-label="Active filters">
+          <ul className="mt-5 flex flex-wrap gap-2" aria-label="Active filters">
             {chips.map((chip) => (
               <li key={`${chip.key}-${chip.label}`}>
                 <button
                   type="button"
                   onClick={() => removeChip(chip.key)}
-                  className="rounded-md border border-white/15 bg-bay-panel px-3 py-1.5 text-xs text-mist transition hover:border-rose/40 hover:text-rose"
+                  className="rounded-md border border-lime/25 bg-lime/10 px-3 py-1.5 text-xs text-lime transition hover:border-rose/40 hover:bg-rose/10 hover:text-rose"
                   title={`Remove ${chip.label}`}
                 >
                   {chip.label}
@@ -474,7 +522,8 @@ export function CarsPage() {
           </ul>
         ) : null}
 
-        <div className="mb-4 flex items-baseline justify-between gap-3">
+        <div className="mt-8 mb-4 flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="font-display text-xl text-mist">Listings</h2>
           <p className="text-sm text-steel">
             {loading
               ? "Searching…"
@@ -487,13 +536,13 @@ export function CarsPage() {
         {error ? <p className="mb-4 text-sm text-rose">{error}</p> : null}
 
         {!loading && listings.length === 0 ? (
-          <div className="border-t border-white/10 py-14 text-center">
+          <div className="play-panel rounded-md border px-5 py-14 text-center">
             {filtersOn ? (
               <>
                 <p className="font-display text-xl text-mist">No cars match</p>
                 <p className="mx-auto mt-2 max-w-md text-sm text-steel">
-                  Nothing for sale fits those filters. Drop a make or garage, widen the year or
-                  Brad Coin range, or clear everything and start again.
+                  Nothing for sale fits those filters. Drop a make or garage, widen the year or Brad
+                  Coin range, or clear everything and start again.
                 </p>
                 <button
                   type="button"
@@ -513,7 +562,7 @@ export function CarsPage() {
             )}
           </div>
         ) : (
-          <ul className="grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => {
               const selected = comparePicks.some((p) => p.id === listing.id);
               return (
