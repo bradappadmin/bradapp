@@ -33,6 +33,12 @@ describe("buildSearchClause", () => {
     expect(clause.orderSql).toContain("coin_price");
   });
 
+  it("filters by made-up garage / dealership name", () => {
+    const clause = buildSearchClause({ garage: "Midnight Motors", sort: "price_asc" });
+    expect(clause.whereSql).toContain("g.name = ?");
+    expect(clause.values).toEqual(["Midnight Motors"]);
+  });
+
   it("applies year and Brad Coin ranges with year_asc sort", () => {
     const clause = buildSearchClause({
       bodyType: "SUV",

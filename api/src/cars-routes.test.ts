@@ -27,6 +27,22 @@ describe.runIf(hasDb)("cars routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.filters.makes).toContain("Porsche");
     expect(res.body.filters.conditions).toEqual(["new", "used"]);
+    expect(Array.isArray(res.body.filters.garages)).toBe(true);
+    expect(res.body.filters.garages.length).toBeGreaterThan(0);
+    expect(res.body.filters.garages[0]).toEqual(
+      expect.objectContaining({ name: expect.any(String), city: expect.any(String) }),
+    );
+  });
+
+  it("filters search results by garage / dealership", async () => {
+    const filters = await request(app).get("/cars/filters");
+    const garageName = filters.body.filters.garages[0].name as string;
+    const res = await request(app).get("/cars/search").query({ garage: garageName, limit: 20 });
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBeGreaterThan(0);
+    expect(
+      res.body.listings.every((l: { garageName: string }) => l.garageName === garageName),
+    ).toBe(true);
   });
 
   it("searches listings with make and condition filters", async () => {

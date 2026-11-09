@@ -18,6 +18,7 @@ const emptyQuery: SearchQuery = {
   bodyType: "",
   fuel: "",
   colour: "",
+  garage: "",
   condition: "",
   yearMin: "",
   yearMax: "",
@@ -42,6 +43,8 @@ function queryFromParams(params: URLSearchParams): SearchQuery {
   if (fuel != null) next.fuel = fuel;
   const colour = params.get("colour");
   if (colour != null) next.colour = colour;
+  const garage = params.get("garage");
+  if (garage != null) next.garage = garage;
   const condition = params.get("condition");
   if (condition === "new" || condition === "used" || condition === "") next.condition = condition;
   const yearMin = params.get("yearMin");
@@ -187,8 +190,8 @@ export function CarsPage() {
         <div className="bay-rise mb-8">
           <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Find a car</h1>
           <p className="mt-2 max-w-2xl text-sm text-steel">
-            Filter real makes and models by body, fuel, year, and Brad Coins. Garages and prices are
-            play — including cars members list from My cars.
+            Filter real makes and models by body, fuel, garage (made-up dealership), year, and Brad
+            Coins. Prices are play — including cars members list from My cars.
           </p>
         </div>
 
@@ -253,6 +256,21 @@ export function CarsPage() {
                 {(filters?.fuels ?? []).map((fuel) => (
                   <option key={fuel} value={fuel}>
                     {fuel}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={labelClass}>
+              Garage
+              <select
+                className={fieldClass}
+                value={form.garage ?? ""}
+                onChange={(e) => applySelect("garage", e.target.value)}
+              >
+                <option value="">Any garage</option>
+                {(filters?.garages ?? []).map((garage) => (
+                  <option key={garage.name} value={garage.name}>
+                    {garage.name} · {garage.city}
                   </option>
                 ))}
               </select>
@@ -454,8 +472,8 @@ export function CarsPage() {
               <>
                 <p className="font-display text-xl text-mist">No cars match</p>
                 <p className="mx-auto mt-2 max-w-md text-sm text-steel">
-                  Nothing for sale fits those filters. Drop a make, widen the year or Brad Coin
-                  range, or clear everything and start again.
+                  Nothing for sale fits those filters. Drop a make or garage, widen the year or
+                  Brad Coin range, or clear everything and start again.
                 </p>
                 <button
                   type="button"

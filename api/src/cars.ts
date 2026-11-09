@@ -33,6 +33,8 @@ export type CarFilters = {
   bodyTypes: string[];
   fuels: string[];
   colours: string[];
+  /** Made-up dealerships with stock currently for sale. */
+  garages: Array<{ name: string; city: string }>;
   conditions: Array<"new" | "used">;
   yearMin: number;
   yearMax: number;
@@ -47,6 +49,8 @@ export type SearchParams = {
   bodyType?: string;
   fuel?: string;
   colour?: string;
+  /** Exact garage / dealership name. */
+  garage?: string;
   condition?: "new" | "used";
   yearMin?: number;
   yearMax?: number;
@@ -129,6 +133,10 @@ export function buildSearchClause(params: SearchParams): {
   if (params.colour) {
     clauses.push("l.colour = ?");
     values.push(params.colour);
+  }
+  if (params.garage) {
+    clauses.push("g.name = ?");
+    values.push(params.garage);
   }
   if (params.condition) {
     clauses.push("l.condition_type = ?");

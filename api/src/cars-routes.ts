@@ -29,6 +29,7 @@ const searchQuerySchema = z.object({
   bodyType: z.string().trim().max(40).optional(),
   fuel: z.string().trim().max(40).optional(),
   colour: z.string().trim().max(40).optional(),
+  garage: z.string().trim().max(120).optional(),
   condition: z.enum(["new", "used"]).optional(),
   yearMin: optionalInt,
   yearMax: optionalInt,
@@ -76,6 +77,12 @@ export function createCarsRouter(): Router {
     const [colours] = await pool.query<(RowDataPacket & { colour: string })[]>(
       `SELECT DISTINCT colour FROM listings WHERE status = 'available' ORDER BY colour`,
     );
+    const [garages] = await pool.query<(RowDataPacket & { name: string; city: string })[]>(
+      `SELECT DISTINCT g.name, g.city
+       FROM garages g
+       INNER JOIN listings l ON l.garage_id = g.id AND l.status = 'available'
+       ORDER BY g.name`,
+    );
     const [bounds] = await pool.query<
       (RowDataPacket & {
         yearMin: number;
@@ -99,6 +106,7 @@ export function createCarsRouter(): Router {
         bodyTypes: bodyTypes.map((r) => r.body_type),
         fuels: fuels.map((r) => r.fuel),
         colours: colours.map((r) => r.colour),
+        garages: garages.map((r) => ({ name: r.name, city: r.city })),
         conditions: ["new", "used"] as const,
         yearMin: Number(bounds[0]?.yearMin ?? 0),
         yearMax: Number(bounds[0]?.yearMax ?? 0),

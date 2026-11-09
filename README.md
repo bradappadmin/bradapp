@@ -34,7 +34,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - Mobile-friendly Midnight Garage layout: collapsible nav, readable forms/lists, usable admin on phone widths
 - Car cards: original colour strip + body silhouette cues, BHP / 0–60 / top speed, price or owned badge (no stock photos)
 - Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
-- Filters: make, model, body, fuel, new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
+- Filters: make, model, body, fuel, garage (made-up dealership), new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
 - Brad Coins: balances + ledger; members buy/sell listings (no real money); My cars shows total garage value (sum of list / fair prices)
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins; rematch the same opponent with a new card pick
 - Free card trades between members; nav Trades badge shows pending inbox count

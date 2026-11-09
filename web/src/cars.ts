@@ -33,6 +33,8 @@ export type CarFilters = {
   bodyTypes: string[];
   fuels: string[];
   colours: string[];
+  /** Made-up dealerships with stock currently for sale. */
+  garages: Array<{ name: string; city: string }>;
   conditions: Array<"new" | "used">;
   yearMin: number;
   yearMax: number;
@@ -47,6 +49,8 @@ export type SearchQuery = {
   bodyType?: string;
   fuel?: string;
   colour?: string;
+  /** Exact garage / dealership name. */
+  garage?: string;
   condition?: "new" | "used" | "";
   yearMin?: string;
   yearMax?: string;
@@ -78,6 +82,7 @@ const FILTER_KEYS: Array<keyof SearchQuery> = [
   "bodyType",
   "fuel",
   "colour",
+  "garage",
   "condition",
   "yearMin",
   "yearMax",
@@ -114,6 +119,7 @@ export function activeFilterChips(query: SearchQuery): ActiveFilterChip[] {
   if (query.model) chips.push({ key: "model", label: query.model });
   if (query.bodyType) chips.push({ key: "bodyType", label: query.bodyType });
   if (query.fuel) chips.push({ key: "fuel", label: query.fuel });
+  if (query.garage) chips.push({ key: "garage", label: query.garage });
   if (query.condition === "new" || query.condition === "used") {
     chips.push({
       key: "condition",
