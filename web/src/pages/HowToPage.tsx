@@ -13,37 +13,51 @@ type Step = {
 
 const STEPS: Step[] = [
   {
+    id: "join",
+    title: "Join the family bay",
+    body: "Sign up with email and a password. Invite codes are optional — use one if Brad or Napwood shared it, or join without. New members get starter Brad Coins. Admins can create invite codes from Admin when they want a private door.",
+    to: "/signup",
+    cta: "Open Sign up",
+  },
+  {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Search the catalogue for real makes and models. Prices are in Brad Coins — never real money. Save favourites for later, buy from Cars, then list or unlist from My cars.",
+    body: "Browse a photo-first catalogue of real makes and models. Filter, compare, and open a listing for studio shots and Brad Coin prices — never real money. Save favourites, buy from Cars, then list or unlist from My cars.",
     to: "/cars",
     cta: "Open Cars",
   },
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Playing earns Brad Coins. Rematch with a new card pick when you’re done, and check Match history for past games.",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge someone from their listing or public garage, rematch when you’re done, and check Match history for past games. Playing earns Brad Coins.",
     to: "/play",
     cta: "Open Play",
   },
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars with family without spending Brad Coins. Offer a trade from Trades or a member’s garage, then accept or decline in your inbox. Completed trade history lists who you swapped with and which cars.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, or Offer trade on someone else’s listing. Accept or decline in your inbox — photo cards show what you’re swapping. Completed history lists who you traded with.",
     to: "/trades",
     cta: "Open Trades",
   },
   {
     id: "reviews",
-    title: "Bay reviews",
-    body: "Watch reviews recorded in the app. Brad (and Napwood) can record and publish; everyone else can watch what’s up in the bay.",
+    title: "Reviews and drag races",
+    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand.",
     to: "/reviews",
     cta: "Open Reviews",
   },
   {
+    id: "profile",
+    title: "Your bay profile",
+    body: "Set a display name and short garage bio in Account. Friends see them on your public garage, the members list, and the leaderboard — never your email or password.",
+    to: "/account",
+    cta: "Open Account",
+  },
+  {
     id: "admin",
     title: "Admin for Brad and Napwood",
-    body: "Day-to-day admins correct accounts, freeze or unfreeze members, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood.",
+    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood.",
     to: "/admin",
     cta: "Open Admin",
     adminOnly: true,
@@ -64,8 +78,8 @@ export function HowToPage() {
           <p className="text-xs uppercase tracking-wide text-steel">Family walkthrough</p>
           <h1 className="mt-2 font-display text-3xl font-semibold text-white sm:text-4xl">How to</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-steel">
-            A short tour of the midnight garage: Brad Coins, cars, play, free trades, reviews, and
-            admin for Brad and Napwood. Nothing here spends real money.
+            A short tour of the midnight garage: invites, Brad Coins, photo-first cars, play, free
+            trades, drag races, and your bay profile. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -122,7 +136,7 @@ export function HowToPage() {
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
                 Leaderboard
               </Link>{" "}
-              — who’s richest in Brad Coins (sign in).
+              — Brad Coin ranks with a highlight car from each garage (sign in).
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
@@ -140,7 +154,7 @@ export function HowToPage() {
               <Link to="/compare" className="text-lime no-underline hover:underline">
                 Compare
               </Link>{" "}
-              — pick two from Cars or Favourites for a specs + Brad Coin face-off.
+              — pick two from Cars or Favourites for a photo + specs face-off.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">
