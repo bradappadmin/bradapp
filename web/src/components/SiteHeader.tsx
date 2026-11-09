@@ -8,8 +8,21 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-white/5 text-lime md:bg-transparent" : "text-steel hover:text-mist"
   }`;
 
+function InboxBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  const label = count > 9 ? "9+" : String(count);
+  return (
+    <span
+      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-rose px-1.5 py-0.5 font-display text-[11px] font-semibold leading-none text-white"
+      aria-label={`${count} pending trade offer${count === 1 ? "" : "s"}`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export function SiteHeader() {
-  const { user } = useAuth();
+  const { user, pendingTradeInbox, refreshTradeInbox } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -18,6 +31,11 @@ export function SiteHeader() {
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!user) return;
+    void refreshTradeInbox();
+  }, [user, location.pathname, refreshTradeInbox]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -57,6 +75,7 @@ export function SiteHeader() {
           </NavLink>
           <NavLink to="/trades" className={linkClass}>
             Trades
+            <InboxBadge count={pendingTradeInbox} />
           </NavLink>
           {isAdmin ? (
             <NavLink to="/admin" className={linkClass}>
@@ -107,10 +126,16 @@ export function SiteHeader() {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/15 text-mist transition hover:border-lime/40 hover:text-lime md:hidden"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/15 text-mist transition hover:border-lime/40 hover:text-lime md:hidden"
             aria-expanded={menuOpen}
             aria-controls={menuId}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={
+              menuOpen
+                ? "Close menu"
+                : pendingTradeInbox > 0
+                  ? `Open menu, ${pendingTradeInbox} pending trade offer${pendingTradeInbox === 1 ? "" : "s"}`
+                  : "Open menu"
+            }
             onClick={() => setMenuOpen((open) => !open)}
           >
             <span aria-hidden className="flex w-4 flex-col gap-1">
@@ -124,6 +149,12 @@ export function SiteHeader() {
                 className={`block h-0.5 w-full bg-current transition ${menuOpen ? "-translate-y-1.5 -rotate-45" : ""}`}
               />
             </span>
+            {pendingTradeInbox > 0 && !menuOpen ? (
+              <span
+                className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-rose"
+                aria-hidden
+              />
+            ) : null}
           </button>
 
           <nav

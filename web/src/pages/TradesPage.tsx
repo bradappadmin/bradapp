@@ -24,7 +24,7 @@ function statusLabel(status: TradeRow["status"]): string {
 }
 
 export function TradesPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshTradeInbox } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const withFromUrl = Number(searchParams.get("with") ?? "");
 
@@ -70,6 +70,7 @@ export function TradesPage() {
     setMembers(memberList.members);
     setTrades(tradeList.trades);
     if (garage.cars[0] && offerListingId === "") setOfferListingId(garage.cars[0].id);
+    await refreshTradeInbox();
   }
 
   useEffect(() => {

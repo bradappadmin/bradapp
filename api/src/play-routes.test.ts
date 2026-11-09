@@ -93,8 +93,21 @@ describe.runIf(hasDb)("play routes", () => {
       ),
     ).toBe(true);
 
+    const countBefore = await b.get("/play/trades/inbox-count");
+    expect(countBefore.status).toBe(200);
+    expect(countBefore.body.pendingIncoming).toBeGreaterThanOrEqual(1);
+
+    const countForSender = await a.get("/play/trades/inbox-count");
+    expect(countForSender.status).toBe(200);
+    expect(countForSender.body.pendingIncoming).toBe(0);
+
     const accept = await b.post(`/play/trades/${tradeId}/accept`);
     expect(accept.status).toBe(200);
+
+    const countAfter = await b.get("/play/trades/inbox-count");
+    expect(countAfter.body.pendingIncoming).toBe(
+      Math.max(0, Number(countBefore.body.pendingIncoming) - 1),
+    );
 
     const garageA = await a.get("/trade/garage");
     const garageB = await b.get("/trade/garage");

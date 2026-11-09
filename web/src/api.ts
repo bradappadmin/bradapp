@@ -317,6 +317,10 @@ export function fetchTrades(): Promise<{ trades: TradeRow[] }> {
   return request("/play/trades");
 }
 
+export function fetchTradeInboxCount(): Promise<{ pendingIncoming: number }> {
+  return request("/play/trades/inbox-count");
+}
+
 export function createTrade(input: {
   offerListingId: number;
   requestListingId: number;

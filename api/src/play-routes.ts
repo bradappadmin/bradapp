@@ -308,6 +308,19 @@ export function createPlayRouter(): Router {
     }
   });
 
+  /** Pending offers waiting in the signed-in user's inbox (they are the recipient). */
+  router.get("/trades/inbox-count", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const pool = getPool();
+    const [rows] = await pool.query<(RowDataPacket & { count: number })[]>(
+      `SELECT COUNT(*) AS count
+       FROM card_trade_offers
+       WHERE to_user_id = ? AND status = 'pending'`,
+      [user.id],
+    );
+    res.json({ pendingIncoming: Number(rows[0]?.count ?? 0) });
+  });
+
   router.get("/trades", requireAuth, async (req, res: Response) => {
     const user = (req as AuthedRequest).user;
     const pool = getPool();

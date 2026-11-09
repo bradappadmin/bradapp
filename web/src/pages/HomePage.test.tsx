@@ -11,6 +11,7 @@ vi.mock("../api", () => ({
   signUp: vi.fn(),
   claimDailyBonus: vi.fn(),
   fetchDailyBonus: vi.fn(),
+  fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
   fetchActivity: vi.fn().mockResolvedValue({ items: [] }),
 }));
 

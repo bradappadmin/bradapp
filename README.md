@@ -37,7 +37,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - Filters: make, model, body, fuel, new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
 - Brad Coins: balances + ledger; members buy/sell listings (no real money)
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins
-- Free card trades between members
+- Free card trades between members; nav Trades badge shows pending inbox count
 - Video reviews: record with car cue cards, publish to disk + DB; admins can take down
 - Admin area (`/admin`): accounts, coin corrections, cars/garages/listings; members blocked
 
