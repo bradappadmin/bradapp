@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import { CarCard } from "./CarCard";
+import { CarCard, CarHeroVisual } from "./CarCard";
 
 describe("CarCard", () => {
   it("shows colour cue, key specs, and a Brad Coin price badge", () => {
@@ -37,6 +37,14 @@ describe("CarCard", () => {
     expect(screen.getByText("3.2s")).toBeInTheDocument();
     expect(screen.getByText("198 mph")).toBeInTheDocument();
     expect(screen.getByText(/Racing Red/)).toBeInTheDocument();
+    expect(document.querySelector("svg")).not.toBeNull();
+  });
+
+  it("renders a hero visual with an accessible paint label", () => {
+    render(
+      <CarHeroVisual colour="Laser Blue" bodyType="SUV" title="Range Rover Sport" />,
+    );
+    expect(screen.getByRole("img", { name: /Range Rover Sport in Laser Blue/i })).toBeInTheDocument();
   });
 
   it("shows an owned badge for garage cars", () => {

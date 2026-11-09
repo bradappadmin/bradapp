@@ -1,12 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import {
-  carBadgeLabel,
-  carPaint,
-  carSilhouettePath,
-  type CarBadgeKind,
-} from "../car-visuals";
+import { carBadgeLabel, type CarBadgeKind } from "../car-visuals";
 import { formatCoins, listingTitle } from "../cars";
+import { CarVisual } from "./CarVisual";
 
 export type CarCardData = {
   id: number;
@@ -79,43 +75,6 @@ function Badge({ kind, coinPrice }: { kind: CarBadgeKind; coinPrice?: number }) 
   );
 }
 
-function Visual({
-  colour,
-  bodyType,
-  dense,
-}: {
-  colour: string;
-  bodyType?: string;
-  dense?: boolean;
-}) {
-  const paint = carPaint(colour);
-  const path = carSilhouettePath(bodyType);
-  return (
-    <div
-      className={`relative shrink-0 overflow-hidden rounded-md border border-white/10 ${
-        dense ? "h-16 w-24" : "h-20 w-28 sm:h-24 sm:w-36"
-      }`}
-      style={{
-        background: `linear-gradient(145deg, ${paint.glow}, transparent 55%), #0b1220`,
-      }}
-      aria-hidden
-    >
-      <span
-        className="absolute inset-y-0 left-0 w-1.5"
-        style={{ backgroundColor: paint.fill }}
-      />
-      <svg
-        viewBox="0 0 160 64"
-        className={`absolute inset-x-1 bottom-0 top-1 h-auto w-auto ${dense ? "px-0.5" : "px-1"}`}
-      >
-        <path d={path} fill={paint.fill} opacity={0.92} />
-        <ellipse cx="42" cy="48" rx="8" ry="8" fill="#070b14" opacity={0.85} />
-        <ellipse cx="118" cy="48" rx="8" ry="8" fill="#070b14" opacity={0.85} />
-      </svg>
-    </div>
-  );
-}
-
 export function CarCard({
   car,
   badge,
@@ -132,7 +91,12 @@ export function CarCard({
 
   const main = (
     <div className={`flex gap-3 ${dense ? "items-center" : "items-start"}`}>
-      <Visual colour={car.colour} bodyType={car.bodyType} dense={dense} />
+      <CarVisual
+        colour={car.colour}
+        bodyType={car.bodyType}
+        size="thumb"
+        className={dense ? "h-16 w-28" : "h-20 w-32 sm:h-24 sm:w-40"}
+      />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
@@ -190,7 +154,7 @@ export function CarCard({
   );
 }
 
-/** Full-bleed colour plane + silhouette for listing detail hero. */
+/** Full-bleed bay plane + realistic silhouette for listing detail hero. */
 export function CarHeroVisual({
   colour,
   bodyType,
@@ -200,28 +164,5 @@ export function CarHeroVisual({
   bodyType?: string;
   title: string;
 }) {
-  const paint = carPaint(colour);
-  const path = carSilhouettePath(bodyType);
-  return (
-    <div
-      className="relative mt-6 overflow-hidden rounded-md border border-white/10"
-      style={{
-        background: `linear-gradient(120deg, ${paint.glow}, transparent 60%), linear-gradient(180deg, #121a2b, #070b14)`,
-      }}
-      role="img"
-      aria-label={`${title} in ${colour}`}
-    >
-      <span
-        className="absolute inset-y-0 left-0 w-2 sm:w-3"
-        style={{ backgroundColor: paint.fill }}
-      />
-      <div className="flex min-h-[9rem] items-end justify-center px-6 pb-4 pt-8 sm:min-h-[11rem]">
-        <svg viewBox="0 0 160 64" className="h-20 w-full max-w-lg sm:h-24">
-          <path d={path} fill={paint.fill} opacity={0.95} />
-          <ellipse cx="42" cy="48" rx="9" ry="9" fill="#070b14" opacity={0.85} />
-          <ellipse cx="118" cy="48" rx="9" ry="9" fill="#070b14" opacity={0.85} />
-        </svg>
-      </div>
-    </div>
-  );
+  return <CarVisual colour={colour} bodyType={bodyType} size="hero" title={title} />;
 }
