@@ -31,6 +31,7 @@ export async function runMigrations(): Promise<void> {
     "010_review_likes.sql",
     "011_featured_review.sql",
     "012_family_invite_codes.sql",
+    "013_drag_race_reviews.sql",
   ];
 
 

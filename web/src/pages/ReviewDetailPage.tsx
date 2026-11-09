@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
-import { ReviewCarThumb } from "../components/ReviewCarThumb";
+import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
 
 function isAdmin(role: string): boolean {
@@ -109,7 +109,9 @@ export function ReviewDetailPage() {
         {review ? (
           <article className="bay-rise mt-6">
             <p className="text-xs uppercase tracking-[0.2em] text-steel">
-              {review.car.make} {review.car.model} · {review.status}
+              {review.type === "drag_race" ? "Drag race · " : ""}
+              {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
+              {review.status}
             </p>
             <h1 className="mt-3 font-display text-3xl font-semibold text-white">{review.title}</h1>
             <p className="mt-2 text-sm text-steel">By {review.publisher.displayName}</p>
@@ -135,10 +137,12 @@ export function ReviewDetailPage() {
               </p>
             </div>
 
-            <ReviewCarThumb
+            <ReviewCarsMedia
+              type={review.type ?? "review"}
               car={review.car}
+              carB={review.carB ?? null}
               size="card"
-              className="mt-8 rounded-md border border-white/10"
+              className="mt-8"
             />
 
             <video

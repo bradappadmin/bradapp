@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
-import { ReviewCarThumb } from "./ReviewCarThumb";
+import { ReviewCarsMedia, reviewCarsCaption } from "./ReviewCarsMedia";
 
 const HOME_REVIEW_LIMIT = 4;
 
@@ -64,18 +64,22 @@ export function LatestReviews() {
                 to={`/reviews/${review.id}`}
                 className="group block overflow-hidden rounded-md border border-white/10 bg-bay-panel/50 no-underline transition hover:border-lime/35 hover:bg-bay-panel/80"
               >
-                <ReviewCarThumb
+                <ReviewCarsMedia
+                  type={review.type ?? "review"}
                   car={review.car}
+                  carB={review.carB ?? null}
                   size="card"
-                  className="aspect-[16/10] w-full border-b border-white/10"
+                  className="border-b border-white/10"
                 />
                 <div className="p-3 sm:p-4">
                   <p className="font-display text-base font-semibold text-mist group-hover:text-white">
                     {review.title}
                   </p>
                   <p className="mt-1 text-sm text-steel">
-                    {review.car.make} {review.car.model}
-                    {review.car.trimName ? ` ${review.car.trimName}` : ""} ·{" "}
+                    {review.type === "drag_race" ? (
+                      <span className="mr-2 text-lime">Drag race</span>
+                    ) : null}
+                    {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
                     {review.publisher.displayName}
                     {" · "}
                     {review.likeCount === 1 ? "1 like" : `${review.likeCount ?? 0} likes`}

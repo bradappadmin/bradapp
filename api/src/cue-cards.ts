@@ -15,9 +15,13 @@ export type CueCard = {
   prompt: string;
 };
 
+function carName(car: CarCueSource): string {
+  return `${car.make} ${car.model}${car.trimName ? ` ${car.trimName}` : ""}`;
+}
+
 /** Cue cards inspired by in-bay review flow — original copy, not Carwow. */
 export function buildCueCards(car: CarCueSource): CueCard[] {
-  const name = `${car.make} ${car.model}${car.trimName ? ` ${car.trimName}` : ""}`;
+  const name = carName(car);
   return [
     {
       id: "intro",
@@ -48,6 +52,44 @@ export function buildCueCards(car: CarCueSource): CueCard[] {
       id: "verdict",
       title: "Verdict",
       prompt: `Would you keep the ${car.make} ${car.model} in Brad’s garage?`,
+    },
+  ];
+}
+
+/** Cue cards for a two-car drag race — Mat Watson–style inspiration only, original copy. */
+export function buildDragRaceCueCards(carA: CarCueSource, carB: CarCueSource): CueCard[] {
+  const a = carName(carA);
+  const b = carName(carB);
+  return [
+    {
+      id: "intro",
+      title: "Intro",
+      prompt: `Drag race in the bay: ${a} versus ${b}. Set the scene.`,
+    },
+    {
+      id: "lane_a",
+      title: "Lane A",
+      prompt: `${a} — ${carA.bhp} bhp, 0–60 in ${carA.zeroToSixtySecs}s. Why does it look quick?`,
+    },
+    {
+      id: "lane_b",
+      title: "Lane B",
+      prompt: `${b} — ${carB.bhp} bhp, 0–60 in ${carB.zeroToSixtySecs}s. What’s its edge?`,
+    },
+    {
+      id: "lights",
+      title: "Lights",
+      prompt: `Tree goes green. Call the launch — who hooks up first?`,
+    },
+    {
+      id: "trap",
+      title: "Trap",
+      prompt: `Top ends: ${carA.topSpeedMph} mph vs ${carB.topSpeedMph} mph. Who holds it through the trap?`,
+    },
+    {
+      id: "verdict",
+      title: "Verdict",
+      prompt: `Who wins the drag — ${carA.make} ${carA.model} or ${carB.make} ${carB.model}? Say it loud.`,
     },
   ];
 }

@@ -37,6 +37,7 @@ describe("HomePage", () => {
       reviews: [
         {
           id: 9,
+          type: "review",
           title: "Bay burn — Focus ST",
           status: "published",
           createdAt: "2026-11-09T12:00:00.000Z",
@@ -52,6 +53,7 @@ describe("HomePage", () => {
             topSpeedMph: 155,
             zeroToSixtySecs: 5.7,
           },
+          carB: null,
           cueCards: [],
           videoUrl: "/reviews/9/video",
           mimeType: "video/webm",
@@ -82,6 +84,7 @@ describe("HomePage", () => {
     vi.mocked(api.fetchFeaturedReview).mockResolvedValue({
       review: {
         id: 11,
+        type: "review",
         title: "Pinned drag — GT-R",
         status: "published",
         createdAt: "2026-11-09T11:00:00.000Z",
@@ -97,6 +100,7 @@ describe("HomePage", () => {
           topSpeedMph: 196,
           zeroToSixtySecs: 2.9,
         },
+        carB: null,
         cueCards: [],
         videoUrl: "/reviews/11/video",
         mimeType: "video/webm",

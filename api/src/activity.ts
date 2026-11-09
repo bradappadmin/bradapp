@@ -52,8 +52,11 @@ type ReviewRow = RowDataPacket & {
   created_at: Date;
   title: string;
   display_name: string;
+  review_type: "review" | "drag_race";
   make: string;
   model: string;
+  b_make: string | null;
+  b_model: string | null;
 };
 
 function categoryLabel(category: string): string {
@@ -140,10 +143,12 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   );
 
   const [reviewRows] = await pool.query<ReviewRow[]>(
-    `SELECT r.id, r.created_at, r.title, u.display_name, cm.make, cm.model
+    `SELECT r.id, r.created_at, r.title, r.review_type, u.display_name, cm.make, cm.model,
+            cmb.make AS b_make, cmb.model AS b_model
      FROM video_reviews r
      INNER JOIN users u ON u.id = r.publisher_user_id
      INNER JOIN car_models cm ON cm.id = r.car_model_id
+     LEFT JOIN car_models cmb ON cmb.id = r.car_model_b_id
      WHERE r.status = 'published'
      ORDER BY r.id DESC
      LIMIT ?`,
@@ -201,11 +206,15 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   }
 
   for (const row of reviewRows) {
+    const cars =
+      row.review_type === "drag_race" && row.b_make && row.b_model
+        ? `${row.make} ${row.model} vs ${row.b_make} ${row.b_model}`
+        : `${row.make} ${row.model}`;
     items.push({
       id: `review-${row.id}`,
       kind: "review",
       createdAt: new Date(row.created_at).toISOString(),
-      summary: `${row.display_name} published “${row.title}” (${row.make} ${row.model})`,
+      summary: `${row.display_name} published “${row.title}” (${cars})`,
       actorName: row.display_name,
       href: `/reviews/${row.id}`,
     });

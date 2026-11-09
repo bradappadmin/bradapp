@@ -505,23 +505,30 @@ export function cancelTrade(id: number): Promise<{ ok: boolean }> {
 
 export type CueCard = { id: string; title: string; prompt: string };
 
+export type ReviewType = "review" | "drag_race";
+
+export type ReviewCar = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
+};
+
 export type ReviewSummary = {
   id: number;
+  type: ReviewType;
   title: string;
   status: "published" | "unpublished";
   createdAt: string;
   publisher: { id: number; displayName: string };
-  car: {
-    id: number;
-    make: string;
-    model: string;
-    trimName: string;
-    bodyType: string;
-    colour: string;
-    bhp: number;
-    topSpeedMph: number;
-    zeroToSixtySecs: number;
-  };
+  car: ReviewCar;
+  /** Present when type is drag_race. */
+  carB: ReviewCar | null;
   cueCards: CueCard[];
   videoUrl: string;
   mimeType: string;
@@ -561,18 +568,34 @@ export function fetchReviewModels(): Promise<{ models: ReviewCarModel[] }> {
 
 export function fetchCueCards(
   carModelId: number,
-): Promise<{ car: { id: number; make: string; model: string; trimName: string }; cueCards: CueCard[] }> {
-  return request(`/reviews/cues/${carModelId}`);
+  carModelBId?: number,
+): Promise<{
+  type: ReviewType;
+  car: { id: number; make: string; model: string; trimName: string };
+  carB: { id: number; make: string; model: string; trimName: string } | null;
+  cueCards: CueCard[];
+}> {
+  const qs =
+    carModelBId != null && Number.isFinite(carModelBId)
+      ? `?vs=${encodeURIComponent(String(carModelBId))}`
+      : "";
+  return request(`/reviews/cues/${carModelId}${qs}`);
 }
 
 export async function publishReview(input: {
+  type?: ReviewType;
   carModelId: number;
+  carModelBId?: number;
   title: string;
   video: Blob;
   filename?: string;
 }): Promise<{ review: ReviewSummary }> {
   const body = new FormData();
+  body.append("type", input.type ?? "review");
   body.append("carModelId", String(input.carModelId));
+  if (input.type === "drag_race" && input.carModelBId != null) {
+    body.append("carModelBId", String(input.carModelBId));
+  }
   body.append("title", input.title);
   body.append("video", input.video, input.filename ?? "review.webm");
   const response = await fetch(`${API_BASE}/reviews`, {

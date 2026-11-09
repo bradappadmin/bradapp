@@ -3,7 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
-import { ReviewCarThumb } from "../components/ReviewCarThumb";
+import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
 
 function isAdmin(role: string): boolean {
@@ -50,7 +50,8 @@ export function ReviewsPage() {
           <div>
             <h1 className="font-display text-3xl font-semibold text-white">Video reviews</h1>
             <p className="mt-2 max-w-xl text-sm text-steel">
-              Brad in the bay — car reviews with cue cards. Original BradApp content, not Carwow.
+              Brad in the bay — single-car reviews and drag races with cue cards. Original BradApp
+              content.
             </p>
           </div>
           {user && isAdmin(user.role) ? (
@@ -73,12 +74,20 @@ export function ReviewsPage() {
                 to={`/reviews/${review.id}`}
                 className="flex gap-4 py-5 no-underline transition hover:bg-white/[0.02] sm:items-center sm:justify-between"
               >
-                <ReviewCarThumb car={review.car} className="shrink-0" />
+                <ReviewCarsMedia
+                  type={review.type ?? "review"}
+                  car={review.car}
+                  carB={review.carB ?? null}
+                  className="w-28 shrink-0 sm:w-40"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-lg font-semibold text-mist">{review.title}</p>
                   <p className="mt-1 text-sm text-steel">
-                    {review.car.make} {review.car.model}
-                    {review.car.trimName ? ` ${review.car.trimName}` : ""} · {review.publisher.displayName}
+                    {review.type === "drag_race" ? (
+                      <span className="mr-2 text-lime">Drag race</span>
+                    ) : null}
+                    {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
+                    {review.publisher.displayName}
                     {review.status === "unpublished" ? " · unpublished" : ""}
                     {review.featured ? " · featured" : ""}
                     {" · "}

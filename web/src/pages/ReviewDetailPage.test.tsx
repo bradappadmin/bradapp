@@ -21,6 +21,7 @@ import * as api from "../api";
 
 const publishedReview = {
   id: 9,
+  type: "review" as const,
   title: "Bay burn — Focus ST",
   status: "published" as const,
   createdAt: "2026-11-09T12:00:00.000Z",
@@ -36,6 +37,7 @@ const publishedReview = {
     topSpeedMph: 155,
     zeroToSixtySecs: 5.7,
   },
+  carB: null,
   cueCards: [{ id: "c1", title: "Look", prompt: "Walk around" }],
   videoUrl: "/reviews/9/video",
   mimeType: "video/webm",

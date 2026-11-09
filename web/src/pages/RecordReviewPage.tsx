@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import * as api from "../api";
-import type { CueCard, ReviewCarModel } from "../api";
+import type { CueCard, ReviewCarModel, ReviewType } from "../api";
 import { useAuth } from "../auth-context";
 import { ReviewCarThumb } from "../components/ReviewCarThumb";
 import { SiteHeader } from "../components/SiteHeader";
@@ -27,7 +27,9 @@ export function RecordReviewPage() {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [models, setModels] = useState<ReviewCarModel[]>([]);
+  const [reviewType, setReviewType] = useState<ReviewType>("review");
   const [carModelId, setCarModelId] = useState<number | "">("");
+  const [carModelBId, setCarModelBId] = useState<number | "">("");
   const [cues, setCues] = useState<CueCard[]>([]);
   const [activeCue, setActiveCue] = useState(0);
   const [title, setTitle] = useState("");
@@ -36,25 +38,42 @@ export function RecordReviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const titleTouched = useRef(false);
 
   useEffect(() => {
     if (!user || !isAdmin(user.role)) return;
     void api.fetchReviewModels().then((res) => {
       setModels(res.models);
       if (res.models[0]) setCarModelId(res.models[0].id);
+      if (res.models[1]) setCarModelBId(res.models[1].id);
+      else if (res.models[0]) setCarModelBId(res.models[0].id);
     });
   }, [user?.id, user?.role]);
 
   useEffect(() => {
     if (carModelId === "") return;
+    if (reviewType === "drag_race") {
+      if (carModelBId === "" || carModelBId === carModelId) {
+        setCues([]);
+        return;
+      }
+      void api.fetchCueCards(carModelId, carModelBId).then((res) => {
+        setCues(res.cueCards);
+        setActiveCue(0);
+        if (!titleTouched.current) {
+          setTitle(`${res.car.make} ${res.car.model} vs ${res.carB?.make} ${res.carB?.model}`);
+        }
+      });
+      return;
+    }
     void api.fetchCueCards(carModelId).then((res) => {
       setCues(res.cueCards);
       setActiveCue(0);
-      if (!title) {
+      if (!titleTouched.current) {
         setTitle(`${res.car.make} ${res.car.model} bay review`);
       }
     });
-  }, [carModelId]);
+  }, [carModelId, carModelBId, reviewType]);
 
   useEffect(() => {
     return () => {
@@ -65,6 +84,10 @@ export function RecordReviewPage() {
   const selectedModel = useMemo(
     () => models.find((model) => model.id === carModelId) ?? null,
     [models, carModelId],
+  );
+  const selectedModelB = useMemo(
+    () => models.find((model) => model.id === carModelBId) ?? null,
+    [models, carModelBId],
   );
 
   if (!authLoading && !user) {
@@ -118,11 +141,19 @@ export function RecordReviewPage() {
       setError("Record a clip, pick a car, and add a title.");
       return;
     }
+    if (reviewType === "drag_race") {
+      if (carModelBId === "" || carModelBId === carModelId) {
+        setError("Pick two different cars for a drag race.");
+        return;
+      }
+    }
     setBusy(true);
     setError(null);
     try {
       const res = await api.publishReview({
+        type: reviewType,
         carModelId,
+        carModelBId: reviewType === "drag_race" ? Number(carModelBId) : undefined,
         title: title.trim(),
         video: blob,
         filename: "review.webm",
@@ -147,7 +178,8 @@ export function RecordReviewPage() {
         <div className="bay-rise mt-6">
           <h1 className="font-display text-3xl font-semibold text-white">Record a review</h1>
           <p className="mt-2 text-sm text-steel">
-            Cue cards come from the selected car. Publish stores the file on disk with a database row.
+            Single-car cue cards or a two-car drag race. Publish stores the file on disk with a
+            database row.
           </p>
         </div>
 
@@ -183,8 +215,38 @@ export function RecordReviewPage() {
           </div>
 
           <div className="flex flex-col gap-4">
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-xs uppercase tracking-wide text-steel">Mode</legend>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setReviewType("review")}
+                  aria-pressed={reviewType === "review"}
+                  className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                    reviewType === "review"
+                      ? "border-lime/50 text-lime"
+                      : "border-white/15 text-mist hover:border-lime/35"
+                  }`}
+                >
+                  Review
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewType("drag_race")}
+                  aria-pressed={reviewType === "drag_race"}
+                  className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                    reviewType === "drag_race"
+                      ? "border-lime/50 text-lime"
+                      : "border-white/15 text-mist hover:border-lime/35"
+                  }`}
+                >
+                  Drag race
+                </button>
+              </div>
+            </fieldset>
+
             <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
-              Car
+              {reviewType === "drag_race" ? "Car A" : "Car"}
               <select
                 className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
                 value={carModelId}
@@ -204,12 +266,42 @@ export function RecordReviewPage() {
                 className="rounded-md border border-white/10"
               />
             ) : null}
+
+            {reviewType === "drag_race" ? (
+              <>
+                <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+                  Car B
+                  <select
+                    className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
+                    value={carModelBId}
+                    onChange={(e) => setCarModelBId(Number(e.target.value))}
+                  >
+                    {models.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {selectedModelB ? (
+                  <ReviewCarThumb
+                    car={selectedModelB}
+                    size="card"
+                    className="rounded-md border border-white/10"
+                  />
+                ) : null}
+              </>
+            ) : null}
+
             <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
               Title
               <input
                 className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  titleTouched.current = true;
+                  setTitle(e.target.value);
+                }}
               />
             </label>
 
@@ -218,7 +310,12 @@ export function RecordReviewPage() {
                 Cue {activeCue + 1} / {Math.max(cues.length, 1)}
               </p>
               <p className="mt-2 font-display text-lg text-white">{cue?.title ?? "…"}</p>
-              <p className="mt-2 text-sm text-mist">{cue?.prompt ?? "Pick a car to load cues."}</p>
+              <p className="mt-2 text-sm text-mist">
+                {cue?.prompt ??
+                  (reviewType === "drag_race"
+                    ? "Pick two different cars to load drag cues."
+                    : "Pick a car to load cues.")}
+              </p>
               <div className="mt-4 flex gap-2">
                 <button
                   type="button"
@@ -245,7 +342,11 @@ export function RecordReviewPage() {
               onClick={() => void onPublish()}
               className="bay-cta rounded-md bg-rose px-4 py-3 font-display text-sm font-semibold text-white disabled:opacity-60"
             >
-              {busy ? "Publishing…" : "Publish review"}
+              {busy
+                ? "Publishing…"
+                : reviewType === "drag_race"
+                  ? "Publish drag race"
+                  : "Publish review"}
             </button>
           </div>
         </div>

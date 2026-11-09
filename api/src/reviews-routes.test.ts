@@ -74,11 +74,50 @@ describe.runIf(hasDb)("reviews routes", () => {
       });
     expect(res.status).toBe(201);
     expect(res.body.review.title).toBe("Bay test drive");
+    expect(res.body.review.type).toBe("review");
+    expect(res.body.review.carB).toBeNull();
     expect(res.body.review.status).toBe("published");
     expect(res.body.review.videoUrl).toMatch(/\/reviews\/\d+\/video/);
     expect(res.body.review.car.bodyType).toBeTruthy();
     expect(res.body.review.car.colour).toBe("Midnight Black");
     reviewId = res.body.review.id;
+  });
+
+  it("lets an admin publish a drag race with two cars and drag cues", async () => {
+    const models = await admin.get("/reviews/models");
+    expect(models.body.models.length).toBeGreaterThanOrEqual(2);
+    const carA = models.body.models[0].id as number;
+    const carB = models.body.models[1].id as number;
+
+    const cues = await admin.get(`/reviews/cues/${carA}`).query({ vs: String(carB) });
+    expect(cues.status).toBe(200);
+    expect(cues.body.type).toBe("drag_race");
+    expect(cues.body.carB.id).toBe(carB);
+    expect(cues.body.cueCards.some((c: { id: string }) => c.id === "lane_b")).toBe(true);
+
+    const same = await admin.get(`/reviews/cues/${carA}`).query({ vs: String(carA) });
+    expect(same.status).toBe(400);
+
+    const res = await admin
+      .post("/reviews")
+      .field("type", "drag_race")
+      .field("carModelId", String(carA))
+      .field("carModelBId", String(carB))
+      .field("title", "Bay drag — GT vs GT")
+      .attach("video", Buffer.from("fake-drag-webm"), {
+        filename: "drag.webm",
+        contentType: "video/webm",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body.review.type).toBe("drag_race");
+    expect(res.body.review.car.id).toBe(carA);
+    expect(res.body.review.carB.id).toBe(carB);
+    expect(res.body.review.cueCards.some((c: { id: string }) => c.id === "lights")).toBe(true);
+
+    const listed = await member.get("/reviews");
+    const drag = listed.body.reviews.find((r: { id: number }) => r.id === res.body.review.id);
+    expect(drag?.type).toBe("drag_race");
+    expect(drag?.carB?.id).toBe(carB);
   });
 
   it("lists published reviews for members and streams the file", async () => {
