@@ -77,6 +77,17 @@ export function fetchDailyBonus(): Promise<{ dailyLogin: DailyLoginStatus }> {
   return request("/auth/daily-bonus");
 }
 
+export function changePassword(input: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}): Promise<{ ok: boolean }> {
+  return request("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
 
 export type ActivityItem = {

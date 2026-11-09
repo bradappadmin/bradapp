@@ -118,4 +118,61 @@ describe.runIf(hasDb)("auth routes", () => {
 
     await getPool().query("DELETE FROM users WHERE email = ?", [email]);
   });
+
+  it("changes password for a signed-in member and signs in with the new one", async () => {
+    const email = `changepw-${Date.now()}@example.com`;
+    const agent = request.agent(app);
+    const signup = await agent.post("/auth/signup").send({
+      email,
+      password: "OldPass-123!",
+      displayName: "Change Pw",
+    });
+    expect(signup.status).toBe(201);
+
+    const badCurrent = await agent.post("/auth/change-password").send({
+      currentPassword: "WrongPass-123!",
+      newPassword: "NewPass-456!",
+      confirmPassword: "NewPass-456!",
+    });
+    expect(badCurrent.status).toBe(401);
+
+    const mismatch = await agent.post("/auth/change-password").send({
+      currentPassword: "OldPass-123!",
+      newPassword: "NewPass-456!",
+      confirmPassword: "NewPass-999!",
+    });
+    expect(mismatch.status).toBe(400);
+
+    const sameAsOld = await agent.post("/auth/change-password").send({
+      currentPassword: "OldPass-123!",
+      newPassword: "OldPass-123!",
+      confirmPassword: "OldPass-123!",
+    });
+    expect(sameAsOld.status).toBe(400);
+
+    const changed = await agent.post("/auth/change-password").send({
+      currentPassword: "OldPass-123!",
+      newPassword: "NewPass-456!",
+      confirmPassword: "NewPass-456!",
+    });
+    expect(changed.status).toBe(200);
+    expect(changed.body.ok).toBe(true);
+    expect(JSON.stringify(changed.body).toLowerCase()).not.toContain("password");
+
+    await agent.post("/auth/signout");
+    const oldSignin = await request(app).post("/auth/signin").send({
+      email,
+      password: "OldPass-123!",
+    });
+    expect(oldSignin.status).toBe(401);
+
+    const newSignin = await request(app).post("/auth/signin").send({
+      email,
+      password: "NewPass-456!",
+    });
+    expect(newSignin.status).toBe(200);
+    expect(newSignin.body.user.email).toBe(email);
+
+    await getPool().query("DELETE FROM users WHERE email = ?", [email]);
+  });
 });

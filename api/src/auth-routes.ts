@@ -26,6 +26,21 @@ const signInSchema = z.object({
   password: z.string().min(1).max(128),
 });
 
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(8).max(128),
+    confirmPassword: z.string().min(8).max(128),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "New password and confirmation do not match.",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: "New password must be different from the current password.",
+    path: ["newPassword"],
+  });
+
 type UserRow = RowDataPacket & {
   id: number;
   email: string;
@@ -208,6 +223,45 @@ export function createAuthRouter(): Router {
       dailyLogin: daily,
       user: { ...user, coinBalance: daily.balance },
     });
+  });
+
+  router.post("/change-password", requireAuth, async (req, res: Response) => {
+    const parsed = changePasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      sendValidationError(res, parsed.error);
+      return;
+    }
+
+    const { currentPassword, newPassword } = parsed.data;
+    const user = (req as AuthedRequest).user;
+    const pool = getPool();
+    const [rows] = await pool.query<UserRow[]>(
+      `SELECT id, email, password_hash, display_name, role, coin_balance, account_status
+       FROM users WHERE id = ? LIMIT 1`,
+      [user.id],
+    );
+    const row = rows[0];
+    if (!row || row.account_status === "closed") {
+      res.status(403).json({ error: "account_closed", message: "This account has been closed." });
+      return;
+    }
+
+    const ok = await verifyPassword(currentPassword, row.password_hash);
+    if (!ok) {
+      res.status(401).json({
+        error: "invalid_credentials",
+        message: "Current password is incorrect.",
+      });
+      return;
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+      passwordHash,
+      user.id,
+    ]);
+
+    res.json({ ok: true });
   });
 
   return router;

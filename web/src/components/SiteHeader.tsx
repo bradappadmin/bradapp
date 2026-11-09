@@ -77,6 +77,9 @@ export function SiteHeader() {
             Trades
             <InboxBadge count={pendingTradeInbox} />
           </NavLink>
+          <NavLink to="/account" className={linkClass}>
+            Account
+          </NavLink>
           {isAdmin ? (
             <NavLink to="/admin" className={linkClass}>
               Admin

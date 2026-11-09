@@ -1,0 +1,132 @@
+import { useState, type FormEvent } from "react";
+import { Link, Navigate } from "react-router-dom";
+import * as api from "../api";
+import { useAuth } from "../auth-context";
+import { SiteHeader } from "../components/SiteHeader";
+import { roleLabel } from "../types";
+
+export function AccountPage() {
+  const { user, loading: authLoading } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!authLoading && !user) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    if (newPassword !== confirmPassword) {
+      setError("New password and confirmation do not match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setError("New password must be different from the current password.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await api.changePassword({ currentPassword, newPassword, confirmPassword });
+      setMessage("Password updated. Use the new one next time you sign in.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not change password");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const fieldClass =
+    "rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-mist outline-none ring-lime/40 focus:ring-2";
+
+  return (
+    <div className="min-h-screen">
+      <SiteHeader />
+      <main className="mx-auto max-w-lg px-4 py-8 sm:px-6 sm:py-10">
+        <div className="bay-rise">
+          <h1 className="font-display text-3xl font-semibold text-white">Account</h1>
+          {user ? (
+            <p className="mt-2 text-sm text-steel">
+              {user.displayName} · {user.email} · {roleLabel(user.role)}
+            </p>
+          ) : null}
+        </div>
+
+        <section className="bay-rise-delay mt-10 border-t border-white/10 pt-8">
+          <h2 className="font-display text-xl text-mist">Change password</h2>
+          <p className="mt-2 text-sm text-steel">
+            Enter your current password, then choose a new one. Stored as a bcrypt hash only — never
+            in plaintext.
+          </p>
+
+          <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+            <label className="flex flex-col gap-2 text-sm text-steel">
+              Current password
+              <input
+                className={fieldClass}
+                type="password"
+                autoComplete="current-password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm text-steel">
+              New password
+              <input
+                className={fieldClass}
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm text-steel">
+              Confirm new password
+              <input
+                className={fieldClass}
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </label>
+            {error ? <p className="text-sm text-rose">{error}</p> : null}
+            {message ? <p className="text-sm text-lime">{message}</p> : null}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="bay-cta mt-1 rounded-md bg-rose px-4 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+            >
+              {submitting ? "Updating…" : "Update password"}
+            </button>
+          </form>
+        </section>
+
+        <p className="mt-10 text-sm text-steel">
+          <Link to="/" className="text-lime no-underline hover:underline">
+            ← Back home
+          </Link>
+        </p>
+      </main>
+    </div>
+  );
+}

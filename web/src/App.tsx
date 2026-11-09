@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth-context";
+import { AccountPage } from "./pages/AccountPage";
 import { CarsPage } from "./pages/CarsPage";
 import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
@@ -37,6 +38,7 @@ export function App() {
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
