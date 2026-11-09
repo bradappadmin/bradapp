@@ -40,6 +40,38 @@ describe("CarCard", () => {
     expect(document.querySelector("img")).not.toBeNull();
   });
 
+  it("renders a photo-first media card for the catalogue", () => {
+    render(
+      <MemoryRouter>
+        <CarCard
+          layout="media"
+          to="/cars/9"
+          badge="price"
+          car={{
+            id: 9,
+            make: "Audi",
+            model: "RS6",
+            trimName: "Avant",
+            bodyType: "Estate",
+            colour: "Racing Red",
+            year: 2019,
+            bhp: 591,
+            coinPrice: 100,
+            status: "available",
+          }}
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("link", { name: /Audi RS6 Avant/i })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+    expect(screen.getByText("100 BC")).toBeInTheDocument();
+    const img = document.querySelector("img");
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
   it("renders a hero visual with an accessible paint label", () => {
     render(
       <CarHeroVisual

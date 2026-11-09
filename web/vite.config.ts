@@ -1,6 +1,25 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import type { ProxyOptions } from "vite";
 import { defineConfig } from "vitest/config";
+
+const apiTarget = "http://127.0.0.1:5174";
+
+/** HTML navigations stay on the SPA; XHR/fetch still hit the API. */
+const spaBypass: NonNullable<ProxyOptions["bypass"]> = (req) => {
+  const accept = req.headers.accept ?? "";
+  if (accept.includes("text/html")) {
+    return "/index.html";
+  }
+};
+
+function apiProxy(): ProxyOptions {
+  return {
+    target: apiTarget,
+    changeOrigin: true,
+    bypass: spaBypass,
+  };
+}
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -10,32 +29,18 @@ export default defineConfig({
     // Allow Cloudflare / localtunnel / localhost.run public hostnames
     allowedHosts: true,
     proxy: {
-      "/auth": {
-        target: "http://127.0.0.1:5174",
-        changeOrigin: true,
-      },
-      "/cars": {
-        target: "http://127.0.0.1:5174",
-        changeOrigin: true,
-      },
-      "/trade": {
-        target: "http://127.0.0.1:5174",
-        changeOrigin: true,
-      },
-      "/play": {
-        target: "http://127.0.0.1:5174",
-        changeOrigin: true,
-      },
-      "/reviews": {
-        target: "http://127.0.0.1:5174",
-        changeOrigin: true,
-      },
-      "/admin": {
-        target: "http://127.0.0.1:5174",
-        changeOrigin: true,
-      },
+      "/auth": apiProxy(),
+      "/cars": apiProxy(),
+      "/favourites": apiProxy(),
+      "/members": apiProxy(),
+      "/leaderboard": apiProxy(),
+      "/activity": apiProxy(),
+      "/trade": apiProxy(),
+      "/play": apiProxy(),
+      "/reviews": apiProxy(),
+      "/admin": apiProxy(),
       "/health": {
-        target: "http://127.0.0.1:5174",
+        target: apiTarget,
         changeOrigin: true,
       },
     },

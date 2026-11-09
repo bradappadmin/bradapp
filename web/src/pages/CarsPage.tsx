@@ -207,8 +207,8 @@ export function CarsPage() {
         <div className="bay-rise mb-8">
           <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Find a car</h1>
           <p className="mt-2 max-w-2xl text-sm text-steel">
-            Type a make, model, or trim in the search box, or use the filters for body, fuel, garage,
-            year, and Brad Coins. Prices are play — including cars members list from My cars.
+            Real makes and models with studio photos. Filter by body, fuel, garage, year, and Brad
+            Coins — prices are play money, including cars members list from My cars.
           </p>
         </div>
 
@@ -513,17 +513,18 @@ export function CarsPage() {
             )}
           </div>
         ) : (
-          <ul className="grid gap-3 border-t border-white/10 pt-4">
+          <ul className="grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => {
               const selected = comparePicks.some((p) => p.id === listing.id);
               return (
-                <li key={listing.id}>
+                <li key={listing.id} className="bay-rise">
                   <CarCard
                     car={listing}
                     to={`/cars/${listing.id}`}
                     badge="price"
+                    layout="media"
                     footer={
-                      <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                      <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
                         <button
                           type="button"
                           onClick={() => onToggleCompare(listing)}

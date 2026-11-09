@@ -7,8 +7,8 @@ type CarVisualProps = {
   bodyType?: string;
   make?: string;
   model?: string;
-  /** Thumbnail strip vs listing hero. */
-  size?: "thumb" | "hero";
+  /** Thumbnail strip, photo-first card, or listing hero. */
+  size?: "thumb" | "card" | "hero";
   title?: string;
   className?: string;
 };
@@ -75,7 +75,7 @@ function FallbackSvg({
 }: {
   colour: string;
   bodyType?: string;
-  size: "thumb" | "hero";
+  size: "thumb" | "card" | "hero";
   title?: string;
 }) {
   const uid = useId().replace(/:/g, "");
@@ -91,7 +91,7 @@ function FallbackSvg({
   return (
     <svg
       viewBox="0 0 200 120"
-      className={isHero ? "h-32 w-full max-w-2xl sm:h-44" : "h-full w-full"}
+      className={isHero ? "h-36 w-full max-w-3xl sm:h-48" : "h-full w-full"}
       aria-hidden={isHero || !title ? true : undefined}
       role={!isHero && title ? "img" : undefined}
       aria-label={!isHero && title ? `${title} in ${colour}` : undefined}
@@ -186,6 +186,21 @@ function FallbackSvg({
   );
 }
 
+function photoWidth(size: "thumb" | "card" | "hero"): number {
+  switch (size) {
+    case "thumb":
+      return 480;
+    case "card":
+      return 800;
+    case "hero":
+      return 1400;
+    default: {
+      const _exhaustive: never = size;
+      return _exhaustive;
+    }
+  }
+}
+
 /** Realistic studio photo when make/model known; layered SVG fallback otherwise. */
 export function CarVisual({
   colour,
@@ -198,13 +213,14 @@ export function CarVisual({
 }: CarVisualProps) {
   const paint = carPaint(colour);
   const isHero = size === "hero";
+  const isCard = size === "card";
   const studioUrl =
     make && model
       ? carStudioImageUrl({
           make,
           model,
           colour,
-          width: isHero ? 900 : 420,
+          width: photoWidth(size),
           angle: "23",
         })
       : null;
@@ -213,7 +229,9 @@ export function CarVisual({
 
   const frameClass = isHero
     ? `relative mt-6 overflow-hidden rounded-md border border-white/10 ${className}`
-    : `relative shrink-0 overflow-hidden rounded-md border border-white/10 ${className}`;
+    : isCard
+      ? `relative overflow-hidden ${className}`
+      : `relative shrink-0 overflow-hidden rounded-md border border-white/10 ${className}`;
 
   const media = showPhoto ? (
     <img
@@ -221,8 +239,10 @@ export function CarVisual({
       alt={title ? `${title} in ${colour}` : `${make} ${model}`}
       className={
         isHero
-          ? "h-auto w-full max-w-3xl object-contain object-bottom"
-          : "h-full w-full object-contain object-center"
+          ? "h-auto w-full max-w-4xl object-contain object-bottom drop-shadow-[0_18px_40px_rgba(0,0,0,0.55)]"
+          : isCard
+            ? "h-full w-full object-contain object-bottom scale-[1.04] transition duration-500 group-hover:scale-[1.08]"
+            : "h-full w-full object-contain object-center"
       }
       loading={isHero ? "eager" : "lazy"}
       decoding="async"
@@ -238,7 +258,10 @@ export function CarVisual({
       <div
         className={frameClass}
         style={{
-          background: `linear-gradient(120deg, ${paint.glow}, transparent 55%), #070b14`,
+          background: `
+            radial-gradient(ellipse 70% 55% at 50% 70%, ${paint.glow}, transparent 70%),
+            linear-gradient(180deg, #121a2b 0%, #070b14 100%)
+          `,
         }}
         role={title && !showPhoto ? "img" : undefined}
         aria-label={title && !showPhoto ? `${title} in ${colour}` : undefined}
@@ -248,9 +271,27 @@ export function CarVisual({
           style={{ backgroundColor: paint.base }}
           aria-hidden
         />
-        <div className="flex min-h-[10rem] items-end justify-center px-3 pb-2 pt-5 sm:min-h-[14rem] sm:px-6">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-bay-deep/80 to-transparent" />
+        <div className="relative flex min-h-[12rem] items-end justify-center px-2 pb-1 pt-6 sm:min-h-[16rem] sm:px-4 sm:pt-8">
           {media}
         </div>
+      </div>
+    );
+  }
+
+  if (isCard) {
+    return (
+      <div
+        className={frameClass}
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 70% at 50% 80%, ${paint.glow}, transparent 65%),
+            linear-gradient(165deg, #152038 0%, #0b1220 55%, #070b14 100%)
+          `,
+        }}
+        aria-hidden={showPhoto ? undefined : true}
+      >
+        <div className="absolute inset-0 flex items-end justify-center px-2 pb-1 pt-3">{media}</div>
       </div>
     );
   }

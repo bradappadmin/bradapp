@@ -14,6 +14,7 @@ describe("carStudioImageUrl", () => {
     expect(url).toContain("modelFamily=rs6");
     expect(url).toContain("paintDescription=Red");
     expect(url).toContain("width=400");
+    expect(url).toContain("fileType=webp");
   });
 
   it("aliases common UK makes for the studio CDN", () => {

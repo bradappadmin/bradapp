@@ -2,10 +2,10 @@
 
 const COLOUR_TO_PAINT: Record<string, string> = {
   "Arctic White": "White",
-  "British Racing Green": "Green",
+  "British Racing Green": "British Racing Green",
   "Laser Blue": "Blue",
   "Midnight Black": "Black",
-  "Nardo Grey": "Grey",
+  "Nardo Grey": "Nardo Grey",
   "Racing Red": "Red",
   Silver: "Silver",
   "Storm Grey": "Grey",
@@ -21,23 +21,36 @@ const MAKE_ALIASES: Record<string, string> = {
   Skoda: "skoda",
 };
 
+/** Prefer sharper modelFamily tokens the studio CDN recognises. */
+const MODEL_FAMILY_ALIASES: Record<string, string> = {
+  "3 series": "3 series",
+  "c-class": "c-class",
+  "model 3": "model 3",
+  "model y": "model y",
+  "range rover sport": "range rover sport",
+  "gt-r": "gt-r",
+  "f-type": "f-type",
+  "mx-5": "mx-5",
+  "cr-v": "cr-v",
+  "cx-5": "cx-5",
+  "civic type r": "civic type r",
+};
+
 function normalizeMake(make: string): string {
   return (MAKE_ALIASES[make] ?? make).trim().toLowerCase();
 }
 
 /** Imagin modelFamily prefers the core name without trim fluff. */
-function normalizeModelFamily(model: string): string {
-  return model
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
+export function normalizeModelFamily(model: string): string {
+  const key = model.trim().toLowerCase().replace(/\s+/g, " ");
+  return MODEL_FAMILY_ALIASES[key] ?? key;
 }
 
 export type CarImageInput = {
   make: string;
   model: string;
   colour?: string;
-  /** Thumbnail ~360, hero ~800. */
+  /** Thumbnail ~480, card ~720, hero ~1200. */
   width?: number;
   /** Studio camera angle; 23 is a common ¾ front. */
   angle?: string;
@@ -55,7 +68,9 @@ export function carStudioImageUrl(input: CarImageInput): string {
     modelFamily: normalizeModelFamily(input.model),
     angle: input.angle ?? "23",
     zoomType: "fullscreen",
-    width: String(input.width ?? 400),
+    width: String(input.width ?? 720),
+    // Transparent-capable PNG reads cleaner on the bay background when supported.
+    fileType: "webp",
   });
   const paint = input.colour ? COLOUR_TO_PAINT[input.colour] : undefined;
   if (paint) params.set("paintDescription", paint);

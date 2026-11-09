@@ -118,7 +118,7 @@ export function ListingPage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
         <Link to="/cars" className="text-sm text-lime no-underline hover:underline">
           ← Back to cars
         </Link>
@@ -127,13 +127,7 @@ export function ListingPage() {
         {error ? <p className="mt-8 text-sm text-rose">{error}</p> : null}
 
         {listing ? (
-          <article className="bay-rise mt-8">
-            <p className="text-xs uppercase tracking-[0.2em] text-steel">
-              {listing.conditionType} · {listing.year} · {listing.status}
-            </p>
-            <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
-              {listingTitle(listing)}
-            </h1>
+          <article className="bay-rise mt-6">
             <CarHeroVisual
               colour={listing.colour}
               bodyType={listing.bodyType}
@@ -141,6 +135,12 @@ export function ListingPage() {
               model={listing.model}
               title={listingTitle(listing)}
             />
+            <p className="mt-6 text-xs uppercase tracking-[0.2em] text-steel">
+              {listing.conditionType} · {listing.year} · {listing.status}
+            </p>
+            <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
+              {listingTitle(listing)}
+            </h1>
             <p className="mt-4 font-display text-3xl font-semibold text-lime">
               {formatCoins(listing.coinPrice)}
             </p>

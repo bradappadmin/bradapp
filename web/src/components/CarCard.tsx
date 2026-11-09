@@ -27,6 +27,11 @@ type CarCardProps = {
   to?: string;
   /** Compact denser layout for play/select strips. */
   dense?: boolean;
+  /**
+   * `media` = photo-first catalogue card (large realistic image).
+   * `row` = classic side-by-side (default; also used when dense).
+   */
+  layout?: "row" | "media";
   /** Extra footer (garage sell controls, etc.). */
   footer?: ReactNode;
   className?: string;
@@ -62,13 +67,13 @@ function Badge({ kind, coinPrice }: { kind: CarBadgeKind; coinPrice?: number }) 
   const label = carBadgeLabel(kind, priceLabel);
   const tone =
     kind === "owned"
-      ? "text-steel border-white/15"
+      ? "text-steel border-white/15 bg-bay-deep/70"
       : kind === "sold"
-        ? "text-steel border-white/10"
-        : "text-lime border-lime/30";
+        ? "text-steel border-white/10 bg-bay-deep/70"
+        : "text-lime border-lime/40 bg-bay-deep/80";
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-md border px-2.5 py-1 font-display text-sm font-semibold ${tone}`}
+      className={`inline-flex shrink-0 items-center rounded-md border px-2.5 py-1 font-display text-sm font-semibold backdrop-blur-sm ${tone}`}
     >
       {label}
     </span>
@@ -80,6 +85,7 @@ export function CarCard({
   badge,
   to,
   dense,
+  layout = "row",
   footer,
   className = "",
 }: CarCardProps) {
@@ -88,8 +94,59 @@ export function CarCard({
     model: car.model,
     trimName: car.trimName ?? "",
   });
+  const useMedia = layout === "media" && !dense;
 
-  const main = (
+  const meta = (
+    <>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p
+            className={`font-display font-semibold text-mist ${
+              dense ? "text-base" : useMedia ? "text-lg sm:text-xl group-hover:text-white" : "text-lg group-hover:text-white"
+            }`}
+          >
+            {title}
+          </p>
+          <p className="mt-0.5 text-sm text-steel">
+            {car.year}
+            {car.bodyType ? ` · ${car.bodyType}` : ""} · {car.colour}
+          </p>
+        </div>
+        {badge && !useMedia ? <Badge kind={badge} coinPrice={car.coinPrice} /> : null}
+      </div>
+      {!dense ? <SpecPills car={car} /> : null}
+      {dense && (car.bhp != null || car.zeroToSixtySecs != null) ? (
+        <p className="mt-1 text-xs text-steel">
+          {car.bhp != null ? `${car.bhp} bhp` : null}
+          {car.bhp != null && car.zeroToSixtySecs != null ? " · " : null}
+          {car.zeroToSixtySecs != null ? `0–60 ${car.zeroToSixtySecs}s` : null}
+          {car.topSpeedMph != null ? ` · ${car.topSpeedMph} mph` : null}
+        </p>
+      ) : null}
+    </>
+  );
+
+  const main = useMedia ? (
+    <div>
+      <div className="relative">
+        <CarVisual
+          colour={car.colour}
+          bodyType={car.bodyType}
+          make={car.make}
+          model={car.model}
+          size="card"
+          title={title}
+          className="aspect-[16/10] w-full"
+        />
+        {badge ? (
+          <div className="absolute right-3 top-3 z-10">
+            <Badge kind={badge} coinPrice={car.coinPrice} />
+          </div>
+        ) : null}
+      </div>
+      <div className="p-3 sm:p-4">{meta}</div>
+    </div>
+  ) : (
     <div className={`flex gap-3 ${dense ? "items-center" : "items-start"}`}>
       <CarVisual
         colour={car.colour}
@@ -99,43 +156,19 @@ export function CarCard({
         size="thumb"
         className={dense ? "h-16 w-28" : "h-24 w-36 sm:h-28 sm:w-44"}
       />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p
-              className={`font-display font-semibold text-mist ${
-                dense ? "text-base" : "text-lg group-hover:text-white"
-              }`}
-            >
-              {title}
-            </p>
-            <p className="mt-0.5 text-sm text-steel">
-              {car.year}
-              {car.bodyType ? ` · ${car.bodyType}` : ""} · {car.colour}
-            </p>
-          </div>
-          {badge ? <Badge kind={badge} coinPrice={car.coinPrice} /> : null}
-        </div>
-        {!dense ? <SpecPills car={car} /> : null}
-        {dense && (car.bhp != null || car.zeroToSixtySecs != null) ? (
-          <p className="mt-1 text-xs text-steel">
-            {car.bhp != null ? `${car.bhp} bhp` : null}
-            {car.bhp != null && car.zeroToSixtySecs != null ? " · " : null}
-            {car.zeroToSixtySecs != null ? `0–60 ${car.zeroToSixtySecs}s` : null}
-            {car.topSpeedMph != null ? ` · ${car.topSpeedMph} mph` : null}
-          </p>
-        ) : null}
-      </div>
+      <div className="min-w-0 flex-1">{meta}</div>
     </div>
   );
 
-  const shellClass = `rounded-md border border-white/10 bg-bay-panel/40 p-3 sm:p-4 ${className}`;
+  const shellClass = useMedia
+    ? `overflow-hidden rounded-md border border-white/10 bg-bay-panel/50 ${className}`
+    : `rounded-md border border-white/10 bg-bay-panel/40 p-3 sm:p-4 ${className}`;
 
   if (to && !footer) {
     return (
       <Link
         to={to}
-        className={`group block no-underline transition hover:border-lime/30 hover:bg-bay-panel/70 ${shellClass}`}
+        className={`group block no-underline transition hover:border-lime/35 hover:bg-bay-panel/80 ${shellClass}`}
       >
         {main}
       </Link>
@@ -151,7 +184,7 @@ export function CarCard({
       ) : (
         main
       )}
-      {footer}
+      {footer ? <div className={useMedia ? "px-3 pb-3 sm:px-4 sm:pb-4" : undefined}>{footer}</div> : null}
     </div>
   );
 }
