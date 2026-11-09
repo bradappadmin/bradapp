@@ -436,7 +436,7 @@ export type AdminUser = {
   displayName: string;
   role: "super_admin" | "admin" | "member";
   coinBalance: number;
-  accountStatus: "active" | "closed";
+  accountStatus: "active" | "closed" | "frozen";
   createdAt?: string;
 };
 
@@ -479,7 +479,11 @@ export function fetchAdminUsers(): Promise<{ users: AdminUser[] }> {
 
 export function patchAdminUser(
   id: number,
-  body: { displayName?: string; role?: AdminUser["role"]; accountStatus?: AdminUser["accountStatus"] },
+  body: {
+    displayName?: string;
+    role?: AdminUser["role"];
+    accountStatus?: AdminUser["accountStatus"];
+  },
 ): Promise<{ user: AdminUser }> {
   return request(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(body) });
 }

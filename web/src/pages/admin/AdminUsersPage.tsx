@@ -48,12 +48,18 @@ function AdminUsersInner() {
     }
   }
 
-  async function setStatus(id: number, accountStatus: "active" | "closed") {
+  async function setStatus(id: number, accountStatus: AdminUser["accountStatus"]) {
     setBusyId(id);
     setError(null);
     try {
       await api.patchAdminUser(id, { accountStatus });
-      setMessage(accountStatus === "closed" ? "Account closed." : "Account reopened.");
+      const message =
+        accountStatus === "frozen"
+          ? "Account frozen — they cannot sign in until unfrozen."
+          : accountStatus === "closed"
+            ? "Account closed."
+            : "Account unfrozen / reopened.";
+      setMessage(message);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Status change failed");
@@ -90,8 +96,9 @@ function AdminUsersInner() {
         </Link>
         <h1 className="bay-rise mt-4 font-display text-3xl font-semibold text-white">Accounts</h1>
         <p className="mt-2 text-sm text-steel">
-          Correct friend and family accounts. Coin changes write an <code>admin_adjust</code> ledger
-          row. See the full trail on{" "}
+          Correct friend and family accounts. Freeze blocks sign-in until unfrozen — Napwood can
+          freeze Brad; Brad cannot freeze Napwood. Coin changes write an <code>admin_adjust</code>{" "}
+          ledger row. See the full trail on{" "}
           <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">
             Coin adjustments
           </Link>
@@ -133,10 +140,15 @@ function AdminUsersInner() {
                       <button
                         type="button"
                         disabled={busyId === row.id || row.id === user?.id}
-                        onClick={() => void setStatus(row.id, "closed")}
+                        onClick={() => void setStatus(row.id, "frozen")}
                         className="rounded-md border border-rose/40 px-3 py-2 text-sm text-rose"
+                        title={
+                          user?.role === "admin" && row.role !== "member"
+                            ? "Brad can only freeze members"
+                            : "Freeze — blocks sign-in until unfrozen"
+                        }
                       >
-                        Close
+                        Freeze
                       </button>
                     ) : (
                       <button
@@ -145,7 +157,7 @@ function AdminUsersInner() {
                         onClick={() => void setStatus(row.id, "active")}
                         className="rounded-md border border-lime/40 px-3 py-2 text-sm text-lime"
                       >
-                        Reopen
+                        {row.accountStatus === "frozen" ? "Unfreeze" : "Reopen"}
                       </button>
                     )}
                   </div>

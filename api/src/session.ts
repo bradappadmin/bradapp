@@ -21,7 +21,7 @@ type SessionRow = RowDataPacket & {
   display_name: string;
   role: Role;
   coin_balance: number;
-  account_status: "active" | "closed";
+  account_status: "active" | "closed" | "frozen";
   expires_at: Date;
 };
 
@@ -118,7 +118,7 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
     return null;
   }
 
-  if (row.account_status === "closed") {
+  if (row.account_status === "closed" || row.account_status === "frozen") {
     await pool.query<ResultSetHeader>("DELETE FROM sessions WHERE id = ?", [sessionId]);
     return null;
   }

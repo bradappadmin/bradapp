@@ -114,4 +114,70 @@ describe.runIf(hasDb)("admin routes", () => {
     const res = await admin.patch(`/admin/users/${memberId}`).send({ role: "super_admin" });
     expect(res.status).toBe(403);
   });
+
+  it("freezes a member so they cannot sign in, then unfreezes them", async () => {
+    const freeze = await admin.patch(`/admin/users/${memberId}`).send({ accountStatus: "frozen" });
+    expect(freeze.status).toBe(200);
+    expect(freeze.body.user.accountStatus).toBe("frozen");
+
+    const blocked = await request(app).post("/auth/signin").send({
+      email: memberEmail,
+      password: "MemberPass-123!",
+    });
+    expect(blocked.status).toBe(403);
+    expect(blocked.body.error).toBe("account_frozen");
+
+    const unfreeze = await admin.patch(`/admin/users/${memberId}`).send({ accountStatus: "active" });
+    expect(unfreeze.status).toBe(200);
+    expect(unfreeze.body.user.accountStatus).toBe("active");
+
+    const ok = await request(app).post("/auth/signin").send({
+      email: memberEmail,
+      password: "MemberPass-123!",
+    });
+    expect(ok.status).toBe(200);
+  });
+
+  it("lets Napwood freeze Brad, and blocks Brad from freezing Napwood", async () => {
+    const parentEmail = `parent-freeze-${Date.now()}@example.com`;
+    const bradEmail = `brad-freeze-${Date.now()}@example.com`;
+    await ensureUser(parentEmail, "ParentPass-123!", "Freeze Parent", "super_admin");
+    await ensureUser(bradEmail, "BradFreeze-123!", "Freeze Brad", "admin");
+
+    const parent = request.agent(app);
+    const brad = request.agent(app);
+    expect(
+      (await parent.post("/auth/signin").send({ email: parentEmail, password: "ParentPass-123!" }))
+        .status,
+    ).toBe(200);
+    expect(
+      (await brad.post("/auth/signin").send({ email: bradEmail, password: "BradFreeze-123!" })).status,
+    ).toBe(200);
+
+    const users = await parent.get("/admin/users");
+    const bradId = users.body.users.find((u: { email: string }) => u.email === bradEmail)?.id as number;
+    const parentId = users.body.users.find((u: { email: string }) => u.email === parentEmail)
+      ?.id as number;
+    expect(bradId).toBeTruthy();
+    expect(parentId).toBeTruthy();
+
+    const freezeBrad = await parent.patch(`/admin/users/${bradId}`).send({ accountStatus: "frozen" });
+    expect(freezeBrad.status).toBe(200);
+    expect(freezeBrad.body.user.accountStatus).toBe("frozen");
+
+    const bradSignin = await request(app).post("/auth/signin").send({
+      email: bradEmail,
+      password: "BradFreeze-123!",
+    });
+    expect(bradSignin.status).toBe(403);
+    expect(bradSignin.body.error).toBe("account_frozen");
+
+    // Brad (still signed-in agent may be wiped; re-sign fails). Use a fresh admin agent
+    // that is not frozen to attempt freezing parent — use Area Admin from beforeAll.
+    const refuse = await admin.patch(`/admin/users/${parentId}`).send({ accountStatus: "frozen" });
+    expect(refuse.status).toBe(403);
+
+    await parent.patch(`/admin/users/${bradId}`).send({ accountStatus: "active" });
+    await getPool().query("DELETE FROM users WHERE email IN (?, ?)", [parentEmail, bradEmail]);
+  });
 });

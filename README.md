@@ -39,7 +39,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins
 - Free card trades between members; nav Trades badge shows pending inbox count
 - Video reviews: record with car cue cards, publish to disk + DB; admins can take down
-- Admin area (`/admin`): accounts, coin corrections + adjust history, cars/garages/listings; members blocked
+- Admin area (`/admin`): accounts (freeze/unfreeze), coin corrections + adjust history, cars/garages/listings; members blocked. Napwood can freeze Brad; Brad cannot freeze Napwood.
 
 ## Run locally
 

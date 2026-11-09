@@ -5,11 +5,44 @@ import { applyCoinDelta, listAdminCoinAdjustments, listLedger } from "./coins.js
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { isAdminRole, isRole, type Role } from "./roles.js";
 
+const accountStatusSchema = z.enum(["active", "closed", "frozen"]);
+
 const userPatchSchema = z.object({
   displayName: z.string().trim().min(1).max(120).optional(),
   role: z.enum(["super_admin", "admin", "member"]).optional(),
-  accountStatus: z.enum(["active", "closed"]).optional(),
+  accountStatus: accountStatusSchema.optional(),
 });
+
+type AccountStatus = z.infer<typeof accountStatusSchema>;
+
+/** Who may freeze/close/reopen whom. Parent may freeze Brad; Brad may not touch parent. */
+function canChangeAccountStatus(
+  actorRole: Role,
+  targetRole: Role,
+  nextStatus: AccountStatus,
+): { ok: true } | { ok: false; message: string } {
+  if (nextStatus === "active") {
+    // Unfreeze / reopen: Brad may restore members; Napwood may restore anyone.
+    if (actorRole === "super_admin") return { ok: true };
+    if (actorRole === "admin" && targetRole === "member") return { ok: true };
+    return { ok: false, message: "Brad can only unfreeze member accounts." };
+  }
+
+  // freeze or close
+  if (actorRole === "super_admin") {
+    return { ok: true };
+  }
+  if (actorRole === "admin") {
+    if (targetRole === "super_admin") {
+      return { ok: false, message: "Brad cannot freeze or close Napwood’s account." };
+    }
+    if (targetRole === "admin") {
+      return { ok: false, message: "Brad cannot freeze or close other admin accounts." };
+    }
+    return { ok: true };
+  }
+  return { ok: false, message: "Not allowed." };
+}
 
 const coinAdjustSchema = z.object({
   delta: z.number().int().refine((n) => n !== 0, "delta must be non-zero"),
@@ -70,7 +103,7 @@ export function createAdminRouter(): Router {
       display_name: string;
       role: Role;
       coin_balance: number;
-      account_status: "active" | "closed";
+      account_status: AccountStatus;
       created_at: Date;
     })[]>(
       `SELECT id, email, display_name, role, coin_balance, account_status, created_at
@@ -143,12 +176,16 @@ export function createAdminRouter(): Router {
       }
     }
 
-    if (parsed.data.accountStatus === "closed" && actor.role === "admin" && isAdminRole(existing.role)) {
-      res.status(403).json({
-        error: "forbidden",
-        message: "Brad cannot close admin accounts.",
-      });
-      return;
+    if (parsed.data.accountStatus != null) {
+      const allowed = canChangeAccountStatus(
+        actor.role,
+        existing.role,
+        parsed.data.accountStatus,
+      );
+      if (!allowed.ok) {
+        res.status(403).json({ error: "forbidden", message: allowed.message });
+        return;
+      }
     }
 
     const fields: string[] = [];
@@ -168,7 +205,10 @@ export function createAdminRouter(): Router {
     values.push(userId);
     await pool.query(`UPDATE users SET ${fields.join(", ")} WHERE id = ?`, values);
 
-    if (parsed.data.accountStatus === "closed") {
+    if (
+      parsed.data.accountStatus === "closed" ||
+      parsed.data.accountStatus === "frozen"
+    ) {
       await pool.query("DELETE FROM sessions WHERE user_id = ?", [userId]);
     }
 
@@ -178,7 +218,7 @@ export function createAdminRouter(): Router {
       display_name: string;
       role: Role;
       coin_balance: number;
-      account_status: "active" | "closed";
+      account_status: AccountStatus;
     })[]>("SELECT id, email, display_name, role, coin_balance, account_status FROM users WHERE id = ?", [
       userId,
     ]);

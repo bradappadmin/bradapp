@@ -48,7 +48,7 @@ type UserRow = RowDataPacket & {
   display_name: string;
   role: PublicUser["role"];
   coin_balance: number;
-  account_status: "active" | "closed";
+  account_status: "active" | "closed" | "frozen";
 };
 
 function toPublicUser(row: UserRow): PublicUser {
@@ -170,6 +170,13 @@ export function createAuthRouter(): Router {
       res.status(403).json({ error: "account_closed", message: "This account has been closed." });
       return;
     }
+    if (user.account_status === "frozen") {
+      res.status(403).json({
+        error: "account_frozen",
+        message: "This account is frozen. Ask Napwood or Brad to unfreeze it.",
+      });
+      return;
+    }
 
     await creditSeedIfNeeded(
       Number(user.id),
@@ -243,6 +250,13 @@ export function createAuthRouter(): Router {
     const row = rows[0];
     if (!row || row.account_status === "closed") {
       res.status(403).json({ error: "account_closed", message: "This account has been closed." });
+      return;
+    }
+    if (row.account_status === "frozen") {
+      res.status(403).json({
+        error: "account_frozen",
+        message: "This account is frozen. Ask Napwood or Brad to unfreeze it.",
+      });
       return;
     }
 
