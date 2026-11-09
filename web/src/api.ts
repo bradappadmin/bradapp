@@ -312,6 +312,7 @@ export type MemberProfileCar = {
   year: number;
   colour: string;
   status: string;
+  coinPrice: number;
 };
 
 export function fetchMembers(): Promise<{ members: MemberSummary[] }> {

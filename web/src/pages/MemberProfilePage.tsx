@@ -18,7 +18,7 @@ export function MemberProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !Number.isFinite(memberId) || memberId <= 0) return;
+    if (!Number.isFinite(memberId) || memberId <= 0) return;
     let cancelled = false;
     void (async () => {
       setLoading(true);
@@ -30,7 +30,7 @@ export function MemberProfilePage() {
           setError(null);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not load profile");
+        if (!cancelled) setError(err instanceof Error ? err.message : "Could not load garage");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -38,15 +38,14 @@ export function MemberProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, memberId]);
-
-  if (!authLoading && !user) {
-    return <Navigate to="/signin" replace />;
-  }
+  }, [memberId]);
 
   if (!Number.isFinite(memberId) || memberId <= 0) {
     return <Navigate to="/members" replace />;
   }
+
+  const isSelf = Boolean(user && member && member.id === user.id);
+  const canChallengeOrTrade = Boolean(user && member && !isSelf && member.carCount > 0);
 
   return (
     <div className="min-h-screen">
@@ -58,18 +57,25 @@ export function MemberProfilePage() {
           </Link>
         </p>
 
-        {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
+        {loading || authLoading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
 
         {member ? (
           <div className="bay-rise mt-6">
-            <h1 className="font-display text-3xl font-semibold text-white">{member.displayName}</h1>
+            <p className="text-xs uppercase tracking-wide text-steel">Public garage</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold text-white">
+              {member.displayName}
+              {isSelf ? " (you)" : ""}
+            </h1>
             <p className="mt-2 text-sm text-steel">{member.roleLabel}</p>
             <p className="mt-4 font-display text-2xl text-lime">{formatCoins(member.coinBalance)}</p>
-            <p className="mt-2 text-sm text-steel">
-              {member.carCount} {member.carCount === 1 ? "car" : "cars"} in the bay
+            <p className="mt-1 text-xs uppercase tracking-wide text-steel">Brad Coin balance</p>
+            <p className="mt-4 text-sm text-steel">
+              {member.carCount} {member.carCount === 1 ? "car" : "cars"} in the bay — names and specs
+              only, no account secrets.
             </p>
-            {user && member.id !== user.id && member.carCount > 0 ? (
+
+            {canChallengeOrTrade ? (
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   to={`/play?opponent=${member.id}`}
@@ -85,11 +91,30 @@ export function MemberProfilePage() {
                 </Link>
               </div>
             ) : null}
+
+            {!user && !authLoading ? (
+              <p className="mt-6 text-sm text-steel">
+                <Link to="/signin" className="text-lime no-underline hover:underline">
+                  Sign in
+                </Link>{" "}
+                to challenge or offer a free trade.
+              </p>
+            ) : null}
+
+            {isSelf ? (
+              <p className="mt-6 text-sm text-steel">
+                This is how others see your bay. Manage listings in{" "}
+                <Link to="/garage" className="text-lime no-underline hover:underline">
+                  My cars
+                </Link>
+                .
+              </p>
+            ) : null}
           </div>
         ) : null}
 
         <section className="mt-10">
-          <h2 className="font-display text-xl text-mist">Cars</h2>
+          <h2 className="font-display text-xl text-mist">Garage</h2>
           {cars.length === 0 && !loading ? (
             <p className="mt-3 text-sm text-steel">Empty garage.</p>
           ) : null}
@@ -98,6 +123,7 @@ export function MemberProfilePage() {
               <li key={car.id}>
                 <CarCard
                   car={car}
+                  to={`/cars/${car.id}`}
                   badge={badgeForStatus(car.status, "owned")}
                 />
               </li>

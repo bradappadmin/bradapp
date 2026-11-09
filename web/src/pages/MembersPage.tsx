@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import * as api from "../api";
 import type { MemberSummary } from "../api";
 import { useAuth } from "../auth-context";
@@ -7,13 +7,12 @@ import { formatCoins } from "../cars";
 import { SiteHeader } from "../components/SiteHeader";
 
 export function MembersPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [members, setMembers] = useState<MemberSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
     let cancelled = false;
     void (async () => {
       setLoading(true);
@@ -32,11 +31,7 @@ export function MembersPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
-
-  if (!authLoading && !user) {
-    return <Navigate to="/signin" replace />;
-  }
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -45,8 +40,8 @@ export function MembersPage() {
         <div className="bay-rise">
           <h1 className="font-display text-3xl font-semibold text-white">Members</h1>
           <p className="mt-2 text-sm text-steel">
-            Who’s in the bay — name, role, Brad Coins, and how many cars they hold. Challenge someone
-            from Play.
+            Public garages in the bay — name, Brad Coins, and car count. Open a garage to see their
+            cars, then challenge or offer a free trade when signed in.
           </p>
         </div>
 
@@ -54,42 +49,55 @@ export function MembersPage() {
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
 
         <ul className="mt-8 divide-y divide-white/10 border-t border-white/10">
-          {members.map((member) => (
-            <li key={member.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <Link
-                  to={`/members/${member.id}`}
-                  className="font-display text-lg font-semibold text-mist no-underline hover:text-white"
-                >
-                  {member.displayName}
-                  {user && member.id === user.id ? " (you)" : ""}
-                </Link>
-                <p className="mt-1 text-sm text-steel">{member.roleLabel}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-4 text-sm">
-                <span className="font-display text-lime">{formatCoins(member.coinBalance)}</span>
-                <span className="text-steel">
-                  {member.carCount} {member.carCount === 1 ? "car" : "cars"}
-                </span>
-                {user && member.id !== user.id && member.carCount > 0 ? (
-                  <>
-                    <Link
-                      to={`/play?opponent=${member.id}`}
-                      className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-sm text-lime no-underline hover:bg-lime/10"
-                    >
-                      Challenge
-                    </Link>
-                    <Link
-                      to={`/trades?with=${member.id}`}
-                      className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline hover:border-lime/40 hover:text-lime"
-                    >
-                      Trade
-                    </Link>
-                  </>
-                ) : null}
-              </div>
-            </li>
-          ))}
+          {members.map((member) => {
+            const isYou = Boolean(user && member.id === user.id);
+            const canAct = Boolean(user && !isYou && member.carCount > 0);
+            return (
+              <li
+                key={member.id}
+                className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <Link
+                    to={`/members/${member.id}`}
+                    className="font-display text-lg font-semibold text-mist no-underline hover:text-white"
+                  >
+                    {member.displayName}
+                    {isYou ? " (you)" : ""}
+                  </Link>
+                  <p className="mt-1 text-sm text-steel">{member.roleLabel}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <span className="font-display text-lime">{formatCoins(member.coinBalance)}</span>
+                  <span className="text-steel">
+                    {member.carCount} {member.carCount === 1 ? "car" : "cars"}
+                  </span>
+                  <Link
+                    to={`/members/${member.id}`}
+                    className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline hover:border-lime/40 hover:text-lime"
+                  >
+                    Open garage
+                  </Link>
+                  {canAct ? (
+                    <>
+                      <Link
+                        to={`/play?opponent=${member.id}`}
+                        className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-sm text-lime no-underline hover:bg-lime/10"
+                      >
+                        Challenge
+                      </Link>
+                      <Link
+                        to={`/trades?with=${member.id}`}
+                        className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline hover:border-lime/40 hover:text-lime"
+                      >
+                        Trade
+                      </Link>
+                    </>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </main>
     </div>

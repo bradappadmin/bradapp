@@ -66,16 +66,31 @@ describe.runIf(hasDb)("members routes", () => {
       carCount: 0,
     });
     expect(typeof self.coinBalance).toBe("number");
+    expect(self).not.toHaveProperty("email");
+    expect(self).not.toHaveProperty("password_hash");
     const rival = res.body.members.find((m: { id: number }) => m.id === otherId);
     expect(rival.carCount).toBeGreaterThanOrEqual(1);
   });
 
-  it("returns a member profile with their cars", async () => {
-    const res = await agent.get(`/members/${otherId}`);
+  it("returns a public member garage with cars and no secrets", async () => {
+    // Unsigned request — garage pages are public.
+    const res = await request(app).get(`/members/${otherId}`);
     expect(res.status).toBe(200);
     expect(res.body.member.id).toBe(otherId);
     expect(res.body.member.carCount).toBeGreaterThanOrEqual(1);
-    expect(res.body.cars.some((c: { id: number }) => c.id === otherCarId)).toBe(true);
+    expect(res.body.member).not.toHaveProperty("email");
+    expect(res.body.member).not.toHaveProperty("passwordHash");
+    expect(res.body.member).not.toHaveProperty("password_hash");
+    const car = res.body.cars.find((c: { id: number }) => c.id === otherCarId);
+    expect(car).toBeTruthy();
+    expect(typeof car.coinPrice).toBe("number");
+    expect(car).not.toHaveProperty("owner_user_id");
+  });
+
+  it("lists members without signing in", async () => {
+    const res = await request(app).get("/members");
+    expect(res.status).toBe(200);
+    expect(res.body.members.length).toBeGreaterThan(0);
   });
 
   it("filters member cards by owner for Top Trumps challenges", async () => {

@@ -1,5 +1,4 @@
 import { Router, type Response } from "express";
-import { requireAuth } from "./auth-middleware.js";
 import { getPool, type RowDataPacket } from "./db.js";
 import { isRole, roleLabel, type Role } from "./roles.js";
 
@@ -23,6 +22,7 @@ type MemberCardRow = RowDataPacket & {
   year: number;
   colour: string;
   status: string;
+  coin_price: number;
 };
 
 function mapMember(row: MemberListRow) {
@@ -37,11 +37,33 @@ function mapMember(row: MemberListRow) {
   };
 }
 
+function mapPublicCar(car: MemberCardRow) {
+  return {
+    id: Number(car.id),
+    make: car.make,
+    model: car.model,
+    trimName: car.trim_name,
+    bodyType: car.body_type,
+    bhp: Number(car.bhp),
+    topSpeedMph: Number(car.top_speed_mph),
+    zeroToSixtySecs: Number(car.zero_to_sixty_secs),
+    year: Number(car.year),
+    colour: car.colour,
+    status: car.status,
+    coinPrice: Number(car.coin_price),
+  };
+}
+
+/**
+ * Public member directory + garage pages.
+ * Returns display name, role label, Brad Coin balance, car count, and cars —
+ * never email or password material.
+ */
 export function createMembersRouter(): Router {
   const router = Router();
 
   /** Active members/admins with coin balance and owned-car count. */
-  router.get("/", requireAuth, async (_req, res: Response) => {
+  router.get("/", async (_req, res: Response) => {
     const pool = getPool();
     const [rows] = await pool.query<MemberListRow[]>(
       `SELECT u.id, u.display_name, u.role, u.coin_balance,
@@ -56,7 +78,7 @@ export function createMembersRouter(): Router {
     res.json({ members: rows.map(mapMember) });
   });
 
-  router.get("/:id", requireAuth, async (req, res: Response) => {
+  router.get("/:id", async (req, res: Response) => {
     const memberId = Number(req.params.id);
     if (!Number.isFinite(memberId) || memberId <= 0) {
       res.status(400).json({ error: "validation_error", message: "Invalid member id" });
@@ -83,7 +105,7 @@ export function createMembersRouter(): Router {
 
     const [cars] = await pool.query<MemberCardRow[]>(
       `SELECT l.id, cm.make, cm.model, cm.trim_name, cm.body_type, cm.bhp, cm.top_speed_mph,
-              cm.zero_to_sixty_secs, l.year, l.colour, l.status
+              cm.zero_to_sixty_secs, l.year, l.colour, l.status, l.coin_price
        FROM listings l
        INNER JOIN car_models cm ON cm.id = l.car_model_id
        WHERE l.owner_user_id = ? AND l.status IN ('owned', 'available')
@@ -93,19 +115,7 @@ export function createMembersRouter(): Router {
 
     res.json({
       member: mapMember(row),
-      cars: cars.map((car) => ({
-        id: Number(car.id),
-        make: car.make,
-        model: car.model,
-        trimName: car.trim_name,
-        bodyType: car.body_type,
-        bhp: Number(car.bhp),
-        topSpeedMph: Number(car.top_speed_mph),
-        zeroToSixtySecs: Number(car.zero_to_sixty_secs),
-        year: Number(car.year),
-        colour: car.colour,
-        status: car.status,
-      })),
+      cars: cars.map(mapPublicCar),
     });
   });
 
