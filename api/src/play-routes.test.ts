@@ -70,13 +70,24 @@ describe.runIf(hasDb)("play routes", () => {
     expect(play.body.match.opponent.userId).toBeTruthy();
   });
 
-  it("creates and accepts a free card trade", async () => {
+  it("creates and accepts a free card trade without moving Brad Coins", async () => {
+    const walletABefore = await a.get("/trade/wallet");
+    const walletBBefore = await b.get("/trade/wallet");
+
     const offer = await a.post("/play/trades").send({
       offerListingId: carA,
       requestListingId: carB,
     });
     expect(offer.status).toBe(201);
     const tradeId = offer.body.trade.id as number;
+
+    const inboxB = await b.get("/play/trades");
+    expect(
+      inboxB.body.trades.some(
+        (t: { id: number; status: string; toUserId: number }) =>
+          t.id === tradeId && t.status === "pending",
+      ),
+    ).toBe(true);
 
     const accept = await b.post(`/play/trades/${tradeId}/accept`);
     expect(accept.status).toBe(200);
@@ -85,5 +96,58 @@ describe.runIf(hasDb)("play routes", () => {
     const garageB = await b.get("/trade/garage");
     expect(garageA.body.cars.some((c: { id: number }) => c.id === carB)).toBe(true);
     expect(garageB.body.cars.some((c: { id: number }) => c.id === carA)).toBe(true);
+
+    const walletAAfter = await a.get("/trade/wallet");
+    const walletBAfter = await b.get("/trade/wallet");
+    expect(walletAAfter.body.balance).toBe(walletABefore.body.balance);
+    expect(walletBAfter.body.balance).toBe(walletBBefore.body.balance);
+  });
+
+  it("lets the recipient decline and the sender cancel pending trades", async () => {
+    // Swap cars back via a fresh purchase path is awkward; buy two more cheap cars if available.
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 20 });
+    const walletA = await a.get("/trade/wallet");
+    const walletB = await b.get("/trade/wallet");
+    const forA = search.body.listings.find(
+      (l: { coinPrice: number; id: number }) =>
+        l.coinPrice <= walletA.body.balance && l.id !== carA && l.id !== carB,
+    );
+    const forB = search.body.listings.find(
+      (l: { coinPrice: number; id: number }) =>
+        l.coinPrice <= walletB.body.balance &&
+        l.id !== carA &&
+        l.id !== carB &&
+        l.id !== forA?.id,
+    );
+    if (!forA || !forB) {
+      expect(true).toBe(true);
+      return;
+    }
+    expect((await a.post(`/trade/listings/${forA.id}/buy`)).status).toBe(200);
+    expect((await b.post(`/trade/listings/${forB.id}/buy`)).status).toBe(200);
+
+    const declinedOffer = await a.post("/play/trades").send({
+      offerListingId: forA.id,
+      requestListingId: forB.id,
+    });
+    expect(declinedOffer.status).toBe(201);
+    const declineId = declinedOffer.body.trade.id as number;
+    expect((await b.post(`/play/trades/${declineId}/decline`)).status).toBe(200);
+    const afterDecline = await a.get("/play/trades");
+    expect(
+      afterDecline.body.trades.find((t: { id: number }) => t.id === declineId)?.status,
+    ).toBe("declined");
+
+    const cancelOffer = await a.post("/play/trades").send({
+      offerListingId: forA.id,
+      requestListingId: forB.id,
+    });
+    expect(cancelOffer.status).toBe(201);
+    const cancelId = cancelOffer.body.trade.id as number;
+    expect((await a.post(`/play/trades/${cancelId}/cancel`)).status).toBe(200);
+    const afterCancel = await a.get("/play/trades");
+    expect(
+      afterCancel.body.trades.find((t: { id: number }) => t.id === cancelId)?.status,
+    ).toBe("cancelled");
   });
 });

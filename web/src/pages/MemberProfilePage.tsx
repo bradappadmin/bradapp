@@ -68,12 +68,20 @@ export function MemberProfilePage() {
               {member.carCount} {member.carCount === 1 ? "car" : "cars"} in the bay
             </p>
             {user && member.id !== user.id && member.carCount > 0 ? (
-              <Link
-                to={`/play?opponent=${member.id}`}
-                className="mt-6 inline-block rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline hover:brightness-110"
-              >
-                Challenge to Top Trumps
-              </Link>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to={`/play?opponent=${member.id}`}
+                  className="inline-block rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline hover:brightness-110"
+                >
+                  Challenge to Top Trumps
+                </Link>
+                <Link
+                  to={`/trades?with=${member.id}`}
+                  className="inline-block rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline hover:bg-lime/10"
+                >
+                  Offer free trade
+                </Link>
+              </div>
             ) : null}
           </div>
         ) : null}

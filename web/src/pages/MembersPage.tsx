@@ -72,12 +72,20 @@ export function MembersPage() {
                   {member.carCount} {member.carCount === 1 ? "car" : "cars"}
                 </span>
                 {user && member.id !== user.id && member.carCount > 0 ? (
-                  <Link
-                    to={`/play?opponent=${member.id}`}
-                    className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-sm text-lime no-underline hover:bg-lime/10"
-                  >
-                    Challenge
-                  </Link>
+                  <>
+                    <Link
+                      to={`/play?opponent=${member.id}`}
+                      className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-sm text-lime no-underline hover:bg-lime/10"
+                    >
+                      Challenge
+                    </Link>
+                    <Link
+                      to={`/trades?with=${member.id}`}
+                      className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline hover:border-lime/40 hover:text-lime"
+                    >
+                      Trade
+                    </Link>
+                  </>
                 ) : null}
               </div>
             </li>
