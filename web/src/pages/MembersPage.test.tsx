@@ -33,7 +33,7 @@ const jordan = {
   coinBalance: 200,
 };
 
-describe("MembersPage name search", () => {
+describe("MembersPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -49,7 +49,7 @@ describe("MembersPage name search", () => {
     });
   });
 
-  it("lists members and searches by display name via q", async () => {
+  it("shows bay hierarchy, directory, and name search", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/members"]}>
@@ -60,6 +60,10 @@ describe("MembersPage name search", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Members" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(document.querySelector(".play-bay-glow")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Directory" })).toBeInTheDocument();
     expect(await screen.findByText("Sam Bay")).toBeInTheDocument();
     expect(screen.getByText("Jordan Pace")).toBeInTheDocument();
 
@@ -90,5 +94,22 @@ describe("MembersPage name search", () => {
     });
     expect(await screen.findByText("Jordan Pace")).toBeInTheDocument();
     expect(screen.queryByText("Sam Bay")).not.toBeInTheDocument();
+  });
+
+  it("shows a clear no-results state with clear CTA", async () => {
+    vi.mocked(api.fetchMembers).mockResolvedValue({ members: [], q: "zzzz" });
+
+    render(
+      <MemoryRouter initialEntries={["/members?q=zzzz"]}>
+        <AuthProvider>
+          <MembersPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Directory" })).not.toBeInTheDocument();
   });
 });
