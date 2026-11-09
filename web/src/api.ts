@@ -48,6 +48,10 @@ export function signUp(input: {
   });
 }
 
+export function fetchSignupOptions(): Promise<{ requireInviteCode: boolean }> {
+  return request("/auth/signup-options");
+}
+
 export type DailyLoginStatus = {
   amount: number;
   claimDate: string;
@@ -816,8 +820,20 @@ export type FamilyInvite = {
   revokedAt: string | null;
 };
 
-export function fetchAdminInvites(): Promise<{ invites: FamilyInvite[] }> {
+export function fetchAdminInvites(): Promise<{
+  invites: FamilyInvite[];
+  requireInviteCode: boolean;
+}> {
   return request("/admin/invites");
+}
+
+export function setAdminRequireInvite(
+  requireInviteCode: boolean,
+): Promise<{ requireInviteCode: boolean }> {
+  return request("/admin/invites/require", {
+    method: "PUT",
+    body: JSON.stringify({ requireInviteCode }),
+  });
 }
 
 export function createAdminInvite(body: {

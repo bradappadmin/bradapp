@@ -21,9 +21,11 @@ function statusLabel(invite: FamilyInvite): string {
 
 function AdminInvitesInner() {
   const [invites, setInvites] = useState<FamilyInvite[]>([]);
+  const [requireInviteCode, setRequireInviteCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [toggleBusy, setToggleBusy] = useState(false);
   const [code, setCode] = useState("");
   const [maxUses, setMaxUses] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
@@ -32,6 +34,7 @@ function AdminInvitesInner() {
   async function reload() {
     const res = await api.fetchAdminInvites();
     setInvites(res.invites);
+    setRequireInviteCode(Boolean(res.requireInviteCode));
   }
 
   useEffect(() => {
@@ -39,6 +42,25 @@ function AdminInvitesInner() {
       setError(err instanceof Error ? err.message : "Could not load invites");
     });
   }, []);
+
+  async function onToggleRequire(next: boolean) {
+    setToggleBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await api.setAdminRequireInvite(next);
+      setRequireInviteCode(res.requireInviteCode);
+      setMessage(
+        res.requireInviteCode
+          ? "Signup now requires a valid invite code."
+          : "Signup is open again — invite codes stay optional.",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update setting");
+    } finally {
+      setToggleBusy(false);
+    }
+  }
 
   async function onCreate(event: FormEvent) {
     event.preventDefault();
@@ -97,11 +119,52 @@ function AdminInvitesInner() {
   return (
     <AdminShell
       title="Family invites"
-      description="Create optional invite codes for friends and family. Sign-up still works without a code — codes are for sharing a bay welcome, not locking the gate."
+      description={
+        requireInviteCode
+          ? "Invite codes are required to sign up. Create, copy, and revoke codes here."
+          : "Create optional invite codes for friends and family. Sign-up still works without a code unless you require invites below."
+      }
     >
+      <section
+        className="admin-panel mt-8 flex flex-col gap-3 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+        aria-label="Require invite setting"
+      >
+        <div className="min-w-0">
+          <p className="font-display text-base font-semibold text-mist">
+            Require invite code to sign up
+          </p>
+          <p className="mt-1 text-sm text-steel">
+            {requireInviteCode
+              ? "On — new members must enter a valid code."
+              : "Off — codes stay optional (open bay)."}
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={requireInviteCode}
+          aria-label="Require invite code to sign up"
+          disabled={toggleBusy}
+          onClick={() => void onToggleRequire(!requireInviteCode)}
+          className={`inline-flex shrink-0 items-center gap-2 rounded-md border px-4 py-2.5 font-display text-sm font-semibold transition disabled:opacity-60 ${
+            requireInviteCode
+              ? "border-lime/50 bg-lime/10 text-lime"
+              : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+          }`}
+        >
+          <span
+            className={`inline-block h-2.5 w-2.5 rounded-full ${
+              requireInviteCode ? "bg-lime" : "bg-steel"
+            }`}
+            aria-hidden
+          />
+          {requireInviteCode ? "Required" : "Optional"}
+        </button>
+      </section>
+
       <form
         onSubmit={(e) => void onCreate(e)}
-        className="admin-panel mt-8 grid gap-4 rounded-md border p-4 sm:grid-cols-2 sm:p-5"
+        className="admin-panel mt-6 grid gap-4 rounded-md border p-4 sm:grid-cols-2 sm:p-5"
       >
         <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:col-span-2">
           Custom code (optional)

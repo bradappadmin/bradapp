@@ -210,6 +210,20 @@ describe.runIf(hasDb)("admin routes", () => {
     expect(revoke.status).toBe(200);
     expect(revoke.body.invite.revokedAt).toBeTruthy();
 
+    expect(list.body.requireInviteCode).toBe(false);
+    const requireOn = await admin.put("/admin/invites/require").send({ requireInviteCode: true });
+    expect(requireOn.status).toBe(200);
+    expect(requireOn.body.requireInviteCode).toBe(true);
+    const listRequired = await admin.get("/admin/invites");
+    expect(listRequired.body.requireInviteCode).toBe(true);
+    const requireOff = await admin.put("/admin/invites/require").send({ requireInviteCode: false });
+    expect(requireOff.body.requireInviteCode).toBe(false);
+
+    const memberBlocked = await member.put("/admin/invites/require").send({
+      requireInviteCode: true,
+    });
+    expect(memberBlocked.status).toBe(403);
+
     await getPool().query("DELETE FROM family_invite_codes WHERE code = ?", [code]);
   });
 });

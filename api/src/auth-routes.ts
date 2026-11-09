@@ -9,6 +9,7 @@ import {
   memberStartingCoins,
 } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
+import { getRequireInviteCode } from "./app-settings.js";
 import {
   consumeInviteCode,
   inviteFailureMessage,
@@ -24,7 +25,7 @@ const signUpSchema = z.object({
   email: emailSchema,
   password: z.string().min(8).max(128),
   displayName: z.string().trim().min(1).max(120),
-  /** Optional family invite — open signup still works without one. */
+  /** Family invite — required only when admin require-invite setting is on. */
   inviteCode: z
     .string()
     .trim()
@@ -115,6 +116,12 @@ function startingCoinsForRole(role: PublicUser["role"]): number {
 export function createAuthRouter(): Router {
   const router = Router();
 
+  /** Public: whether signup currently requires a family invite code. */
+  router.get("/signup-options", async (_req, res: Response) => {
+    const requireInviteCode = await getRequireInviteCode();
+    res.json({ requireInviteCode });
+  });
+
   router.post("/signup", async (req: Request, res: Response) => {
     const parsed = signUpSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -123,6 +130,15 @@ export function createAuthRouter(): Router {
     }
 
     const { email, password, displayName, inviteCode } = parsed.data;
+    const requireInvite = await getRequireInviteCode();
+    if (requireInvite && !inviteCode) {
+      res.status(400).json({
+        error: "invite_required",
+        message: "A valid family invite code is required to sign up.",
+      });
+      return;
+    }
+
     const pool = getPool();
     const [existing] = await pool.query<RowDataPacket[]>(
       "SELECT id FROM users WHERE email = ? LIMIT 1",

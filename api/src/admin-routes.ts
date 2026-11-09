@@ -1,5 +1,6 @@
 import { Router, type Response } from "express";
 import { z } from "zod";
+import { getRequireInviteCode, setRequireInviteCode } from "./app-settings.js";
 import { requireAdmin, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta, listAdminCoinAdjustments, listLedger } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
@@ -503,8 +504,29 @@ export function createAdminRouter(): Router {
   });
 
   router.get("/invites", async (_req, res: Response) => {
-    const invites = await listInviteCodes();
-    res.json({ invites });
+    const [invites, requireInviteCode] = await Promise.all([
+      listInviteCodes(),
+      getRequireInviteCode(),
+    ]);
+    res.json({ invites, requireInviteCode });
+  });
+
+  const requireInviteSchema = z.object({
+    requireInviteCode: z.boolean(),
+  });
+
+  /** Toggle: when true, signup requires a valid family invite code. */
+  router.put("/invites/require", async (req, res: Response) => {
+    const parsed = requireInviteSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "validation_error",
+        message: "requireInviteCode must be a boolean.",
+      });
+      return;
+    }
+    const requireInviteCode = await setRequireInviteCode(parsed.data.requireInviteCode);
+    res.json({ requireInviteCode });
   });
 
   router.post("/invites", async (req, res: Response) => {

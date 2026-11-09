@@ -1,6 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
+import { setRequireInviteCode } from "./app-settings.js";
 import { DAILY_LOGIN_BONUS, memberStartingCoins } from "./coins.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
@@ -308,9 +309,63 @@ describe.runIf(hasDb)("auth routes", () => {
       });
     expect(open.status).toBe(201);
 
+    const optionsOpen = await request(app).get("/auth/signup-options");
+    expect(optionsOpen.status).toBe(200);
+    expect(optionsOpen.body.requireInviteCode).toBe(false);
+
     await getPool().query("DELETE FROM family_invite_codes WHERE code = ?", [code]);
     await getPool().query("DELETE FROM users WHERE email LIKE 'invite-%@example.com' OR email = ?", [
       adminEmail,
     ]);
+  });
+
+  it("blocks open signup when require-invite is on, and allows a valid code", async () => {
+    const adminEmail = `req-invite-admin-${Date.now()}@example.com`;
+    const admin = request.agent(app);
+    await ensureUser(adminEmail, "AdminPass-123!", "Require Invite Admin", "admin");
+    expect(
+      (await admin.post("/auth/signin").send({ email: adminEmail, password: "AdminPass-123!" }))
+        .status,
+    ).toBe(200);
+
+    const toggleOn = await admin.put("/admin/invites/require").send({ requireInviteCode: true });
+    expect(toggleOn.status).toBe(200);
+    expect(toggleOn.body.requireInviteCode).toBe(true);
+
+    const options = await request(app).get("/auth/signup-options");
+    expect(options.body.requireInviteCode).toBe(true);
+
+    const missing = await request
+      .agent(app)
+      .post("/auth/signup")
+      .send({
+        email: `req-missing-${Date.now()}@example.com`,
+        password: "MemberPass-123!",
+        displayName: "Needs Code",
+      });
+    expect(missing.status).toBe(400);
+    expect(missing.body.error).toBe("invite_required");
+
+    const code = `REQ-OK-${Date.now()}`;
+    const created = await admin.post("/admin/invites").send({ code, maxUses: 1 });
+    expect(created.status).toBe(201);
+
+    const withCode = await request
+      .agent(app)
+      .post("/auth/signup")
+      .send({
+        email: `req-ok-${Date.now()}@example.com`,
+        password: "MemberPass-123!",
+        displayName: "Has Code",
+        inviteCode: code,
+      });
+    expect(withCode.status).toBe(201);
+
+    await setRequireInviteCode(false);
+    await getPool().query("DELETE FROM family_invite_codes WHERE code = ?", [code]);
+    await getPool().query(
+      "DELETE FROM users WHERE email LIKE 'req-%@example.com' OR email = ?",
+      [adminEmail],
+    );
   });
 });
