@@ -1,7 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
-import { MEMBER_STARTING_COINS } from "./coins.js";
+import { memberStartingCoins } from "./coins.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
 import { seedAccounts } from "./seed.js";
@@ -27,13 +27,13 @@ describe.runIf(hasDb)("trade routes", () => {
       displayName: "Coin Buyer",
     });
     expect(signup.status).toBe(201);
-    expect(signup.body.user.coinBalance).toBe(MEMBER_STARTING_COINS);
+    expect(signup.body.user.coinBalance).toBe(memberStartingCoins());
 
     const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 5 });
     expect(search.status).toBe(200);
     listingId = search.body.listings[0].id;
     cheapListingId = search.body.listings.find(
-      (l: { coinPrice: number }) => l.coinPrice <= MEMBER_STARTING_COINS,
+      (l: { coinPrice: number }) => l.coinPrice <= memberStartingCoins(),
     )?.id;
     expect(cheapListingId).toBeTruthy();
   });
@@ -47,13 +47,18 @@ describe.runIf(hasDb)("trade routes", () => {
   it("buys a listing, moves it to garage, and updates the ledger", async () => {
     const buy = await buyer.post(`/trade/listings/${cheapListingId}/buy`);
     expect(buy.status).toBe(200);
-    expect(buy.body.balance).toBeLessThan(MEMBER_STARTING_COINS);
+    expect(buy.body.balance).toBeLessThan(memberStartingCoins());
 
     const wallet = await buyer.get("/trade/wallet");
     expect(wallet.status).toBe(200);
     expect(wallet.body.balance).toBe(buy.body.balance);
     expect(wallet.body.ledger.some((e: { reason: string }) => e.reason === "purchase")).toBe(true);
-    expect(wallet.body.ledger.some((e: { reason: string }) => e.reason === "seed")).toBe(true);
+    expect(
+      wallet.body.ledger.some(
+        (e: { reason: string; delta: number }) =>
+          e.reason === "seed" && e.delta === memberStartingCoins(),
+      ),
+    ).toBe(true);
 
     const garage = await buyer.get("/trade/garage");
     expect(garage.status).toBe(200);

@@ -1,8 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
-import { MEMBER_STARTING_COINS } from "./coins.js";
-import { closePool, getPool } from "./db.js";
+import { memberStartingCoins } from "./coins.js";import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
 import { verifyPassword } from "./password.js";
 import {
@@ -58,7 +57,7 @@ describe.runIf(hasDb)("demo family seed", () => {
       )[0];
       expect(row).toBeTruthy();
       expect(row.role).toBe("member");
-      expect(Number(row.coin_balance)).toBeGreaterThanOrEqual(MEMBER_STARTING_COINS);
+      expect(Number(row.coin_balance)).toBeGreaterThanOrEqual(memberStartingCoins());
       expect(Number(row.car_count)).toBeGreaterThanOrEqual(member.carCount);
     }
   });

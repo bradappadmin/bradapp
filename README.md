@@ -30,7 +30,8 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 
 ## What’s in this slice
 
-- Accounts: sign-up, sign-in, session cookie, signed-in change password (bcrypt)
+- Accounts: sign-up, sign-in, session cookie, signed-in change password (bcrypt); new members get starter Brad Coins (default 100, `MEMBER_STARTING_COINS` env) with a seed ledger entry
+
 - Mobile-friendly Midnight Garage layout: collapsible nav, readable forms/lists, usable admin on phone widths
 - Car cards: original colour strip + body silhouette cues, BHP / 0–60 / top speed, price or owned badge (no stock photos)
 - Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
@@ -72,6 +73,13 @@ Optional demo-family password override (hashed at seed, never logged or committe
 ```bash
 # in .env
 DEMO_MEMBER_PASSWORD=…   # shared walkthrough secret for Sam/Jordan/Casey
+```
+
+Optional starter Brad Coins for new member sign-up (default 100):
+
+```bash
+# in .env
+MEMBER_STARTING_COINS=100
 ```
 
 ## Checks

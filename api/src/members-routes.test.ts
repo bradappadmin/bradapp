@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
-import { MEMBER_STARTING_COINS } from "./coins.js";
+import { memberStartingCoins } from "./coins.js";
 import { seedAccounts } from "./seed.js";
 
 loadEnv();
@@ -42,7 +42,7 @@ describe.runIf(hasDb)("members routes", () => {
     ).toBe(200);
     const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 30 });
     const cheap = search.body.listings.find(
-      (l: { coinPrice: number }) => l.coinPrice <= MEMBER_STARTING_COINS,
+      (l: { coinPrice: number }) => l.coinPrice <= memberStartingCoins(),
     );
     expect(cheap).toBeTruthy();
     otherCarId = Number(cheap!.id);

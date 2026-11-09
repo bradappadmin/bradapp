@@ -1,7 +1,7 @@
 import {
   ADMIN_STARTING_COINS,
-  MEMBER_STARTING_COINS,
   creditSeedIfNeeded,
+  memberStartingCoins,
 } from "./coins.js";
 import { closePool, getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { loadEnv } from "./env.js";
@@ -73,8 +73,8 @@ export async function seedAccounts(): Promise<void> {
   );
   for (const user of users) {
     const amount =
-      user.role === "member" ? MEMBER_STARTING_COINS : ADMIN_STARTING_COINS;
-    await creditSeedIfNeeded(Number(user.id), amount, "Starting Brad Coins");
+      user.role === "member" ? memberStartingCoins() : ADMIN_STARTING_COINS;
+    await creditSeedIfNeeded(Number(user.id), amount, "Starter Brad Coins");
   }
 
   await seedBradStarterGarage();
@@ -84,27 +84,28 @@ export async function seedAccounts(): Promise<void> {
 
 /**
  * Keep a pocket of buyable stock so play/trade/member tests (and walkthroughs)
- * can purchase with MEMBER_STARTING_COINS after starter garages are filled.
+ * can purchase with memberStartingCoins() after starter garages are filled.
  */
 async function ensureAffordableStock(minCount: number): Promise<void> {
   const pool = getPool();
+  const starter = memberStartingCoins();
   const [countRows] = await pool.query<(RowDataPacket & { count: number })[]>(
     `SELECT COUNT(*) AS count
      FROM listings
      WHERE status = 'available' AND owner_user_id IS NULL AND coin_price <= ?`,
-    [MEMBER_STARTING_COINS],
+    [starter],
   );
   const have = Number(countRows[0]?.count ?? 0);
   if (have >= minCount) return;
   const need = minCount - have;
-  const targetPrice = Math.min(150, MEMBER_STARTING_COINS);
+  const targetPrice = Math.min(150, starter);
   await pool.query(
     `UPDATE listings
      SET coin_price = ?
      WHERE status = 'available' AND owner_user_id IS NULL AND coin_price > ?
      ORDER BY coin_price ASC
      LIMIT ?`,
-    [targetPrice, MEMBER_STARTING_COINS, need],
+    [targetPrice, starter, need],
   );
 }
 

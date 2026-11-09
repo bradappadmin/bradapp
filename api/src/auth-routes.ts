@@ -2,11 +2,11 @@ import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import {
   ADMIN_STARTING_COINS,
-  MEMBER_STARTING_COINS,
   applyCoinDelta,
   claimDailyLoginBonus,
   creditSeedIfNeeded,
   getDailyLoginStatus,
+  memberStartingCoins,
 } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { hashPassword, verifyPassword } from "./password.js";
@@ -71,7 +71,7 @@ function sendValidationError(res: Response, error: z.ZodError): void {
 function startingCoinsForRole(role: PublicUser["role"]): number {
   switch (role) {
     case "member":
-      return MEMBER_STARTING_COINS;
+      return memberStartingCoins();
     case "admin":
     case "super_admin":
       return ADMIN_STARTING_COINS;
@@ -117,9 +117,9 @@ export function createAuthRouter(): Router {
       userId = Number(result.insertId);
       coinBalance = await applyCoinDelta(connection, {
         userId,
-        delta: MEMBER_STARTING_COINS,
+        delta: memberStartingCoins(),
         reason: "seed",
-        note: "Starting Brad Coins",
+        note: "Starter Brad Coins",
       });
       await connection.commit();
     } catch (error) {

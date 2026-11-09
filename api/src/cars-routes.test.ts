@@ -68,7 +68,10 @@ describe.runIf(hasDb)("cars routes", () => {
   });
 
   it("filters models by make to available stock only", async () => {
-    const res = await request(app).get("/cars/models").query({ make: "BMW" });
+    const filters = await request(app).get("/cars/filters");
+    const make = (filters.body.filters.makes as string[])[0];
+    expect(make).toBeTruthy();
+    const res = await request(app).get("/cars/models").query({ make });
     expect(res.status).toBe(200);
     expect(res.body.models.length).toBeGreaterThan(0);
     expect(res.body.models.every((m: string) => typeof m === "string")).toBe(true);

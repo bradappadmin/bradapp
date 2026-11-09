@@ -1,7 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
-import { DAILY_LOGIN_BONUS } from "./coins.js";
+import { DAILY_LOGIN_BONUS, memberStartingCoins } from "./coins.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
 import { seedAccounts } from "./seed.js";
@@ -33,7 +33,7 @@ describe.runIf(hasDb)("auth routes", () => {
     expect(res.body.error).toBe("validation_error");
   });
 
-  it("signs up a member, reads /me, and signs out", async () => {
+  it("signs up a member with starter Brad Coins and a seed ledger entry", async () => {
     const signup = await agent.post("/auth/signup").send({
       email: memberEmail,
       password: "MemberPass-123!",
@@ -41,11 +41,25 @@ describe.runIf(hasDb)("auth routes", () => {
     });
     expect(signup.status).toBe(201);
     expect(signup.body.user.role).toBe("member");
+    expect(signup.body.user.coinBalance).toBe(memberStartingCoins());
     expect(signup.headers["set-cookie"]).toBeTruthy();
 
     const me = await agent.get("/auth/me");
     expect(me.status).toBe(200);
     expect(me.body.user.email).toBe(memberEmail);
+    // /me may also claim the daily login bonus on top of starter coins.
+    expect(me.body.user.coinBalance).toBeGreaterThanOrEqual(memberStartingCoins());
+
+    const wallet = await agent.get("/trade/wallet");
+    expect(wallet.status).toBe(200);
+    expect(
+      wallet.body.ledger.some(
+        (e: { reason: string; delta: number; note: string }) =>
+          e.reason === "seed" &&
+          e.delta === memberStartingCoins() &&
+          /starter/i.test(e.note),
+      ),
+    ).toBe(true);
 
     const signout = await agent.post("/auth/signout");
     expect(signout.status).toBe(200);

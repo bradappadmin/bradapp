@@ -1,6 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
+import { memberStartingCoins } from "./coins.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
 import { ensureUser, seedAccounts } from "./seed.js";
@@ -70,7 +71,7 @@ describe.runIf(hasDb)("admin routes", () => {
       note: "Goodwill top-up",
     });
     expect(res.status).toBe(200);
-    expect(res.body.balance).toBeGreaterThanOrEqual(250);
+    expect(res.body.balance).toBeGreaterThanOrEqual(memberStartingCoins() + 50);
     expect(res.body.ledger.some((e: { reason: string }) => e.reason === "admin_adjust")).toBe(true);
   });
 

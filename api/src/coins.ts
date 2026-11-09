@@ -1,9 +1,24 @@
 import type { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { getPool } from "./db.js";
 
-/** Starting Brad Coins for new members. */
-export const MEMBER_STARTING_COINS = 200;
+/** Default starter Brad Coins when `MEMBER_STARTING_COINS` env is unset. */
+export const DEFAULT_MEMBER_STARTING_COINS = 100;
 export const ADMIN_STARTING_COINS = 1000;
+
+/**
+ * Starter Brad Coins credited on member sign-up (ledger reason `seed`).
+ * Override with env `MEMBER_STARTING_COINS` (non-negative integer).
+ */
+export function memberStartingCoins(): number {
+  const raw = process.env.MEMBER_STARTING_COINS;
+  if (raw == null || raw.trim() === "") return DEFAULT_MEMBER_STARTING_COINS;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return DEFAULT_MEMBER_STARTING_COINS;
+  return Math.min(Math.trunc(n), 1_000_000);
+}
+
+/** @deprecated Prefer `memberStartingCoins()` so env overrides apply after loadEnv. */
+export const MEMBER_STARTING_COINS = DEFAULT_MEMBER_STARTING_COINS;
 
 /** Brad Coins credited once per UTC calendar day when signed in. */
 export const DAILY_LOGIN_BONUS = 25;

@@ -4,7 +4,7 @@ import { createApp } from "./app.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
 import { seedAccounts } from "./seed.js";
-import { MEMBER_STARTING_COINS } from "./coins.js";
+import { memberStartingCoins } from "./coins.js";
 import { PLAY_COINS, WIN_COINS } from "./top-trumps.js";
 
 loadEnv();
@@ -29,7 +29,7 @@ describe.runIf(hasDb)("play routes", () => {
 
     const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 30 });
     const affordable = search.body.listings.filter(
-      (l: { coinPrice: number }) => l.coinPrice <= MEMBER_STARTING_COINS,
+      (l: { coinPrice: number }) => l.coinPrice <= memberStartingCoins(),
     );
     expect(affordable.length).toBeGreaterThanOrEqual(2);
     carA = affordable[0].id;
