@@ -79,21 +79,21 @@ function AdminInventoryInner() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
         <Link to="/admin" className="text-sm text-lime no-underline hover:underline">
           ← Admin
         </Link>
         <h1 className="bay-rise mt-4 font-display text-3xl font-semibold text-white">Cars & garages</h1>
         <p className="mt-2 text-sm text-steel">Correct listings, model specs, and garage copy.</p>
 
-        <nav className="mt-6 flex gap-4 border-b border-white/10 pb-3">
-          <button type="button" className={tabClass("listings")} onClick={() => setTab("listings")}>
+        <nav className="-mx-1 mt-6 flex gap-1 overflow-x-auto border-b border-white/10 px-1 pb-3 sm:gap-4">
+          <button type="button" className={`${tabClass("listings")} shrink-0 px-2 py-1`} onClick={() => setTab("listings")}>
             Listings
           </button>
-          <button type="button" className={tabClass("models")} onClick={() => setTab("models")}>
+          <button type="button" className={`${tabClass("models")} shrink-0 px-2 py-1`} onClick={() => setTab("models")}>
             Models
           </button>
-          <button type="button" className={tabClass("garages")} onClick={() => setTab("garages")}>
+          <button type="button" className={`${tabClass("garages")} shrink-0 px-2 py-1`} onClick={() => setTab("garages")}>
             Garages
           </button>
         </nav>
@@ -104,28 +104,28 @@ function AdminInventoryInner() {
         {tab === "listings" ? (
           <ul className="mt-6 divide-y divide-white/10 border-t border-white/10">
             {listings.slice(0, 40).map((listing) => (
-              <li key={listing.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-mist">
+              <li key={listing.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-mist break-words">
                     #{listing.id} {listing.make} {listing.model} · {listing.year} · {listing.status}
                   </p>
                   <p className="text-xs text-steel">
                     {listing.garageName} · {listing.ownerLabel}
                   </p>
                 </div>
-                <div className="flex items-end gap-2">
-                  <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-steel">
+                <div className="flex w-full items-end gap-2 sm:w-auto">
+                  <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:flex-none">
                     Coins
                     <input
                       id={`price-${listing.id}`}
-                      className="w-24 rounded-md border border-white/10 bg-bay-panel px-2 py-1.5 text-sm text-mist"
+                      className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist sm:w-28"
                       type="number"
                       defaultValue={listing.coinPrice}
                     />
                   </label>
                   <button
                     type="button"
-                    className="rounded-md border border-white/15 px-3 py-1.5 text-sm text-mist"
+                    className="shrink-0 rounded-md border border-white/15 px-3 py-2 text-sm text-mist"
                     onClick={() => {
                       const el = document.getElementById(`price-${listing.id}`) as HTMLInputElement | null;
                       void saveListing(listing.id, Number(el?.value || listing.coinPrice));
@@ -142,28 +142,28 @@ function AdminInventoryInner() {
         {tab === "models" ? (
           <ul className="mt-6 divide-y divide-white/10 border-t border-white/10">
             {models.slice(0, 40).map((model) => (
-              <li key={model.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-mist">
+              <li key={model.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-mist break-words">
                     {model.make} {model.model} {model.trimName}
                   </p>
                   <p className="text-xs text-steel">
                     {model.bodyType} · {model.fuel} · {model.topSpeedMph} mph · {model.zeroToSixtySecs}s
                   </p>
                 </div>
-                <div className="flex items-end gap-2">
-                  <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-steel">
+                <div className="flex w-full items-end gap-2 sm:w-auto">
+                  <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:flex-none">
                     BHP
                     <input
                       id={`bhp-${model.id}`}
-                      className="w-24 rounded-md border border-white/10 bg-bay-panel px-2 py-1.5 text-sm text-mist"
+                      className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist sm:w-28"
                       type="number"
                       defaultValue={model.bhp}
                     />
                   </label>
                   <button
                     type="button"
-                    className="rounded-md border border-white/15 px-3 py-1.5 text-sm text-mist"
+                    className="shrink-0 rounded-md border border-white/15 px-3 py-2 text-sm text-mist"
                     onClick={() => {
                       const el = document.getElementById(`bhp-${model.id}`) as HTMLInputElement | null;
                       void saveModel(model.id, Number(el?.value || model.bhp));
@@ -184,18 +184,18 @@ function AdminInventoryInner() {
                 <p className="text-mist">
                   {garage.name} · {garage.city}
                 </p>
-                <div className="flex flex-wrap items-end gap-2">
-                  <label className="flex min-w-[16rem] flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                  <label className="flex w-full min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel">
                     Tagline
                     <input
                       id={`tag-${garage.id}`}
-                      className="rounded-md border border-white/10 bg-bay-panel px-2 py-1.5 text-sm text-mist"
+                      className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
                       defaultValue={garage.tagline}
                     />
                   </label>
                   <button
                     type="button"
-                    className="rounded-md border border-white/15 px-3 py-1.5 text-sm text-mist"
+                    className="w-full rounded-md border border-white/15 px-3 py-2 text-sm text-mist sm:w-auto"
                     onClick={() => {
                       const el = document.getElementById(`tag-${garage.id}`) as HTMLInputElement | null;
                       void saveGarage(garage.id, el?.value ?? garage.tagline);

@@ -40,7 +40,7 @@ export function HomePage() {
     return (
       <div className="min-h-screen">
         <SiteHeader />
-        <main className="mx-auto flex max-w-3xl items-center px-6 py-16">
+        <main className="mx-auto flex max-w-3xl items-center px-4 py-12 sm:px-6 sm:py-16">
           <p className="text-steel">Loading…</p>
         </main>
       </div>
@@ -51,10 +51,10 @@ export function HomePage() {
     return (
       <div className="min-h-screen">
         <SiteHeader />
-        <main className="relative mx-auto flex max-w-3xl flex-col px-6 py-16">
+        <main className="relative mx-auto flex max-w-3xl flex-col px-4 py-12 sm:px-6 sm:py-16">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(ellipse_at_top,rgba(244,63,94,0.2),transparent_70%)]" />
           <div className="bay-rise relative">
-            <p className="font-display text-5xl font-bold tracking-tight text-white sm:text-6xl">
+            <p className="font-display text-4xl font-bold tracking-tight text-white sm:text-6xl">
               BradApp
             </p>
             <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full" />
@@ -99,10 +99,10 @@ export function HomePage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="relative mx-auto flex max-w-3xl flex-col px-6 py-16">
+      <main className="relative mx-auto flex max-w-3xl flex-col px-4 py-12 sm:px-6 sm:py-16">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(ellipse_at_top,rgba(163,230,53,0.14),transparent_70%)]" />
         <div className="bay-rise relative">
-          <p className="font-display text-5xl font-bold tracking-tight text-white">BradApp</p>
+          <p className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">BradApp</p>
           <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full" />
           <h1 className="mt-8 font-display text-3xl font-semibold text-mist">
             Welcome back, {user.displayName}

@@ -79,6 +79,33 @@ export async function seedAccounts(): Promise<void> {
 
   await seedBradStarterGarage();
   await seedDemoFamilyGarages();
+  await ensureAffordableStock(12);
+}
+
+/**
+ * Keep a pocket of buyable stock so play/trade/member tests (and walkthroughs)
+ * can purchase with MEMBER_STARTING_COINS after starter garages are filled.
+ */
+async function ensureAffordableStock(minCount: number): Promise<void> {
+  const pool = getPool();
+  const [countRows] = await pool.query<(RowDataPacket & { count: number })[]>(
+    `SELECT COUNT(*) AS count
+     FROM listings
+     WHERE status = 'available' AND owner_user_id IS NULL AND coin_price <= ?`,
+    [MEMBER_STARTING_COINS],
+  );
+  const have = Number(countRows[0]?.count ?? 0);
+  if (have >= minCount) return;
+  const need = minCount - have;
+  const targetPrice = Math.min(150, MEMBER_STARTING_COINS);
+  await pool.query(
+    `UPDATE listings
+     SET coin_price = ?
+     WHERE status = 'available' AND owner_user_id IS NULL AND coin_price > ?
+     ORDER BY coin_price ASC
+     LIMIT ?`,
+    [targetPrice, MEMBER_STARTING_COINS, need],
+  );
 }
 
 async function resolveDemoMemberPasswordHash(): Promise<string> {

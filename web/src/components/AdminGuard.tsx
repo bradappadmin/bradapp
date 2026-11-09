@@ -10,7 +10,7 @@ export function AdminGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-3xl items-center px-6">
+      <main className="mx-auto flex min-h-screen max-w-3xl items-center px-4 sm:px-6">
         <p className="text-steel">Loading…</p>
       </main>
     );

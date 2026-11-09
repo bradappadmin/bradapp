@@ -49,7 +49,7 @@ export function MemberProfilePage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <p className="text-sm text-steel">
           <Link to="/members" className="text-lime no-underline hover:underline">
             ← Members

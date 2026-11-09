@@ -11,7 +11,7 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-6 py-16">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-4 py-12 sm:px-6 sm:py-16">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(244,63,94,0.22),transparent_70%)]" />
       <header className="bay-rise relative mb-10">
         <Link to="/" className="inline-block no-underline">

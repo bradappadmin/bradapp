@@ -185,7 +185,7 @@ export function CarsPage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="bay-rise mb-8">
           <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Find a car</h1>
           <p className="mt-2 max-w-2xl text-sm text-steel">
@@ -488,11 +488,11 @@ export function CarsPage() {
                     <p className="font-display text-lg font-semibold text-mist group-hover:text-white">
                       {listingTitle(listing)}
                     </p>
-                    <p className="mt-1 text-sm text-steel">
+                    <p className="mt-1 text-sm leading-relaxed text-steel">
                       {listing.year} · {listing.conditionType} · {listing.bodyType} · {listing.fuel}{" "}
                       · {listing.colour} · {formatMileage(listing.mileage)}
                     </p>
-                    <p className="mt-1 text-xs text-steel">
+                    <p className="mt-1 text-xs leading-relaxed text-steel">
                       {listing.bhp} bhp · {listing.topSpeedMph} mph · {listing.zeroToSixtySecs}s
                       0–60 · {listing.garageName}, {listing.garageCity}
                     </p>

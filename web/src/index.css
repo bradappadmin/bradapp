@@ -19,8 +19,13 @@
     min-height: 100%;
   }
 
+  html {
+    overflow-x: clip;
+  }
+
   body {
     margin: 0;
+    overflow-x: clip;
     color: var(--color-mist);
     font-family: var(--font-body);
     background-color: var(--color-bay-deep);
@@ -42,6 +47,35 @@
   h2,
   h3 {
     font-family: var(--font-display);
+  }
+
+  /* Touch-friendly controls on phone widths */
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  @media (max-width: 639px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      min-height: 2.75rem;
+      font-size: 16px; /* avoid iOS zoom on focus */
+    }
+  }
+}
+
+@layer utilities {
+  .page-pad {
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .page-pad {
+      padding-inline: 1.5rem;
+    }
   }
 }
 
