@@ -1,8 +1,36 @@
 import { Link } from "react-router-dom";
 import { AdminGuard } from "../../components/AdminGuard";
-import { SiteHeader } from "../../components/SiteHeader";
+import { AdminShell } from "../../components/AdminShell";
 import { useAuth } from "../../auth-context";
 import { roleLabel } from "../../types";
+
+const SECTIONS = [
+  {
+    to: "/admin/users",
+    title: "Accounts",
+    body: "List members, correct names, freeze or close accounts, adjust Brad Coins.",
+  },
+  {
+    to: "/admin/invites",
+    title: "Family invites",
+    body: "Create, copy, and revoke optional signup invite codes.",
+  },
+  {
+    to: "/admin/coin-history",
+    title: "Coin adjustments",
+    body: "Who changed which balance, by how much, when, and the note.",
+  },
+  {
+    to: "/admin/inventory",
+    title: "Cars & garages",
+    body: "Edit models, listings, and garage details.",
+  },
+  {
+    to: "/reviews",
+    title: "Reviews",
+    body: "Record or take down bay videos.",
+  },
+] as const;
 
 export function AdminHomePage() {
   return (
@@ -15,62 +43,28 @@ export function AdminHomePage() {
 function AdminHomeInner() {
   const { user } = useAuth();
   return (
-    <div className="min-h-screen">
-      <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="bay-rise">
-          <h1 className="font-display text-3xl font-semibold text-white">Admin</h1>
-          <p className="mt-2 text-sm text-steel">
-            {user ? `${user.displayName} · ${roleLabel(user.role)}` : ""} — Brad and Napwood can correct
-            accounts, stock, coins, and reviews. Members stay out.
-          </p>
-        </div>
-        <ul className="mt-10 divide-y divide-white/10 border-t border-white/10">
-          <li>
-            <Link to="/admin/users" className="block py-5 text-mist no-underline hover:text-white">
-              <span className="font-display text-lg font-semibold">Accounts</span>
-              <span className="mt-1 block text-sm text-steel">
-                List members, correct names, close accounts, adjust Brad Coins.
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/invites" className="block py-5 text-mist no-underline hover:text-white">
-              <span className="font-display text-lg font-semibold">Family invites</span>
-              <span className="mt-1 block text-sm text-steel">
-                Create, copy, and revoke optional signup invite codes.
-              </span>
-            </Link>
-          </li>
-          <li>
+    <AdminShell
+      title="Admin"
+      description={
+        <>
+          {user ? `${user.displayName} · ${roleLabel(user.role)}` : ""} — Brad and Napwood can
+          correct accounts, stock, coins, and reviews. Members stay out.
+        </>
+      }
+    >
+      <ul className="mt-10 divide-y divide-white/10 border-t border-white/10">
+        {SECTIONS.map((section) => (
+          <li key={section.to} className="admin-row">
             <Link
-              to="/admin/coin-history"
-              className="block py-5 text-mist no-underline hover:text-white"
+              to={section.to}
+              className="block py-5 text-mist no-underline transition hover:text-white"
             >
-              <span className="font-display text-lg font-semibold">Coin adjustments</span>
-              <span className="mt-1 block text-sm text-steel">
-                Who changed which balance, by how much, when, and the note.
-              </span>
+              <span className="font-display text-lg font-semibold">{section.title}</span>
+              <span className="mt-1 block text-sm text-steel">{section.body}</span>
             </Link>
           </li>
-          <li>
-            <Link to="/admin/inventory" className="block py-5 text-mist no-underline hover:text-white">
-              <span className="font-display text-lg font-semibold">Cars & garages</span>
-              <span className="mt-1 block text-sm text-steel">
-                Edit models, listings, and garage details.
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/reviews" className="block py-5 text-mist no-underline hover:text-white">
-              <span className="font-display text-lg font-semibold">Reviews</span>
-              <span className="mt-1 block text-sm text-steel">
-                Record or take down bay videos.
-              </span>
-            </Link>
-          </li>
-        </ul>
-      </main>
-    </div>
+        ))}
+      </ul>
+    </AdminShell>
   );
 }
