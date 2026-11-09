@@ -12,7 +12,28 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
-describe("FavouritesPage media cards", () => {
+const favourite = {
+  id: 11,
+  make: "Audi",
+  model: "RS6",
+  trimName: "Avant",
+  bodyType: "Estate",
+  bhp: 591,
+  topSpeedMph: 155,
+  zeroToSixtySecs: 3.6,
+  conditionType: "used" as const,
+  year: 2019,
+  colour: "Nardo Grey",
+  mileage: 18000,
+  coinPrice: 310,
+  status: "available" as const,
+  ownerLabel: "Bay stock",
+  garageName: "Bay",
+  garageCity: "London",
+  favouritedAt: "2026-11-09T12:00:00.000Z",
+};
+
+describe("FavouritesPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -36,32 +57,11 @@ describe("FavouritesPage media cards", () => {
       },
     });
     vi.mocked(api.fetchFavourites).mockResolvedValue({
-      cars: [
-        {
-          id: 11,
-          make: "Audi",
-          model: "RS6",
-          trimName: "Avant",
-          bodyType: "Estate",
-          bhp: 591,
-          topSpeedMph: 155,
-          zeroToSixtySecs: 3.6,
-          conditionType: "used",
-          year: 2019,
-          colour: "Nardo Grey",
-          mileage: 18000,
-          coinPrice: 310,
-          status: "available",
-          ownerLabel: "Bay stock",
-          garageName: "Bay",
-          garageCity: "London",
-          favouritedAt: "2026-11-09T12:00:00.000Z",
-        },
-      ],
+      cars: [favourite],
     });
   });
 
-  it("renders favourites as photo-first media cards", async () => {
+  it("shows bay hierarchy and photo-first media cards", async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -71,12 +71,35 @@ describe("FavouritesPage media cards", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Favourites" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(document.querySelector(".play-bay-glow")).not.toBeNull();
+    expect(await screen.findByRole("heading", { name: "Saved" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: /Audi RS6 Avant/i })).toHaveAttribute(
       "href",
       "/cars/11",
     );
+    const browseLinks = screen.getAllByRole("link", { name: "Browse cars" });
+    expect(browseLinks.some((link) => link.getAttribute("href") === "/cars")).toBe(true);
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
+  it("shows a clear empty state with Cars CTA", async () => {
+    vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [] });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <FavouritesPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No favourites yet")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    const cta = screen.getAllByRole("link", { name: "Browse cars" });
+    expect(cta.some((link) => link.className.includes("bay-cta"))).toBe(true);
+    expect(screen.queryByRole("heading", { name: "Saved" })).not.toBeInTheDocument();
   });
 });
