@@ -76,6 +76,20 @@ describe.runIf(hasDb)("trade routes", () => {
 
     const detail = await request(app).get(`/cars/listings/${cheapListingId}`);
     expect(detail.body.listing.status).toBe("owned");
+
+    const purchases = await buyer.get("/trade/purchases");
+    expect(purchases.status).toBe(200);
+    const purchase = purchases.body.purchases.find(
+      (p: { listingId: number }) => p.listingId === cheapListingId,
+    );
+    expect(purchase).toBeTruthy();
+    expect(purchase.paidPrice).toBeGreaterThan(0);
+    expect(purchase.purchasedAt).toBeTruthy();
+    expect(purchase.make).toBeTruthy();
+    // Catalogue / bay stock has no member seller ledger row.
+    expect(purchase.sellerDisplayName == null || typeof purchase.sellerDisplayName === "string").toBe(
+      true,
+    );
   });
 
   it("lists a owned car for sale and another member can buy it", async () => {
@@ -112,11 +126,26 @@ describe.runIf(hasDb)("trade routes", () => {
     expect(sale.make).toBeTruthy();
     expect(sale.model).toBeTruthy();
 
+    const purchases = await second.get("/trade/purchases");
+    expect(purchases.status).toBe(200);
+    const purchase = purchases.body.purchases.find(
+      (p: { listingId: number }) => p.listingId === cheapListingId,
+    );
+    expect(purchase).toBeTruthy();
+    expect(purchase.paidPrice).toBe(sellPrice);
+    expect(purchase.sellerDisplayName).toBe("Coin Buyer");
+    expect(purchase.purchasedAt).toBeTruthy();
+
     await getPool().query("DELETE FROM users WHERE email = ?", [secondEmail]);
   });
 
   it("requires auth for sold history", async () => {
     const res = await request(app).get("/trade/sold");
+    expect(res.status).toBe(401);
+  });
+
+  it("requires auth for purchase history", async () => {
+    const res = await request(app).get("/trade/purchases");
     expect(res.status).toBe(401);
   });
 

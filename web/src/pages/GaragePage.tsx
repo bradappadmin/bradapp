@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
-import type { GarageCar, LedgerEntry, SoldCar } from "../api";
+import type { GarageCar, LedgerEntry, PurchasedCar, SoldCar } from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins, listingTitle } from "../cars";
 import { badgeForStatus } from "../car-visuals";
@@ -15,6 +15,7 @@ export function GaragePage() {
   const [totalValue, setTotalValue] = useState(0);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [sales, setSales] = useState<SoldCar[]>([]);
+  const [purchases, setPurchases] = useState<PurchasedCar[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,10 +23,11 @@ export function GaragePage() {
   const [busyId, setBusyId] = useState<number | null>(null);
 
   async function reload() {
-    const [garage, wallet, sold] = await Promise.all([
+    const [garage, wallet, sold, bought] = await Promise.all([
       api.fetchGarage(),
       api.fetchWallet(),
       api.fetchSoldHistory(),
+      api.fetchPurchaseHistory(),
     ]);
     setCars(garage.cars);
     setTotalValue(
@@ -33,6 +35,7 @@ export function GaragePage() {
     );
     setLedger(wallet.ledger);
     setSales(sold.sales);
+    setPurchases(bought.purchases);
     if (user) {
       setUser({ ...user, coinBalance: wallet.balance });
     }
@@ -117,8 +120,8 @@ export function GaragePage() {
           <p className="mt-2 text-sm text-steel">
             List an owned car for sale in Brad Coins, change the price, or unlist it. Other members buy
             from the Cars catalogue. Garage value is the sum of each car’s list / fair Brad Coin price.
-            Sold history lists cars you sold — price, buyer when known, and when. No real money leaves
-            this bay.
+            Sold and purchase history show cars you sold or bought — price, counterparty when known,
+            and when. No real money leaves this bay.
           </p>
           {user ? (
             <p className="mt-4 font-display text-2xl text-lime">{formatCoins(user.coinBalance)}</p>
@@ -204,6 +207,53 @@ export function GaragePage() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="font-display text-xl text-mist">Purchase history</h2>
+          <p className="mt-2 text-sm text-steel">
+            Cars you bought with Brad Coins, newest first.
+          </p>
+          {purchases.length === 0 && !loading ? (
+            <p className="mt-3 text-sm text-steel">
+              No purchases yet.{" "}
+              <Link to="/cars" className="text-lime no-underline hover:underline">
+                Browse cars
+              </Link>
+              .
+            </p>
+          ) : null}
+          {purchases.length > 0 ? (
+            <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
+              {purchases.map((purchase) => (
+                <li
+                  key={purchase.ledgerId}
+                  className="flex flex-wrap items-baseline justify-between gap-3 py-3 text-sm"
+                >
+                  <div className="min-w-0">
+                    <Link
+                      to={`/cars/${purchase.listingId}`}
+                      className="font-display text-mist no-underline hover:text-lime"
+                    >
+                      {listingTitle(purchase)}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-steel">
+                      {purchase.year} · {purchase.colour}
+                      {purchase.sellerDisplayName
+                        ? ` · Seller: ${purchase.sellerDisplayName}`
+                        : " · Seller unknown"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-steel">
+                      {new Date(purchase.purchasedAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <p className="font-display font-semibold text-rose">
+                    {formatCoins(purchase.paidPrice)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
 
         <section className="mt-12">

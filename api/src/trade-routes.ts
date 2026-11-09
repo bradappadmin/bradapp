@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta, getCoinBalance, listLedger } from "./coins.js";
 import { getPool, type RowDataPacket } from "./db.js";
+import { listPurchaseHistory } from "./purchase-history.js";
 import { listSoldHistory } from "./sold-history.js";
 
 const sellSchema = z.object({
@@ -68,6 +69,12 @@ export function createTradeRouter(): Router {
     res.json({ sales });
   });
 
+  router.get("/purchases", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const purchases = await listPurchaseHistory(user.id);
+    res.json({ purchases });
+  });
+
   router.post("/listings/:id/buy", requireAuth, async (req, res: Response) => {
     const user = (req as AuthedRequest).user;
     const listingId = Number(req.params.id);
@@ -112,7 +119,10 @@ export function createTradeRouter(): Router {
           delta: -price,
           reason: "purchase",
           listingId,
-          note: `Bought listing #${listingId}`,
+          note:
+            sellerId != null
+              ? `Bought listing #${listingId} from ${listing.owner_label}`
+              : `Bought listing #${listingId}`,
         });
       } catch (error) {
         await connection.rollback();

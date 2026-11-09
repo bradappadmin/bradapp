@@ -245,6 +245,24 @@ export function fetchSoldHistory(): Promise<{ sales: SoldCar[] }> {
   return request("/trade/sold");
 }
 
+export type PurchasedCar = {
+  ledgerId: number;
+  listingId: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+  year: number;
+  paidPrice: number;
+  purchasedAt: string;
+  sellerDisplayName: string | null;
+};
+
+export function fetchPurchaseHistory(): Promise<{ purchases: PurchasedCar[] }> {
+  return request("/trade/purchases");
+}
+
 export function buyListing(id: number): Promise<{ ok: boolean; listingId: number; coinPrice: number; balance: number }> {
   return request(`/trade/listings/${id}/buy`, { method: "POST" });
 }
