@@ -278,8 +278,22 @@ export function fetchLedger(
   return request(`/trade/ledger?${qs}`);
 }
 
-export function fetchGarage(): Promise<{ cars: GarageCar[]; totalValue: number }> {
+export function fetchGarage(): Promise<{
+  cars: GarageCar[];
+  totalValue: number;
+  showcaseListingId: number | null;
+}> {
   return request("/trade/garage");
+}
+
+/** Pin or unpin the public garage showcase car. Pass null to unpin. */
+export function setGarageShowcase(
+  listingId: number | null,
+): Promise<{ ok: boolean; showcaseListingId: number | null }> {
+  return request("/trade/garage/showcase", {
+    method: "PUT",
+    body: JSON.stringify({ listingId }),
+  });
 }
 
 export type SoldCar = {
@@ -516,9 +530,15 @@ export function fetchMembers(params?: {
   return request(`/members${query}`);
 }
 
-export function fetchMemberProfile(
-  id: number,
-): Promise<{ member: MemberSummary; cars: MemberProfileCar[] }> {
+export type ShowcaseSource = "pinned" | "highest_value";
+
+export function fetchMemberProfile(id: number): Promise<{
+  member: MemberSummary;
+  cars: MemberProfileCar[];
+  showcase: MemberProfileCar | null;
+  showcaseSource: ShowcaseSource | null;
+  showcaseListingId: number | null;
+}> {
   return request(`/members/${id}`);
 }
 

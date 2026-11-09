@@ -62,6 +62,7 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     });
     vi.mocked(api.fetchGarage).mockResolvedValue({
       totalValue: 420,
+      showcaseListingId: null,
       cars: [
         {
           id: 9,

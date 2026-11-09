@@ -13,6 +13,7 @@ import {
   rewardForResult,
   type TopTrumpsCategory,
 } from "./top-trumps.js";
+import { clearShowcaseForListings } from "./showcase.js";
 import {
   STREAK_MILESTONES,
   applyWinStreakUpdate,
@@ -556,6 +557,11 @@ export function createPlayRouter(): Router {
         `UPDATE listings SET owner_user_id = ?, owner_label = ?, status = 'owned' WHERE id = ?`,
         [trade.from_user_id, fromUser[0]?.display_name ?? "Member", trade.request_listing_id],
       );
+      // Pins on cars that left a bay must clear (both sides may have pinned).
+      await clearShowcaseForListings(connection, [
+        Number(trade.offer_listing_id),
+        Number(trade.request_listing_id),
+      ]);
       await connection.query(
         `UPDATE card_trade_offers SET status = 'accepted', resolved_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [tradeId],

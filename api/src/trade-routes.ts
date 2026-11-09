@@ -4,10 +4,19 @@ import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta, getCoinBalance, listLedger } from "./coins.js";
 import { getPool, type RowDataPacket } from "./db.js";
 import { listPurchaseHistory } from "./purchase-history.js";
+import {
+  clearShowcaseForListings,
+  readShowcaseListingId,
+} from "./showcase.js";
 import { listSoldHistory } from "./sold-history.js";
 
 const sellSchema = z.object({
   coinPrice: z.number().int().min(1).max(1_000_000),
+});
+
+const showcaseSchema = z.object({
+  /** Listing id to pin, or null to unpin. */
+  listingId: z.number().int().positive().nullable(),
 });
 
 type ListingTradeRow = RowDataPacket & {
@@ -72,7 +81,60 @@ export function createTradeRouter(): Router {
     // Fair value = each listing's coin_price (asking price when listed, last price when owned).
     const cars = rows as Array<{ coinPrice: number }>;
     const totalValue = cars.reduce((sum, car) => sum + Number(car.coinPrice), 0);
-    res.json({ cars: rows, totalValue });
+    const showcaseListingId = await readShowcaseListingId(pool, user.id);
+    res.json({ cars: rows, totalValue, showcaseListingId });
+  });
+
+  /**
+   * Pin (or unpin) one owned listing as the public garage showcase hero.
+   * Listing must belong to the signed-in user with status owned or available.
+   */
+  router.put("/garage/showcase", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const parsed = showcaseSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "validation_error", message: "Invalid showcase listing." });
+      return;
+    }
+
+    const pool = getPool();
+    const listingId = parsed.data.listingId;
+    if (listingId == null) {
+      await pool.query(`UPDATE users SET showcase_listing_id = NULL WHERE id = ?`, [user.id]);
+      res.json({ ok: true, showcaseListingId: null });
+      return;
+    }
+
+    const [rows] = await pool.query<ListingTradeRow[]>(
+      `SELECT id, coin_price, status, owner_user_id, owner_label
+       FROM listings WHERE id = ? LIMIT 1`,
+      [listingId],
+    );
+    const listing = rows[0];
+    if (!listing) {
+      res.status(404).json({ error: "not_found", message: "Listing not found." });
+      return;
+    }
+    if (listing.owner_user_id == null || Number(listing.owner_user_id) !== user.id) {
+      res.status(403).json({
+        error: "not_owner",
+        message: "You can only showcase a car you own.",
+      });
+      return;
+    }
+    if (listing.status !== "owned" && listing.status !== "available") {
+      res.status(409).json({
+        error: "not_showcaseable",
+        message: "That car is not in your bay right now.",
+      });
+      return;
+    }
+
+    await pool.query(`UPDATE users SET showcase_listing_id = ? WHERE id = ?`, [
+      listingId,
+      user.id,
+    ]);
+    res.json({ ok: true, showcaseListingId: listingId });
   });
 
   router.get("/sold", requireAuth, async (req, res: Response) => {
@@ -164,6 +226,8 @@ export function createTradeRouter(): Router {
          WHERE id = ?`,
         [user.id, user.displayName, listingId],
       );
+      // Previous owner's pin (if any) no longer points at a car they own.
+      await clearShowcaseForListings(connection, [listingId]);
 
       await connection.commit();
       res.json({

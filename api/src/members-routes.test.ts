@@ -1,9 +1,8 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
-import { closePool, getPool } from "./db.js";
+import { closePool, getPool, type RowDataPacket } from "./db.js";
 import { loadEnv } from "./env.js";
-import { memberStartingCoins } from "./coins.js";
 import { seedAccounts } from "./seed.js";
 
 loadEnv();
@@ -41,13 +40,21 @@ describe.runIf(hasDb)("members routes", () => {
       (await otherAgent.post("/auth/signin").send({ email: otherEmail, password: "MembersPass-123!" }))
         .status,
     ).toBe(200);
-    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 30 });
-    const cheap = search.body.listings.find(
-      (l: { coinPrice: number }) => l.coinPrice <= memberStartingCoins(),
+    const pool = getPool();
+    const [listingRows] = await pool.query<(RowDataPacket & { id: number })[]>(
+      `SELECT id FROM listings ORDER BY id ASC LIMIT 1`,
     );
-    expect(cheap).toBeTruthy();
-    otherCarId = Number(cheap!.id);
-    expect((await otherAgent.post(`/trade/listings/${otherCarId}/buy`)).status).toBe(200);
+    expect(listingRows[0]).toBeTruthy();
+    otherCarId = Number(listingRows[0]!.id);
+    await pool.query(
+      `UPDATE listings
+       SET owner_user_id = ?, owner_label = ?, status = 'owned'
+       WHERE id = ?`,
+      [otherId, "Challenge Rival", otherCarId],
+    );
+    await pool.query(`UPDATE users SET showcase_listing_id = NULL WHERE showcase_listing_id = ?`, [
+      otherCarId,
+    ]);
   });
 
   afterAll(async () => {
@@ -92,6 +99,9 @@ describe.runIf(hasDb)("members routes", () => {
     expect(car).toBeTruthy();
     expect(typeof car.coinPrice).toBe("number");
     expect(car).not.toHaveProperty("owner_user_id");
+    expect(res.body.showcase).toBeTruthy();
+    expect(["pinned", "highest_value"]).toContain(res.body.showcaseSource);
+    expect(typeof res.body.showcase.coinPrice).toBe("number");
   });
 
   it("lists members without signing in", async () => {

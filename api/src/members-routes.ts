@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { getPool, type RowDataPacket } from "./db.js";
 import { isRole, roleLabel, type Role } from "./roles.js";
+import { readShowcaseListingId, resolveShowcaseCar } from "./showcase.js";
 
 const membersQuerySchema = z.object({
   q: z.string().trim().max(120).optional(),
@@ -146,9 +147,16 @@ export function createMembersRouter(): Router {
       [memberId],
     );
 
+    const mappedCars = cars.map(mapPublicCar);
+    const pinnedListingId = await readShowcaseListingId(pool, memberId);
+    const resolved = resolveShowcaseCar(mappedCars, pinnedListingId);
+
     res.json({
       member: mapMember(row),
-      cars: cars.map(mapPublicCar),
+      cars: mappedCars,
+      showcase: resolved?.car ?? null,
+      showcaseSource: resolved?.source ?? null,
+      showcaseListingId: pinnedListingId,
     });
   });
 

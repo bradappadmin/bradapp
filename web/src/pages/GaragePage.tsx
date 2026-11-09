@@ -59,6 +59,7 @@ export function GaragePage() {
   const sort = parseGarageSort(searchParams.get("sort"));
   const [cars, setCars] = useState<GarageCar[]>([]);
   const [totalValue, setTotalValue] = useState(0);
+  const [showcaseListingId, setShowcaseListingId] = useState<number | null>(null);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [sales, setSales] = useState<SoldCar[]>([]);
   const [purchases, setPurchases] = useState<PurchasedCar[]>([]);
@@ -78,6 +79,9 @@ export function GaragePage() {
     setCars(garage.cars);
     setTotalValue(
       typeof garage.totalValue === "number" ? garage.totalValue : sumGarageValue(garage.cars),
+    );
+    setShowcaseListingId(
+      typeof garage.showcaseListingId === "number" ? garage.showcaseListingId : null,
     );
     setLedger(wallet.ledger);
     setSales(sold.sales);
@@ -189,7 +193,30 @@ export function GaragePage() {
     }
   }
 
+  async function onToggleShowcase(car: GarageCar) {
+    const pinning = showcaseListingId !== car.id;
+    setBusyId(car.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await api.setGarageShowcase(pinning ? car.id : null);
+      setShowcaseListingId(res.showcaseListingId);
+      const noticeText = pinning
+        ? "Showcase pinned — friends see this car as your garage hero."
+        : "Showcase unpinned — the bay picks the highest-value car instead.";
+      setNotice(noticeText);
+      toast.success(noticeText);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not update showcase";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   function renderManagedCar(car: GarageCar) {
+    const isShowcase = showcaseListingId === car.id;
     return (
       <li key={car.id} className="bay-rise">
         <CarCard
@@ -225,16 +252,30 @@ export function GaragePage() {
                   </button>
                 </form>
               )}
-              {car.status === "available" ? (
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <button
                   type="button"
                   disabled={busyId === car.id}
-                  onClick={() => void onUnlist(car.id)}
-                  className="w-full rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime disabled:opacity-60 sm:w-auto"
+                  onClick={() => void onToggleShowcase(car)}
+                  className={
+                    isShowcase
+                      ? "w-full rounded-md border border-lime/40 bg-lime/10 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:bg-lime/15 disabled:opacity-60 sm:w-auto"
+                      : "w-full rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime disabled:opacity-60 sm:w-auto"
+                  }
                 >
-                  Unlist
+                  {isShowcase ? "Unpin showcase" : "Make showcase"}
                 </button>
-              ) : null}
+                {car.status === "available" ? (
+                  <button
+                    type="button"
+                    disabled={busyId === car.id}
+                    onClick={() => void onUnlist(car.id)}
+                    className="w-full rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime disabled:opacity-60 sm:w-auto"
+                  >
+                    Unlist
+                  </button>
+                ) : null}
+              </div>
             </div>
           }
         />
@@ -255,8 +296,8 @@ export function GaragePage() {
             </h1>
             <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
             <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
-              Your bay — list owned cars for Brad Coins, change the price, or unlist. Garage value is
-              the sum of each car’s list / fair price. Sold and purchase history stay here. No real
+              Your bay — list owned cars for Brad Coins, change the price, or unlist. Pin one as the
+              public showcase hero. Garage value is the sum of each car’s list / fair price. No real
               money leaves this bay.
             </p>
             {!loading ? (
@@ -272,13 +313,24 @@ export function GaragePage() {
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {cars.length} owned · {forSaleCars.length} for sale
                 </span>
+                <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  {showcaseListingId != null ? "Showcase pinned" : "Showcase: highest value"}
+                </span>
               </div>
             ) : null}
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
+            {user ? (
+              <Link
+                to={`/members/${user.id}`}
+                className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Public garage
+              </Link>
+            ) : null}
             <Link
               to="/cars"
-              className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
             >
               Browse cars
             </Link>

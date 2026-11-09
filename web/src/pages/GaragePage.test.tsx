@@ -13,6 +13,7 @@ vi.mock("../api", () => ({
   fetchWallet: vi.fn(),
   fetchSoldHistory: vi.fn(),
   fetchPurchaseHistory: vi.fn(),
+  setGarageShowcase: vi.fn(),
 }));
 
 import * as api from "../api";
@@ -43,8 +44,13 @@ describe("GaragePage Midnight Garage UI", () => {
     vi.mocked(api.fetchWallet).mockResolvedValue({ balance: 500, ledger: [] });
     vi.mocked(api.fetchSoldHistory).mockResolvedValue({ sales: [] });
     vi.mocked(api.fetchPurchaseHistory).mockResolvedValue({ purchases: [] });
+    vi.mocked(api.setGarageShowcase).mockImplementation(async (listingId) => ({
+      ok: true,
+      showcaseListingId: listingId,
+    }));
     vi.mocked(api.fetchGarage).mockResolvedValue({
       totalValue: 1240,
+      showcaseListingId: null,
       cars: [
         {
           id: 9,
@@ -142,10 +148,35 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getAllByRole("button", { name: "List for sale" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Update price" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Make showcase" }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Showcase: highest value/i)).toBeInTheDocument();
 
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
+  it("pins a showcase car from My cars", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const pinButtons = await screen.findAllByRole("button", { name: "Make showcase" });
+    await user.click(pinButtons[0]!);
+    await vi.waitFor(() => {
+      expect(api.setGarageShowcase).toHaveBeenCalled();
+    });
+    expect(await screen.findByRole("button", { name: "Unpin showcase" })).toBeInTheDocument();
+    expect(screen.getAllByText(/Showcase pinned/i).length).toBeGreaterThan(0);
   });
 
   it("sorts Owned by name via URL-backed control", async () => {
