@@ -33,13 +33,18 @@ describe("SiteHeader", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("link", { name: "BradApp" })).toBeInTheDocument();
+    const brand = await screen.findByRole("link", { name: "BradApp" });
+    expect(brand).toBeInTheDocument();
+    expect(document.querySelector("header.nav-shell")).not.toBeNull();
+    expect(document.querySelector(".bay-brand-line")).not.toBeNull();
+
     const openButton = screen.getByRole("button", { name: "Open menu" });
     expect(screen.queryByRole("navigation", { name: "Primary mobile" })).not.toBeInTheDocument();
 
     await user.click(openButton);
     const mobileNav = screen.getByRole("navigation", { name: "Primary mobile" });
     expect(mobileNav).toBeInTheDocument();
+    expect(mobileNav).toHaveClass("nav-shell-panel");
     expect(screen.getByRole("button", { name: "Close menu" })).toBeInTheDocument();
     expect(mobileNav).toHaveTextContent("Cars");
     expect(mobileNav).toHaveTextContent("Compare");
