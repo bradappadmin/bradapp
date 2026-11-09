@@ -10,6 +10,7 @@ vi.mock("../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
   fetchTopTrumpsCategories: vi.fn(),
+  fetchTopTrumpsStreak: vi.fn(),
   fetchGarage: vi.fn(),
   fetchMembers: vi.fn(),
   fetchMemberCards: vi.fn(),
@@ -47,6 +48,17 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
         { id: "zero_to_sixty_secs", label: "0–60", direction: "lower" },
       ],
       rewards: { win: 25, play: 5 },
+      streakMilestones: [
+        { streak: 3, coins: 15 },
+        { streak: 5, coins: 40 },
+      ],
+    });
+    vi.mocked(api.fetchTopTrumpsStreak).mockResolvedValue({
+      streak: 2,
+      milestones: [
+        { streak: 3, coins: 15 },
+        { streak: 5, coins: 40 },
+      ],
     });
     vi.mocked(api.fetchGarage).mockResolvedValue({
       totalValue: 420,
@@ -103,6 +115,8 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "Top Trumps" })).toBeInTheDocument();
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(screen.getByText(/Win \+25 BC/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Win streak ×2/i)).toBeInTheDocument();
+    expect(screen.getByText(/3 wins \+15 BC/i)).toBeInTheDocument();
 
     const historyLinks = screen.getAllByRole("link", { name: /Match history/i });
     expect(historyLinks.some((link) => link.getAttribute("href") === "/play/history")).toBe(true);

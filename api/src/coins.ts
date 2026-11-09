@@ -29,7 +29,8 @@ export type LedgerReason =
   | "sale"
   | "admin_adjust"
   | "play_reward"
-  | "daily_login";
+  | "daily_login"
+  | "tt_streak_bonus";
 
 export type DailyLoginStatus = {
   amount: number;

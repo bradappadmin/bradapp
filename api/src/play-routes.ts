@@ -13,6 +13,12 @@ import {
   rewardForResult,
   type TopTrumpsCategory,
 } from "./top-trumps.js";
+import {
+  STREAK_MILESTONES,
+  applyWinStreakUpdate,
+  getWinStreak,
+  outcomeForPlayer,
+} from "./win-streak.js";
 
 const categorySchema = z.enum(["bhp", "top_speed_mph", "zero_to_sixty_secs"]);
 
@@ -119,6 +125,20 @@ export function createPlayRouter(): Router {
         { id: "zero_to_sixty_secs", label: "0–60", direction: "lower" },
       ],
       rewards: { win: WIN_COINS, play: PLAY_COINS },
+      streakMilestones: STREAK_MILESTONES.map((m) => ({
+        streak: m.streak,
+        coins: m.coins,
+      })),
+    });
+  });
+
+  /** Current consecutive Top Trumps win streak for the signed-in member. */
+  router.get("/top-trumps/streak", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const streak = await getWinStreak(user.id);
+    res.json({
+      streak,
+      milestones: STREAK_MILESTONES.map((m) => ({ streak: m.streak, coins: m.coins })),
     });
   });
 
@@ -195,13 +215,21 @@ export function createPlayRouter(): Router {
           coinReward,
         ],
       );
-      const balance = await applyCoinDelta(connection, {
+      let balance = await applyCoinDelta(connection, {
         userId: user.id,
         delta: coinReward,
         reason: "play_reward",
         listingId,
         note: `Top Trumps vs house (${category})`,
       });
+      const streak = await applyWinStreakUpdate(connection, {
+        userId: user.id,
+        outcome: outcomeForPlayer(winner, "challenger"),
+        listingId,
+      });
+      if (streak.bonusAwarded > 0) {
+        balance = streak.balance;
+      }
       await connection.commit();
       res.status(201).json({
         match: {
@@ -216,6 +244,10 @@ export function createPlayRouter(): Router {
           opponent: cardVisual(house),
         },
         balance,
+        winStreak: {
+          current: streak.current,
+          bonusAwarded: streak.bonusAwarded,
+        },
       });
     } catch (error) {
       await connection.rollback();
@@ -285,7 +317,7 @@ export function createPlayRouter(): Router {
           challengerReward,
         ],
       );
-      const balance = await applyCoinDelta(connection, {
+      let balance = await applyCoinDelta(connection, {
         userId: user.id,
         delta: challengerReward,
         reason: "play_reward",
@@ -299,6 +331,19 @@ export function createPlayRouter(): Router {
         listingId: opponentListingId,
         note: `Top Trumps PvP (${category})`,
       });
+      const streak = await applyWinStreakUpdate(connection, {
+        userId: user.id,
+        outcome: outcomeForPlayer(winner, "challenger"),
+        listingId,
+      });
+      await applyWinStreakUpdate(connection, {
+        userId: opponentUserId,
+        outcome: outcomeForPlayer(winner, "opponent"),
+        listingId: opponentListingId,
+      });
+      if (streak.bonusAwarded > 0) {
+        balance = streak.balance;
+      }
       await connection.commit();
       res.status(201).json({
         match: {
@@ -317,6 +362,10 @@ export function createPlayRouter(): Router {
           },
         },
         balance,
+        winStreak: {
+          current: streak.current,
+          bonusAwarded: streak.bonusAwarded,
+        },
       });
     } catch (error) {
       await connection.rollback();

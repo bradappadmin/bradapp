@@ -234,7 +234,14 @@ export type LedgerEntry = {
   id: number;
   delta: number;
   balanceAfter: number;
-  reason: "seed" | "purchase" | "sale" | "admin_adjust" | "play_reward" | "daily_login";
+  reason:
+    | "seed"
+    | "purchase"
+    | "sale"
+    | "admin_adjust"
+    | "play_reward"
+    | "daily_login"
+    | "tt_streak_bonus";
   listingId: number | null;
   note: string;
   createdAt: string;
@@ -370,12 +377,27 @@ export type TradeRow = {
   createdAt: string;
 };
 
+export type StreakMilestone = { streak: number; coins: number };
+
 export function fetchTopTrumpsCategories(): Promise<{
   categories: Array<{ id: TopTrumpsCategory; label: string; direction: "higher" | "lower" }>;
   rewards: { win: number; play: number };
+  streakMilestones?: StreakMilestone[];
 }> {
   return request("/play/top-trumps/categories");
 }
+
+export function fetchTopTrumpsStreak(): Promise<{
+  streak: number;
+  milestones: StreakMilestone[];
+}> {
+  return request("/play/top-trumps/streak");
+}
+
+export type WinStreakResult = {
+  current: number;
+  bonusAwarded: number;
+};
 
 export type MatchHistoryCar = {
   listingId: number | null;
@@ -429,6 +451,7 @@ export function playTopTrumpsHouse(input: {
     opponent: TopTrumpsCardVisual;
   };
   balance: number;
+  winStreak: WinStreakResult;
 }> {
   return request("/play/top-trumps/house", { method: "POST", body: JSON.stringify(input) });
 }
@@ -449,6 +472,7 @@ export function playTopTrumpsPvp(input: {
     opponent: TopTrumpsCardVisual & { userId: number };
   };
   balance: number;
+  winStreak: WinStreakResult;
 }> {
   return request("/play/top-trumps/pvp", { method: "POST", body: JSON.stringify(input) });
 }

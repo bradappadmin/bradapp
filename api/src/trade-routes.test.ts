@@ -167,9 +167,15 @@ describe.runIf(hasDb)("trade routes", () => {
       expect(typeof entry.delta).toBe("number");
       expect(typeof entry.balanceAfter).toBe("number");
       expect(
-        ["seed", "purchase", "sale", "daily_login", "play_reward", "admin_adjust"].includes(
-          entry.reason,
-        ),
+        [
+          "seed",
+          "purchase",
+          "sale",
+          "daily_login",
+          "play_reward",
+          "admin_adjust",
+          "tt_streak_bonus",
+        ].includes(entry.reason),
       ).toBe(true);
     }
   });

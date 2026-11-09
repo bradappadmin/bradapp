@@ -49,6 +49,30 @@ describe.runIf(hasDb)("play routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.categories).toHaveLength(3);
     expect(res.body.rewards.win).toBe(WIN_COINS);
+    expect(res.body.streakMilestones).toEqual([
+      { streak: 3, coins: 15 },
+      { streak: 5, coins: 40 },
+    ]);
+  });
+
+  it("reports win streak and updates it after house play", async () => {
+    const streakBefore = await a.get("/play/top-trumps/streak");
+    expect(streakBefore.status).toBe(200);
+    expect(typeof streakBefore.body.streak).toBe("number");
+
+    const play = await a.post("/play/top-trumps/house").send({ listingId: carA, category: "bhp" });
+    expect(play.status).toBe(201);
+    expect(play.body.winStreak).toBeTruthy();
+    expect(typeof play.body.winStreak.current).toBe("number");
+    expect(typeof play.body.winStreak.bonusAwarded).toBe("number");
+
+    if (play.body.match.winner === "challenger") {
+      expect(play.body.winStreak.current).toBe(streakBefore.body.streak + 1);
+    } else if (play.body.match.winner === "opponent") {
+      expect(play.body.winStreak.current).toBe(0);
+    } else {
+      expect(play.body.winStreak.current).toBe(streakBefore.body.streak);
+    }
   });
 
   it("plays Top Trumps vs the house and credits play_reward coins", async () => {

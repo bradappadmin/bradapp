@@ -6,7 +6,8 @@ export type LedgerReasonLabel =
   | "sale"
   | "admin_adjust"
   | "play_reward"
-  | "daily_login";
+  | "daily_login"
+  | "tt_streak_bonus";
 
 export function ledgerReasonLabel(reason: LedgerReasonLabel): string {
   switch (reason) {
@@ -20,6 +21,8 @@ export function ledgerReasonLabel(reason: LedgerReasonLabel): string {
       return "Daily";
     case "play_reward":
       return "Play";
+    case "tt_streak_bonus":
+      return "Win streak";
     case "admin_adjust":
       return "Admin adjust";
     default: {

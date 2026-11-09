@@ -5,6 +5,7 @@ import type {
   GarageCar,
   MemberCard,
   MemberSummary,
+  StreakMilestone,
   TopTrumpsCardVisual,
   TopTrumpsCategory,
 } from "../api";
@@ -43,6 +44,12 @@ export function TopTrumpsPage() {
 
   const [categories, setCategories] = useState<CategoryMeta[]>([]);
   const [rewards, setRewards] = useState({ win: 25, play: 5 });
+  const [streakMilestones, setStreakMilestones] = useState<StreakMilestone[]>([
+    { streak: 3, coins: 15 },
+    { streak: 5, coins: 40 },
+  ]);
+  const [winStreak, setWinStreak] = useState(0);
+  const [lastStreakBonus, setLastStreakBonus] = useState(0);
   const [myCars, setMyCars] = useState<GarageCar[]>([]);
   const [members, setMembers] = useState<MemberSummary[]>([]);
   const [opponentCards, setOpponentCards] = useState<MemberCard[]>([]);
@@ -91,13 +98,16 @@ export function TopTrumpsPage() {
   useEffect(() => {
     if (!user) return;
     void (async () => {
-      const [cats, garage, memberList] = await Promise.all([
+      const [cats, garage, memberList, streak] = await Promise.all([
         api.fetchTopTrumpsCategories(),
         api.fetchGarage(),
         api.fetchMembers(),
+        api.fetchTopTrumpsStreak(),
       ]);
       setCategories(cats.categories);
       setRewards(cats.rewards);
+      if (cats.streakMilestones?.length) setStreakMilestones(cats.streakMilestones);
+      setWinStreak(streak.streak);
       setMyCars(garage.cars);
       setMembers(memberList.members);
       if (garage.cars[0]) setListingId(garage.cars[0].id);
@@ -201,10 +211,20 @@ export function TopTrumpsPage() {
       if (mode === "house") {
         const res = await api.playTopTrumpsHouse({ listingId: myListingId, category });
         setUser({ ...user, coinBalance: res.balance });
+        setWinStreak(res.winStreak.current);
+        setLastStreakBonus(res.winStreak.bonusAwarded);
         const w = res.match.winner;
         const outcome =
           w === "challenger" ? "You win" : w === "draw" ? "Draw" : "House wins";
-        const outcomeText = `${outcome} · +${res.match.coinReward} BC`;
+        const streakBit =
+          w === "challenger"
+            ? ` · streak ${res.winStreak.current}`
+            : w === "opponent"
+              ? " · streak reset"
+              : "";
+        const bonusBit =
+          res.winStreak.bonusAwarded > 0 ? ` · +${res.winStreak.bonusAwarded} streak BC` : "";
+        const outcomeText = `${outcome} · +${res.match.coinReward} BC${streakBit}${bonusBit}`;
         setFaceOff({
           outcome: outcomeText,
           categoryLabel: catLabel,
@@ -221,6 +241,11 @@ export function TopTrumpsPage() {
           theirLabel: "House",
         });
         toast.success(outcomeText);
+        if (res.winStreak.bonusAwarded > 0) {
+          toast.success(
+            `Win streak ×${res.winStreak.current} — +${res.winStreak.bonusAwarded} Brad Coins`,
+          );
+        }
         setAwaitingRematchPick(false);
       } else {
         const theirListingId = opponentListingId as number;
@@ -230,11 +255,21 @@ export function TopTrumpsPage() {
           category,
         });
         setUser({ ...user, coinBalance: res.balance });
+        setWinStreak(res.winStreak.current);
+        setLastStreakBonus(res.winStreak.bonusAwarded);
         const w = res.match.winner;
         const rivalName = selectedOpponent?.displayName ?? "Opponent";
         const outcome =
           w === "challenger" ? "You win" : w === "draw" ? "Draw" : "They win";
-        const outcomeText = `${outcome} vs ${rivalName} · +${res.match.coinReward} BC`;
+        const streakBit =
+          w === "challenger"
+            ? ` · streak ${res.winStreak.current}`
+            : w === "opponent"
+              ? " · streak reset"
+              : "";
+        const bonusBit =
+          res.winStreak.bonusAwarded > 0 ? ` · +${res.winStreak.bonusAwarded} streak BC` : "";
+        const outcomeText = `${outcome} vs ${rivalName} · +${res.match.coinReward} BC${streakBit}${bonusBit}`;
         setFaceOff({
           outcome: outcomeText,
           categoryLabel: catLabel,
@@ -256,6 +291,11 @@ export function TopTrumpsPage() {
           theirLabel: rivalName,
         });
         toast.success(outcomeText);
+        if (res.winStreak.bonusAwarded > 0) {
+          toast.success(
+            `Win streak ×${res.winStreak.current} — +${res.winStreak.bonusAwarded} Brad Coins`,
+          );
+        }
         setAwaitingRematchPick(false);
       }
     } catch (err) {
@@ -290,7 +330,25 @@ export function TopTrumpsPage() {
               <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                 Play +{rewards.play} BC
               </span>
+              <span
+                className="rounded-md border border-rose/35 bg-rose/10 px-3 py-1.5 font-display text-xs font-semibold text-rose"
+                title={streakMilestones
+                  .map((m) => `${m.streak} wins → +${m.coins} BC`)
+                  .join(" · ")}
+              >
+                Win streak ×{winStreak}
+              </span>
             </div>
+            <p className="mt-2 text-xs text-steel">
+              Streak bonuses:{" "}
+              {streakMilestones.map((m, i) => (
+                <span key={m.streak}>
+                  {i > 0 ? " · " : null}
+                  {m.streak} wins +{m.coins} BC
+                </span>
+              ))}
+              . A loss resets the streak; draws keep it.
+            </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <Link
@@ -537,6 +595,13 @@ export function TopTrumpsPage() {
             </p>
             <p className="mt-1 text-sm text-steel">
               {faceOff.categoryLabel}: {faceOff.yourValue} vs {faceOff.theirValue}
+            </p>
+            <p className="mt-2 text-sm text-mist">
+              Current win streak:{" "}
+              <span className="font-display font-semibold text-rose">×{winStreak}</span>
+              {lastStreakBonus > 0 ? (
+                <span className="text-lime"> · streak bonus +{lastStreakBonus} BC</span>
+              ) : null}
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <TrumpCard
