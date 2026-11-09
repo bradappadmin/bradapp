@@ -5,8 +5,10 @@ import { useAuth } from "../auth-context";
 import type { ListingDetail } from "../cars";
 import { formatCoins, formatMileage, listingTitle } from "../cars";
 import { CarHeroVisual } from "../components/CarCard";
+import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { SiteHeader } from "../components/SiteHeader";
 import { rememberRecentlyViewed } from "../recently-viewed";
+import { listingSharePath } from "../share-link";
 
 export function ListingPage() {
   const { id } = useParams();
@@ -173,6 +175,7 @@ export function ListingPage() {
                       ? "Saved · Unfavourite"
                       : "Save to favourites"}
               </button>
+              <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy share link" />
             </div>
             {canBuy && user ? (
               <p className="mt-2 text-xs text-steel">Your balance: {formatCoins(user.coinBalance)}</p>

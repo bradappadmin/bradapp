@@ -11,7 +11,9 @@ import {
 } from "../compare-selection";
 import { buildCompareRows, compareTitles, type CompareHighlight } from "../compare-specs";
 import { CarHeroVisual } from "../components/CarCard";
+import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { SiteHeader } from "../components/SiteHeader";
+import { compareSharePath } from "../share-link";
 
 function cellClass(side: "left" | "right", highlight: CompareHighlight): string {
   if (highlight === side) return "font-semibold text-lime";
@@ -244,6 +246,11 @@ export function ComparePage() {
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
+              <CopyShareLinkButton
+                path={compareSharePath(left.id, right.id)}
+                label="Copy compare link"
+                className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
+              />
               <Link
                 to="/cars"
                 className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
