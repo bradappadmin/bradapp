@@ -92,6 +92,20 @@ export function fetchActivity(limit = 30): Promise<{ items: ActivityItem[] }> {
   return request(`/activity?limit=${limit}`);
 }
 
+export type LeaderboardEntry = {
+  rank: number;
+  id: number;
+  displayName: string;
+  role: "super_admin" | "admin" | "member";
+  roleLabel: string;
+  coinBalance: number;
+  topTrumpsWins: number;
+};
+
+export function fetchLeaderboard(): Promise<{ entries: LeaderboardEntry[] }> {
+  return request("/leaderboard");
+}
+
 export function claimDailyBonus(): Promise<{
   dailyLogin: DailyLoginStatus;
   user: User;

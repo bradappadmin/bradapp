@@ -5,6 +5,7 @@ import { createActivityRouter } from "./activity-routes.js";
 import { createAdminRouter } from "./admin-routes.js";
 import { createAuthRouter } from "./auth-routes.js";
 import { createCarsRouter } from "./cars-routes.js";
+import { createLeaderboardRouter } from "./leaderboard-routes.js";
 import { createMembersRouter } from "./members-routes.js";
 import { createPlayRouter } from "./play-routes.js";
 import { createReviewsRouter } from "./reviews-routes.js";
@@ -30,6 +31,7 @@ export function createApp(): Express {
   app.use("/auth", createAuthRouter());
   app.use("/cars", createCarsRouter());
   app.use("/members", createMembersRouter());
+  app.use("/leaderboard", createLeaderboardRouter());
   app.use("/activity", createActivityRouter());
   app.use("/trade", createTradeRouter());
   app.use("/play", createPlayRouter());

@@ -4,6 +4,7 @@ import { createApp } from "./app.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
 import { seedAccounts } from "./seed.js";
+import { MEMBER_STARTING_COINS } from "./coins.js";
 import { PLAY_COINS, WIN_COINS } from "./top-trumps.js";
 
 loadEnv();
@@ -26,8 +27,11 @@ describe.runIf(hasDb)("play routes", () => {
     expect((await a.post("/auth/signup").send({ email: emailA, password: "PlayPass-123!", displayName: "Player A" })).status).toBe(201);
     expect((await b.post("/auth/signup").send({ email: emailB, password: "PlayPass-123!", displayName: "Player B" })).status).toBe(201);
 
-    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 10 });
-    const affordable = search.body.listings.filter((l: { coinPrice: number }) => l.coinPrice <= 80);
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 30 });
+    const affordable = search.body.listings.filter(
+      (l: { coinPrice: number }) => l.coinPrice <= MEMBER_STARTING_COINS,
+    );
+    expect(affordable.length).toBeGreaterThanOrEqual(2);
     carA = affordable[0].id;
     carB = affordable[1].id;
     expect((await a.post(`/trade/listings/${carA}/buy`)).status).toBe(200);

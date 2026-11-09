@@ -3,6 +3,7 @@ import { AuthProvider } from "./auth-context";
 import { CarsPage } from "./pages/CarsPage";
 import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
+import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { ListingPage } from "./pages/ListingPage";
 import { MemberProfilePage } from "./pages/MemberProfilePage";
 import { MembersPage } from "./pages/MembersPage";
@@ -27,6 +28,7 @@ export function App() {
         <Route path="/garage" element={<GaragePage />} />
         <Route path="/members" element={<MembersPage />} />
         <Route path="/members/:id" element={<MemberProfilePage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/play" element={<TopTrumpsPage />} />
         <Route path="/trades" element={<TradesPage />} />
         <Route path="/reviews" element={<ReviewsPage />} />
