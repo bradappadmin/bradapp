@@ -16,7 +16,7 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
-describe("GaragePage media cards", () => {
+describe("GaragePage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -43,7 +43,7 @@ describe("GaragePage media cards", () => {
     vi.mocked(api.fetchSoldHistory).mockResolvedValue({ sales: [] });
     vi.mocked(api.fetchPurchaseHistory).mockResolvedValue({ purchases: [] });
     vi.mocked(api.fetchGarage).mockResolvedValue({
-      totalValue: 420,
+      totalValue: 820,
       cars: [
         {
           id: 9,
@@ -64,11 +64,30 @@ describe("GaragePage media cards", () => {
           garageName: "Bay",
           garageCity: "London",
         },
+        {
+          id: 10,
+          make: "Ford",
+          model: "Focus",
+          trimName: "ST",
+          bodyType: "Hatchback",
+          bhp: 280,
+          topSpeedMph: 155,
+          zeroToSixtySecs: 5.7,
+          conditionType: "used",
+          year: 2020,
+          colour: "Blue",
+          mileage: 18000,
+          coinPrice: 400,
+          status: "available",
+          ownerLabel: "You",
+          garageName: "Bay",
+          garageCity: "London",
+        },
       ],
     });
   });
 
-  it("renders owned cars as photo-first media cards", async () => {
+  it("shows bay hierarchy, owned vs for-sale sections, and media cards", async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -80,10 +99,27 @@ describe("GaragePage media cards", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "My cars" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(document.querySelector(".play-bay-glow")).not.toBeNull();
+    expect(await screen.findByText(/Garage value/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Owned" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "For sale" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Purchases" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sold" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Coin ledger" })).toBeInTheDocument();
+
     expect(await screen.findByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
       "href",
       "/cars/9",
     );
+    expect(screen.getByRole("link", { name: /Ford Focus ST/i })).toHaveAttribute(
+      "href",
+      "/cars/10",
+    );
+    expect(screen.getByRole("button", { name: "List for sale" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Update price" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
+
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
