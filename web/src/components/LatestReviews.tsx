@@ -69,6 +69,8 @@ export function LatestReviews() {
                     {review.car.make} {review.car.model}
                     {review.car.trimName ? ` ${review.car.trimName}` : ""} ·{" "}
                     {review.publisher.displayName}
+                    {" · "}
+                    {review.likeCount === 1 ? "1 like" : `${review.likeCount ?? 0} likes`}
                   </p>
                 </div>
                 <span className="shrink-0 font-display text-sm text-lime sm:pl-4">Watch →</span>

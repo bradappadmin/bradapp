@@ -78,6 +78,8 @@ export function ReviewsPage() {
                     {review.car.make} {review.car.model}
                     {review.car.trimName ? ` ${review.car.trimName}` : ""} · {review.publisher.displayName}
                     {review.status === "unpublished" ? " · unpublished" : ""}
+                    {" · "}
+                    {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
                   </p>
                 </div>
                 <p className="text-xs text-steel">{new Date(review.createdAt).toLocaleString()}</p>

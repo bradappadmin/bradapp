@@ -90,6 +90,42 @@ describe.runIf(hasDb)("reviews routes", () => {
     expect(video.headers["content-type"]).toMatch(/video/);
   });
 
+  it("lets members like and unlike a published review", async () => {
+    const guest = await request(app).post(`/reviews/${reviewId}/like`);
+    expect(guest.status).toBe(401);
+
+    const liked = await member.post(`/reviews/${reviewId}/like`);
+    expect(liked.status).toBe(200);
+    expect(liked.body).toMatchObject({ ok: true, liked: true, likeCount: 1 });
+
+    const detail = await member.get(`/reviews/${reviewId}`);
+    expect(detail.status).toBe(200);
+    expect(detail.body.review.likeCount).toBe(1);
+    expect(detail.body.review.likedByMe).toBe(true);
+
+    const list = await member.get("/reviews");
+    const listed = list.body.reviews.find((r: { id: number }) => r.id === reviewId);
+    expect(listed?.likeCount).toBe(1);
+    expect(listed?.likedByMe).toBe(true);
+
+    const publicList = await request(app).get("/reviews");
+    const publicListed = publicList.body.reviews.find((r: { id: number }) => r.id === reviewId);
+    expect(publicListed?.likeCount).toBe(1);
+    expect(publicListed?.likedByMe).toBe(false);
+
+    const again = await member.post(`/reviews/${reviewId}/like`);
+    expect(again.status).toBe(200);
+    expect(again.body.likeCount).toBe(1);
+
+    const unliked = await member.delete(`/reviews/${reviewId}/like`);
+    expect(unliked.status).toBe(200);
+    expect(unliked.body).toMatchObject({ ok: true, liked: false, likeCount: 0 });
+
+    const after = await member.get(`/reviews/${reviewId}`);
+    expect(after.body.review.likeCount).toBe(0);
+    expect(after.body.review.likedByMe).toBe(false);
+  });
+
   it("blocks members from publishing and lets admins unpublish", async () => {
     const blocked = await member
       .post("/reviews")
@@ -100,6 +136,9 @@ describe.runIf(hasDb)("reviews routes", () => {
 
     const unpublish = await admin.post(`/reviews/${reviewId}/unpublish`);
     expect(unpublish.status).toBe(200);
+
+    const cannotLike = await member.post(`/reviews/${reviewId}/like`);
+    expect(cannotLike.status).toBe(404);
 
     const list = await member.get("/reviews");
     expect(list.body.reviews.some((r: { id: number }) => r.id === reviewId)).toBe(false);

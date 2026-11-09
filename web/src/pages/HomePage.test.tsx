@@ -51,6 +51,8 @@ describe("HomePage", () => {
           cueCards: [],
           videoUrl: "/reviews/9/video",
           mimeType: "video/webm",
+          likeCount: 3,
+          likedByMe: false,
         },
       ],
     });
@@ -68,6 +70,7 @@ describe("HomePage", () => {
     const watch = await screen.findByRole("link", { name: /Bay burn — Focus ST/i });
     expect(watch).toHaveAttribute("href", "/reviews/9");
     expect(screen.getByText("Watch →")).toBeInTheDocument();
+    expect(screen.getByText(/3 likes/)).toBeInTheDocument();
   });
 
   it("shows recently viewed cars from localStorage on home", async () => {

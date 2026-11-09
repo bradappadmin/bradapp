@@ -7,6 +7,12 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { buildCueCards } from "./cue-cards.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
+import {
+  addReviewLike,
+  countReviewLikes,
+  getPublishedReviewId,
+  removeReviewLike,
+} from "./review-likes.js";
 import { isAdminRole } from "./roles.js";
 import { readSessionUser } from "./session.js";
 import { ensureVideosDir, videoFilePath } from "./video-storage.js";
@@ -47,6 +53,8 @@ type ReviewRow = RowDataPacket & {
   bhp: number;
   top_speed_mph: number;
   zero_to_sixty_secs: number;
+  like_count: number;
+  liked_by_me: number | boolean;
 };
 
 type CueCardJson = Array<{ id: string; title: string; prompt: string }>;
@@ -81,17 +89,30 @@ function toReview(row: ReviewRow) {
     videoUrl: `/reviews/${row.id}/video`,
     byteSize: Number(row.byte_size),
     mimeType: row.mime_type,
+    likeCount: Number(row.like_count ?? 0),
+    likedByMe: Boolean(row.liked_by_me),
   };
 }
 
-const reviewSelect = `
+function reviewSelectSql(viewerUserId: number | null): string {
+  const likedExpr =
+    viewerUserId == null
+      ? "0 AS liked_by_me"
+      : `EXISTS (
+           SELECT 1 FROM review_likes rlme
+           WHERE rlme.review_id = r.id AND rlme.user_id = ${Number(viewerUserId)}
+         ) AS liked_by_me`;
+  return `
   SELECT r.id, r.title, r.filename, r.mime_type, r.byte_size, r.status, r.cue_cards_json, r.created_at,
          r.publisher_user_id, u.display_name,
-         cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs
+         cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
+         (SELECT COUNT(*) FROM review_likes rlc WHERE rlc.review_id = r.id) AS like_count,
+         ${likedExpr}
   FROM video_reviews r
   INNER JOIN users u ON u.id = r.publisher_user_id
   INNER JOIN car_models cm ON cm.id = r.car_model_id
 `;
+}
 
 export function createReviewsRouter(): Router {
   const router = Router();
@@ -183,7 +204,7 @@ export function createReviewsRouter(): Router {
         : 20;
     const pool = getPool();
     const [rows] = await pool.query<ReviewRow[]>(
-      `${reviewSelect}
+      `${reviewSelectSql(user?.id ?? null)}
        ${includeUnpublished ? "" : "WHERE r.status = 'published'"}
        ORDER BY r.created_at DESC
        LIMIT ?`,
@@ -200,7 +221,10 @@ export function createReviewsRouter(): Router {
     }
     const user = (req as AuthedRequest).user;
     const pool = getPool();
-    const [rows] = await pool.query<ReviewRow[]>(`${reviewSelect} WHERE r.id = ? LIMIT 1`, [id]);
+    const [rows] = await pool.query<ReviewRow[]>(
+      `${reviewSelectSql(user.id)} WHERE r.id = ? LIMIT 1`,
+      [id],
+    );
     const row = rows[0];
     if (!row) {
       res.status(404).json({ error: "not_found", message: "Review not found." });
@@ -211,6 +235,38 @@ export function createReviewsRouter(): Router {
       return;
     }
     res.json({ review: toReview(row) });
+  });
+
+  router.post("/:id/like", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid review id" });
+      return;
+    }
+    if ((await getPublishedReviewId(id)) == null) {
+      res.status(404).json({ error: "not_found", message: "Published review not found." });
+      return;
+    }
+    await addReviewLike(user.id, id);
+    const likeCount = await countReviewLikes(id);
+    res.json({ ok: true, liked: true, likeCount });
+  });
+
+  router.delete("/:id/like", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid review id" });
+      return;
+    }
+    if ((await getPublishedReviewId(id)) == null) {
+      res.status(404).json({ error: "not_found", message: "Published review not found." });
+      return;
+    }
+    await removeReviewLike(user.id, id);
+    const likeCount = await countReviewLikes(id);
+    res.json({ ok: true, liked: false, likeCount });
   });
 
   router.get("/:id/video", requireAuth, async (req, res: Response) => {
@@ -321,9 +377,10 @@ export function createReviewsRouter(): Router {
           JSON.stringify(cueCards),
         ],
       );
-      const [rows] = await pool.query<ReviewRow[]>(`${reviewSelect} WHERE r.id = ? LIMIT 1`, [
-        result.insertId,
-      ]);
+      const [rows] = await pool.query<ReviewRow[]>(
+        `${reviewSelectSql(authed.user.id)} WHERE r.id = ? LIMIT 1`,
+        [result.insertId],
+      );
       res.status(201).json({ review: toReview(rows[0]!) });
     } catch (error) {
       await unlink(videoFilePath(filename)).catch(() => undefined);

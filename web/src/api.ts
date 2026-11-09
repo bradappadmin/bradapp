@@ -503,6 +503,8 @@ export type ReviewSummary = {
   cueCards: CueCard[];
   videoUrl: string;
   mimeType: string;
+  likeCount: number;
+  likedByMe: boolean;
 };
 
 export type ReviewCarModel = {
@@ -563,6 +565,14 @@ export async function publishReview(input: {
 
 export function unpublishReview(id: number): Promise<{ ok: boolean; status: string }> {
   return request(`/reviews/${id}/unpublish`, { method: "POST" });
+}
+
+export function likeReview(id: number): Promise<{ ok: boolean; liked: true; likeCount: number }> {
+  return request(`/reviews/${id}/like`, { method: "POST" });
+}
+
+export function unlikeReview(id: number): Promise<{ ok: boolean; liked: false; likeCount: number }> {
+  return request(`/reviews/${id}/like`, { method: "DELETE" });
 }
 
 export function reviewVideoSrc(videoUrl: string): string {

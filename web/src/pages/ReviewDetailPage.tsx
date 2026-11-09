@@ -16,6 +16,7 @@ export function ReviewDetailPage() {
   const [review, setReview] = useState<ReviewSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [likeBusy, setLikeBusy] = useState(false);
 
   useEffect(() => {
     if (!user || !Number.isFinite(reviewId)) return;
@@ -54,6 +55,26 @@ export function ReviewDetailPage() {
     }
   }
 
+  async function onToggleLike() {
+    if (!review || review.status !== "published") return;
+    setLikeBusy(true);
+    setError(null);
+    try {
+      const res = review.likedByMe
+        ? await api.unlikeReview(review.id)
+        : await api.likeReview(review.id);
+      setReview({
+        ...review,
+        likedByMe: res.liked,
+        likeCount: res.likeCount,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update like");
+    } finally {
+      setLikeBusy(false);
+    }
+  }
+
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -71,6 +92,27 @@ export function ReviewDetailPage() {
             </p>
             <h1 className="mt-3 font-display text-3xl font-semibold text-white">{review.title}</h1>
             <p className="mt-2 text-sm text-steel">By {review.publisher.displayName}</p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {review.status === "published" ? (
+                <button
+                  type="button"
+                  disabled={likeBusy}
+                  onClick={() => void onToggleLike()}
+                  className={`rounded-md border px-4 py-2 font-display text-sm font-semibold transition disabled:opacity-60 ${
+                    review.likedByMe
+                      ? "border-lime/50 text-lime hover:bg-lime/10"
+                      : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                  }`}
+                  aria-pressed={review.likedByMe}
+                >
+                  {likeBusy ? "Updating…" : review.likedByMe ? "Liked" : "Like"}
+                </button>
+              ) : null}
+              <p className="text-sm text-steel" aria-live="polite">
+                {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
+              </p>
+            </div>
 
             <video
               className="mt-8 w-full rounded-md border border-white/10 bg-black"
