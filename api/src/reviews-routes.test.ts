@@ -60,6 +60,10 @@ describe.runIf(hasDb)("reviews routes", () => {
   });
 
   it("lets an admin publish a video review to disk + DB", async () => {
+    const models = await admin.get("/reviews/models");
+    expect(models.body.models[0].bodyType).toBeTruthy();
+    expect(models.body.models[0].colour).toBe("Midnight Black");
+
     const res = await admin
       .post("/reviews")
       .field("carModelId", String(carModelId))
@@ -72,6 +76,8 @@ describe.runIf(hasDb)("reviews routes", () => {
     expect(res.body.review.title).toBe("Bay test drive");
     expect(res.body.review.status).toBe("published");
     expect(res.body.review.videoUrl).toMatch(/\/reviews\/\d+\/video/);
+    expect(res.body.review.car.bodyType).toBeTruthy();
+    expect(res.body.review.car.colour).toBe("Midnight Black");
     reviewId = res.body.review.id;
   });
 

@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
+import { ReviewCarThumb } from "../components/ReviewCarThumb";
 import { SiteHeader } from "../components/SiteHeader";
 
 function isAdmin(role: string): boolean {
@@ -134,8 +135,14 @@ export function ReviewDetailPage() {
               </p>
             </div>
 
+            <ReviewCarThumb
+              car={review.car}
+              size="card"
+              className="mt-8 rounded-md border border-white/10"
+            />
+
             <video
-              className="mt-8 w-full rounded-md border border-white/10 bg-black"
+              className="mt-6 w-full rounded-md border border-white/10 bg-black"
               controls
               playsInline
               src={api.reviewVideoSrc(review.videoUrl)}

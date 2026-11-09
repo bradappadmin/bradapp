@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
+import { ReviewCarThumb } from "./ReviewCarThumb";
 
 export function FeaturedReview() {
   const [review, setReview] = useState<ReviewSummary | null>(null);
@@ -46,8 +47,9 @@ export function FeaturedReview() {
 
       <Link
         to={`/reviews/${review.id}`}
-        className="mt-5 flex flex-col gap-2 border-t border-white/10 py-5 no-underline transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between"
+        className="mt-5 grid gap-4 border-t border-white/10 py-5 no-underline transition hover:bg-white/[0.02] sm:grid-cols-[minmax(0,14rem)_1fr_auto] sm:items-center"
       >
+        <ReviewCarThumb car={review.car} size="card" className="rounded-md border border-white/10" />
         <div className="min-w-0">
           <p className="font-display text-lg font-semibold text-mist">{review.title}</p>
           <p className="mt-1 text-sm text-steel">

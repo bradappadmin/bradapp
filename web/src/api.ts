@@ -515,6 +515,8 @@ export type ReviewSummary = {
     make: string;
     model: string;
     trimName: string;
+    bodyType: string;
+    colour: string;
     bhp: number;
     topSpeedMph: number;
     zeroToSixtySecs: number;
@@ -532,6 +534,8 @@ export type ReviewCarModel = {
   make: string;
   model: string;
   trimName: string;
+  bodyType: string;
+  colour: string;
   label: string;
 };
 

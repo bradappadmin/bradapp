@@ -51,6 +51,7 @@ type ReviewRow = RowDataPacket & {
   make: string;
   model: string;
   trim_name: string;
+  body_type: string;
   bhp: number;
   top_speed_mph: number;
   zero_to_sixty_secs: number;
@@ -58,6 +59,9 @@ type ReviewRow = RowDataPacket & {
   liked_by_me: number | boolean;
   is_featured: number | boolean;
 };
+
+/** Reviews are on car models (no listing paint) — Midnight Black keeps studio photos on-brand. */
+const REVIEW_STUDIO_COLOUR = "Midnight Black";
 
 type CueCardJson = Array<{ id: string; title: string; prompt: string }>;
 
@@ -83,6 +87,8 @@ function toReview(row: ReviewRow) {
       make: row.make,
       model: row.model,
       trimName: row.trim_name,
+      bodyType: row.body_type,
+      colour: REVIEW_STUDIO_COLOUR,
       bhp: Number(row.bhp),
       topSpeedMph: Number(row.top_speed_mph),
       zeroToSixtySecs: Number(row.zero_to_sixty_secs),
@@ -108,7 +114,8 @@ function reviewSelectSql(viewerUserId: number | null): string {
   return `
   SELECT r.id, r.title, r.filename, r.mime_type, r.byte_size, r.status, r.cue_cards_json, r.created_at,
          r.is_featured, r.publisher_user_id, u.display_name,
-         cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
+         cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.body_type,
+         cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
          (SELECT COUNT(*) FROM review_likes rlc WHERE rlc.review_id = r.id) AS like_count,
          ${likedExpr}
   FROM video_reviews r
@@ -122,8 +129,16 @@ export function createReviewsRouter(): Router {
 
   router.get("/models", requireAuth, async (_req, res: Response) => {
     const pool = getPool();
-    const [rows] = await pool.query<(RowDataPacket & { id: number; make: string; model: string; trim_name: string })[]>(
-      `SELECT id, make, model, trim_name FROM car_models ORDER BY make, model, trim_name`,
+    const [rows] = await pool.query<
+      (RowDataPacket & {
+        id: number;
+        make: string;
+        model: string;
+        trim_name: string;
+        body_type: string;
+      })[]
+    >(
+      `SELECT id, make, model, trim_name, body_type FROM car_models ORDER BY make, model, trim_name`,
     );
     res.json({
       models: rows.map((r) => ({
@@ -131,6 +146,8 @@ export function createReviewsRouter(): Router {
         make: r.make,
         model: r.model,
         trimName: r.trim_name,
+        bodyType: r.body_type,
+        colour: REVIEW_STUDIO_COLOUR,
         label: `${r.make} ${r.model}${r.trim_name ? ` ${r.trim_name}` : ""}`,
       })),
     });

@@ -30,6 +30,8 @@ const publishedReview = {
     make: "Ford",
     model: "Focus",
     trimName: "ST",
+    bodyType: "Hatchback",
+    colour: "Midnight Black",
     bhp: 280,
     topSpeedMph: 155,
     zeroToSixtySecs: 5.7,

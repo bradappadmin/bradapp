@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import * as api from "../api";
 import type { CueCard, ReviewCarModel } from "../api";
 import { useAuth } from "../auth-context";
+import { ReviewCarThumb } from "../components/ReviewCarThumb";
 import { SiteHeader } from "../components/SiteHeader";
 
 function isAdmin(role: string): boolean {
@@ -60,6 +61,11 @@ export function RecordReviewPage() {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  const selectedModel = useMemo(
+    () => models.find((model) => model.id === carModelId) ?? null,
+    [models, carModelId],
+  );
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
@@ -191,6 +197,13 @@ export function RecordReviewPage() {
                 ))}
               </select>
             </label>
+            {selectedModel ? (
+              <ReviewCarThumb
+                car={selectedModel}
+                size="card"
+                className="rounded-md border border-white/10"
+              />
+            ) : null}
             <label className="flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
               Title
               <input

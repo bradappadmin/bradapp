@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
+import { ReviewCarThumb } from "./ReviewCarThumb";
 
 const HOME_REVIEW_LIMIT = 4;
 
@@ -61,9 +62,10 @@ export function LatestReviews() {
             <li key={review.id}>
               <Link
                 to={`/reviews/${review.id}`}
-                className="flex flex-col gap-1 py-4 no-underline transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between"
+                className="flex gap-4 py-4 no-underline transition hover:bg-white/[0.02] sm:items-center sm:justify-between"
               >
-                <div className="min-w-0">
+                <ReviewCarThumb car={review.car} className="shrink-0" />
+                <div className="min-w-0 flex-1">
                   <p className="font-display text-base font-semibold text-mist">{review.title}</p>
                   <p className="mt-1 text-sm text-steel">
                     {review.car.make} {review.car.model}

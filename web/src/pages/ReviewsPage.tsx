@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
+import { ReviewCarThumb } from "../components/ReviewCarThumb";
 import { SiteHeader } from "../components/SiteHeader";
 
 function isAdmin(role: string): boolean {
@@ -70,9 +71,10 @@ export function ReviewsPage() {
             <li key={review.id}>
               <Link
                 to={`/reviews/${review.id}`}
-                className="flex flex-col gap-1 py-5 no-underline transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between"
+                className="flex gap-4 py-5 no-underline transition hover:bg-white/[0.02] sm:items-center sm:justify-between"
               >
-                <div>
+                <ReviewCarThumb car={review.car} className="shrink-0" />
+                <div className="min-w-0 flex-1">
                   <p className="font-display text-lg font-semibold text-mist">{review.title}</p>
                   <p className="mt-1 text-sm text-steel">
                     {review.car.make} {review.car.model}
@@ -82,8 +84,13 @@ export function ReviewsPage() {
                     {" · "}
                     {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
                   </p>
+                  <p className="mt-1 text-xs text-steel sm:hidden">
+                    {new Date(review.createdAt).toLocaleString()}
+                  </p>
                 </div>
-                <p className="text-xs text-steel">{new Date(review.createdAt).toLocaleString()}</p>
+                <p className="hidden shrink-0 text-xs text-steel sm:block">
+                  {new Date(review.createdAt).toLocaleString()}
+                </p>
               </Link>
             </li>
           ))}
