@@ -35,6 +35,9 @@ export function TradesPage() {
   const { user, loading: authLoading, refreshTradeInbox } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const withFromUrl = Number(searchParams.get("with") ?? "");
+  const theirCarFromUrl = Number(searchParams.get("theirCar") ?? "");
+  const preferredRequestListingId =
+    Number.isFinite(theirCarFromUrl) && theirCarFromUrl > 0 ? theirCarFromUrl : null;
 
   const [myCars, setMyCars] = useState<GarageCar[]>([]);
   const [members, setMembers] = useState<MemberSummary[]>([]);
@@ -122,7 +125,11 @@ export function TradesPage() {
       .then((res) => {
         if (cancelled) return;
         setMemberCards(res.cards);
-        setRequestListingId(res.cards[0]?.id ?? "");
+        const preferred =
+          preferredRequestListingId != null
+            ? res.cards.find((card) => card.id === preferredRequestListingId)
+            : undefined;
+        setRequestListingId(preferred?.id ?? res.cards[0]?.id ?? "");
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not load their cars");
@@ -130,7 +137,7 @@ export function TradesPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, partnerUserId]);
+  }, [user?.id, partnerUserId, preferredRequestListingId]);
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
@@ -144,6 +151,14 @@ export function TradesPage() {
     } else {
       setSearchParams({ with: String(nextId) }, { replace: true });
     }
+  }
+
+  function onRequestCarChange(nextId: number | "") {
+    setRequestListingId(nextId);
+    if (partnerUserId === "") return;
+    const next = new URLSearchParams({ with: String(partnerUserId) });
+    if (nextId !== "") next.set("theirCar", String(nextId));
+    setSearchParams(next, { replace: true });
   }
 
   async function onCreate() {
@@ -351,7 +366,9 @@ export function TradesPage() {
               <select
                 className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
                 value={requestListingId}
-                onChange={(e) => setRequestListingId(Number(e.target.value))}
+                onChange={(e) =>
+                  onRequestCarChange(e.target.value === "" ? "" : Number(e.target.value))
+                }
                 disabled={partnerUserId === ""}
               >
                 <option value="">{partnerUserId === "" ? "Pick a member first" : "Pick their car"}</option>

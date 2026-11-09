@@ -82,9 +82,11 @@ describe("ListingPage challenge CTA", () => {
 
     const challenge = await screen.findByRole("link", { name: "Challenge to Top Trumps" });
     expect(challenge).toHaveAttribute("href", "/play?opponent=177&theirCar=143");
+    const trade = screen.getByRole("link", { name: "Offer trade" });
+    expect(trade).toHaveAttribute("href", "/trades?with=177&theirCar=143");
   });
 
-  it("prompts sign-in to challenge when signed out", async () => {
+  it("prompts sign-in to challenge or trade when signed out", async () => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
 
     render(
@@ -97,10 +99,10 @@ describe("ListingPage challenge CTA", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("link", { name: "Sign in to challenge" })).toHaveAttribute(
-      "href",
-      "/signin",
-    );
+    expect(
+      await screen.findByRole("link", { name: "Sign in to challenge or trade" }),
+    ).toHaveAttribute("href", "/signin");
     expect(screen.queryByRole("link", { name: "Challenge to Top Trumps" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Offer trade" })).not.toBeInTheDocument();
   });
 });

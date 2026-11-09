@@ -82,6 +82,10 @@ describe("MemberProfilePage media cards", () => {
       "href",
       "/cars/42",
     );
+    expect(screen.getByRole("link", { name: "Offer trade" })).toHaveAttribute(
+      "href",
+      "/trades?with=7&theirCar=42",
+    );
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");

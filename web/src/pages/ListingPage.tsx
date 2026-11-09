@@ -7,6 +7,7 @@ import { formatCoins, formatMileage, listingTitle } from "../cars";
 import { CarHeroVisual } from "../components/CarCard";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { SiteHeader } from "../components/SiteHeader";
+import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { rememberRecentlyViewed } from "../recently-viewed";
 import { listingSharePath } from "../share-link";
@@ -121,6 +122,12 @@ export function ListingPage() {
         viewerId: user?.id,
       })
     : "hidden";
+  const tradeAction = listing
+    ? garageTradeOfferAction({
+        ownerUserId: listing.ownerUserId,
+        viewerId: user?.id,
+      })
+    : "hidden";
 
   return (
     <div className="min-h-screen">
@@ -174,12 +181,20 @@ export function ListingPage() {
                   Challenge to Top Trumps
                 </Link>
               ) : null}
-              {challengeAction === "signin" ? (
+              {tradeAction === "offer" && listing.ownerUserId != null ? (
+                <Link
+                  to={garageTradeOfferHref(listing.ownerUserId, listing.id)}
+                  className="inline-block rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                >
+                  Offer trade
+                </Link>
+              ) : null}
+              {challengeAction === "signin" || tradeAction === "signin" ? (
                 <Link
                   to="/signin"
                   className="inline-block rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
                 >
-                  Sign in to challenge
+                  Sign in to challenge or trade
                 </Link>
               ) : null}
               <button

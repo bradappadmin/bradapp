@@ -7,6 +7,7 @@ import { formatCoins } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
+import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 
 export function MemberProfilePage() {
   const { id } = useParams();
@@ -129,16 +130,45 @@ export function MemberProfilePage() {
           ) : null}
           {cars.length > 0 ? (
             <ul className="mt-4 grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2 xl:grid-cols-3">
-              {cars.map((car) => (
-                <li key={car.id} className="bay-rise">
-                  <CarCard
-                    car={car}
-                    to={`/cars/${car.id}`}
-                    badge={badgeForStatus(car.status, "price")}
-                    layout="media"
-                  />
-                </li>
-              ))}
+              {cars.map((car) => {
+                const tradeAction = member
+                  ? garageTradeOfferAction({
+                      ownerUserId: member.id,
+                      viewerId: user?.id,
+                    })
+                  : "hidden";
+                return (
+                  <li key={car.id} className="bay-rise">
+                    <CarCard
+                      car={car}
+                      to={`/cars/${car.id}`}
+                      badge={badgeForStatus(car.status, "price")}
+                      layout="media"
+                      footer={
+                        tradeAction === "offer" && member ? (
+                          <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                            <Link
+                              to={garageTradeOfferHref(member.id, car.id)}
+                              className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-xs font-semibold text-lime no-underline transition hover:bg-lime/10"
+                            >
+                              Offer trade
+                            </Link>
+                          </div>
+                        ) : tradeAction === "signin" ? (
+                          <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                            <Link
+                              to="/signin"
+                              className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                            >
+                              Sign in to offer trade
+                            </Link>
+                          </div>
+                        ) : undefined
+                      }
+                    />
+                  </li>
+                );
+              })}
             </ul>
           ) : null}
         </section>
