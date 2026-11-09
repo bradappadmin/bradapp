@@ -149,6 +149,36 @@ describe.runIf(hasDb)("trade routes", () => {
     expect(res.status).toBe(401);
   });
 
+  it("returns the personal Brad Coin ledger for the signed-in member", async () => {
+    const res = await buyer.get("/trade/ledger").query({ limit: 50 });
+    expect(res.status).toBe(200);
+    expect(typeof res.body.balance).toBe("number");
+    expect(Array.isArray(res.body.ledger)).toBe(true);
+    expect(res.body.ledger.length).toBeGreaterThan(0);
+    expect(res.body.ledger.some((e: { reason: string }) => e.reason === "seed")).toBe(true);
+    expect(res.body.ledger.some((e: { reason: string }) => e.reason === "purchase")).toBe(true);
+    for (const entry of res.body.ledger as Array<{
+      reason: string;
+      delta: number;
+      balanceAfter: number;
+      createdAt: string;
+    }>) {
+      expect(entry.createdAt).toBeTruthy();
+      expect(typeof entry.delta).toBe("number");
+      expect(typeof entry.balanceAfter).toBe("number");
+      expect(
+        ["seed", "purchase", "sale", "daily_login", "play_reward", "admin_adjust"].includes(
+          entry.reason,
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("requires auth for personal ledger", async () => {
+    const res = await request(app).get("/trade/ledger");
+    expect(res.status).toBe(401);
+  });
+
   it("rejects buying without enough coins", async () => {
     // Drain is hard; buy an expensive car that exceeds remaining balance if possible.
     const search = await request(app).get("/cars/search").query({ sort: "price_desc", limit: 1 });

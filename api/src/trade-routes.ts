@@ -28,6 +28,18 @@ export function createTradeRouter(): Router {
     res.json({ balance, ledger });
   });
 
+  /** Full personal Brad Coin ledger for the signed-in member. */
+  router.get("/ledger", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const rawLimit = Number(req.query.limit ?? 100);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(Math.trunc(rawLimit), 1), 200)
+      : 100;
+    const balance = await getCoinBalance(user.id);
+    const ledger = await listLedger(user.id, limit);
+    res.json({ balance, ledger });
+  });
+
   router.get("/garage", requireAuth, async (req, res: Response) => {
     const user = (req as AuthedRequest).user;
     const pool = getPool();

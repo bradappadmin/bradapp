@@ -86,6 +86,9 @@ export function SiteHeader() {
             Trades
             <InboxBadge count={pendingTradeInbox} />
           </NavLink>
+          <NavLink to="/ledger" className={linkClass}>
+            Ledger
+          </NavLink>
           <NavLink to="/account" className={linkClass}>
             Account
           </NavLink>

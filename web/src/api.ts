@@ -223,6 +223,13 @@ export function fetchWallet(): Promise<{ balance: number; ledger: LedgerEntry[] 
   return request("/trade/wallet");
 }
 
+export function fetchLedger(
+  limit = 100,
+): Promise<{ balance: number; ledger: LedgerEntry[] }> {
+  const qs = new URLSearchParams({ limit: String(limit) }).toString();
+  return request(`/trade/ledger?${qs}`);
+}
+
 export function fetchGarage(): Promise<{ cars: GarageCar[]; totalValue: number }> {
   return request("/trade/garage");
 }

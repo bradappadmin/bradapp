@@ -43,7 +43,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - Favourites: signed-in members save/unsave listings (server-side); Favourites page in nav
 - Compare: pick two listings from Cars or Favourites for a side-by-side specs + Brad Coin price view
 - Share link: copy absolute listing URL from listing detail (and compare URL from Compare)
-- Brad Coins: balances + ledger; members buy/sell listings (no real money); My cars shows total garage value (sum of list / fair prices), purchase history, and sold history (price, counterparty when known, when)
+- Brad Coins: balances + personal ledger (starter, buy, sell, daily, play, admin adjust) linked from home/account; My cars shows garage value, purchase history, and sold history
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins; rematch the same opponent with a new card pick
 - Free card trades between members; nav Trades badge shows pending inbox count
 - Video reviews: record with car cue cards, publish to disk + DB; admins can take down

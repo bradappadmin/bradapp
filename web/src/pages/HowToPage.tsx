@@ -142,6 +142,12 @@ export function HowToPage() {
               </Link>{" "}
               — pick two from Cars or Favourites for a specs + Brad Coin face-off.
             </li>
+            <li>
+              <Link to="/ledger" className="text-lime no-underline hover:underline">
+                Coin ledger
+              </Link>{" "}
+              — every in/out for your Brad Coins (sign in).
+            </li>
           </ul>
         </section>
       </main>

@@ -67,6 +67,22 @@ export function AccountPage() {
         </div>
 
         <section className="bay-rise-delay mt-10 border-t border-white/10 pt-8">
+          <h2 className="font-display text-xl text-mist">Brad Coins</h2>
+          {user ? (
+            <p className="mt-2 font-display text-2xl text-lime">{user.coinBalance.toLocaleString()} BC</p>
+          ) : null}
+          <p className="mt-2 text-sm text-steel">
+            See every in and out — starter, buys, sells, daily, play, and admin adjusts.
+          </p>
+          <Link
+            to="/ledger"
+            className="mt-4 inline-block rounded-md border border-lime/40 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+          >
+            Open coin ledger
+          </Link>
+        </section>
+
+        <section className="bay-rise-delay mt-10 border-t border-white/10 pt-8">
           <h2 className="font-display text-xl text-mist">Change password</h2>
           <p className="mt-2 text-sm text-steel">
             Enter your current password, then choose a new one. Stored as a bcrypt hash only — never

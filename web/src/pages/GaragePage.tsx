@@ -296,7 +296,12 @@ export function GaragePage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="font-display text-xl text-mist">Coin ledger</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-display text-xl text-mist">Coin ledger</h2>
+            <Link to="/ledger" className="font-display text-sm text-lime no-underline hover:underline">
+              Full ledger
+            </Link>
+          </div>
           <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
             {ledger.map((entry) => (
               <li key={entry.id} className="flex items-baseline justify-between gap-4 py-3 text-sm">

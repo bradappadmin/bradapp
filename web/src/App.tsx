@@ -8,6 +8,7 @@ import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
 import { HowToPage } from "./pages/HowToPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
+import { LedgerPage } from "./pages/LedgerPage";
 import { ListingPage } from "./pages/ListingPage";
 import { MemberProfilePage } from "./pages/MemberProfilePage";
 import { MembersPage } from "./pages/MembersPage";
@@ -47,6 +48,7 @@ export function App() {
         <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
         <Route path="/admin/inventory" element={<AdminInventoryPage />} />
         <Route path="/account" element={<AccountPage />} />
+        <Route path="/ledger" element={<LedgerPage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
