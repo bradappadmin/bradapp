@@ -6,11 +6,27 @@ import { useAuth } from "../auth-context";
 import { formatCoins, formatMileage, listingTitle } from "../cars";
 import { SiteHeader } from "../components/SiteHeader";
 
+function statusLabel(status: GarageCar["status"]): string {
+  switch (status) {
+    case "available":
+      return "For sale";
+    case "owned":
+      return "In garage";
+    case "sold":
+      return "Sold";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
 export function GaragePage() {
   const { user, loading: authLoading, setUser, refresh } = useAuth();
   const [cars, setCars] = useState<GarageCar[]>([]);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sellPrices, setSellPrices] = useState<Record<number, string>>({});
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -49,21 +65,27 @@ export function GaragePage() {
     return <Navigate to="/signin" replace />;
   }
 
-  async function onSell(event: FormEvent, carId: number) {
+  async function onListOrUpdatePrice(event: FormEvent, car: GarageCar) {
     event.preventDefault();
-    const price = Number(sellPrices[carId]);
+    const price = Number(sellPrices[car.id] ?? car.coinPrice);
     if (!Number.isFinite(price) || price < 1) {
-      setError("Enter a coin price of at least 1");
+      setError("Enter a Brad Coin price of at least 1");
       return;
     }
-    setBusyId(carId);
+    setBusyId(car.id);
     setError(null);
+    setNotice(null);
     try {
-      await api.sellListing(carId, Math.trunc(price));
+      await api.sellListing(car.id, Math.trunc(price));
       await reload();
       await refresh();
+      setNotice(
+        car.status === "available"
+          ? `Updated asking price to ${formatCoins(Math.trunc(price))}.`
+          : `Listed for sale at ${formatCoins(Math.trunc(price))}. Other members can buy it from Cars.`,
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not list for sale");
+      setError(err instanceof Error ? err.message : "Could not update listing");
     } finally {
       setBusyId(null);
     }
@@ -72,15 +94,19 @@ export function GaragePage() {
   async function onUnlist(carId: number) {
     setBusyId(carId);
     setError(null);
+    setNotice(null);
     try {
       await api.unlistListing(carId);
       await reload();
+      setNotice("Unlisted — car is back in your garage only.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not unlist");
     } finally {
       setBusyId(null);
     }
   }
+
+  const forSaleCount = cars.filter((c) => c.status === "available").length;
 
   return (
     <div className="min-h-screen">
@@ -89,14 +115,24 @@ export function GaragePage() {
         <div className="bay-rise">
           <h1 className="font-display text-3xl font-semibold text-white">My cars</h1>
           <p className="mt-2 text-sm text-steel">
-            Your garage floor and Brad Coin ledger. No real money leaves this bay.
+            List an owned car for sale in Brad Coins, change the price, or unlist it. Other members buy
+            from the Cars catalogue. No real money leaves this bay.
           </p>
           {user ? (
             <p className="mt-4 font-display text-2xl text-lime">{formatCoins(user.coinBalance)}</p>
           ) : null}
+          {!loading && cars.length > 0 ? (
+            <p className="mt-2 text-sm text-steel">
+              {cars.length} {cars.length === 1 ? "car" : "cars"}
+              {forSaleCount > 0
+                ? ` · ${forSaleCount} for sale`
+                : null}
+            </p>
+          ) : null}
         </div>
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
+        {notice ? <p className="mt-4 text-sm text-lime">{notice}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
 
         <section className="mt-10">
@@ -115,25 +151,45 @@ export function GaragePage() {
               <li key={car.id} className="py-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <Link
+                        to={`/cars/${car.id}`}
+                        className="font-display text-lg font-semibold text-mist no-underline hover:text-white"
+                      >
+                        {listingTitle(car)}
+                      </Link>
+                      <span
+                        className={
+                          car.status === "available"
+                            ? "text-xs font-display uppercase tracking-wide text-lime"
+                            : "text-xs font-display uppercase tracking-wide text-steel"
+                        }
+                      >
+                        {statusLabel(car.status)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-steel">
+                      {car.year} · {car.colour} · {formatMileage(car.mileage)}
+                    </p>
+                    <p className="mt-1 text-sm text-steel">
+                      {car.status === "available" ? "Asking" : "Last price"}{" "}
+                      {formatCoins(car.coinPrice)}
+                    </p>
                     <Link
                       to={`/cars/${car.id}`}
-                      className="font-display text-lg font-semibold text-mist no-underline hover:text-white"
+                      className="mt-2 inline-block text-sm text-lime no-underline hover:underline"
                     >
-                      {listingTitle(car)}
+                      {car.status === "available" ? "View public listing" : "Open car"}
                     </Link>
-                    <p className="mt-1 text-sm text-steel">
-                      {car.year} · {car.colour} · {formatMileage(car.mileage)} · {car.status}
-                    </p>
-                    <p className="mt-1 text-sm text-steel">Listed at {formatCoins(car.coinPrice)}</p>
                   </div>
                   <div className="flex flex-col gap-2 sm:items-end">
-                    {car.status === "owned" ? (
+                    {(car.status === "owned" || car.status === "available") && (
                       <form
                         className="flex flex-wrap items-end gap-2"
-                        onSubmit={(e) => void onSell(e, car.id)}
+                        onSubmit={(e) => void onListOrUpdatePrice(e, car)}
                       >
                         <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-steel">
-                          Sale price
+                          Brad Coin price
                           <input
                             className="w-28 rounded-md border border-white/10 bg-bay-panel px-2 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
                             type="number"
@@ -149,10 +205,10 @@ export function GaragePage() {
                           disabled={busyId === car.id}
                           className="rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white disabled:opacity-60"
                         >
-                          List for sale
+                          {car.status === "available" ? "Update price" : "List for sale"}
                         </button>
                       </form>
-                    ) : null}
+                    )}
                     {car.status === "available" ? (
                       <button
                         type="button"
@@ -177,7 +233,9 @@ export function GaragePage() {
               <li key={entry.id} className="flex items-baseline justify-between gap-4 py-3 text-sm">
                 <div>
                   <p className="text-mist">{entry.reason.replace("_", " ")}</p>
-                  <p className="text-xs text-steel">{entry.note || new Date(entry.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-steel">
+                    {entry.note || new Date(entry.createdAt).toLocaleString()}
+                  </p>
                 </div>
                 <p className={entry.delta >= 0 ? "text-lime" : "text-rose"}>
                   {entry.delta >= 0 ? "+" : ""}

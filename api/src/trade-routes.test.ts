@@ -110,6 +110,41 @@ describe.runIf(hasDb)("trade routes", () => {
     expect(res.status).toBe(401);
   });
 
+  it("updates asking price on a listed car and can unlist it", async () => {
+    // Buy a fresh affordable listing (may be none if stock depleted — skip gracefully).
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 20 });
+    const wallet = await buyer.get("/trade/wallet");
+    const affordable = search.body.listings.find(
+      (l: { coinPrice: number }) => l.coinPrice <= wallet.body.balance,
+    );
+    if (!affordable) {
+      expect(true).toBe(true);
+      return;
+    }
+    const carId = affordable.id as number;
+    expect((await buyer.post(`/trade/listings/${carId}/buy`)).status).toBe(200);
+
+    const listed = await buyer.post(`/trade/listings/${carId}/sell`).send({ coinPrice: 77 });
+    expect(listed.status).toBe(200);
+    expect(listed.body.status).toBe("available");
+    expect(listed.body.coinPrice).toBe(77);
+
+    const repriced = await buyer.post(`/trade/listings/${carId}/sell`).send({ coinPrice: 88 });
+    expect(repriced.status).toBe(200);
+    expect(repriced.body.coinPrice).toBe(88);
+
+    const publicListing = await request(app).get(`/cars/listings/${carId}`);
+    expect(publicListing.body.listing.status).toBe("available");
+    expect(publicListing.body.listing.coinPrice).toBe(88);
+
+    const unlist = await buyer.post(`/trade/listings/${carId}/unlist`);
+    expect(unlist.status).toBe(200);
+    expect(unlist.body.status).toBe("owned");
+
+    const after = await request(app).get(`/cars/listings/${carId}`);
+    expect(after.body.listing.status).toBe("owned");
+  });
+
   // silence unused
   void listingId;
 });

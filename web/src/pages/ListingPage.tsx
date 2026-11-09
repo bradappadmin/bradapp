@@ -114,9 +114,9 @@ export function ListingPage() {
 
             {ownsListing ? (
               <p className="mt-6 text-sm text-lime">
-                You own this car. Manage it in{" "}
+                You own this car. List it for sale, change the price, or unlist in{" "}
                 <Link to="/garage" className="underline">
-                  My garage
+                  My cars
                 </Link>
                 .
               </p>

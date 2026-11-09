@@ -154,8 +154,8 @@ export function CarsPage() {
         <div className="bay-rise mb-8">
           <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Find a car</h1>
           <p className="mt-2 max-w-2xl text-sm text-steel">
-            Real makes and models. Garages, owners, and Brad Coin prices are play — nothing here buys a
-            real car.
+            Real makes and models. Garages, owners, and Brad Coin prices are play — including cars
+            members list from My cars. Nothing here buys a real car.
           </p>
         </div>
 
