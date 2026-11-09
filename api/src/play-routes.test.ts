@@ -74,6 +74,45 @@ describe.runIf(hasDb)("play routes", () => {
     expect(play.body.match.opponent.userId).toBeTruthy();
   });
 
+  it("allows a rematch vs the same opponent (second match, new category pick)", async () => {
+    const first = await a.post("/play/top-trumps/pvp").send({
+      listingId: carA,
+      opponentListingId: carB,
+      category: "bhp",
+    });
+    expect(first.status).toBe(201);
+    const opponentUserId = first.body.match.opponent.userId as number;
+
+    // Prefer a different owned card when the wallet can buy one; otherwise rematch with carA.
+    const wallet = await a.get("/trade/wallet");
+    const garage = await a.get("/trade/garage");
+    const ownedIds = new Set(
+      (garage.body.cars as Array<{ id: number }>).map((car) => car.id),
+    );
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 40 });
+    const next = (search.body.listings as Array<{ id: number; coinPrice: number }>).find(
+      (l) =>
+        !ownedIds.has(l.id) &&
+        l.id !== carB &&
+        l.coinPrice <= Number(wallet.body.balance),
+    );
+    let rematchListingId = carA;
+    if (next) {
+      const buy = await a.post(`/trade/listings/${next.id}/buy`);
+      if (buy.status === 200) rematchListingId = next.id;
+    }
+
+    const rematch = await a.post("/play/top-trumps/pvp").send({
+      listingId: rematchListingId,
+      opponentListingId: carB,
+      category: "top_speed_mph",
+    });
+    expect(rematch.status).toBe(201);
+    expect(rematch.body.match.mode).toBe("pvp");
+    expect(rematch.body.match.opponent.userId).toBe(opponentUserId);
+    expect(rematch.body.match.id).not.toBe(first.body.match.id);
+  });
+
   it("creates and accepts a free card trade without moving Brad Coins", async () => {
     const walletABefore = await a.get("/trade/wallet");
     const walletBBefore = await b.get("/trade/wallet");
