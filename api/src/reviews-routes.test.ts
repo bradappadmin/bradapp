@@ -80,6 +80,11 @@ describe.runIf(hasDb)("reviews routes", () => {
     expect(list.status).toBe(200);
     expect(list.body.reviews.some((r: { id: number }) => r.id === reviewId)).toBe(true);
 
+    const publicList = await request(app).get("/reviews").query({ limit: 5 });
+    expect(publicList.status).toBe(200);
+    expect(publicList.body.reviews.some((r: { id: number }) => r.id === reviewId)).toBe(true);
+    expect(publicList.body.reviews.length).toBeLessThanOrEqual(5);
+
     const video = await member.get(`/reviews/${reviewId}/video`);
     expect(video.status).toBe(200);
     expect(video.headers["content-type"]).toMatch(/video/);

@@ -8,6 +8,7 @@ import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { buildCueCards } from "./cue-cards.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { isAdminRole } from "./roles.js";
+import { readSessionUser } from "./session.js";
 import { ensureVideosDir, videoFilePath } from "./video-storage.js";
 
 const upload = multer({
@@ -159,15 +160,34 @@ export function createReviewsRouter(): Router {
     });
   });
 
-  router.get("/", requireAuth, async (req, res: Response) => {
-    const user = (req as AuthedRequest).user;
-    const includeUnpublished = isAdminRole(user.role) && req.query.all === "1";
+  /** Published reviews are public (home / bay). `?all=1` needs an admin session. */
+  router.get("/", async (req, res: Response) => {
+    const wantAll = req.query.all === "1";
+    const user = await readSessionUser(req);
+    if (wantAll) {
+      if (!user) {
+        res.status(401).json({ error: "unauthenticated", message: "Not signed in." });
+        return;
+      }
+      if (!isAdminRole(user.role)) {
+        res.status(403).json({ error: "forbidden", message: "Admin area only." });
+        return;
+      }
+    }
+    const includeUnpublished = wantAll && user != null && isAdminRole(user.role);
+    const rawLimit = Number(req.query.limit ?? (includeUnpublished ? 100 : 20));
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(Math.trunc(rawLimit), 1), 100)
+      : includeUnpublished
+        ? 100
+        : 20;
     const pool = getPool();
     const [rows] = await pool.query<ReviewRow[]>(
       `${reviewSelect}
        ${includeUnpublished ? "" : "WHERE r.status = 'published'"}
        ORDER BY r.created_at DESC
-       LIMIT 100`,
+       LIMIT ?`,
+      [limit],
     );
     res.json({ reviews: rows.map(toReview) });
   });

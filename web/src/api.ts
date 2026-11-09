@@ -513,8 +513,15 @@ export type ReviewCarModel = {
   label: string;
 };
 
-export function fetchReviews(all = false): Promise<{ reviews: ReviewSummary[] }> {
-  return request(`/reviews${all ? "?all=1" : ""}`);
+export function fetchReviews(
+  all = false,
+  limit?: number,
+): Promise<{ reviews: ReviewSummary[] }> {
+  const params = new URLSearchParams();
+  if (all) params.set("all", "1");
+  if (limit != null && Number.isFinite(limit)) params.set("limit", String(limit));
+  const qs = params.toString();
+  return request(`/reviews${qs ? `?${qs}` : ""}`);
 }
 
 export function fetchReview(id: number): Promise<{ review: ReviewSummary }> {

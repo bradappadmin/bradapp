@@ -14,6 +14,7 @@ vi.mock("../api", () => ({
   fetchDailyBonus: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
   fetchActivity: vi.fn().mockResolvedValue({ items: [] }),
+  fetchReviews: vi.fn().mockResolvedValue({ reviews: [] }),
 }));
 
 import * as api from "../api";
@@ -25,7 +26,48 @@ describe("HomePage", () => {
 
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
+    vi.mocked(api.fetchReviews).mockResolvedValue({ reviews: [] });
     window.localStorage.clear();
+  });
+
+  it("shows latest published reviews with watch links on home", async () => {
+    vi.mocked(api.fetchReviews).mockResolvedValue({
+      reviews: [
+        {
+          id: 9,
+          title: "Bay burn — Focus ST",
+          status: "published",
+          createdAt: "2026-11-09T12:00:00.000Z",
+          publisher: { id: 1, displayName: "Brad" },
+          car: {
+            id: 3,
+            make: "Ford",
+            model: "Focus",
+            trimName: "ST",
+            bhp: 280,
+            topSpeedMph: 155,
+            zeroToSixtySecs: 5.7,
+          },
+          cueCards: [],
+          videoUrl: "/reviews/9/video",
+          mimeType: "video/webm",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Latest bay reviews" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Latest reviews" })).toBeInTheDocument();
+    const watch = await screen.findByRole("link", { name: /Bay burn — Focus ST/i });
+    expect(watch).toHaveAttribute("href", "/reviews/9");
+    expect(screen.getByText("Watch →")).toBeInTheDocument();
   });
 
   it("shows recently viewed cars from localStorage on home", async () => {

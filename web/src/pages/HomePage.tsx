@@ -5,6 +5,7 @@ import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { ActivityFeed } from "../components/ActivityFeed";
 import { FirstVisitTips } from "../components/FirstVisitTips";
+import { LatestReviews } from "../components/LatestReviews";
 import { RecentlyViewedCars } from "../components/RecentlyViewedCars";
 import { SiteHeader } from "../components/SiteHeader";
 import { roleLabel } from "../types";
@@ -99,6 +100,8 @@ export function HomePage() {
           </div>
 
           <RecentlyViewedCars />
+
+          <LatestReviews />
         </main>
       </div>
     );
@@ -235,6 +238,8 @@ export function HomePage() {
         <FirstVisitTips user={user} />
 
         <RecentlyViewedCars />
+
+        <LatestReviews />
 
         <ActivityFeed />
       </main>
