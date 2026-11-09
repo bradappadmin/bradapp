@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { ToastProvider } from "../toast-context";
@@ -43,7 +44,7 @@ describe("GaragePage Midnight Garage UI", () => {
     vi.mocked(api.fetchSoldHistory).mockResolvedValue({ sales: [] });
     vi.mocked(api.fetchPurchaseHistory).mockResolvedValue({ purchases: [] });
     vi.mocked(api.fetchGarage).mockResolvedValue({
-      totalValue: 820,
+      totalValue: 1240,
       cars: [
         {
           id: 9,
@@ -59,6 +60,25 @@ describe("GaragePage Midnight Garage UI", () => {
           colour: "Racing Red",
           mileage: 12000,
           coinPrice: 420,
+          status: "owned",
+          ownerLabel: "You",
+          garageName: "Bay",
+          garageCity: "London",
+        },
+        {
+          id: 11,
+          make: "Audi",
+          model: "RS3",
+          trimName: "Vorsprung",
+          bodyType: "Saloon",
+          bhp: 400,
+          topSpeedMph: 155,
+          zeroToSixtySecs: 3.8,
+          conditionType: "used",
+          year: 2021,
+          colour: "Nardo Grey",
+          mileage: 9000,
+          coinPrice: 520,
           status: "owned",
           ownerLabel: "You",
           garageName: "Bay",
@@ -89,10 +109,12 @@ describe("GaragePage Midnight Garage UI", () => {
 
   it("shows bay hierarchy, owned vs for-sale sections, and media cards", async () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/garage"]}>
         <AuthProvider>
           <ToastProvider>
-            <GaragePage />
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
           </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
@@ -107,6 +129,7 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Purchases" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sold" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Coin ledger" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
 
     expect(await screen.findByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
       "href",
@@ -116,12 +139,43 @@ describe("GaragePage Midnight Garage UI", () => {
       "href",
       "/cars/10",
     );
-    expect(screen.getByRole("button", { name: "List for sale" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "List for sale" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Update price" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
 
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
+  it("sorts Owned by name via URL-backed control", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("link", { name: /Audi RS3/i })).toBeInTheDocument();
+    const ownedHeading = screen.getByRole("heading", { name: "Owned" });
+    const ownedSection = ownedHeading.closest("section");
+    expect(ownedSection).not.toBeNull();
+    const ownedLinks = ownedSection!.querySelectorAll("a[href^='/cars/']");
+    expect(ownedLinks[0]?.textContent).toMatch(/Audi RS3/i);
+
+    const sort = screen.getByRole("combobox", { name: /Sort Owned and For sale cars/i });
+    await user.selectOptions(sort, "name_asc");
+    expect(sort).toHaveValue("name_asc");
+
+    const resortedOwned = screen.getByRole("heading", { name: "Owned" }).closest("section");
+    const resortedLinks = resortedOwned!.querySelectorAll("a[href^='/cars/']");
+    expect(resortedLinks[0]?.textContent).toMatch(/Audi RS3/i);
+    expect(resortedLinks[1]?.textContent).toMatch(/Porsche 911/i);
   });
 });

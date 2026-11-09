@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { GarageCar, LedgerEntry, PurchasedCar, SoldCar } from "../api";
 import { useAuth } from "../auth-context";
@@ -8,6 +8,12 @@ import { badgeForStatus } from "../car-visuals";
 import { CarCard } from "../components/CarCard";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import {
+  GARAGE_SORT_OPTIONS,
+  parseGarageSort,
+  sortGarageCars,
+  type GarageSort,
+} from "../garage-sort";
 import { sumGarageValue } from "../garage-value";
 import { useToast } from "../toast-context";
 
@@ -49,6 +55,8 @@ function EmptyBay({ children }: { children: ReactNode }) {
 export function GaragePage() {
   const { user, loading: authLoading, setUser, refresh } = useAuth();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sort = parseGarageSort(searchParams.get("sort"));
   const [cars, setCars] = useState<GarageCar[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
@@ -100,10 +108,34 @@ export function GaragePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when signed-in user id changes
   }, [user?.id]);
 
-  const ownedCars = useMemo(() => cars.filter((c) => c.status === "owned"), [cars]);
-  const forSaleCars = useMemo(() => cars.filter((c) => c.status === "available"), [cars]);
+  const ownedCars = useMemo(
+    () => sortGarageCars(
+      cars.filter((c) => c.status === "owned"),
+      sort,
+    ),
+    [cars, sort],
+  );
+  const forSaleCars = useMemo(
+    () => sortGarageCars(
+      cars.filter((c) => c.status === "available"),
+      sort,
+    ),
+    [cars, sort],
+  );
   const garageValue =
     totalValue > 0 || cars.length === 0 ? totalValue : sumGarageValue(cars);
+
+  function setSort(next: GarageSort) {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next === "value_desc") params.delete("sort");
+        else params.set("sort", next);
+        return params;
+      },
+      { replace: true },
+    );
+  }
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
@@ -262,6 +294,34 @@ export function GaragePage() {
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {notice ? <p className="mt-4 text-sm text-lime">{notice}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
+
+        <div
+          className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+          role="search"
+          aria-label="Sort garage cars"
+        >
+          <div className="min-w-0">
+            <p className="font-display text-lg text-mist">Sort the bay</p>
+            <p className="mt-1 text-sm text-steel">
+              Applies to Owned and For sale. Choice stays in the URL.
+            </p>
+          </div>
+          <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+            Sort by
+            <select
+              className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+              value={sort}
+              onChange={(e) => setSort(parseGarageSort(e.target.value))}
+              aria-label="Sort Owned and For sale cars"
+            >
+              {GARAGE_SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <SectionShell
           id="garage-owned"
