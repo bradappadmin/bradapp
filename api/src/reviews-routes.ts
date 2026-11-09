@@ -362,13 +362,40 @@ export function createReviewsRouter(): Router {
       : includeUnpublished
         ? 100
         : 20;
+
+    /** Optional filter: `review` (cue card) or `drag_race`. Omit / empty = all types. */
+    const typeRaw = typeof req.query.type === "string" ? req.query.type.trim() : "";
+    let typeFilter: ReviewType | null = null;
+    if (typeRaw) {
+      const parsedType = reviewTypeSchema.safeParse(typeRaw);
+      if (!parsedType.success) {
+        res.status(400).json({
+          error: "validation_error",
+          message: "type must be review or drag_race",
+        });
+        return;
+      }
+      typeFilter = parsedType.data;
+    }
+
+    const whereParts: string[] = [];
+    const params: Array<string | number> = [];
+    if (!includeUnpublished) {
+      whereParts.push("r.status = 'published'");
+    }
+    if (typeFilter) {
+      whereParts.push("r.review_type = ?");
+      params.push(typeFilter);
+    }
+    params.push(limit);
+
     const pool = getPool();
     const [rows] = await pool.query<ReviewRow[]>(
       `${reviewSelectSql(user?.id ?? null)}
-       ${includeUnpublished ? "" : "WHERE r.status = 'published'"}
+       ${whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : ""}
        ORDER BY r.created_at DESC
        LIMIT ?`,
-      [limit],
+      params,
     );
     res.json({ reviews: rows.map(toReview) });
   });

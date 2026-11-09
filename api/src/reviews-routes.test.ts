@@ -118,6 +118,21 @@ describe.runIf(hasDb)("reviews routes", () => {
     const drag = listed.body.reviews.find((r: { id: number }) => r.id === res.body.review.id);
     expect(drag?.type).toBe("drag_race");
     expect(drag?.carB?.id).toBe(carB);
+
+    const onlyDrag = await member.get("/reviews").query({ type: "drag_race" });
+    expect(onlyDrag.status).toBe(200);
+    expect(onlyDrag.body.reviews.length).toBeGreaterThanOrEqual(1);
+    expect(onlyDrag.body.reviews.every((r: { type: string }) => r.type === "drag_race")).toBe(true);
+
+    const onlyCue = await member.get("/reviews").query({ type: "review" });
+    expect(onlyCue.status).toBe(200);
+    expect(onlyCue.body.reviews.every((r: { type: string }) => r.type === "review")).toBe(true);
+    expect(onlyCue.body.reviews.some((r: { id: number }) => r.id === res.body.review.id)).toBe(
+      false,
+    );
+
+    const badType = await member.get("/reviews").query({ type: "podcast" });
+    expect(badType.status).toBe(400);
   });
 
   it("lists published reviews for members and streams the file", async () => {

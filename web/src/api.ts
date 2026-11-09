@@ -587,10 +587,12 @@ export type ReviewCarModel = {
 export function fetchReviews(
   all = false,
   limit?: number,
+  type?: ReviewType | "all",
 ): Promise<{ reviews: ReviewSummary[] }> {
   const params = new URLSearchParams();
   if (all) params.set("all", "1");
   if (limit != null && Number.isFinite(limit)) params.set("limit", String(limit));
+  if (type === "review" || type === "drag_race") params.set("type", type);
   const qs = params.toString();
   return request(`/reviews${qs ? `?${qs}` : ""}`);
 }

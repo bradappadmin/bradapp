@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
-import type { ReviewSummary } from "../api";
+import type { ReviewSummary, ReviewType } from "../api";
 import { useAuth } from "../auth-context";
+import { FeaturedReview } from "../components/FeaturedReview";
 import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
 
@@ -10,8 +11,23 @@ function isAdmin(role: string): boolean {
   return role === "admin" || role === "super_admin";
 }
 
+type ReviewTypeFilter = "all" | ReviewType;
+
+const FILTERS: Array<{ id: ReviewTypeFilter; label: string }> = [
+  { id: "all", label: "All" },
+  { id: "review", label: "Cue card" },
+  { id: "drag_race", label: "Drag race" },
+];
+
+function parseTypeFilter(raw: string | null): ReviewTypeFilter {
+  if (raw === "review" || raw === "drag_race") return raw;
+  return "all";
+}
+
 export function ReviewsPage() {
   const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const typeFilter = parseTypeFilter(searchParams.get("type"));
   const [reviews, setReviews] = useState<ReviewSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +38,11 @@ export function ReviewsPage() {
     void (async () => {
       setLoading(true);
       try {
-        const res = await api.fetchReviews(isAdmin(user.role));
+        const res = await api.fetchReviews(
+          isAdmin(user.role),
+          undefined,
+          typeFilter === "all" ? "all" : typeFilter,
+        );
         if (!cancelled) {
           setReviews(res.reviews);
           setError(null);
@@ -36,11 +56,30 @@ export function ReviewsPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, user?.role]);
+  }, [user?.id, user?.role, typeFilter]);
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
+
+  function setTypeFilter(next: ReviewTypeFilter) {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next === "all") params.delete("type");
+        else params.set("type", next);
+        return params;
+      },
+      { replace: true },
+    );
+  }
+
+  const emptyMessage =
+    typeFilter === "drag_race"
+      ? "No drag races published yet."
+      : typeFilter === "review"
+        ? "No cue-card reviews published yet."
+        : "No reviews published yet.";
 
   return (
     <div className="min-h-screen">
@@ -50,7 +89,7 @@ export function ReviewsPage() {
           <div>
             <h1 className="font-display text-3xl font-semibold text-white">Video reviews</h1>
             <p className="mt-2 max-w-xl text-sm text-steel">
-              Brad in the bay — single-car reviews and drag races with cue cards. Original BradApp
+              Brad in the bay — single-car cue-card reviews and drag races. Original BradApp
               content.
             </p>
           </div>
@@ -64,10 +103,40 @@ export function ReviewsPage() {
           ) : null}
         </div>
 
+        <FeaturedReview />
+
+        <div className="mt-10 border-t border-white/10 pt-6">
+          <fieldset>
+            <legend className="font-display text-xs uppercase tracking-wide text-steel">
+              Filter by type
+            </legend>
+            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Review type">
+              {FILTERS.map((filter) => {
+                const active = typeFilter === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setTypeFilter(filter.id)}
+                    className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                      active
+                        ? "border-lime/50 bg-lime/10 text-lime"
+                        : "border-white/15 text-mist hover:border-lime/35 hover:text-lime"
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        </div>
+
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-8 text-sm text-rose">{error}</p> : null}
 
-        <ul className="mt-8 divide-y divide-white/10 border-t border-white/10">
+        <ul className="mt-6 divide-y divide-white/10 border-t border-white/10">
           {reviews.map((review) => (
             <li key={review.id}>
               <Link
@@ -85,7 +154,9 @@ export function ReviewsPage() {
                   <p className="mt-1 text-sm text-steel">
                     {review.type === "drag_race" ? (
                       <span className="mr-2 text-lime">Drag race</span>
-                    ) : null}
+                    ) : (
+                      <span className="mr-2 text-mist/80">Cue card</span>
+                    )}
                     {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
                     {review.publisher.displayName}
                     {review.status === "unpublished" ? " · unpublished" : ""}
@@ -105,7 +176,7 @@ export function ReviewsPage() {
           ))}
         </ul>
         {!loading && reviews.length === 0 ? (
-          <p className="mt-6 text-sm text-steel">No reviews published yet.</p>
+          <p className="mt-6 text-sm text-steel">{emptyMessage}</p>
         ) : null}
       </main>
     </div>
