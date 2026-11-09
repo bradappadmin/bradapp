@@ -57,7 +57,7 @@ export function MembersPage() {
                 key={member.id}
                 className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div>
+                <div className="min-w-0">
                   <Link
                     to={`/members/${member.id}`}
                     className="font-display text-lg font-semibold text-mist no-underline hover:text-white"
@@ -66,6 +66,9 @@ export function MembersPage() {
                     {isYou ? " (you)" : ""}
                   </Link>
                   <p className="mt-1 text-sm text-steel">{member.roleLabel}</p>
+                  {member.bio ? (
+                    <p className="mt-1 max-w-md text-sm text-mist/90">{member.bio}</p>
+                  ) : null}
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-sm">
                   <span className="font-display text-lime">{formatCoins(member.coinBalance)}</span>

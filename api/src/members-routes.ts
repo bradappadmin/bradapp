@@ -5,6 +5,7 @@ import { isRole, roleLabel, type Role } from "./roles.js";
 type MemberListRow = RowDataPacket & {
   id: number;
   display_name: string;
+  bio: string | null;
   role: string;
   coin_balance: number;
   car_count: number;
@@ -27,9 +28,11 @@ type MemberCardRow = RowDataPacket & {
 
 function mapMember(row: MemberListRow) {
   const role: Role = isRole(row.role) ? row.role : "member";
+  const bio = row.bio && row.bio.trim().length > 0 ? row.bio.trim() : null;
   return {
     id: Number(row.id),
     displayName: row.display_name,
+    bio,
     role,
     roleLabel: roleLabel(role),
     coinBalance: Number(row.coin_balance),
@@ -66,13 +69,13 @@ export function createMembersRouter(): Router {
   router.get("/", async (_req, res: Response) => {
     const pool = getPool();
     const [rows] = await pool.query<MemberListRow[]>(
-      `SELECT u.id, u.display_name, u.role, u.coin_balance,
+      `SELECT u.id, u.display_name, u.bio, u.role, u.coin_balance,
               COUNT(l.id) AS car_count
        FROM users u
        LEFT JOIN listings l
          ON l.owner_user_id = u.id AND l.status IN ('owned', 'available')
        WHERE u.account_status = 'active'
-       GROUP BY u.id, u.display_name, u.role, u.coin_balance
+       GROUP BY u.id, u.display_name, u.bio, u.role, u.coin_balance
        ORDER BY u.display_name ASC`,
     );
     res.json({ members: rows.map(mapMember) });
@@ -87,13 +90,13 @@ export function createMembersRouter(): Router {
 
     const pool = getPool();
     const [rows] = await pool.query<MemberListRow[]>(
-      `SELECT u.id, u.display_name, u.role, u.coin_balance,
+      `SELECT u.id, u.display_name, u.bio, u.role, u.coin_balance,
               COUNT(l.id) AS car_count
        FROM users u
        LEFT JOIN listings l
          ON l.owner_user_id = u.id AND l.status IN ('owned', 'available')
        WHERE u.id = ? AND u.account_status = 'active'
-       GROUP BY u.id, u.display_name, u.role, u.coin_balance
+       GROUP BY u.id, u.display_name, u.bio, u.role, u.coin_balance
        LIMIT 1`,
       [memberId],
     );

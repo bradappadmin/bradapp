@@ -190,6 +190,65 @@ describe.runIf(hasDb)("auth routes", () => {
     await getPool().query("DELETE FROM users WHERE email = ?", [email]);
   });
 
+  it("lets a signed-in member update display name and garage bio", async () => {
+    const email = `profile-${Date.now()}@example.com`;
+    const agent = request.agent(app);
+    const signup = await agent.post("/auth/signup").send({
+      email,
+      password: "ProfilePass-123!",
+      displayName: "Old Bay Name",
+    });
+    expect(signup.status).toBe(201);
+    expect(signup.body.user.bio).toBeNull();
+
+    const guest = await request(app).patch("/auth/profile").send({
+      displayName: "Nope",
+      bio: "Should fail",
+    });
+    expect(guest.status).toBe(401);
+
+    const tooLong = "x".repeat(161);
+    const badBio = await agent.patch("/auth/profile").send({
+      displayName: "Still Valid",
+      bio: tooLong,
+    });
+    expect(badBio.status).toBe(400);
+
+    const updated = await agent.patch("/auth/profile").send({
+      displayName: "New Bay Name",
+      bio: "Short garage bio for the bay.",
+    });
+    expect(updated.status).toBe(200);
+    expect(updated.body.user.displayName).toBe("New Bay Name");
+    expect(updated.body.user.bio).toBe("Short garage bio for the bay.");
+    expect(updated.body.user.email).toBe(email);
+
+    const me = await agent.get("/auth/me");
+    expect(me.body.user.displayName).toBe("New Bay Name");
+    expect(me.body.user.bio).toBe("Short garage bio for the bay.");
+
+    const cleared = await agent.patch("/auth/profile").send({
+      displayName: "New Bay Name",
+      bio: "   ",
+    });
+    expect(cleared.status).toBe(200);
+    expect(cleared.body.user.bio).toBeNull();
+
+    const publicGarage = await request(app).get(`/members/${signup.body.user.id}`);
+    expect(publicGarage.status).toBe(200);
+    expect(publicGarage.body.member.displayName).toBe("New Bay Name");
+    expect(publicGarage.body.member.bio).toBeNull();
+
+    await agent.patch("/auth/profile").send({
+      displayName: "New Bay Name",
+      bio: "Back on the wall.",
+    });
+    const withBio = await request(app).get(`/members/${signup.body.user.id}`);
+    expect(withBio.body.member.bio).toBe("Back on the wall.");
+
+    await getPool().query("DELETE FROM users WHERE email = ?", [email]);
+  });
+
   it("accepts an optional family invite on signup and rejects bad codes", async () => {
     const adminEmail = `invite-admin-${Date.now()}@example.com`;
     const admin = request.agent(app);

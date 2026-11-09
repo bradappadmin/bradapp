@@ -57,6 +57,7 @@ describe("ReviewDetailPage likes", () => {
         id: 2,
         email: "member@example.com",
         displayName: "Member",
+        bio: null,
         role: "member",
         coinBalance: 100,
       },

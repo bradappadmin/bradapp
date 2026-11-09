@@ -64,12 +64,18 @@ describe.runIf(hasDb)("members routes", () => {
       displayName: "Members Tester",
       role: "member",
       carCount: 0,
+      bio: null,
     });
     expect(typeof self.coinBalance).toBe("number");
     expect(self).not.toHaveProperty("email");
     expect(self).not.toHaveProperty("password_hash");
     const rival = res.body.members.find((m: { id: number }) => m.id === otherId);
     expect(rival.carCount).toBeGreaterThanOrEqual(1);
+
+    const demo = res.body.members.find((m: { displayName: string }) => m.displayName === "Sam Bay");
+    if (demo) {
+      expect(typeof demo.bio === "string" || demo.bio === null).toBe(true);
+    }
   });
 
   it("returns a public member garage with cars and no secrets", async () => {

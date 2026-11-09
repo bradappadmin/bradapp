@@ -89,6 +89,18 @@ export function changePassword(input: {
   });
 }
 
+export const BIO_MAX_LENGTH = 160;
+
+export function updateProfile(input: {
+  displayName: string;
+  bio?: string;
+}): Promise<{ user: User }> {
+  return request("/auth/profile", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
 export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
 
 export type ActivityItem = {
@@ -422,6 +434,7 @@ export function fetchMemberCards(ownerUserId?: number): Promise<{ cards: MemberC
 export type MemberSummary = {
   id: number;
   displayName: string;
+  bio: string | null;
   role: "super_admin" | "admin" | "member";
   roleLabel: string;
   coinBalance: number;

@@ -58,6 +58,7 @@ describe("SiteHeader", () => {
         id: 7,
         email: "member@example.com",
         displayName: "Member",
+        bio: null,
         role: "member",
         coinBalance: 200,
       },

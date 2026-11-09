@@ -10,6 +10,8 @@ export type PublicUser = {
   id: number;
   email: string;
   displayName: string;
+  /** Short public garage bio; null when unset. */
+  bio: string | null;
   role: Role;
   coinBalance: number;
 };
@@ -19,6 +21,7 @@ type SessionRow = RowDataPacket & {
   user_id: number;
   email: string;
   display_name: string;
+  bio: string | null;
   role: Role;
   coin_balance: number;
   account_status: "active" | "closed" | "frozen";
@@ -100,7 +103,7 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
 
   const pool = getPool();
   const [rows] = await pool.query<SessionRow[]>(
-    `SELECT s.id, s.user_id, s.expires_at, u.email, u.display_name, u.role, u.coin_balance, u.account_status
+    `SELECT s.id, s.user_id, s.expires_at, u.email, u.display_name, u.bio, u.role, u.coin_balance, u.account_status
      FROM sessions s
      INNER JOIN users u ON u.id = s.user_id
      WHERE s.id = ?
@@ -127,6 +130,7 @@ export async function readSessionUser(req: Request): Promise<PublicUser | null> 
     id: Number(row.user_id),
     email: row.email,
     displayName: row.display_name,
+    bio: row.bio && row.bio.trim().length > 0 ? row.bio.trim() : null,
     role: row.role,
     coinBalance: Number(row.coin_balance),
   };

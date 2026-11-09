@@ -53,21 +53,39 @@ const changePasswordSchema = z
     path: ["newPassword"],
   });
 
+/** Public bay name + short garage bio (empty bio clears). */
+export const BIO_MAX_LENGTH = 160;
+
+const updateProfileSchema = z.object({
+  displayName: z.string().trim().min(1).max(120),
+  bio: z
+    .string()
+    .trim()
+    .max(BIO_MAX_LENGTH)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+});
+
 type UserRow = RowDataPacket & {
   id: number;
   email: string;
   password_hash: string;
   display_name: string;
+  bio: string | null;
   role: PublicUser["role"];
   coin_balance: number;
   account_status: "active" | "closed" | "frozen";
 };
+
+const USER_PUBLIC_SELECT =
+  "id, email, password_hash, display_name, bio, role, coin_balance, account_status";
 
 function toPublicUser(row: UserRow): PublicUser {
   return {
     id: Number(row.id),
     email: row.email,
     displayName: row.display_name,
+    bio: row.bio && row.bio.trim().length > 0 ? row.bio.trim() : null,
     role: row.role,
     coinBalance: Number(row.coin_balance),
   };
@@ -158,6 +176,7 @@ export function createAuthRouter(): Router {
         id: userId,
         email,
         displayName,
+        bio: null,
         role: "member" as const,
         coinBalance,
       },
@@ -174,7 +193,7 @@ export function createAuthRouter(): Router {
     const { email, password } = parsed.data;
     const pool = getPool();
     const [rows] = await pool.query<UserRow[]>(
-      "SELECT id, email, password_hash, display_name, role, coin_balance, account_status FROM users WHERE email = ? LIMIT 1",
+      `SELECT ${USER_PUBLIC_SELECT} FROM users WHERE email = ? LIMIT 1`,
       [email],
     );
     const user = rows[0];
@@ -210,7 +229,7 @@ export function createAuthRouter(): Router {
     const daily = await claimDailyLoginBonus(Number(user.id));
 
     const [freshRows] = await pool.query<UserRow[]>(
-      "SELECT id, email, password_hash, display_name, role, coin_balance, account_status FROM users WHERE id = ? LIMIT 1",
+      `SELECT ${USER_PUBLIC_SELECT} FROM users WHERE id = ? LIMIT 1`,
       [user.id],
     );
 
@@ -255,6 +274,34 @@ export function createAuthRouter(): Router {
     });
   });
 
+  router.patch("/profile", requireAuth, async (req, res: Response) => {
+    const parsed = updateProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      sendValidationError(res, parsed.error);
+      return;
+    }
+
+    const user = (req as AuthedRequest).user;
+    const pool = getPool();
+    const bio = parsed.data.bio ?? null;
+    await pool.query(`UPDATE users SET display_name = ?, bio = ? WHERE id = ?`, [
+      parsed.data.displayName,
+      bio,
+      user.id,
+    ]);
+
+    const [rows] = await pool.query<UserRow[]>(
+      `SELECT ${USER_PUBLIC_SELECT} FROM users WHERE id = ? LIMIT 1`,
+      [user.id],
+    );
+    const row = rows[0];
+    if (!row) {
+      res.status(404).json({ error: "not_found", message: "Account not found." });
+      return;
+    }
+    res.json({ user: toPublicUser(row) });
+  });
+
   router.post("/change-password", requireAuth, async (req, res: Response) => {
     const parsed = changePasswordSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -266,8 +313,7 @@ export function createAuthRouter(): Router {
     const user = (req as AuthedRequest).user;
     const pool = getPool();
     const [rows] = await pool.query<UserRow[]>(
-      `SELECT id, email, password_hash, display_name, role, coin_balance, account_status
-       FROM users WHERE id = ? LIMIT 1`,
+      `SELECT ${USER_PUBLIC_SELECT} FROM users WHERE id = ? LIMIT 1`,
       [user.id],
     );
     const row = rows[0];

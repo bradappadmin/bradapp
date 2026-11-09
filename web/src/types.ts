@@ -4,6 +4,8 @@ export type User = {
   id: number;
   email: string;
   displayName: string;
+  /** Short public garage bio; null when unset. */
+  bio: string | null;
   role: Role;
   coinBalance: number;
 };

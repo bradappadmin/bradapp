@@ -23,6 +23,7 @@ describe("MemberProfilePage media cards", () => {
         id: 2,
         email: "viewer@example.com",
         displayName: "Viewer",
+        bio: null,
         role: "member",
         coinBalance: 200,
       },
@@ -38,6 +39,7 @@ describe("MemberProfilePage media cards", () => {
       member: {
         id: 7,
         displayName: "Bay Friend",
+        bio: "Collects pace in the family bay.",
         role: "member",
         roleLabel: "Member",
         coinBalance: 880,
@@ -74,6 +76,7 @@ describe("MemberProfilePage media cards", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Bay Friend" })).toBeInTheDocument();
+    expect(screen.getByText("Collects pace in the family bay.")).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Member garage cars" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
       "href",

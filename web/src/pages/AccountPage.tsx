@@ -1,12 +1,19 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
+import { BIO_MAX_LENGTH } from "../api";
 import { useAuth } from "../auth-context";
 import { SiteHeader } from "../components/SiteHeader";
 import { roleLabel } from "../types";
 
 export function AccountPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, setUser } = useAuth();
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileBusy, setProfileBusy] = useState(false);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,8 +21,39 @@ export function AccountPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+    setDisplayName(user.displayName);
+    setBio(user.bio ?? "");
+  }, [user?.id, user?.displayName, user?.bio]);
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
+  }
+
+  async function onSaveProfile(event: FormEvent) {
+    event.preventDefault();
+    setProfileError(null);
+    setProfileMessage(null);
+    const name = displayName.trim();
+    if (!name) {
+      setProfileError("Display name is required.");
+      return;
+    }
+    if (bio.trim().length > BIO_MAX_LENGTH) {
+      setProfileError(`Bio must be ${BIO_MAX_LENGTH} characters or fewer.`);
+      return;
+    }
+    setProfileBusy(true);
+    try {
+      const res = await api.updateProfile({ displayName: name, bio: bio.trim() });
+      setUser(res.user);
+      setProfileMessage("Bay name and bio saved. Friends see them on your garage.");
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : "Could not save profile");
+    } finally {
+      setProfileBusy(false);
+    }
   }
 
   async function onSubmit(event: FormEvent) {
@@ -65,6 +103,61 @@ export function AccountPage() {
             </p>
           ) : null}
         </div>
+
+        <section className="bay-rise-delay mt-10 border-t border-white/10 pt-8">
+          <h2 className="font-display text-xl text-mist">Bay profile</h2>
+          <p className="mt-2 text-sm text-steel">
+            Your display name and short bio show on your public garage, the members list, and
+            challenges. Email stays private (admins can still see it).
+          </p>
+
+          <form onSubmit={(e) => void onSaveProfile(e)} className="mt-6 flex flex-col gap-4">
+            <label className="flex flex-col gap-2 text-sm text-steel">
+              Display name
+              <input
+                className={fieldClass}
+                type="text"
+                maxLength={120}
+                required
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm text-steel">
+              Garage bio
+              <textarea
+                className={`${fieldClass} min-h-[5.5rem] resize-y`}
+                maxLength={BIO_MAX_LENGTH}
+                placeholder="A short line about your bay…"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
+              <span className="text-xs text-steel">
+                {bio.trim().length}/{BIO_MAX_LENGTH}
+              </span>
+            </label>
+            {profileError ? <p className="text-sm text-rose">{profileError}</p> : null}
+            {profileMessage ? <p className="text-sm text-lime">{profileMessage}</p> : null}
+            <button
+              type="submit"
+              disabled={profileBusy}
+              className="bay-cta rounded-md bg-rose px-4 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+            >
+              {profileBusy ? "Saving…" : "Save bay profile"}
+            </button>
+          </form>
+          {user ? (
+            <p className="mt-4 text-sm text-steel">
+              Preview your garage:{" "}
+              <Link
+                to={`/members/${user.id}`}
+                className="text-lime no-underline hover:underline"
+              >
+                Open public garage
+              </Link>
+            </p>
+          ) : null}
+        </section>
 
         <section className="bay-rise-delay mt-10 border-t border-white/10 pt-8">
           <h2 className="font-display text-xl text-mist">Brad Coins</h2>

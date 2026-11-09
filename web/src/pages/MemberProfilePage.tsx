@@ -68,6 +68,9 @@ export function MemberProfilePage() {
               {isSelf ? " (you)" : ""}
             </h1>
             <p className="mt-2 text-sm text-steel">{member.roleLabel}</p>
+            {member.bio ? (
+              <p className="mt-4 max-w-2xl text-base text-mist">{member.bio}</p>
+            ) : null}
             <p className="mt-5 font-display text-2xl text-lime sm:text-3xl">
               {formatCoins(member.coinBalance)}
             </p>
@@ -105,7 +108,11 @@ export function MemberProfilePage() {
 
             {isSelf ? (
               <p className="mt-6 text-sm text-steel">
-                This is how others see your bay. Manage listings in{" "}
+                This is how others see your bay. Edit your display name and bio in{" "}
+                <Link to="/account" className="text-lime no-underline hover:underline">
+                  Account
+                </Link>
+                , or manage listings in{" "}
                 <Link to="/garage" className="text-lime no-underline hover:underline">
                   My cars
                 </Link>

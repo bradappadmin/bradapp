@@ -24,10 +24,27 @@ const BRAD_ADMIN_PASSWORD_HASH =
  * (hashed at runtime; never logged or committed).
  */
 export const DEMO_FAMILY_MEMBERS = [
-  { email: "sam.bay@example.com", displayName: "Sam Bay", carCount: 2 },
-  { email: "jordan.lap@example.com", displayName: "Jordan Lap", carCount: 2 },
-  { email: "casey.apex@example.com", displayName: "Casey Apex", carCount: 2 },
+  {
+    email: "sam.bay@example.com",
+    displayName: "Sam Bay",
+    bio: "Weekend bay runs and fair trades.",
+    carCount: 2,
+  },
+  {
+    email: "jordan.lap@example.com",
+    displayName: "Jordan Lap",
+    bio: "Top Trumps first, chat later.",
+    carCount: 2,
+  },
+  {
+    email: "casey.apex@example.com",
+    displayName: "Casey Apex",
+    bio: "Collecting pace. Trading for fun.",
+    carCount: 2,
+  },
 ] as const;
+
+const BRAD_ADMIN_BIO = "Bay host — reviews, drag races, and fair play.";
 
 /** Committed fallback hash for demo members (plaintext never in this repo). */
 export const DEMO_MEMBER_PASSWORD_HASH =
@@ -38,14 +55,15 @@ export async function seedAccounts(): Promise<void> {
   const pool = getPool();
 
   await pool.query(
-    `INSERT INTO users (email, password_hash, display_name, role, account_status)
-     VALUES (?, ?, ?, 'admin', 'active')
+    `INSERT INTO users (email, password_hash, display_name, bio, role, account_status)
+     VALUES (?, ?, ?, ?, 'admin', 'active')
      ON DUPLICATE KEY UPDATE
        password_hash = VALUES(password_hash),
        display_name = VALUES(display_name),
+       bio = COALESCE(users.bio, VALUES(bio)),
        role = 'admin',
        account_status = 'active'`,
-    [BRAD_ADMIN_EMAIL, BRAD_ADMIN_PASSWORD_HASH, BRAD_ADMIN_NAME],
+    [BRAD_ADMIN_EMAIL, BRAD_ADMIN_PASSWORD_HASH, BRAD_ADMIN_NAME, BRAD_ADMIN_BIO],
   );
 
   const superEmail = process.env.SEED_SUPER_ADMIN_EMAIL?.trim();
@@ -132,14 +150,15 @@ async function seedDemoFamilyMembers(): Promise<void> {
   const passwordHash = await resolveDemoMemberPasswordHash();
   for (const member of DEMO_FAMILY_MEMBERS) {
     await pool.query(
-      `INSERT INTO users (email, password_hash, display_name, role, account_status)
-       VALUES (?, ?, ?, 'member', 'active')
+      `INSERT INTO users (email, password_hash, display_name, bio, role, account_status)
+       VALUES (?, ?, ?, ?, 'member', 'active')
        ON DUPLICATE KEY UPDATE
          password_hash = VALUES(password_hash),
          display_name = VALUES(display_name),
+         bio = COALESCE(users.bio, VALUES(bio)),
          role = 'member',
          account_status = 'active'`,
-      [member.email, passwordHash, member.displayName],
+      [member.email, passwordHash, member.displayName, member.bio],
     );
   }
 }

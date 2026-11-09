@@ -184,6 +184,7 @@ describe("HomePage", () => {
         id: 3,
         email: "bradapp.admin@gmail.com",
         displayName: "Brad",
+        bio: null,
         role: "admin",
         coinBalance: 1000,
       },
