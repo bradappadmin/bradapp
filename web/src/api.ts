@@ -356,6 +356,15 @@ export function fetchTopTrumpsHistory(
   return request(`/play/top-trumps/history?${qs}`);
 }
 
+export type TopTrumpsCardVisual = {
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+  year: number | null;
+};
+
 export function playTopTrumpsHouse(input: {
   listingId: number;
   category: TopTrumpsCategory;
@@ -367,7 +376,8 @@ export function playTopTrumpsHouse(input: {
     challengerValue: number;
     opponentValue: number;
     category: TopTrumpsCategory;
-    opponent: { make: string; model: string; trimName: string };
+    challenger: TopTrumpsCardVisual;
+    opponent: TopTrumpsCardVisual;
   };
   balance: number;
 }> {
@@ -386,7 +396,8 @@ export function playTopTrumpsPvp(input: {
     challengerValue: number;
     opponentValue: number;
     category: TopTrumpsCategory;
-    opponent: { make: string; model: string; trimName: string; userId: number };
+    challenger: TopTrumpsCardVisual;
+    opponent: TopTrumpsCardVisual & { userId: number };
   };
   balance: number;
 }> {

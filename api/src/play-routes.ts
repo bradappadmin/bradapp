@@ -36,9 +36,12 @@ type OwnedCardRow = RowDataPacket & {
   id: number;
   owner_user_id: number | null;
   status: string;
+  colour: string;
+  year: number;
   make: string;
   model: string;
   trim_name: string;
+  body_type: string;
   bhp: number;
   top_speed_mph: number;
   zero_to_sixty_secs: number;
@@ -48,10 +51,32 @@ type HouseCardRow = RowDataPacket & {
   make: string;
   model: string;
   trim_name: string;
+  body_type: string;
   bhp: number;
   top_speed_mph: number;
   zero_to_sixty_secs: number;
 };
+
+/** House has no listing paint — Midnight Black keeps studio photos on-brand. */
+const HOUSE_CARD_COLOUR = "Midnight Black";
+
+function cardVisual(row: {
+  make: string;
+  model: string;
+  trim_name: string;
+  body_type: string;
+  colour?: string;
+  year?: number;
+}) {
+  return {
+    make: row.make,
+    model: row.model,
+    trimName: row.trim_name,
+    bodyType: row.body_type,
+    colour: row.colour ?? HOUSE_CARD_COLOUR,
+    year: row.year != null ? Number(row.year) : null,
+  };
+}
 
 function cardValue(row: { bhp: number; top_speed_mph: number; zero_to_sixty_secs: number }, category: TopTrumpsCategory): number {
   switch (category) {
@@ -71,7 +96,8 @@ function cardValue(row: { bhp: number; top_speed_mph: number; zero_to_sixty_secs
 async function loadOwnedCard(listingId: number): Promise<OwnedCardRow | null> {
   const pool = getPool();
   const [rows] = await pool.query<OwnedCardRow[]>(
-    `SELECT l.id, l.owner_user_id, l.status, cm.make, cm.model, cm.trim_name,
+    `SELECT l.id, l.owner_user_id, l.status, l.colour, l.year,
+            cm.make, cm.model, cm.trim_name, cm.body_type,
             cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs
      FROM listings l
      INNER JOIN car_models cm ON cm.id = l.car_model_id
@@ -131,7 +157,7 @@ export function createPlayRouter(): Router {
 
     const pool = getPool();
     const [houseRows] = await pool.query<HouseCardRow[]>(
-      `SELECT make, model, trim_name, bhp, top_speed_mph, zero_to_sixty_secs
+      `SELECT make, model, trim_name, body_type, bhp, top_speed_mph, zero_to_sixty_secs
        FROM car_models
        ORDER BY RAND()
        LIMIT 1`,
@@ -186,11 +212,8 @@ export function createPlayRouter(): Router {
           opponentValue,
           winner,
           coinReward,
-          opponent: {
-            make: house.make,
-            model: house.model,
-            trimName: house.trim_name,
-          },
+          challenger: cardVisual(card),
+          opponent: cardVisual(house),
         },
         balance,
       });
@@ -287,10 +310,9 @@ export function createPlayRouter(): Router {
           winner,
           coinReward: challengerReward,
           opponentCoinReward: opponentReward,
+          challenger: cardVisual(mine!),
           opponent: {
-            make: theirs.make,
-            model: theirs.model,
-            trimName: theirs.trim_name,
+            ...cardVisual(theirs!),
             userId: opponentUserId,
           },
         },

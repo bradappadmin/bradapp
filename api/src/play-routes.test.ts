@@ -58,6 +58,12 @@ describe.runIf(hasDb)("play routes", () => {
     expect(["challenger", "opponent", "draw"]).toContain(play.body.match.winner);
     expect(play.body.match.coinReward).toBeGreaterThanOrEqual(PLAY_COINS);
     expect(play.body.balance).toBeGreaterThanOrEqual(before.body.balance + PLAY_COINS);
+    expect(play.body.match.challenger.make).toBeTruthy();
+    expect(play.body.match.challenger.colour).toBeTruthy();
+    expect(play.body.match.challenger.bodyType).toBeTruthy();
+    expect(play.body.match.opponent.make).toBeTruthy();
+    expect(play.body.match.opponent.bodyType).toBeTruthy();
+    expect(play.body.match.opponent.colour).toBe("Midnight Black");
 
     const wallet = await a.get("/trade/wallet");
     expect(wallet.body.ledger.some((e: { reason: string }) => e.reason === "play_reward")).toBe(true);
@@ -83,6 +89,9 @@ describe.runIf(hasDb)("play routes", () => {
     expect(play.status).toBe(201);
     expect(play.body.match.mode).toBe("pvp");
     expect(play.body.match.opponent.userId).toBeTruthy();
+    expect(play.body.match.challenger.colour).toBeTruthy();
+    expect(play.body.match.opponent.colour).toBeTruthy();
+    expect(play.body.match.opponent.bodyType).toBeTruthy();
 
     const historyA = await a.get("/play/top-trumps/history");
     const asChallenger = historyA.body.matches.find(

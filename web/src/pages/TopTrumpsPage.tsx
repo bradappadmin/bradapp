@@ -1,14 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
-import type { GarageCar, MemberCard, MemberSummary, TopTrumpsCategory } from "../api";
+import type {
+  GarageCar,
+  MemberCard,
+  MemberSummary,
+  TopTrumpsCardVisual,
+  TopTrumpsCategory,
+} from "../api";
 import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
-import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
+import { TrumpCard } from "../components/TrumpCard";
 import { prepareRematch, rematchPrompt } from "../top-trumps-rematch";
 
 type CategoryMeta = { id: TopTrumpsCategory; label: string; direction: "higher" | "lower" };
+
+type MatchFaceOff = {
+  outcome: string;
+  categoryLabel: string;
+  yourValue: number;
+  theirValue: number;
+  winner: "challenger" | "opponent" | "draw";
+  yourCar: TopTrumpsCardVisual & { bhp?: number; topSpeedMph?: number; zeroToSixtySecs?: number };
+  theirCar: TopTrumpsCardVisual & { bhp?: number; topSpeedMph?: number; zeroToSixtySecs?: number };
+  theirLabel: string;
+};
 
 export function TopTrumpsPage() {
   const { user, loading: authLoading, setUser } = useAuth();
@@ -29,7 +46,7 @@ export function TopTrumpsPage() {
   const [mode, setMode] = useState<"house" | "challenge">(
     Number.isFinite(opponentFromUrl) && opponentFromUrl > 0 ? "challenge" : "house",
   );
-  const [result, setResult] = useState<string | null>(null);
+  const [faceOff, setFaceOff] = useState<MatchFaceOff | null>(null);
   const [awaitingRematchPick, setAwaitingRematchPick] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,6 +72,11 @@ export function TopTrumpsPage() {
         ? null
         : challengeableMembers.find((m) => m.id === opponentUserId) ?? null,
     [challengeableMembers, opponentUserId],
+  );
+
+  const categoryMeta = useMemo(
+    () => categories.find((c) => c.id === category) ?? null,
+    [categories, category],
   );
 
   useEffect(() => {
@@ -103,7 +125,7 @@ export function TopTrumpsPage() {
 
   function onModeChange(next: "house" | "challenge") {
     setMode(next);
-    setResult(null);
+    setFaceOff(null);
     setAwaitingRematchPick(false);
     setError(null);
     if (next === "house") {
@@ -116,7 +138,7 @@ export function TopTrumpsPage() {
   function onOpponentChange(nextId: number | "") {
     setOpponentUserId(nextId);
     setOpponentListingId("");
-    setResult(null);
+    setFaceOff(null);
     setAwaitingRematchPick(false);
     if (nextId === "") {
       setSearchParams({}, { replace: true });
@@ -131,7 +153,7 @@ export function TopTrumpsPage() {
     setOpponentUserId(prep.opponentUserId);
     setListingId(prep.listingId);
     setOpponentListingId(prep.opponentListingId);
-    setResult(null);
+    setFaceOff(null);
     setError(null);
     setAwaitingRematchPick(true);
     if (prep.mode === "challenge" && prep.opponentUserId !== "") {
@@ -144,22 +166,34 @@ export function TopTrumpsPage() {
     (mode === "house" || (opponentUserId !== "" && opponentListingId !== ""));
 
   async function onPlay() {
-    if (!user || !canPlay) return;
-    // canPlay narrows listingId (and challenge opponent picks) away from "".
+    if (!user || !canPlay || !selectedMyCar) return;
     const myListingId = listingId as number;
     setBusy(true);
     setError(null);
-    setResult(null);
+    setFaceOff(null);
     try {
+      const catLabel = categoryMeta?.label ?? category;
       if (mode === "house") {
         const res = await api.playTopTrumpsHouse({ listingId: myListingId, category });
         setUser({ ...user, coinBalance: res.balance });
         const w = res.match.winner;
         const outcome =
           w === "challenger" ? "You win" : w === "draw" ? "Draw" : "House wins";
-        setResult(
-          `${outcome}. Your ${res.match.challengerValue} vs house ${res.match.opponentValue} (${res.match.opponent.make} ${res.match.opponent.model}). +${res.match.coinReward} BC`,
-        );
+        setFaceOff({
+          outcome: `${outcome} · +${res.match.coinReward} BC`,
+          categoryLabel: catLabel,
+          yourValue: res.match.challengerValue,
+          theirValue: res.match.opponentValue,
+          winner: w,
+          yourCar: {
+            ...res.match.challenger,
+            bhp: selectedMyCar.bhp,
+            topSpeedMph: selectedMyCar.topSpeedMph,
+            zeroToSixtySecs: selectedMyCar.zeroToSixtySecs,
+          },
+          theirCar: res.match.opponent,
+          theirLabel: "House",
+        });
         setAwaitingRematchPick(false);
       } else {
         const theirListingId = opponentListingId as number;
@@ -170,12 +204,29 @@ export function TopTrumpsPage() {
         });
         setUser({ ...user, coinBalance: res.balance });
         const w = res.match.winner;
+        const rivalName = selectedOpponent?.displayName ?? "Opponent";
         const outcome =
           w === "challenger" ? "You win" : w === "draw" ? "Draw" : "They win";
-        const rivalName = selectedOpponent?.displayName ?? "Opponent";
-        setResult(
-          `${outcome} vs ${rivalName}. ${res.match.challengerValue} vs ${res.match.opponentValue} (${res.match.opponent.make} ${res.match.opponent.model}). +${res.match.coinReward} BC`,
-        );
+        setFaceOff({
+          outcome: `${outcome} vs ${rivalName} · +${res.match.coinReward} BC`,
+          categoryLabel: catLabel,
+          yourValue: res.match.challengerValue,
+          theirValue: res.match.opponentValue,
+          winner: w,
+          yourCar: {
+            ...res.match.challenger,
+            bhp: selectedMyCar.bhp,
+            topSpeedMph: selectedMyCar.topSpeedMph,
+            zeroToSixtySecs: selectedMyCar.zeroToSixtySecs,
+          },
+          theirCar: {
+            ...res.match.opponent,
+            bhp: selectedOpponentCard?.bhp,
+            topSpeedMph: selectedOpponentCard?.topSpeedMph,
+            zeroToSixtySecs: selectedOpponentCard?.zeroToSixtySecs,
+          },
+          theirLabel: rivalName,
+        });
         setAwaitingRematchPick(false);
       }
     } catch (err) {
@@ -188,7 +239,7 @@ export function TopTrumpsPage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="bay-rise">
           <h1 className="font-display text-3xl font-semibold text-white">Top Trumps</h1>
           <p className="mt-2 text-sm text-steel">
@@ -216,7 +267,7 @@ export function TopTrumpsPage() {
             before you can play.
           </p>
         ) : (
-          <div className="bay-rise-delay mt-8 flex flex-col gap-5 border-y border-white/10 py-6">
+          <div className="bay-rise-delay mt-8 flex flex-col gap-6 border-y border-white/10 py-6">
             <section>
               <h2 className="font-display text-sm uppercase tracking-wide text-steel">1. Your card</h2>
               <label className="mt-2 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
@@ -239,8 +290,8 @@ export function TopTrumpsPage() {
                 </select>
               </label>
               {selectedMyCar ? (
-                <div className="mt-3">
-                  <CarCard car={selectedMyCar} badge="owned" dense />
+                <div className="mt-3 max-w-sm">
+                  <TrumpCard label="You" car={selectedMyCar} />
                 </div>
               ) : null}
             </section>
@@ -319,20 +370,25 @@ export function TopTrumpsPage() {
                         ) : null}
                         {opponentCards.map((card) => (
                           <option key={card.id} value={card.id}>
-                            {card.make} {card.model} · {card.bhp} bhp · 0–60 {card.zeroToSixtySecs}s
+                            {card.make} {card.model} · {card.colour} · {card.bhp} bhp
                           </option>
                         ))}
                       </select>
                     </label>
                   ) : null}
                   {selectedOpponentCard ? (
-                    <div className="mt-3">
-                      <CarCard car={selectedOpponentCard} badge="owned" dense />
+                    <div className="mt-3 max-w-sm">
+                      <TrumpCard
+                        label={selectedOpponent?.displayName ?? "Opponent"}
+                        car={selectedOpponentCard}
+                      />
                     </div>
                   ) : null}
                 </div>
               ) : (
-                <p className="mt-3 text-sm text-steel">Random house card from the catalogue.</p>
+                <p className="mt-3 text-sm text-steel">
+                  Random house card from the catalogue — revealed with a studio photo after you play.
+                </p>
               )}
             </section>
 
@@ -380,17 +436,37 @@ export function TopTrumpsPage() {
         )}
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
-        {result ? (
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <p className="text-sm text-lime">{result}</p>
+
+        {faceOff ? (
+          <section className="bay-rise mt-8 border-t border-white/10 pt-6" aria-label="Match result">
+            <p className="font-display text-lg font-semibold text-lime">{faceOff.outcome}</p>
+            <p className="mt-1 text-sm text-steel">
+              {faceOff.categoryLabel}: {faceOff.yourValue} vs {faceOff.theirValue}
+            </p>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <TrumpCard
+                label="You"
+                car={faceOff.yourCar}
+                highlighted={faceOff.winner === "challenger"}
+                statLabel={faceOff.categoryLabel}
+                statValue={faceOff.yourValue}
+              />
+              <TrumpCard
+                label={faceOff.theirLabel}
+                car={faceOff.theirCar}
+                highlighted={faceOff.winner === "opponent"}
+                statLabel={faceOff.categoryLabel}
+                statValue={faceOff.theirValue}
+              />
+            </div>
             <button
               type="button"
               onClick={onRematch}
-              className="w-fit rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime hover:bg-lime/10"
+              className="mt-5 w-fit rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime hover:bg-lime/10"
             >
               Rematch — new card pick
             </button>
-          </div>
+          </section>
         ) : null}
 
         <p className="mt-10 text-sm text-steel">
