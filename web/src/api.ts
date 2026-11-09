@@ -328,6 +328,34 @@ export function fetchTopTrumpsCategories(): Promise<{
   return request("/play/top-trumps/categories");
 }
 
+export type MatchHistoryCar = {
+  listingId: number | null;
+  make: string;
+  model: string;
+  trimName: string;
+  value: number;
+};
+
+export type MatchHistoryItem = {
+  id: number;
+  mode: "house" | "pvp";
+  category: TopTrumpsCategory;
+  createdAt: string;
+  opponentName: string;
+  yourCar: MatchHistoryCar;
+  theirCar: MatchHistoryCar;
+  result: "win" | "loss" | "draw";
+  coinReward: number;
+  youWere: "challenger" | "opponent";
+};
+
+export function fetchTopTrumpsHistory(
+  limit = 40,
+): Promise<{ matches: MatchHistoryItem[] }> {
+  const qs = new URLSearchParams({ limit: String(limit) }).toString();
+  return request(`/play/top-trumps/history?${qs}`);
+}
+
 export function playTopTrumpsHouse(input: {
   listingId: number;
   category: TopTrumpsCategory;

@@ -10,6 +10,7 @@ import { HowToPage } from "./pages/HowToPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { LedgerPage } from "./pages/LedgerPage";
 import { ListingPage } from "./pages/ListingPage";
+import { MatchHistoryPage } from "./pages/MatchHistoryPage";
 import { MemberProfilePage } from "./pages/MemberProfilePage";
 import { MembersPage } from "./pages/MembersPage";
 import { AdminCoinHistoryPage } from "./pages/admin/AdminCoinHistoryPage";
@@ -39,6 +40,7 @@ export function App() {
         <Route path="/members/:id" element={<MemberProfilePage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/play" element={<TopTrumpsPage />} />
+        <Route path="/play/history" element={<MatchHistoryPage />} />
         <Route path="/trades" element={<TradesPage />} />
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/reviews/record" element={<RecordReviewPage />} />

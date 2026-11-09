@@ -61,6 +61,17 @@ describe.runIf(hasDb)("play routes", () => {
 
     const wallet = await a.get("/trade/wallet");
     expect(wallet.body.ledger.some((e: { reason: string }) => e.reason === "play_reward")).toBe(true);
+
+    const history = await a.get("/play/top-trumps/history");
+    expect(history.status).toBe(200);
+    const houseMatch = history.body.matches.find((m: { id: number }) => m.id === play.body.match.id);
+    expect(houseMatch).toBeTruthy();
+    expect(houseMatch.mode).toBe("house");
+    expect(houseMatch.opponentName).toBe("House");
+    expect(houseMatch.category).toBe("bhp");
+    expect(houseMatch.yourCar.listingId).toBe(carA);
+    expect(houseMatch.theirCar.make).toBeTruthy();
+    expect(["win", "loss", "draw"]).toContain(houseMatch.result);
   });
 
   it("plays PvP Top Trumps between two owned cards", async () => {
@@ -72,6 +83,29 @@ describe.runIf(hasDb)("play routes", () => {
     expect(play.status).toBe(201);
     expect(play.body.match.mode).toBe("pvp");
     expect(play.body.match.opponent.userId).toBeTruthy();
+
+    const historyA = await a.get("/play/top-trumps/history");
+    const asChallenger = historyA.body.matches.find(
+      (m: { id: number }) => m.id === play.body.match.id,
+    );
+    expect(asChallenger.opponentName).toBe("Player B");
+    expect(asChallenger.yourCar.listingId).toBe(carA);
+    expect(asChallenger.theirCar.listingId).toBe(carB);
+
+    const historyB = await b.get("/play/top-trumps/history");
+    const asOpponent = historyB.body.matches.find(
+      (m: { id: number }) => m.id === play.body.match.id,
+    );
+    expect(asOpponent).toBeTruthy();
+    expect(asOpponent.opponentName).toBe("Player A");
+    expect(asOpponent.yourCar.listingId).toBe(carB);
+    expect(asOpponent.theirCar.listingId).toBe(carA);
+    expect(asOpponent.youWere).toBe("opponent");
+  });
+
+  it("requires auth for Top Trumps match history", async () => {
+    const res = await request(app).get("/play/top-trumps/history");
+    expect(res.status).toBe(401);
   });
 
   it("allows a rematch vs the same opponent (second match, new category pick)", async () => {

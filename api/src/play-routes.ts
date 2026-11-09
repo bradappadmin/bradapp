@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
+import { listMatchHistory } from "./match-history.js";
 import {
   PLAY_COINS,
   WIN_COINS,
@@ -96,18 +97,12 @@ export function createPlayRouter(): Router {
 
   router.get("/top-trumps/history", requireAuth, async (req, res: Response) => {
     const user = (req as AuthedRequest).user;
-    const pool = getPool();
-    const [rows] = await pool.query(
-      `SELECT id, mode, category, challenger_value AS challengerValue, opponent_value AS opponentValue,
-              winner, coin_reward AS coinReward, opponent_make AS opponentMake, opponent_model AS opponentModel,
-              created_at AS createdAt
-       FROM top_trumps_matches
-       WHERE challenger_user_id = ? OR opponent_user_id = ?
-       ORDER BY id DESC
-       LIMIT 30`,
-      [user.id, user.id],
-    );
-    res.json({ matches: rows });
+    const rawLimit = Number(req.query.limit ?? 40);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(Math.trunc(rawLimit), 1), 100)
+      : 40;
+    const matches = await listMatchHistory(user.id, limit);
+    res.json({ matches });
   });
 
   /** Play vs the house: your owned car against a random model. */

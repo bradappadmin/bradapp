@@ -42,6 +42,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 - Recently viewed cars on home (last few opened listings, localStorage on this device)
 - Favourites: signed-in members save/unsave listings (server-side); Favourites page in nav
 - Compare: pick two listings from Cars or Favourites for a side-by-side specs + Brad Coin price view
+- Top Trumps match history — past matches with opponent, category, result, and cars used (from Play)
 - Share link: copy absolute listing URL from listing detail (and compare URL from Compare)
 - Brad Coins: balances + personal ledger (starter, buy, sell, daily, play, admin adjust) linked from home/account; My cars shows garage value, purchase history, and sold history
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins; rematch the same opponent with a new card pick

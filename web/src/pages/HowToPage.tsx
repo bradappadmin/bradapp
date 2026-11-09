@@ -22,7 +22,7 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Playing earns Brad Coins. Rematch with a new card pick when you’re done.",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Playing earns Brad Coins. Rematch with a new card pick when you’re done, and check Match history for past games.",
     to: "/play",
     cta: "Open Play",
   },

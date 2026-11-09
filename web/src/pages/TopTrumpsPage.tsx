@@ -197,6 +197,14 @@ export function TopTrumpsPage() {
             {rewards.play} BC for playing. After a match, rematch the same opponent with a new card
             pick.
           </p>
+          <p className="mt-4">
+            <Link
+              to="/play/history"
+              className="font-display text-sm text-lime no-underline hover:underline"
+            >
+              Match history
+            </Link>
+          </p>
         </div>
 
         {myCars.length === 0 ? (
