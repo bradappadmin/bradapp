@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
 import type { FavouriteCar } from "../api";
 import { useAuth } from "../auth-context";
 import { badgeForStatus } from "../car-visuals";
 import {
+  clearCompareSelection,
+  compareHref,
   loadCompareSelection,
   toComparePick,
   toggleComparePick,
   type ComparePick,
 } from "../compare-selection";
+import { listingTitle } from "../cars";
 import { CarCard } from "../components/CarCard";
-import { CompareTray } from "../components/CompareTray";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 
@@ -52,6 +54,18 @@ export function FavouritesPage() {
     };
   }, [user?.id]);
 
+  /** Drop compare picks that are no longer favourited on this page. */
+  useEffect(() => {
+    if (loading) return;
+    const favouriteIds = new Set(cars.map((car) => car.id));
+    setComparePicks((prev) => {
+      const filtered = prev.filter((pick) => favouriteIds.has(pick.id));
+      if (filtered.length === prev.length) return prev;
+      if (filtered.length === 0) clearCompareSelection();
+      return filtered;
+    });
+  }, [cars, loading]);
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
@@ -69,10 +83,19 @@ export function FavouritesPage() {
     }
   }
 
-  function onToggleCompare(car: FavouriteCar) {
+  function onToggleSelect(car: FavouriteCar) {
     const { picks } = toggleComparePick(toComparePick(car));
     setComparePicks(picks);
   }
+
+  function onClearSelect() {
+    clearCompareSelection();
+    setComparePicks([]);
+  }
+
+  const selectedCount = comparePicks.length;
+  const canCompare = selectedCount === 2;
+  const compareTo = useMemo(() => compareHref(comparePicks), [comparePicks]);
 
   return (
     <div className="relative min-h-screen">
@@ -87,8 +110,8 @@ export function FavouritesPage() {
             </h1>
             <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
             <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
-              Cars you saved from the catalogue. Open a listing anytime, compare two side by side, or
-              remove from this bay list.
+              Cars you saved from the catalogue. Tick exactly two, then Compare these for a side-by-side
+              bay face-off — or open a listing anytime.
             </p>
             {!loading ? (
               <div className="mt-4 flex flex-wrap gap-2" aria-label="Favourites bay notes">
@@ -139,57 +162,125 @@ export function FavouritesPage() {
         ) : null}
 
         {cars.length > 0 ? (
-          <section className="bay-rise-delay mt-10" aria-labelledby="favourites-grid">
-            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-              <h2 id="favourites-grid" className="font-display text-xl text-mist">
-                Saved
-              </h2>
-              <p className="text-sm text-steel">
-                {cars.length} {cars.length === 1 ? "car" : "cars"}
-              </p>
+          <>
+            <div
+              className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+              role="region"
+              aria-label="Compare favourites"
+            >
+              <div className="min-w-0">
+                <p className="font-display text-lg text-mist">Compare favourites</p>
+                <p className="mt-1 text-sm text-steel">
+                  Select exactly two saved cars ({selectedCount}/2).
+                </p>
+                {selectedCount > 0 ? (
+                  <ul className="mt-2 list-none space-y-0.5 p-0 text-sm text-mist">
+                    {comparePicks.map((pick) => (
+                      <li key={pick.id} className="truncate">
+                        {listingTitle(pick)}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-xs text-steel">Tick the boxes on the cards below.</p>
+                )}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 sm:mt-0">
+                {selectedCount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={onClearSelect}
+                    className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-rose/50 hover:text-rose"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+                {canCompare ? (
+                  <Link
+                    to={compareTo}
+                    className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-2.5 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+                  >
+                    Compare these
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="rounded-md border border-white/10 px-5 py-2.5 font-display text-sm font-semibold text-steel disabled:opacity-60"
+                  >
+                    Compare these
+                  </button>
+                )}
+              </div>
             </div>
-            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {cars.map((car) => {
-                const selected = comparePicks.some((p) => p.id === car.id);
-                return (
-                  <li key={car.id} className="bay-rise">
-                    <CarCard
-                      car={car}
-                      to={`/cars/${car.id}`}
-                      badge={badgeForStatus(car.status, "price")}
-                      layout="media"
-                      footer={
-                        <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
-                          <button
-                            type="button"
-                            onClick={() => onToggleCompare(car)}
-                            className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold transition ${
-                              selected
-                                ? "border-lime/50 text-lime hover:bg-lime/10"
-                                : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
-                            }`}
-                          >
-                            {selected ? "In compare" : "Compare"}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busyId === car.id}
-                            onClick={() => void onRemove(car.id)}
-                            className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist transition hover:border-rose hover:text-rose disabled:opacity-60"
-                          >
-                            {busyId === car.id ? "Removing…" : "Remove"}
-                          </button>
-                        </div>
-                      }
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
 
-        <CompareTray picks={comparePicks} onChange={setComparePicks} />
+            <section className="bay-rise-delay mt-10" aria-labelledby="favourites-grid">
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                <h2 id="favourites-grid" className="font-display text-xl text-mist">
+                  Saved
+                </h2>
+                <p className="text-sm text-steel">
+                  {cars.length} {cars.length === 1 ? "car" : "cars"}
+                </p>
+              </div>
+              <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {cars.map((car) => {
+                  const selected = comparePicks.some((p) => p.id === car.id);
+                  const selectionFull = selectedCount >= 2 && !selected;
+                  const checkboxId = `favourite-compare-${car.id}`;
+                  return (
+                    <li key={car.id} className="bay-rise">
+                      <CarCard
+                        car={car}
+                        to={`/cars/${car.id}`}
+                        badge={badgeForStatus(car.status, "price")}
+                        layout="media"
+                        footer={
+                          <div className="flex flex-col gap-3 border-t border-white/10 pt-3">
+                            <label
+                              htmlFor={checkboxId}
+                              className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition ${
+                                selected
+                                  ? "border-lime/45 bg-lime/10 text-lime"
+                                  : selectionFull
+                                    ? "border-white/10 text-steel"
+                                    : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                              }`}
+                            >
+                              <input
+                                id={checkboxId}
+                                type="checkbox"
+                                className="h-4 w-4 accent-[var(--color-lime)]"
+                                checked={selected}
+                                disabled={selectionFull}
+                                onChange={() => onToggleSelect(car)}
+                              />
+                              <span className="font-display text-xs font-semibold">
+                                {selected
+                                  ? "Selected for compare"
+                                  : selectionFull
+                                    ? "Pair full — clear one first"
+                                    : "Select for compare"}
+                              </span>
+                            </label>
+                            <button
+                              type="button"
+                              disabled={busyId === car.id}
+                              onClick={() => void onRemove(car.id)}
+                              className="w-fit rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist transition hover:border-rose hover:text-rose disabled:opacity-60"
+                            >
+                              {busyId === car.id ? "Removing…" : "Remove"}
+                            </button>
+                          </div>
+                        }
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          </>
+        ) : null}
       </main>
     </div>
   );

@@ -1,7 +1,9 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import { COMPARE_SELECTION_KEY } from "../compare-selection";
 import { FavouritesPage } from "./FavouritesPage";
 
 vi.mock("../api", () => ({
@@ -12,7 +14,7 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
-const favourite = {
+const audi = {
   id: 11,
   make: "Audi",
   model: "RS6",
@@ -33,12 +35,26 @@ const favourite = {
   favouritedAt: "2026-11-09T12:00:00.000Z",
 };
 
+const porsche = {
+  ...audi,
+  id: 9,
+  make: "Porsche",
+  model: "911",
+  trimName: "GT3",
+  bodyType: "Coupe",
+  colour: "Racing Red",
+  coinPrice: 420,
+  favouritedAt: "2026-11-09T12:05:00.000Z",
+};
+
 describe("FavouritesPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
+    window.sessionStorage.removeItem(COMPARE_SELECTION_KEY);
   });
 
   beforeEach(() => {
+    window.sessionStorage.removeItem(COMPARE_SELECTION_KEY);
     vi.mocked(api.fetchMe).mockResolvedValue({
       user: {
         id: 2,
@@ -57,7 +73,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
       },
     });
     vi.mocked(api.fetchFavourites).mockResolvedValue({
-      cars: [favourite],
+      cars: [audi],
     });
   });
 
@@ -101,5 +117,35 @@ describe("FavouritesPage Midnight Garage UI", () => {
     const cta = screen.getAllByRole("link", { name: "Browse cars" });
     expect(cta.some((link) => link.className.includes("bay-cta"))).toBe(true);
     expect(screen.queryByRole("heading", { name: "Saved" })).not.toBeInTheDocument();
+  });
+
+  it("enables Compare these only after selecting exactly two favourites", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [audi, porsche] });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/favourites" element={<FavouritesPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Compare favourites")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Compare these" })).toBeDisabled();
+
+    const boxes = await screen.findAllByRole("checkbox", { name: /Select for compare/i });
+    expect(boxes).toHaveLength(2);
+    await user.click(boxes[0]!);
+    expect(screen.getByRole("button", { name: "Compare these" })).toBeDisabled();
+    expect(screen.getByText(/1\/2/)).toBeInTheDocument();
+
+    await user.click(boxes[1]!);
+    const compareLink = await screen.findByRole("link", { name: "Compare these" });
+    expect(compareLink.getAttribute("href")).toMatch(/^\/compare\?a=\d+&b=\d+$/);
+    expect(compareLink.getAttribute("href")).toContain("11");
+    expect(compareLink.getAttribute("href")).toContain("9");
   });
 });
