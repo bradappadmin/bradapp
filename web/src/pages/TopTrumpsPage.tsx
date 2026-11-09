@@ -31,6 +31,9 @@ export function TopTrumpsPage() {
   const { user, loading: authLoading, setUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const opponentFromUrl = Number(searchParams.get("opponent") ?? "");
+  const theirCarFromUrl = Number(searchParams.get("theirCar") ?? "");
+  const preferredOpponentListingId =
+    Number.isFinite(theirCarFromUrl) && theirCarFromUrl > 0 ? theirCarFromUrl : null;
 
   const [categories, setCategories] = useState<CategoryMeta[]>([]);
   const [rewards, setRewards] = useState({ win: 25, play: 5 });
@@ -109,7 +112,11 @@ export function TopTrumpsPage() {
       .then((res) => {
         if (cancelled) return;
         setOpponentCards(res.cards);
-        setOpponentListingId(res.cards[0]?.id ?? "");
+        const preferred =
+          preferredOpponentListingId != null
+            ? res.cards.find((card) => card.id === preferredOpponentListingId)
+            : undefined;
+        setOpponentListingId(preferred?.id ?? res.cards[0]?.id ?? "");
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not load opponent cards");
@@ -117,7 +124,7 @@ export function TopTrumpsPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, mode, opponentUserId]);
+  }, [user?.id, mode, opponentUserId, preferredOpponentListingId]);
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
@@ -145,6 +152,16 @@ export function TopTrumpsPage() {
     } else {
       setSearchParams({ opponent: String(nextId) }, { replace: true });
     }
+  }
+
+  function onOpponentCarChange(nextId: number | "") {
+    setOpponentListingId(nextId);
+    setFaceOff(null);
+    setAwaitingRematchPick(false);
+    if (opponentUserId === "") return;
+    const next = new URLSearchParams({ opponent: String(opponentUserId) });
+    if (nextId !== "") next.set("theirCar", String(nextId));
+    setSearchParams(next, { replace: true });
   }
 
   function onRematch() {
@@ -358,7 +375,7 @@ export function TopTrumpsPage() {
                         className="rounded-md border border-white/10 bg-bay-panel px-3 py-2 text-sm text-mist"
                         value={opponentListingId}
                         onChange={(e) =>
-                          setOpponentListingId(
+                          onOpponentCarChange(
                             e.target.value === "" ? "" : Number(e.target.value),
                           )
                         }

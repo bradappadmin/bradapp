@@ -7,6 +7,7 @@ import { formatCoins, formatMileage, listingTitle } from "../cars";
 import { CarHeroVisual } from "../components/CarCard";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { SiteHeader } from "../components/SiteHeader";
+import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { rememberRecentlyViewed } from "../recently-viewed";
 import { listingSharePath } from "../share-link";
 
@@ -114,6 +115,12 @@ export function ListingPage() {
 
   const ownsListing = Boolean(user && listing && listing.ownerUserId === user.id);
   const canBuy = Boolean(listing && listing.status === "available" && !ownsListing);
+  const challengeAction = listing
+    ? listingChallengeAction({
+        ownerUserId: listing.ownerUserId,
+        viewerId: user?.id,
+      })
+    : "hidden";
 
   return (
     <div className="min-h-screen">
@@ -158,6 +165,22 @@ export function ListingPage() {
                 >
                   {busy ? "Buying…" : user ? `Buy for ${formatCoins(listing.coinPrice)}` : "Sign in to buy"}
                 </button>
+              ) : null}
+              {challengeAction === "challenge" && listing.ownerUserId != null ? (
+                <Link
+                  to={listingChallengeHref(listing.ownerUserId, listing.id)}
+                  className="inline-block rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                >
+                  Challenge to Top Trumps
+                </Link>
+              ) : null}
+              {challengeAction === "signin" ? (
+                <Link
+                  to="/signin"
+                  className="inline-block rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                >
+                  Sign in to challenge
+                </Link>
               ) : null}
               <button
                 type="button"
@@ -239,7 +262,18 @@ export function ListingPage() {
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-steel">Owner</dt>
-                <dd className="mt-1 text-mist">{listing.ownerLabel}</dd>
+                <dd className="mt-1 text-mist">
+                  {listing.ownerUserId != null ? (
+                    <Link
+                      to={`/members/${listing.ownerUserId}`}
+                      className="text-mist no-underline hover:text-lime"
+                    >
+                      {listing.ownerLabel}
+                    </Link>
+                  ) : (
+                    listing.ownerLabel
+                  )}
+                </dd>
               </div>
               <div className="sm:col-span-2">
                 <dt className="text-xs uppercase tracking-wide text-steel">Garage</dt>
