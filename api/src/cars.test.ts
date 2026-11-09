@@ -4,7 +4,7 @@ import { buildSearchClause } from "./cars.js";
 
 describe("car seed data", () => {
   it("includes everyday and performance cars with realistic specs", () => {
-    expect(SEED_CAR_MODELS.length).toBeGreaterThanOrEqual(40);
+    expect(SEED_CAR_MODELS.length).toBeGreaterThanOrEqual(70);
     const makes = new Set(SEED_CAR_MODELS.map((c) => c.make));
     expect(makes.has("Porsche")).toBe(true);
     expect(makes.has("Ford")).toBe(true);

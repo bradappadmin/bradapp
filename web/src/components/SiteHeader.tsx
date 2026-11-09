@@ -9,40 +9,44 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function SiteHeader() {
   const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   return (
     <header className="relative z-10 border-b border-white/5">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
         <Link to="/" className="font-display text-xl font-bold tracking-tight text-white no-underline">
           BradApp
         </Link>
-        <nav className="flex flex-wrap items-center gap-4 sm:gap-6">
-          <NavLink to="/cars" className={linkClass}>
+        <nav className="flex flex-wrap items-center gap-4 sm:gap-5">
+          <NavLink to="/cars" className={linkClass} end={false}>
             Cars
+          </NavLink>
+          <NavLink to="/play" className={linkClass}>
+            Play
+          </NavLink>
+          <NavLink to="/reviews" className={linkClass}>
+            Reviews
           </NavLink>
           {user ? (
             <>
-              <NavLink to="/reviews" className={linkClass}>
-                Reviews
-              </NavLink>
-              <NavLink to="/play" className={linkClass}>
-                Top Trumps
+              <NavLink to="/garage" className={linkClass}>
+                My cars
               </NavLink>
               <NavLink to="/trades" className={linkClass}>
                 Trades
               </NavLink>
-              <NavLink to="/garage" className={linkClass}>
-                My garage
-              </NavLink>
-              {(user.role === "admin" || user.role === "super_admin") && (
+              {isAdmin ? (
                 <NavLink to="/admin" className={linkClass}>
                   Admin
                 </NavLink>
-              )}
-              <span className="font-display text-sm text-lime">{formatCoins(user.coinBalance)}</span>
-              <NavLink to="/" className={linkClass}>
-                Home
-              </NavLink>
+              ) : null}
+              <Link
+                to="/garage"
+                className="font-display text-sm font-semibold text-lime no-underline"
+                title="Brad Coin balance"
+              >
+                {formatCoins(user.coinBalance)}
+              </Link>
             </>
           ) : (
             <>

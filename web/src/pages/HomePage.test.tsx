@@ -28,7 +28,9 @@ describe("HomePage", () => {
     );
 
     expect(await screen.findByText("BradApp")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Search cars" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sign in" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Cars" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Play" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Reviews" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Sign in" }).length).toBeGreaterThan(0);
   });
 });
