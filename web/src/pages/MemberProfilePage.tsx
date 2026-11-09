@@ -50,7 +50,7 @@ export function MemberProfilePage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <p className="text-sm text-steel">
           <Link to="/members" className="text-lime no-underline hover:underline">
             ← Members
@@ -62,17 +62,19 @@ export function MemberProfilePage() {
 
         {member ? (
           <div className="bay-rise mt-6">
-            <p className="text-xs uppercase tracking-wide text-steel">Public garage</p>
-            <h1 className="mt-2 font-display text-3xl font-semibold text-white">
+            <p className="text-xs uppercase tracking-[0.2em] text-steel">Public garage</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
               {member.displayName}
               {isSelf ? " (you)" : ""}
             </h1>
             <p className="mt-2 text-sm text-steel">{member.roleLabel}</p>
-            <p className="mt-4 font-display text-2xl text-lime">{formatCoins(member.coinBalance)}</p>
+            <p className="mt-5 font-display text-2xl text-lime sm:text-3xl">
+              {formatCoins(member.coinBalance)}
+            </p>
             <p className="mt-1 text-xs uppercase tracking-wide text-steel">Brad Coin balance</p>
-            <p className="mt-4 text-sm text-steel">
-              {member.carCount} {member.carCount === 1 ? "car" : "cars"} in the bay — names and specs
-              only, no account secrets.
+            <p className="mt-4 max-w-2xl text-sm text-steel">
+              {member.carCount} {member.carCount === 1 ? "car" : "cars"} in the bay — studio photos
+              of their garage, no account secrets.
             </p>
 
             {canChallengeOrTrade ? (
@@ -113,22 +115,25 @@ export function MemberProfilePage() {
           </div>
         ) : null}
 
-        <section className="mt-10">
+        <section className="mt-10" aria-label="Member garage cars">
           <h2 className="font-display text-xl text-mist">Garage</h2>
           {cars.length === 0 && !loading ? (
             <p className="mt-3 text-sm text-steel">Empty garage.</p>
           ) : null}
-          <ul className="mt-4 grid gap-3 border-t border-white/10 pt-4">
-            {cars.map((car) => (
-              <li key={car.id}>
-                <CarCard
-                  car={car}
-                  to={`/cars/${car.id}`}
-                  badge={badgeForStatus(car.status, "owned")}
-                />
-              </li>
-            ))}
-          </ul>
+          {cars.length > 0 ? (
+            <ul className="mt-4 grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2 xl:grid-cols-3">
+              {cars.map((car) => (
+                <li key={car.id} className="bay-rise">
+                  <CarCard
+                    car={car}
+                    to={`/cars/${car.id}`}
+                    badge={badgeForStatus(car.status, "price")}
+                    layout="media"
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       </main>
     </div>
