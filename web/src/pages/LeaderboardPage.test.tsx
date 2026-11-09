@@ -12,7 +12,7 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
-describe("LeaderboardPage garage photos", () => {
+describe("LeaderboardPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -67,11 +67,30 @@ describe("LeaderboardPage garage photos", () => {
           topTrumpsWins: 0,
           highlightCar: null,
         },
+        {
+          rank: 3,
+          id: 9,
+          displayName: "Casey Apex",
+          bio: null,
+          role: "member",
+          roleLabel: "Member",
+          coinBalance: 400,
+          topTrumpsWins: 1,
+          highlightCar: {
+            id: 55,
+            make: "Ford",
+            model: "Focus",
+            trimName: "ST",
+            bodyType: "Hatchback",
+            colour: "Blue",
+            coinPrice: 180,
+          },
+        },
       ],
     });
   });
 
-  it("shows highlight studio photo, bio snippet, and links rows to public garages", async () => {
+  it("shows bay hierarchy, podium flair, photo rows, and garage links", async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -81,6 +100,10 @@ describe("LeaderboardPage garage photos", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Brad Coin leaderboard" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(document.querySelector(".play-bay-glow")).not.toBeNull();
+    expect(await screen.findByLabelText("Top three on the podium")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Standings" })).toBeInTheDocument();
 
     const garageLink = await screen.findByRole("link", {
       name: /Bay Friend, rank 1, open garage/i,
