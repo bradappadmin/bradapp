@@ -10,7 +10,7 @@ import {
   type ComparePick,
 } from "../compare-selection";
 import { buildCompareRows, compareTitles, type CompareHighlight } from "../compare-specs";
-import { CarHeroVisual } from "../components/CarCard";
+import { CompareCarPanel } from "../components/CompareCarPanel";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { SiteHeader } from "../components/SiteHeader";
 import { compareSharePath } from "../share-link";
@@ -89,7 +89,7 @@ export function ComparePage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <p className="text-xs uppercase tracking-[0.2em] text-steel">Specs face-off</p>
         <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
           Compare
@@ -108,7 +108,7 @@ export function ComparePage() {
               </Link>
             </>
           ) : null}
-          , then open them side by side — Brad Coin price and the key specs.
+          , then open them side by side — studio photos first, Brad Coin price and key specs below.
         </p>
 
         {!hasPair ? (
@@ -172,47 +172,47 @@ export function ComparePage() {
 
         {left && right && titles ? (
           <div className="bay-rise mt-8">
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <Link
-                  to={`/cars/${left.id}`}
-                  className="font-display text-xl font-semibold text-mist no-underline hover:text-lime"
-                >
-                  {titles.left}
-                </Link>
-                <p className="mt-1 text-sm text-steel">
-                  {left.year} · {formatCoins(left.coinPrice)}
-                </p>
-                <CarHeroVisual
-                  colour={left.colour}
-                  bodyType={left.bodyType}
-                  make={left.make}
-                  model={left.model}
-                  title={titles.left}
-                />
-              </div>
-              <div>
-                <Link
-                  to={`/cars/${right.id}`}
-                  className="font-display text-xl font-semibold text-mist no-underline hover:text-lime"
-                >
-                  {titles.right}
-                </Link>
-                <p className="mt-1 text-sm text-steel">
-                  {right.year} · {formatCoins(right.coinPrice)}
-                </p>
-                <CarHeroVisual
-                  colour={right.colour}
-                  bodyType={right.bodyType}
-                  make={right.make}
-                  model={right.model}
-                  title={titles.right}
-                />
-              </div>
+            <div
+              role="region"
+              aria-label="Compare car photos"
+              className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch sm:gap-3"
+            >
+              <CompareCarPanel
+                listingId={left.id}
+                title={titles.left}
+                year={left.year}
+                colour={left.colour}
+                bodyType={left.bodyType}
+                make={left.make}
+                model={left.model}
+                coinPrice={left.coinPrice}
+                detail={left.trimName ? left.trimName : undefined}
+              />
+              <p
+                className="hidden self-center text-center font-display text-sm font-semibold uppercase tracking-[0.2em] text-steel sm:block"
+                aria-hidden
+              >
+                vs
+              </p>
+              <CompareCarPanel
+                listingId={right.id}
+                title={titles.right}
+                year={right.year}
+                colour={right.colour}
+                bodyType={right.bodyType}
+                make={right.make}
+                model={right.model}
+                coinPrice={right.coinPrice}
+                detail={right.trimName ? right.trimName : undefined}
+              />
             </div>
 
-            <div className="mt-8 overflow-x-auto border-t border-white/10 pt-4">
-              <table className="w-full min-w-[28rem] border-collapse text-left text-sm">
+            <div className="mt-10 overflow-x-auto border-t border-white/10 pt-6">
+              <h2 className="font-display text-xl text-mist">Specs</h2>
+              <p className="mt-1 text-sm text-steel">
+                Lime highlights the stronger value (or lower Brad Coin price / mileage / 0–60).
+              </p>
+              <table className="mt-4 w-full min-w-[28rem] border-collapse text-left text-sm">
                 <caption className="sr-only">Side-by-side listing comparison</caption>
                 <thead>
                   <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-steel">
@@ -244,10 +244,6 @@ export function ComparePage() {
                 </tbody>
               </table>
             </div>
-
-            <p className="mt-4 text-xs text-steel">
-              Lime highlights the stronger value (or lower Brad Coin price / mileage / 0–60).
-            </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <CopyShareLinkButton

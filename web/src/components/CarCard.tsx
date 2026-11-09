@@ -196,12 +196,14 @@ export function CarHeroVisual({
   make,
   model,
   title,
+  className = "",
 }: {
   colour: string;
   bodyType?: string;
   make?: string;
   model?: string;
   title: string;
+  className?: string;
 }) {
   return (
     <CarVisual
@@ -211,6 +213,7 @@ export function CarHeroVisual({
       model={model}
       size="hero"
       title={title}
+      className={className}
     />
   );
 }
