@@ -316,8 +316,16 @@ export type TradeRow = {
   toDisplayName: string;
   offerMake: string;
   offerModel: string;
+  offerTrimName: string;
+  offerBodyType: string;
+  offerColour: string;
+  offerYear: number;
   requestMake: string;
   requestModel: string;
+  requestTrimName: string;
+  requestBodyType: string;
+  requestColour: string;
+  requestYear: number;
   createdAt: string;
 };
 

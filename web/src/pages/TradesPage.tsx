@@ -5,6 +5,14 @@ import type { GarageCar, MemberCard, MemberSummary, TradeRow } from "../api";
 import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
 import { SiteHeader } from "../components/SiteHeader";
+import { TradeOfferPair } from "../components/TradeOfferPair";
+import { TrumpCard } from "../components/TrumpCard";
+import {
+  garageToTrumpCard,
+  memberCardToTrumpCard,
+  tradeOfferCar,
+  tradeRequestCar,
+} from "../trade-cars";
 
 function statusLabel(status: TradeRow["status"]): string {
   switch (status) {
@@ -58,6 +66,15 @@ export function TradesPage() {
   const history = useMemo(
     () => trades.filter((t) => t.status === "accepted"),
     [trades],
+  );
+
+  const selectedOfferCar = useMemo(
+    () => myCars.find((car) => car.id === offerListingId) ?? null,
+    [myCars, offerListingId],
+  );
+  const selectedRequestCard = useMemo(
+    () => memberCards.find((card) => card.id === requestListingId) ?? null,
+    [memberCards, requestListingId],
   );
 
   async function reload() {
@@ -229,20 +246,22 @@ export function TradesPage() {
           {loading ? <p className="mt-3 text-sm text-steel">Loading…</p> : null}
           <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
             {incoming.map((trade) => (
-              <li
-                key={trade.id}
-                className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="text-sm">
-                  <p className="text-mist">
-                    <span className="font-display text-lime">{trade.fromDisplayName}</span> offers{" "}
-                    {trade.offerMake} {trade.offerModel} for your {trade.requestMake}{" "}
-                    {trade.requestModel}
+              <li key={trade.id} className="flex flex-col gap-4 py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-sm text-mist">
+                    <span className="font-display text-lime">{trade.fromDisplayName}</span> wants a
+                    free swap
                   </p>
-                  <p className="mt-1 text-xs uppercase tracking-wide text-steel">
+                  <p className="text-xs uppercase tracking-wide text-steel">
                     {statusLabel(trade.status)} · free swap
                   </p>
                 </div>
+                <TradeOfferPair
+                  offerLabel={`${trade.fromDisplayName} offers`}
+                  requestLabel="You give"
+                  offerCar={tradeOfferCar(trade)}
+                  requestCar={tradeRequestCar(trade)}
+                />
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -273,25 +292,26 @@ export function TradesPage() {
           <h2 className="font-display text-xl text-mist">Your outgoing offers</h2>
           <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
             {outgoing.map((trade) => (
-              <li
-                key={trade.id}
-                className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="text-sm">
-                  <p className="text-mist">
+              <li key={trade.id} className="flex flex-col gap-4 py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-sm text-mist">
                     Waiting on <span className="font-display text-lime">{trade.toDisplayName}</span>
-                    : you offered {trade.offerMake} {trade.offerModel} for {trade.requestMake}{" "}
-                    {trade.requestModel}
                   </p>
-                  <p className="mt-1 text-xs uppercase tracking-wide text-steel">
+                  <p className="text-xs uppercase tracking-wide text-steel">
                     {statusLabel(trade.status)}
                   </p>
                 </div>
+                <TradeOfferPair
+                  offerLabel="You offer"
+                  requestLabel={`You want from ${trade.toDisplayName}`}
+                  offerCar={tradeOfferCar(trade)}
+                  requestCar={tradeRequestCar(trade)}
+                />
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => void onCancel(trade.id)}
-                  className="rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist disabled:opacity-60"
+                  className="w-fit rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist disabled:opacity-60"
                 >
                   Cancel
                 </button>
@@ -357,6 +377,25 @@ export function TradesPage() {
                 ))}
               </select>
             </label>
+            {selectedOfferCar || selectedRequestCard ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {selectedOfferCar ? (
+                  <TrumpCard label="You offer" car={garageToTrumpCard(selectedOfferCar)} />
+                ) : (
+                  <p className="text-sm text-steel">Pick the car you offer.</p>
+                )}
+                {selectedRequestCard ? (
+                  <TrumpCard
+                    label="You request"
+                    car={memberCardToTrumpCard(selectedRequestCard)}
+                  />
+                ) : (
+                  <p className="text-sm text-steel">
+                    {partnerUserId === "" ? "Pick a member first." : "Pick their car."}
+                  </p>
+                )}
+              </div>
+            ) : null}
             {myCars.length === 0 ? (
               <p className="text-sm text-steel">
                 You need a car in{" "}
@@ -401,14 +440,21 @@ export function TradesPage() {
           </div>
           <ul className="mt-4 divide-y divide-white/10 border-t border-white/10">
             {history.slice(0, 5).map((trade) => (
-              <li key={trade.id} className="py-3 text-sm">
-                <p className="text-mist">
-                  {trade.fromDisplayName} ↔ {trade.toDisplayName}: {trade.offerMake}{" "}
-                  {trade.offerModel} for {trade.requestMake} {trade.requestModel}
-                </p>
-                <p className="mt-1 text-xs uppercase tracking-wide text-steel">
-                  {statusLabel(trade.status)}
-                </p>
+              <li key={trade.id} className="flex flex-col gap-3 py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                  <p className="text-mist">
+                    {trade.fromDisplayName} ↔ {trade.toDisplayName}
+                  </p>
+                  <p className="text-xs uppercase tracking-wide text-steel">
+                    {statusLabel(trade.status)}
+                  </p>
+                </div>
+                <TradeOfferPair
+                  offerLabel={`${trade.fromDisplayName} gave`}
+                  requestLabel={`${trade.toDisplayName} gave`}
+                  offerCar={tradeOfferCar(trade)}
+                  requestCar={tradeRequestCar(trade)}
+                />
               </li>
             ))}
           </ul>

@@ -347,8 +347,10 @@ export function createPlayRouter(): Router {
               t.from_user_id AS fromUserId, t.to_user_id AS toUserId,
               t.offer_listing_id AS offerListingId, t.request_listing_id AS requestListingId,
               fu.display_name AS fromDisplayName, tu.display_name AS toDisplayName,
-              ocm.make AS offerMake, ocm.model AS offerModel,
-              rcm.make AS requestMake, rcm.model AS requestModel
+              ocm.make AS offerMake, ocm.model AS offerModel, ocm.trim_name AS offerTrimName,
+              ocm.body_type AS offerBodyType, ol.colour AS offerColour, ol.year AS offerYear,
+              rcm.make AS requestMake, rcm.model AS requestModel, rcm.trim_name AS requestTrimName,
+              rcm.body_type AS requestBodyType, rl.colour AS requestColour, rl.year AS requestYear
        FROM card_trade_offers t
        INNER JOIN users fu ON fu.id = t.from_user_id
        INNER JOIN users tu ON tu.id = t.to_user_id

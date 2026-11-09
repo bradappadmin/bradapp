@@ -168,12 +168,17 @@ describe.runIf(hasDb)("play routes", () => {
     const tradeId = offer.body.trade.id as number;
 
     const inboxB = await b.get("/play/trades");
-    expect(
-      inboxB.body.trades.some(
-        (t: { id: number; status: string; toUserId: number }) =>
-          t.id === tradeId && t.status === "pending",
-      ),
-    ).toBe(true);
+    const pending = inboxB.body.trades.find(
+      (t: { id: number; status: string; toUserId: number }) =>
+        t.id === tradeId && t.status === "pending",
+    );
+    expect(pending).toBeTruthy();
+    expect(pending.offerColour).toBeTruthy();
+    expect(pending.offerBodyType).toBeTruthy();
+    expect(pending.requestColour).toBeTruthy();
+    expect(pending.requestBodyType).toBeTruthy();
+    expect(pending.offerYear).toBeGreaterThan(1990);
+    expect(pending.requestYear).toBeGreaterThan(1990);
 
     const countBefore = await b.get("/play/trades/inbox-count");
     expect(countBefore.status).toBe(200);
