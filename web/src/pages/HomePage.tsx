@@ -113,6 +113,12 @@ export function HomePage() {
               Play
             </Link>
             <Link
+              to="/members"
+              className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+            >
+              Members
+            </Link>
+            <Link
               to="/reviews"
               className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
             >

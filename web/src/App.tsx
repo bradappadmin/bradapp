@@ -4,6 +4,8 @@ import { CarsPage } from "./pages/CarsPage";
 import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
 import { ListingPage } from "./pages/ListingPage";
+import { MemberProfilePage } from "./pages/MemberProfilePage";
+import { MembersPage } from "./pages/MembersPage";
 import { AdminHomePage } from "./pages/admin/AdminHomePage";
 import { AdminInventoryPage } from "./pages/admin/AdminInventoryPage";
 import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
@@ -23,6 +25,8 @@ export function App() {
         <Route path="/cars" element={<CarsPage />} />
         <Route path="/cars/:id" element={<ListingPage />} />
         <Route path="/garage" element={<GaragePage />} />
+        <Route path="/members" element={<MembersPage />} />
+        <Route path="/members/:id" element={<MemberProfilePage />} />
         <Route path="/play" element={<TopTrumpsPage />} />
         <Route path="/trades" element={<TradesPage />} />
         <Route path="/reviews" element={<ReviewsPage />} />

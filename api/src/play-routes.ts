@@ -514,7 +514,23 @@ export function createPlayRouter(): Router {
   /** Member-owned cars available to challenge or request in a trade (excluding yours). */
   router.get("/cards/members", requireAuth, async (req, res: Response) => {
     const user = (req as AuthedRequest).user;
+    const ownerUserIdRaw = req.query.ownerUserId;
+    const ownerUserId =
+      typeof ownerUserIdRaw === "string" && ownerUserIdRaw.trim() !== ""
+        ? Number(ownerUserIdRaw)
+        : null;
+    if (ownerUserId != null && (!Number.isFinite(ownerUserId) || ownerUserId <= 0)) {
+      res.status(400).json({ error: "validation_error", message: "Invalid ownerUserId" });
+      return;
+    }
+
     const pool = getPool();
+    const clauses = ["l.owner_user_id IS NOT NULL", "l.owner_user_id <> ?"];
+    const values: number[] = [user.id];
+    if (ownerUserId != null) {
+      clauses.push("l.owner_user_id = ?");
+      values.push(ownerUserId);
+    }
     const [rows] = await pool.query(
       `SELECT l.id, l.owner_user_id AS ownerUserId, u.display_name AS ownerDisplayName,
               cm.make, cm.model, cm.trim_name AS trimName,
@@ -523,10 +539,10 @@ export function createPlayRouter(): Router {
        FROM listings l
        INNER JOIN car_models cm ON cm.id = l.car_model_id
        INNER JOIN users u ON u.id = l.owner_user_id
-       WHERE l.owner_user_id IS NOT NULL AND l.owner_user_id <> ?
+       WHERE ${clauses.join(" AND ")}
        ORDER BY u.display_name, cm.make, cm.model
        LIMIT 100`,
-      [user.id],
+      values,
     );
     res.json({ cards: rows });
   });

@@ -29,6 +29,9 @@ export function SiteHeader() {
           </NavLink>
           {user ? (
             <>
+              <NavLink to="/members" className={linkClass}>
+                Members
+              </NavLink>
               <NavLink to="/garage" className={linkClass}>
                 My cars
               </NavLink>

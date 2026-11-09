@@ -4,6 +4,7 @@ import express, { type Express } from "express";
 import { createAdminRouter } from "./admin-routes.js";
 import { createAuthRouter } from "./auth-routes.js";
 import { createCarsRouter } from "./cars-routes.js";
+import { createMembersRouter } from "./members-routes.js";
 import { createPlayRouter } from "./play-routes.js";
 import { createReviewsRouter } from "./reviews-routes.js";
 import { createTradeRouter } from "./trade-routes.js";
@@ -27,6 +28,7 @@ export function createApp(): Express {
 
   app.use("/auth", createAuthRouter());
   app.use("/cars", createCarsRouter());
+  app.use("/members", createMembersRouter());
   app.use("/trade", createTradeRouter());
   app.use("/play", createPlayRouter());
   app.use("/reviews", createReviewsRouter());

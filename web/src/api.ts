@@ -218,8 +218,42 @@ export function playTopTrumpsPvp(input: {
   return request("/play/top-trumps/pvp", { method: "POST", body: JSON.stringify(input) });
 }
 
-export function fetchMemberCards(): Promise<{ cards: MemberCard[] }> {
-  return request("/play/cards/members");
+export function fetchMemberCards(ownerUserId?: number): Promise<{ cards: MemberCard[] }> {
+  const qs =
+    ownerUserId != null && Number.isFinite(ownerUserId) ? `?ownerUserId=${ownerUserId}` : "";
+  return request(`/play/cards/members${qs}`);
+}
+
+export type MemberSummary = {
+  id: number;
+  displayName: string;
+  role: "super_admin" | "admin" | "member";
+  roleLabel: string;
+  coinBalance: number;
+  carCount: number;
+};
+
+export type MemberProfileCar = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
+  year: number;
+  colour: string;
+  status: string;
+};
+
+export function fetchMembers(): Promise<{ members: MemberSummary[] }> {
+  return request("/members");
+}
+
+export function fetchMemberProfile(
+  id: number,
+): Promise<{ member: MemberSummary; cars: MemberProfileCar[] }> {
+  return request(`/members/${id}`);
 }
 
 export function fetchTrades(): Promise<{ trades: TradeRow[] }> {
