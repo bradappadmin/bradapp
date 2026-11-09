@@ -26,39 +26,42 @@ import { SignUpPage } from "./pages/SignUpPage";
 import { TopTrumpsPage } from "./pages/TopTrumpsPage";
 import { TradeHistoryPage } from "./pages/TradeHistoryPage";
 import { TradesPage } from "./pages/TradesPage";
+import { ToastProvider } from "./toast-context";
 
 export function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/how-to" element={<HowToPage />} />
-        <Route path="/cars" element={<CarsPage />} />
-        <Route path="/cars/:id" element={<ListingPage />} />
-        <Route path="/compare" element={<ComparePage />} />
-        <Route path="/garage" element={<GaragePage />} />
-        <Route path="/favourites" element={<FavouritesPage />} />
-        <Route path="/members" element={<MembersPage />} />
-        <Route path="/members/:id" element={<MemberProfilePage />} />
-        <Route path="/leaderboard" element={<LeaderboardPage />} />
-        <Route path="/play" element={<TopTrumpsPage />} />
-        <Route path="/play/history" element={<MatchHistoryPage />} />
-        <Route path="/trades" element={<TradesPage />} />
-        <Route path="/trades/history" element={<TradeHistoryPage />} />
-        <Route path="/reviews" element={<ReviewsPage />} />
-        <Route path="/reviews/record" element={<RecordReviewPage />} />
-        <Route path="/reviews/:id" element={<ReviewDetailPage />} />
-        <Route path="/admin" element={<AdminHomePage />} />
-        <Route path="/admin/users" element={<AdminUsersPage />} />
-        <Route path="/admin/invites" element={<AdminInvitesPage />} />
-        <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
-        <Route path="/admin/inventory" element={<AdminInventoryPage />} />
-        <Route path="/account" element={<AccountPage />} />
-        <Route path="/ledger" element={<LedgerPage />} />
-        <Route path="/signin" element={<SignInPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ToastProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/how-to" element={<HowToPage />} />
+          <Route path="/cars" element={<CarsPage />} />
+          <Route path="/cars/:id" element={<ListingPage />} />
+          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/garage" element={<GaragePage />} />
+          <Route path="/favourites" element={<FavouritesPage />} />
+          <Route path="/members" element={<MembersPage />} />
+          <Route path="/members/:id" element={<MemberProfilePage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/play" element={<TopTrumpsPage />} />
+          <Route path="/play/history" element={<MatchHistoryPage />} />
+          <Route path="/trades" element={<TradesPage />} />
+          <Route path="/trades/history" element={<TradeHistoryPage />} />
+          <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/reviews/record" element={<RecordReviewPage />} />
+          <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+          <Route path="/admin" element={<AdminHomePage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/invites" element={<AdminInvitesPage />} />
+          <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
+          <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/ledger" element={<LedgerPage />} />
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ToastProvider>
     </AuthProvider>
   );
 }

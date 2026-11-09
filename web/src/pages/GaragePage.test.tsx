@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import { ToastProvider } from "../toast-context";
 import { GaragePage } from "./GaragePage";
 
 vi.mock("../api", () => ({
@@ -71,7 +72,9 @@ describe("GaragePage media cards", () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <GaragePage />
+          <ToastProvider>
+            <GaragePage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );

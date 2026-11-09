@@ -11,11 +11,13 @@ import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-of
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { rememberRecentlyViewed } from "../recently-viewed";
 import { listingSharePath } from "../share-link";
+import { useToast } from "../toast-context";
 
 export function ListingPage() {
   const { id } = useParams();
   const listingId = Number(id);
   const { user, setUser, refresh } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [favourited, setFavourited] = useState(false);
@@ -85,8 +87,11 @@ export function ListingPage() {
       setListing(detail.listing);
       setFavourited(Boolean(detail.favourited));
       await refresh();
+      toast.success("Bought — car is in your garage.");
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Purchase failed");
+      const msg = err instanceof Error ? err.message : "Purchase failed";
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }

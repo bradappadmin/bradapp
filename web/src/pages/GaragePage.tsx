@@ -8,9 +8,11 @@ import { badgeForStatus } from "../car-visuals";
 import { CarCard } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
 import { sumGarageValue } from "../garage-value";
+import { useToast } from "../toast-context";
 
 export function GaragePage() {
   const { user, loading: authLoading, setUser, refresh } = useAuth();
+  const toast = useToast();
   const [cars, setCars] = useState<GarageCar[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
@@ -80,13 +82,16 @@ export function GaragePage() {
       await api.sellListing(car.id, Math.trunc(price));
       await reload();
       await refresh();
-      setNotice(
+      const noticeText =
         car.status === "available"
           ? `Updated asking price to ${formatCoins(Math.trunc(price))}.`
-          : `Listed for sale at ${formatCoins(Math.trunc(price))}. Other members can buy it from Cars.`,
-      );
+          : `Listed for sale at ${formatCoins(Math.trunc(price))}. Other members can buy it from Cars.`;
+      setNotice(noticeText);
+      toast.success(noticeText);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update listing");
+      const msg = err instanceof Error ? err.message : "Could not update listing";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusyId(null);
     }
@@ -99,9 +104,13 @@ export function GaragePage() {
     try {
       await api.unlistListing(carId);
       await reload();
-      setNotice("Unlisted — car is back in your garage only.");
+      const noticeText = "Unlisted — car is back in your garage only.";
+      setNotice(noticeText);
+      toast.success(noticeText);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not unlist");
+      const msg = err instanceof Error ? err.message : "Could not unlist";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusyId(null);
     }

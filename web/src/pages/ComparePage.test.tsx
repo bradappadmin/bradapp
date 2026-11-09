@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ListingDetail } from "../cars";
 import { AuthProvider } from "../auth-context";
+import { ToastProvider } from "../toast-context";
 import { ComparePage } from "./ComparePage";
 
 vi.mock("../api", () => ({
@@ -72,9 +73,11 @@ describe("ComparePage photos", () => {
     render(
       <MemoryRouter initialEntries={["/compare?a=9&b=11"]}>
         <AuthProvider>
-          <Routes>
-            <Route path="/compare" element={<ComparePage />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/compare" element={<ComparePage />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );

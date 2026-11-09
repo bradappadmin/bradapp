@@ -4,10 +4,12 @@ import * as api from "../api";
 import { BIO_MAX_LENGTH } from "../api";
 import { useAuth } from "../auth-context";
 import { SiteHeader } from "../components/SiteHeader";
+import { useToast } from "../toast-context";
 import { roleLabel } from "../types";
 
 export function AccountPage() {
   const { user, loading: authLoading, setUser } = useAuth();
+  const toast = useToast();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -48,9 +50,13 @@ export function AccountPage() {
     try {
       const res = await api.updateProfile({ displayName: name, bio: bio.trim() });
       setUser(res.user);
-      setProfileMessage("Bay name and bio saved. Friends see them on your garage.");
+      const ok = "Bay name and bio saved. Friends see them on your garage.";
+      setProfileMessage(ok);
+      toast.success(ok);
     } catch (err) {
-      setProfileError(err instanceof Error ? err.message : "Could not save profile");
+      const msg = err instanceof Error ? err.message : "Could not save profile";
+      setProfileError(msg);
+      toast.error(msg);
     } finally {
       setProfileBusy(false);
     }

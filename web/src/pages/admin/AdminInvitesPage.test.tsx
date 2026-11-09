@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../../auth-context";
+import { ToastProvider } from "../../toast-context";
 import { AdminInvitesPage } from "./AdminInvitesPage";
 
 vi.mock("../../api", () => ({
@@ -51,7 +52,9 @@ describe("AdminInvitesPage require-invite toggle", () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <AdminInvitesPage />
+          <ToastProvider>
+            <AdminInvitesPage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );

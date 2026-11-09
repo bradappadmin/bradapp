@@ -12,6 +12,7 @@ import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
 import { SiteHeader } from "../components/SiteHeader";
 import { TrumpCard } from "../components/TrumpCard";
+import { useToast } from "../toast-context";
 import { prepareRematch, rematchPrompt } from "../top-trumps-rematch";
 
 type CategoryMeta = { id: TopTrumpsCategory; label: string; direction: "higher" | "lower" };
@@ -29,6 +30,7 @@ type MatchFaceOff = {
 
 export function TopTrumpsPage() {
   const { user, loading: authLoading, setUser } = useAuth();
+  const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const opponentFromUrl = Number(searchParams.get("opponent") ?? "");
   const theirCarFromUrl = Number(searchParams.get("theirCar") ?? "");
@@ -139,6 +141,8 @@ export function TopTrumpsPage() {
       setOpponentUserId("");
       setOpponentListingId("");
       setSearchParams({}, { replace: true });
+    } else {
+      toast.success("Challenge started — pick a member and their car.");
     }
   }
 
@@ -196,8 +200,9 @@ export function TopTrumpsPage() {
         const w = res.match.winner;
         const outcome =
           w === "challenger" ? "You win" : w === "draw" ? "Draw" : "House wins";
+        const outcomeText = `${outcome} · +${res.match.coinReward} BC`;
         setFaceOff({
-          outcome: `${outcome} · +${res.match.coinReward} BC`,
+          outcome: outcomeText,
           categoryLabel: catLabel,
           yourValue: res.match.challengerValue,
           theirValue: res.match.opponentValue,
@@ -211,6 +216,7 @@ export function TopTrumpsPage() {
           theirCar: res.match.opponent,
           theirLabel: "House",
         });
+        toast.success(outcomeText);
         setAwaitingRematchPick(false);
       } else {
         const theirListingId = opponentListingId as number;
@@ -224,8 +230,9 @@ export function TopTrumpsPage() {
         const rivalName = selectedOpponent?.displayName ?? "Opponent";
         const outcome =
           w === "challenger" ? "You win" : w === "draw" ? "Draw" : "They win";
+        const outcomeText = `${outcome} vs ${rivalName} · +${res.match.coinReward} BC`;
         setFaceOff({
-          outcome: `${outcome} vs ${rivalName} · +${res.match.coinReward} BC`,
+          outcome: outcomeText,
           categoryLabel: catLabel,
           yourValue: res.match.challengerValue,
           theirValue: res.match.opponentValue,
@@ -244,10 +251,13 @@ export function TopTrumpsPage() {
           },
           theirLabel: rivalName,
         });
+        toast.success(outcomeText);
         setAwaitingRematchPick(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Play failed");
+      const msg = err instanceof Error ? err.message : "Play failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }

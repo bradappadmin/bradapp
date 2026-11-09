@@ -7,6 +7,7 @@ import { listingTitle } from "../cars";
 import { SiteHeader } from "../components/SiteHeader";
 import { TradeOfferPair } from "../components/TradeOfferPair";
 import { TrumpCard } from "../components/TrumpCard";
+import { useToast } from "../toast-context";
 import {
   garageToTrumpCard,
   memberCardToTrumpCard,
@@ -33,6 +34,7 @@ function statusLabel(status: TradeRow["status"]): string {
 
 export function TradesPage() {
   const { user, loading: authLoading, refreshTradeInbox } = useAuth();
+  const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const withFromUrl = Number(searchParams.get("with") ?? "");
   const theirCarFromUrl = Number(searchParams.get("theirCar") ?? "");
@@ -171,10 +173,14 @@ export function TradesPage() {
     setMessage(null);
     try {
       await api.createTrade({ offerListingId, requestListingId });
-      setMessage("Free trade offer sent — no Brad Coins move. Waiting in their inbox.");
+      const ok = "Free trade offer sent — no Brad Coins move. Waiting in their inbox.";
+      setMessage(ok);
+      toast.success(ok);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create trade");
+      const msg = err instanceof Error ? err.message : "Could not create trade";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -186,10 +192,14 @@ export function TradesPage() {
     setMessage(null);
     try {
       await api.acceptTrade(id);
-      setMessage("Accepted — ownership swapped. Still zero Brad Coins spent.");
+      const ok = "Accepted — ownership swapped. Still zero Brad Coins spent.";
+      setMessage(ok);
+      toast.success(ok);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Accept failed");
+      const msg = err instanceof Error ? err.message : "Accept failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -201,10 +211,14 @@ export function TradesPage() {
     setMessage(null);
     try {
       await api.declineTrade(id);
-      setMessage("Declined.");
+      const ok = "Declined.";
+      setMessage(ok);
+      toast.success(ok);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Decline failed");
+      const msg = err instanceof Error ? err.message : "Decline failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -216,10 +230,14 @@ export function TradesPage() {
     setMessage(null);
     try {
       await api.cancelTrade(id);
-      setMessage("Offer cancelled.");
+      const ok = "Offer cancelled.";
+      setMessage(ok);
+      toast.success(ok);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cancel failed");
+      const msg = err instanceof Error ? err.message : "Cancel failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }

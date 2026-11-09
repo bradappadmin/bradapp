@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import type { ListingDetail } from "../cars";
+import { ToastProvider } from "../toast-context";
 import { ListingPage } from "./ListingPage";
 
 vi.mock("../api", () => ({
@@ -73,9 +74,11 @@ describe("ListingPage challenge CTA", () => {
     render(
       <MemoryRouter initialEntries={["/cars/143"]}>
         <AuthProvider>
-          <Routes>
-            <Route path="/cars/:id" element={<ListingPage />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -92,9 +95,11 @@ describe("ListingPage challenge CTA", () => {
     render(
       <MemoryRouter initialEntries={["/cars/143"]}>
         <AuthProvider>
-          <Routes>
-            <Route path="/cars/:id" element={<ListingPage />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );

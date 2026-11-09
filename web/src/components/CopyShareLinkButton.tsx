@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { absoluteShareUrl, copyTextToClipboard } from "../share-link";
+import { useToast } from "../toast-context";
 
 type CopyShareLinkButtonProps = {
   path: string;
@@ -14,12 +15,15 @@ export function CopyShareLinkButton({
   copiedLabel = "Copied",
   className = "",
 }: CopyShareLinkButtonProps) {
+  const toast = useToast();
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
 
   async function onCopy() {
     const url = absoluteShareUrl(path);
     const ok = await copyTextToClipboard(url);
     setStatus(ok ? "copied" : "failed");
+    if (ok) toast.success("Link copied.");
+    else toast.error("Could not copy link.");
     window.setTimeout(() => setStatus("idle"), 2000);
   }
 

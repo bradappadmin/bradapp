@@ -3,6 +3,7 @@ import * as api from "../../api";
 import type { FamilyInvite } from "../../api";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
+import { useToast } from "../../toast-context";
 
 export function AdminInvitesPage() {
   return (
@@ -20,6 +21,7 @@ function statusLabel(invite: FamilyInvite): string {
 }
 
 function AdminInvitesInner() {
+  const toast = useToast();
   const [invites, setInvites] = useState<FamilyInvite[]>([]);
   const [requireInviteCode, setRequireInviteCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,10 +111,14 @@ function AdminInvitesInner() {
     try {
       await navigator.clipboard.writeText(invite.code);
       setCopiedId(invite.id);
-      setMessage(`Copied ${invite.code}.`);
+      const ok = `Copied ${invite.code}.`;
+      setMessage(ok);
+      toast.success(ok);
       window.setTimeout(() => setCopiedId((current) => (current === invite.id ? null : current)), 2000);
     } catch {
-      setError("Could not copy — select the code manually.");
+      const msg = "Could not copy — select the code manually.";
+      setError(msg);
+      toast.error(msg);
     }
   }
 
