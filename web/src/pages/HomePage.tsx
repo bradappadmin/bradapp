@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
 import { useAuth } from "../auth-context";
@@ -6,11 +7,32 @@ import { SiteHeader } from "../components/SiteHeader";
 import { roleLabel } from "../types";
 
 export function HomePage() {
-  const { user, loading, setUser } = useAuth();
+  const { user, loading, setUser, dailyLogin, refresh } = useAuth();
+  const [claimBusy, setClaimBusy] = useState(false);
+  const [claimNote, setClaimNote] = useState<string | null>(null);
 
   async function onSignOut() {
     await api.signOut();
     setUser(null);
+  }
+
+  async function onClaimDaily() {
+    setClaimBusy(true);
+    setClaimNote(null);
+    try {
+      const res = await api.claimDailyBonus();
+      setUser(res.user);
+      await refresh();
+      setClaimNote(
+        res.dailyLogin.claimedJustNow
+          ? `Claimed +${res.dailyLogin.amount} BC for ${res.dailyLogin.claimDate} (UTC).`
+          : `Already claimed today’s +${res.dailyLogin.amount} BC (${res.dailyLogin.claimDate} UTC).`,
+      );
+    } catch (err) {
+      setClaimNote(err instanceof Error ? err.message : "Could not claim daily bonus");
+    } finally {
+      setClaimBusy(false);
+    }
   }
 
   if (loading) {
@@ -90,6 +112,29 @@ export function HomePage() {
           <p className="mt-4 font-display text-2xl font-semibold text-lime">
             {formatCoins(user.coinBalance)}
           </p>
+          {dailyLogin ? (
+            <div className="mt-4 text-sm text-steel">
+              {dailyLogin.claimedToday ? (
+                <p className="text-lime">
+                  Daily bonus claimed for {dailyLogin.claimDate} (UTC)
+                  {dailyLogin.claimedJustNow ? ` — +${dailyLogin.amount} BC just now` : ""}.
+                </p>
+              ) : (
+                <p>
+                  Daily login bonus available: +{dailyLogin.amount} BC.{" "}
+                  <button
+                    type="button"
+                    disabled={claimBusy}
+                    onClick={() => void onClaimDaily()}
+                    className="border-0 bg-transparent p-0 font-inherit text-lime underline disabled:opacity-60"
+                  >
+                    {claimBusy ? "Claiming…" : "Claim"}
+                  </button>
+                </p>
+              )}
+              {claimNote ? <p className="mt-1 text-mist">{claimNote}</p> : null}
+            </div>
+          ) : null}
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-steel">
             Browse the catalogue, manage your cars, play Top Trumps, and open bay reviews.
           </p>

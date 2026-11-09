@@ -5,7 +5,24 @@ import { getPool } from "./db.js";
 export const MEMBER_STARTING_COINS = 200;
 export const ADMIN_STARTING_COINS = 1000;
 
-export type LedgerReason = "seed" | "purchase" | "sale" | "admin_adjust" | "play_reward";
+/** Brad Coins credited once per UTC calendar day when signed in. */
+export const DAILY_LOGIN_BONUS = 25;
+
+export type LedgerReason =
+  | "seed"
+  | "purchase"
+  | "sale"
+  | "admin_adjust"
+  | "play_reward"
+  | "daily_login";
+
+export type DailyLoginStatus = {
+  amount: number;
+  claimDate: string;
+  claimedToday: boolean;
+  claimedJustNow: boolean;
+  balance: number;
+};
 
 export async function getCoinBalance(userId: number): Promise<number> {
   const pool = getPool();
@@ -101,6 +118,94 @@ export async function creditSeedIfNeeded(
   } finally {
     connection.release();
   }
+}
+
+/** UTC calendar date YYYY-MM-DD for daily bonus uniqueness. */
+export function utcClaimDate(now = new Date()): string {
+  return now.toISOString().slice(0, 10);
+}
+
+/**
+ * Credits the daily login bonus at most once per UTC day.
+ * Idempotent: safe to call on every /me or sign-in.
+ */
+export async function claimDailyLoginBonus(
+  userId: number,
+  now = new Date(),
+): Promise<DailyLoginStatus> {
+  const claimDate = utcClaimDate(now);
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [existing] = await connection.query<(RowDataPacket & { id: number })[]>(
+      `SELECT id FROM coin_ledger
+       WHERE user_id = ?
+         AND reason = 'daily_login'
+         AND note = ?
+       LIMIT 1
+       FOR UPDATE`,
+      [userId, `Daily login ${claimDate}`],
+    );
+    if (existing.length > 0) {
+      const [balRows] = await connection.query<(RowDataPacket & { coin_balance: number })[]>(
+        "SELECT coin_balance FROM users WHERE id = ? LIMIT 1",
+        [userId],
+      );
+      await connection.commit();
+      return {
+        amount: DAILY_LOGIN_BONUS,
+        claimDate,
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: Number(balRows[0]?.coin_balance ?? 0),
+      };
+    }
+
+    const balance = await applyCoinDelta(connection, {
+      userId,
+      delta: DAILY_LOGIN_BONUS,
+      reason: "daily_login",
+      note: `Daily login ${claimDate}`,
+    });
+    await connection.commit();
+    return {
+      amount: DAILY_LOGIN_BONUS,
+      claimDate,
+      claimedToday: true,
+      claimedJustNow: true,
+      balance,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function getDailyLoginStatus(
+  userId: number,
+  now = new Date(),
+): Promise<DailyLoginStatus> {
+  const claimDate = utcClaimDate(now);
+  const pool = getPool();
+  const [existing] = await pool.query<(RowDataPacket & { id: number })[]>(
+    `SELECT id FROM coin_ledger
+     WHERE user_id = ?
+       AND reason = 'daily_login'
+       AND note = ?
+     LIMIT 1`,
+    [userId, `Daily login ${claimDate}`],
+  );
+  const balance = await getCoinBalance(userId);
+  return {
+    amount: DAILY_LOGIN_BONUS,
+    claimDate,
+    claimedToday: existing.length > 0,
+    claimedJustNow: false,
+    balance,
+  };
 }
 
 export async function listLedger(userId: number, limit = 20): Promise<

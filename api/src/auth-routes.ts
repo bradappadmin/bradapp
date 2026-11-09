@@ -4,11 +4,14 @@ import {
   ADMIN_STARTING_COINS,
   MEMBER_STARTING_COINS,
   applyCoinDelta,
+  claimDailyLoginBonus,
   creditSeedIfNeeded,
+  getDailyLoginStatus,
 } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { hashPassword, verifyPassword } from "./password.js";
 import { createSession, destroySession, readSessionUser, type PublicUser } from "./session.js";
+import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 
 const emailSchema = z.string().trim().email().max(255).transform((v) => v.toLowerCase());
 
@@ -159,13 +162,18 @@ export function createAuthRouter(): Router {
       "Starting Brad Coins",
     );
 
+    const daily = await claimDailyLoginBonus(Number(user.id));
+
     const [freshRows] = await pool.query<UserRow[]>(
       "SELECT id, email, password_hash, display_name, role, coin_balance, account_status FROM users WHERE id = ? LIMIT 1",
       [user.id],
     );
 
     await createSession(res, Number(user.id));
-    res.json({ user: toPublicUser(freshRows[0] ?? user) });
+    res.json({
+      user: toPublicUser(freshRows[0] ?? user),
+      dailyLogin: daily,
+    });
   });
 
   router.post("/signout", async (req: Request, res: Response) => {
@@ -174,12 +182,32 @@ export function createAuthRouter(): Router {
   });
 
   router.get("/me", async (req: Request, res: Response) => {
-    const user = await readSessionUser(req);
-    if (!user) {
+    const sessionUser = await readSessionUser(req);
+    if (!sessionUser) {
       res.status(401).json({ error: "unauthenticated", message: "Not signed in." });
       return;
     }
-    res.json({ user });
+    const daily = await claimDailyLoginBonus(sessionUser.id);
+    const user =
+      daily.claimedJustNow || daily.balance !== sessionUser.coinBalance
+        ? { ...sessionUser, coinBalance: daily.balance }
+        : sessionUser;
+    res.json({ user, dailyLogin: daily });
+  });
+
+  router.get("/daily-bonus", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const status = await getDailyLoginStatus(user.id);
+    res.json({ dailyLogin: status });
+  });
+
+  router.post("/daily-bonus", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const daily = await claimDailyLoginBonus(user.id);
+    res.json({
+      dailyLogin: daily,
+      user: { ...user, coinBalance: daily.balance },
+    });
   });
 
   return router;

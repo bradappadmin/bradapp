@@ -9,6 +9,8 @@ vi.mock("../api", () => ({
   signOut: vi.fn(),
   signIn: vi.fn(),
   signUp: vi.fn(),
+  claimDailyBonus: vi.fn(),
+  fetchDailyBonus: vi.fn(),
 }));
 
 import * as api from "../api";

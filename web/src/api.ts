@@ -47,7 +47,18 @@ export function signUp(input: {
   });
 }
 
-export function signIn(input: { email: string; password: string }): Promise<{ user: User }> {
+export type DailyLoginStatus = {
+  amount: number;
+  claimDate: string;
+  claimedToday: boolean;
+  claimedJustNow: boolean;
+  balance: number;
+};
+
+export function signIn(input: {
+  email: string;
+  password: string;
+}): Promise<{ user: User; dailyLogin?: DailyLoginStatus }> {
   return request("/auth/signin", {
     method: "POST",
     body: JSON.stringify(input),
@@ -58,8 +69,19 @@ export function signOut(): Promise<{ ok: boolean }> {
   return request("/auth/signout", { method: "POST" });
 }
 
-export function fetchMe(): Promise<{ user: User }> {
+export function fetchMe(): Promise<{ user: User; dailyLogin: DailyLoginStatus }> {
   return request("/auth/me");
+}
+
+export function fetchDailyBonus(): Promise<{ dailyLogin: DailyLoginStatus }> {
+  return request("/auth/daily-bonus");
+}
+
+export function claimDailyBonus(): Promise<{
+  dailyLogin: DailyLoginStatus;
+  user: User;
+}> {
+  return request("/auth/daily-bonus", { method: "POST" });
 }
 
 function toQuery(params: SearchQuery): string {
@@ -94,7 +116,7 @@ export type LedgerEntry = {
   id: number;
   delta: number;
   balanceAfter: number;
-  reason: "seed" | "purchase" | "sale" | "admin_adjust" | "play_reward";
+  reason: "seed" | "purchase" | "sale" | "admin_adjust" | "play_reward" | "daily_login";
   listingId: number | null;
   note: string;
   createdAt: string;
