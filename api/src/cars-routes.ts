@@ -1,6 +1,5 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
-import { getPool, type RowDataPacket } from "./db.js";
 import {
   buildSearchClause,
   listingSelectSql,
@@ -8,6 +7,9 @@ import {
   toListingSummary,
   type SearchParams,
 } from "./cars.js";
+import { getPool, type RowDataPacket } from "./db.js";
+import { isListingFavourited } from "./favourites.js";
+import { readSessionUser } from "./session.js";
 
 const optionalInt = z
   .string()
@@ -174,7 +176,9 @@ export function createCarsRouter(): Router {
       res.status(404).json({ error: "not_found", message: "Listing not found." });
       return;
     }
-    res.json({ listing: toListingDetail(row) });
+    const user = await readSessionUser(req);
+    const favourited = user ? await isListingFavourited(user.id, id) : false;
+    res.json({ listing: toListingDetail(row), favourited });
   });
 
   router.get("/models", async (req: Request, res: Response) => {

@@ -15,7 +15,7 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Search the catalogue for real makes and models. Prices are in Brad Coins — never real money. Buy from Cars, then list or unlist from My cars.",
+    body: "Search the catalogue for real makes and models. Prices are in Brad Coins — never real money. Save favourites for later, buy from Cars, then list or unlist from My cars.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -129,6 +129,12 @@ export function HowToPage() {
                 My cars
               </Link>{" "}
               — garage value, list prices, and unlist.
+            </li>
+            <li>
+              <Link to="/favourites" className="text-lime no-underline hover:underline">
+                Favourites
+              </Link>{" "}
+              — listings you saved (sign in).
             </li>
           </ul>
         </section>

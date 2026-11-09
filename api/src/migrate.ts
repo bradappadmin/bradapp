@@ -27,6 +27,7 @@ export async function runMigrations(): Promise<void> {
     "006_admin.sql",
     "007_daily_login.sql",
     "008_account_frozen.sql",
+    "009_favourites.sql",
   ];
 
 

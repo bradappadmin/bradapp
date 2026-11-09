@@ -80,5 +80,6 @@ describe("SiteHeader", () => {
 
     expect(await screen.findByLabelText("3 pending trade offers")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Trades/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Favourites" }).length).toBeGreaterThan(0);
   });
 });

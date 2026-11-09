@@ -14,10 +14,12 @@ export function ListingPage() {
   const { user, setUser, refresh } = useAuth();
   const navigate = useNavigate();
   const [listing, setListing] = useState<ListingDetail | null>(null);
+  const [favourited, setFavourited] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [favBusy, setFavBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +34,7 @@ export function ListingPage() {
         const res = await api.fetchListing(listingId);
         if (!cancelled) {
           setListing(res.listing);
+          setFavourited(Boolean(res.favourited));
           setError(null);
           rememberRecentlyViewed({
             id: res.listing.id,
@@ -51,6 +54,7 @@ export function ListingPage() {
       } catch (err) {
         if (!cancelled) {
           setListing(null);
+          setFavourited(false);
           setError(err instanceof Error ? err.message : "Could not load listing");
         }
       } finally {
@@ -61,7 +65,7 @@ export function ListingPage() {
     return () => {
       cancelled = true;
     };
-  }, [listingId]);
+  }, [listingId, user?.id]);
 
   async function onBuy() {
     if (!user) {
@@ -75,11 +79,34 @@ export function ListingPage() {
       setUser({ ...user, coinBalance: res.balance });
       const detail = await api.fetchListing(listingId);
       setListing(detail.listing);
+      setFavourited(Boolean(detail.favourited));
       await refresh();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Purchase failed");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function onToggleFavourite() {
+    if (!user) {
+      navigate("/signin");
+      return;
+    }
+    setFavBusy(true);
+    setActionError(null);
+    try {
+      if (favourited) {
+        await api.removeFavourite(listingId);
+        setFavourited(false);
+      } else {
+        await api.saveFavourite(listingId);
+        setFavourited(true);
+      }
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Could not update favourite");
+    } finally {
+      setFavBusy(false);
     }
   }
 
@@ -117,8 +144,8 @@ export function ListingPage() {
               Brad Coins only — no real money. Buy moves the car into your garage.
             </p>
 
-            {canBuy ? (
-              <div className="mt-6">
+            <div className="mt-6 flex flex-wrap gap-3">
+              {canBuy ? (
                 <button
                   type="button"
                   disabled={busy}
@@ -127,10 +154,37 @@ export function ListingPage() {
                 >
                   {busy ? "Buying…" : user ? `Buy for ${formatCoins(listing.coinPrice)}` : "Sign in to buy"}
                 </button>
-                {user ? (
-                  <p className="mt-2 text-xs text-steel">Your balance: {formatCoins(user.coinBalance)}</p>
-                ) : null}
-              </div>
+              ) : null}
+              <button
+                type="button"
+                disabled={favBusy}
+                onClick={() => void onToggleFavourite()}
+                className={`rounded-md border px-5 py-3 font-display text-sm font-semibold transition disabled:opacity-60 ${
+                  favourited
+                    ? "border-lime/50 text-lime hover:bg-lime/10"
+                    : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                }`}
+              >
+                {favBusy
+                  ? "Saving…"
+                  : !user
+                    ? "Sign in to favourite"
+                    : favourited
+                      ? "Saved · Unfavourite"
+                      : "Save to favourites"}
+              </button>
+            </div>
+            {canBuy && user ? (
+              <p className="mt-2 text-xs text-steel">Your balance: {formatCoins(user.coinBalance)}</p>
+            ) : null}
+            {favourited ? (
+              <p className="mt-2 text-xs text-steel">
+                In your{" "}
+                <Link to="/favourites" className="text-lime no-underline hover:underline">
+                  Favourites
+                </Link>
+                .
+              </p>
             ) : null}
 
             {ownsListing ? (

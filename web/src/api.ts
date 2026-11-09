@@ -144,8 +144,45 @@ export function searchCars(
   return request(`/cars/search${toQuery(params)}`);
 }
 
-export function fetchListing(id: number): Promise<{ listing: ListingDetail }> {
+export function fetchListing(id: number): Promise<{ listing: ListingDetail; favourited: boolean }> {
   return request(`/cars/listings/${id}`);
+}
+
+export type FavouriteCar = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
+  conditionType: "new" | "used";
+  year: number;
+  colour: string;
+  mileage: number;
+  coinPrice: number;
+  status: "available" | "owned" | "sold";
+  ownerLabel: string;
+  garageName: string;
+  garageCity: string;
+  favouritedAt: string;
+};
+
+export function fetchFavourites(): Promise<{ cars: FavouriteCar[] }> {
+  return request("/favourites");
+}
+
+export function fetchFavouriteStatus(id: number): Promise<{ favourited: boolean }> {
+  return request(`/favourites/${id}`);
+}
+
+export function saveFavourite(id: number): Promise<{ ok: boolean; favourited: true }> {
+  return request(`/favourites/${id}`, { method: "POST" });
+}
+
+export function removeFavourite(id: number): Promise<{ ok: boolean; favourited: false }> {
+  return request(`/favourites/${id}`, { method: "DELETE" });
 }
 
 export function fetchModels(make?: string): Promise<{ models: string[] }> {

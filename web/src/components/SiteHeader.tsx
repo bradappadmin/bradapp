@@ -76,6 +76,9 @@ export function SiteHeader() {
           <NavLink to="/garage" className={linkClass}>
             My cars
           </NavLink>
+          <NavLink to="/favourites" className={linkClass}>
+            Favourites
+          </NavLink>
           <NavLink to="/trades" className={linkClass}>
             Trades
             <InboxBadge count={pendingTradeInbox} />
