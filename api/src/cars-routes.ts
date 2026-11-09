@@ -36,7 +36,9 @@ const searchQuerySchema = z.object({
   coinMax: optionalInt,
   mileageMax: optionalInt,
   bhpMin: optionalInt,
-  sort: z.enum(["price_asc", "price_desc", "year_desc", "mileage_asc", "bhp_desc"]).optional(),
+  sort: z
+    .enum(["price_asc", "price_desc", "year_asc", "year_desc", "mileage_asc", "bhp_desc"])
+    .optional(),
   limit: optionalInt,
   offset: optionalInt,
 });
@@ -170,15 +172,23 @@ export function createCarsRouter(): Router {
   router.get("/models", async (req: Request, res: Response) => {
     const make = typeof req.query.make === "string" ? req.query.make.trim() : "";
     const pool = getPool();
+    // Only models with cars currently for sale — keeps the Model dropdown useful.
     if (!make) {
       const [rows] = await pool.query<(RowDataPacket & { model: string })[]>(
-        `SELECT DISTINCT model FROM car_models ORDER BY model`,
+        `SELECT DISTINCT cm.model
+         FROM car_models cm
+         INNER JOIN listings l ON l.car_model_id = cm.id AND l.status = 'available'
+         ORDER BY cm.model`,
       );
       res.json({ models: rows.map((r) => r.model) });
       return;
     }
     const [rows] = await pool.query<(RowDataPacket & { model: string })[]>(
-      `SELECT DISTINCT model FROM car_models WHERE make = ? ORDER BY model`,
+      `SELECT DISTINCT cm.model
+       FROM car_models cm
+       INNER JOIN listings l ON l.car_model_id = cm.id AND l.status = 'available'
+       WHERE cm.make = ?
+       ORDER BY cm.model`,
       [make],
     );
     res.json({ models: rows.map((r) => r.model) });

@@ -32,4 +32,24 @@ describe("buildSearchClause", () => {
     expect(clause.values).toEqual(["Porsche", "used", 500]);
     expect(clause.orderSql).toContain("coin_price");
   });
+
+  it("applies year and Brad Coin ranges with year_asc sort", () => {
+    const clause = buildSearchClause({
+      bodyType: "SUV",
+      fuel: "Petrol",
+      yearMin: 2018,
+      yearMax: 2024,
+      coinMin: 100,
+      coinMax: 800,
+      sort: "year_asc",
+    });
+    expect(clause.whereSql).toContain("cm.body_type = ?");
+    expect(clause.whereSql).toContain("cm.fuel = ?");
+    expect(clause.whereSql).toContain("l.year >= ?");
+    expect(clause.whereSql).toContain("l.year <= ?");
+    expect(clause.whereSql).toContain("l.coin_price >= ?");
+    expect(clause.whereSql).toContain("l.coin_price <= ?");
+    expect(clause.values).toEqual(["SUV", "Petrol", 2018, 2024, 100, 800]);
+    expect(clause.orderSql).toBe("ORDER BY l.year ASC, l.id ASC");
+  });
 });

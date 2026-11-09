@@ -54,7 +54,13 @@ export type SearchParams = {
   coinMax?: number;
   mileageMax?: number;
   bhpMin?: number;
-  sort?: "price_asc" | "price_desc" | "year_desc" | "mileage_asc" | "bhp_desc";
+  sort?:
+    | "price_asc"
+    | "price_desc"
+    | "year_asc"
+    | "year_desc"
+    | "mileage_asc"
+    | "bhp_desc";
   limit?: number;
   offset?: number;
 };
@@ -160,6 +166,9 @@ export function buildSearchClause(params: SearchParams): {
       break;
     case "price_desc":
       orderSql = "ORDER BY l.coin_price DESC, l.id ASC";
+      break;
+    case "year_asc":
+      orderSql = "ORDER BY l.year ASC, l.id ASC";
       break;
     case "year_desc":
       orderSql = "ORDER BY l.year DESC, l.id ASC";

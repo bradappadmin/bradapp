@@ -57,6 +57,36 @@ export type SearchQuery = {
   sort?: string;
 };
 
+export const SORT_OPTIONS = [
+  { value: "price_asc", label: "Brad Coins: low to high" },
+  { value: "price_desc", label: "Brad Coins: high to low" },
+  { value: "year_desc", label: "Year: newest" },
+  { value: "year_asc", label: "Year: oldest" },
+  { value: "mileage_asc", label: "Mileage: lowest" },
+  { value: "bhp_desc", label: "BHP: highest" },
+] as const;
+
+export type ActiveFilterChip = {
+  key: keyof SearchQuery;
+  label: string;
+};
+
+const FILTER_KEYS: Array<keyof SearchQuery> = [
+  "q",
+  "make",
+  "model",
+  "bodyType",
+  "fuel",
+  "colour",
+  "condition",
+  "yearMin",
+  "yearMax",
+  "coinMin",
+  "coinMax",
+  "mileageMax",
+  "bhpMin",
+];
+
 export function formatCoins(n: number): string {
   return `${n.toLocaleString()} BC`;
 }
@@ -67,4 +97,71 @@ export function formatMileage(n: number): string {
 
 export function listingTitle(listing: Pick<ListingSummary, "make" | "model" | "trimName">): string {
   return `${listing.make} ${listing.model}${listing.trimName ? ` ${listing.trimName}` : ""}`;
+}
+
+export function hasActiveFilters(query: SearchQuery): boolean {
+  return FILTER_KEYS.some((key) => {
+    const value = query[key];
+    return value != null && String(value).trim() !== "";
+  });
+}
+
+/** Human-readable chips for the filters currently applied (excludes default sort). */
+export function activeFilterChips(query: SearchQuery): ActiveFilterChip[] {
+  const chips: ActiveFilterChip[] = [];
+  if (query.q?.trim()) chips.push({ key: "q", label: `“${query.q.trim()}”` });
+  if (query.make) chips.push({ key: "make", label: query.make });
+  if (query.model) chips.push({ key: "model", label: query.model });
+  if (query.bodyType) chips.push({ key: "bodyType", label: query.bodyType });
+  if (query.fuel) chips.push({ key: "fuel", label: query.fuel });
+  if (query.condition === "new" || query.condition === "used") {
+    chips.push({
+      key: "condition",
+      label: query.condition === "new" ? "New" : "Used",
+    });
+  }
+  if (query.yearMin || query.yearMax) {
+    const lo = query.yearMin || "…";
+    const hi = query.yearMax || "…";
+    chips.push({ key: "yearMin", label: `Year ${lo}–${hi}` });
+  }
+  if (query.coinMin || query.coinMax) {
+    const lo = query.coinMin ? `${Number(query.coinMin).toLocaleString()} BC` : "…";
+    const hi = query.coinMax ? `${Number(query.coinMax).toLocaleString()} BC` : "…";
+    chips.push({ key: "coinMin", label: `Price ${lo}–${hi}` });
+  }
+  if (query.colour) chips.push({ key: "colour", label: query.colour });
+  if (query.mileageMax) {
+    chips.push({
+      key: "mileageMax",
+      label: `≤ ${Number(query.mileageMax).toLocaleString()} mi`,
+    });
+  }
+  if (query.bhpMin) chips.push({ key: "bhpMin", label: `≥ ${query.bhpMin} bhp` });
+  return chips;
+}
+
+/** Clear one chip; year/coin ranges clear both ends together. */
+export function clearFilterChip(query: SearchQuery, key: keyof SearchQuery): SearchQuery {
+  const next: SearchQuery = { ...query };
+  if (key === "yearMin" || key === "yearMax") {
+    next.yearMin = "";
+    next.yearMax = "";
+    return next;
+  }
+  if (key === "coinMin" || key === "coinMax") {
+    next.coinMin = "";
+    next.coinMax = "";
+    return next;
+  }
+  if (key === "condition") {
+    next.condition = "";
+    return next;
+  }
+  if (key === "sort") {
+    next.sort = "price_asc";
+    return next;
+  }
+  next[key] = "";
+  return next;
 }

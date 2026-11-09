@@ -32,7 +32,7 @@ Optional: set `DEMO_MEMBER_PASSWORD` in `.env` before seeding to hash a shared w
 
 - Accounts: sign-up, sign-in, session cookie
 - Car search: real makes/models with realistic specs, invented garages/listings/owners/coin prices
-- Filters: make, model, new/used, body, fuel, colour, year, coins, mileage, BHP
+- Filters: make, model, body, fuel, new/used, year range, Brad Coin price range, sort (plus colour / mileage / BHP)
 - Brad Coins: balances + ledger; members buy/sell listings (no real money)
 - Top Trumps: head-to-head (higher BHP/top speed, lower 0–60); playing earns coins
 - Free card trades between members

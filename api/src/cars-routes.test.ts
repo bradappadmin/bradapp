@@ -51,10 +51,41 @@ describe.runIf(hasDb)("cars routes", () => {
     expect(res.body.listing.ownerLabel).toBeTruthy();
   });
 
-  it("filters models by make", async () => {
+  it("filters models by make to available stock only", async () => {
     const res = await request(app).get("/cars/models").query({ make: "BMW" });
     expect(res.status).toBe(200);
     expect(res.body.models.length).toBeGreaterThan(0);
     expect(res.body.models.every((m: string) => typeof m === "string")).toBe(true);
+  });
+
+  it("filters by year and Brad Coin ranges and sorts", async () => {
+    const filters = await request(app).get("/cars/filters");
+    const yearMin = filters.body.filters.yearMin as number;
+    const coinMax = filters.body.filters.coinPriceMax as number;
+    const res = await request(app).get("/cars/search").query({
+      yearMin,
+      yearMax: yearMin + 20,
+      coinMin: 1,
+      coinMax,
+      sort: "year_asc",
+      limit: 10,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBeGreaterThan(0);
+    const years = res.body.listings.map((l: { year: number }) => l.year);
+    for (let i = 1; i < years.length; i += 1) {
+      expect(years[i]).toBeGreaterThanOrEqual(years[i - 1]);
+    }
+  });
+
+  it("returns an empty result set for an impossible filter combo", async () => {
+    const res = await request(app).get("/cars/search").query({
+      make: "Porsche",
+      yearMin: 2099,
+      coinMax: 1,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(0);
+    expect(res.body.listings).toEqual([]);
   });
 });
