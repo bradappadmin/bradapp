@@ -1,7 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
-import { closePool, getPool } from "./db.js";
+import { closePool, getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { loadEnv } from "./env.js";
 import { seedAccounts } from "./seed.js";
 
@@ -28,6 +28,9 @@ describe.runIf(hasDb)("leaderboard routes", () => {
 
   afterAll(async () => {
     const pool = getPool();
+    await pool.query("DELETE FROM listings WHERE owner_user_id = (SELECT id FROM users WHERE email = ?)", [
+      email,
+    ]);
     await pool.query("DELETE FROM users WHERE email = ?", [email]);
     await closePool();
   });
@@ -52,12 +55,79 @@ describe.runIf(hasDb)("leaderboard routes", () => {
         coinBalance: expect.any(Number),
         topTrumpsWins: expect.any(Number),
       });
+      expect(entry.bio === null || typeof entry.bio === "string").toBe(true);
+      expect(entry.highlightCar === null || typeof entry.highlightCar === "object").toBe(true);
+      if (entry.highlightCar) {
+        expect(entry.highlightCar).toMatchObject({
+          id: expect.any(Number),
+          make: expect.any(String),
+          model: expect.any(String),
+          trimName: expect.any(String),
+          bodyType: expect.any(String),
+          colour: expect.any(String),
+          coinPrice: expect.any(Number),
+        });
+      }
       if (i > 0) {
         expect(entry.coinBalance).toBeLessThanOrEqual(res.body.entries[i - 1].coinBalance);
       }
     }
 
-    const self = res.body.entries.find((e: { displayName: string }) => e.displayName === "Leaderboard Tester");
+    const self = res.body.entries.find(
+      (e: { displayName: string }) => e.displayName === "Leaderboard Tester",
+    );
     expect(self).toBeTruthy();
+    expect(self.highlightCar).toBeNull();
+  });
+
+  it("picks the highest-priced owned car as the highlight (tie → lowest id)", async () => {
+    const pool = getPool();
+    const [userRows] = await pool.query<(RowDataPacket & { id: number })[]>(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [email],
+    );
+    const userId = Number(userRows[0]?.id);
+    expect(userId).toBeGreaterThan(0);
+
+    const [modelRows] = await pool.query<(RowDataPacket & { id: number })[]>(
+      "SELECT id FROM car_models ORDER BY id ASC LIMIT 1",
+    );
+    const modelId = Number(modelRows[0]?.id);
+    expect(modelId).toBeGreaterThan(0);
+
+    const [garageRows] = await pool.query<(RowDataPacket & { id: number })[]>(
+      "SELECT id FROM garages ORDER BY id ASC LIMIT 1",
+    );
+    const garageId = Number(garageRows[0]?.id);
+    expect(garageId).toBeGreaterThan(0);
+
+    const insertListing = async (coinPrice: number, colour: string, year: number) => {
+      const [result] = await pool.query<ResultSetHeader>(
+        `INSERT INTO listings
+          (car_model_id, garage_id, condition_type, year, colour, mileage, coin_price, owner_label, owner_user_id, status)
+         VALUES (?, ?, 'used', ?, ?, 12000, ?, 'Leaderboard Tester', ?, 'owned')`,
+        [modelId, garageId, year, colour, coinPrice, userId],
+      );
+      return Number(result.insertId);
+    };
+
+    const cheapId = await insertListing(100, "Racing Red", 2020);
+    const dearId = await insertListing(500, "Laser Blue", 2022);
+
+    try {
+      const res = await agent.get("/leaderboard");
+      expect(res.status).toBe(200);
+      const self = res.body.entries.find(
+        (e: { displayName: string }) => e.displayName === "Leaderboard Tester",
+      );
+      expect(self.highlightCar).toMatchObject({
+        id: dearId,
+        colour: "Laser Blue",
+        coinPrice: 500,
+      });
+      expect(self.highlightCar.id).not.toBe(cheapId);
+    } finally {
+      await pool.query("DELETE FROM listings WHERE id IN (?, ?)", [cheapId, dearId]);
+    }
   });
 });

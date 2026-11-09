@@ -116,14 +116,27 @@ export function fetchActivity(limit = 30): Promise<{ items: ActivityItem[] }> {
   return request(`/activity?limit=${limit}`);
 }
 
+/** Highest-value owned/available listing; ties → lowest listing id. */
+export type LeaderboardHighlightCar = {
+  id: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+  coinPrice: number;
+};
+
 export type LeaderboardEntry = {
   rank: number;
   id: number;
   displayName: string;
+  bio: string | null;
   role: "super_admin" | "admin" | "member";
   roleLabel: string;
   coinBalance: number;
   topTrumpsWins: number;
+  highlightCar: LeaderboardHighlightCar | null;
 };
 
 export function fetchLeaderboard(): Promise<{ entries: LeaderboardEntry[] }> {
