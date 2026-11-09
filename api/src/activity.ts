@@ -2,14 +2,29 @@ import { getPool, type RowDataPacket } from "./db.js";
 
 export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
 
+/** Studio visual for the primary car on a feed row (SVG fallback on the client). */
+export type ActivityCarVisual = {
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+};
+
 export type ActivityItem = {
   id: string;
   kind: ActivityKind;
   createdAt: string;
   summary: string;
+  /** Member display name for the primary actor. */
   actorName: string;
   href: string | null;
+  /** Primary car involved in the event, when known. */
+  car: ActivityCarVisual | null;
 };
+
+/** Reviews have no listing paint — Midnight Black keeps studio photos on-brand. */
+const REVIEW_STUDIO_COLOUR = "Midnight Black";
 
 type LedgerRow = RowDataPacket & {
   id: number;
@@ -19,6 +34,9 @@ type LedgerRow = RowDataPacket & {
   display_name: string;
   make: string | null;
   model: string | null;
+  trim_name: string | null;
+  body_type: string | null;
+  colour: string | null;
   listing_id: number | null;
 };
 
@@ -29,6 +47,9 @@ type TradeRow = RowDataPacket & {
   to_name: string;
   offer_make: string;
   offer_model: string;
+  offer_trim_name: string;
+  offer_body_type: string;
+  offer_colour: string;
   request_make: string;
   request_model: string;
 };
@@ -45,6 +66,9 @@ type MatchRow = RowDataPacket & {
   opponent_model: string;
   challenger_make: string | null;
   challenger_model: string | null;
+  challenger_trim_name: string | null;
+  challenger_body_type: string | null;
+  challenger_colour: string | null;
 };
 
 type ReviewRow = RowDataPacket & {
@@ -55,6 +79,8 @@ type ReviewRow = RowDataPacket & {
   review_type: "review" | "drag_race";
   make: string;
   model: string;
+  trim_name: string;
+  body_type: string;
   b_make: string | null;
   b_model: string | null;
 };
@@ -91,13 +117,30 @@ function winnerPhrase(
   }
 }
 
+function carVisual(
+  make: string | null | undefined,
+  model: string | null | undefined,
+  trimName: string | null | undefined,
+  bodyType: string | null | undefined,
+  colour: string | null | undefined,
+): ActivityCarVisual | null {
+  if (!make || !model) return null;
+  return {
+    make,
+    model,
+    trimName: trimName ?? "",
+    bodyType: bodyType ?? "",
+    colour: colour && colour.trim().length > 0 ? colour : "Midnight Black",
+  };
+}
+
 export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   const pool = getPool();
   const take = Math.min(Math.max(limit, 1), 50);
 
   const [ledgerRows] = await pool.query<LedgerRow[]>(
     `SELECT cl.id, cl.reason, cl.delta, cl.created_at, cl.listing_id,
-            u.display_name, cm.make, cm.model
+            u.display_name, cm.make, cm.model, cm.trim_name, cm.body_type, l.colour
      FROM coin_ledger cl
      INNER JOIN users u ON u.id = cl.user_id
      LEFT JOIN listings l ON l.id = cl.listing_id
@@ -112,6 +155,8 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
     `SELECT t.id, t.resolved_at,
             fu.display_name AS from_name, tu.display_name AS to_name,
             ocm.make AS offer_make, ocm.model AS offer_model,
+            ocm.trim_name AS offer_trim_name, ocm.body_type AS offer_body_type,
+            ol.colour AS offer_colour,
             rcm.make AS request_make, rcm.model AS request_model
      FROM card_trade_offers t
      INNER JOIN users fu ON fu.id = t.from_user_id
@@ -131,7 +176,9 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
             m.opponent_make, m.opponent_model,
             cu.display_name AS challenger_name,
             ou.display_name AS opponent_name,
-            ccm.make AS challenger_make, ccm.model AS challenger_model
+            ccm.make AS challenger_make, ccm.model AS challenger_model,
+            ccm.trim_name AS challenger_trim_name, ccm.body_type AS challenger_body_type,
+            cl.colour AS challenger_colour
      FROM top_trumps_matches m
      INNER JOIN users cu ON cu.id = m.challenger_user_id
      LEFT JOIN users ou ON ou.id = m.opponent_user_id
@@ -143,7 +190,8 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   );
 
   const [reviewRows] = await pool.query<ReviewRow[]>(
-    `SELECT r.id, r.created_at, r.title, r.review_type, u.display_name, cm.make, cm.model,
+    `SELECT r.id, r.created_at, r.title, r.review_type, u.display_name,
+            cm.make, cm.model, cm.trim_name, cm.body_type,
             cmb.make AS b_make, cmb.model AS b_model
      FROM video_reviews r
      INNER JOIN users u ON u.id = r.publisher_user_id
@@ -158,13 +206,13 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   const items: ActivityItem[] = [];
 
   for (const row of ledgerRows) {
-    const car =
+    const carLabel =
       row.make && row.model ? `${row.make} ${row.model}` : `listing #${row.listing_id ?? "?"}`;
     const kind: ActivityKind = row.reason;
     const summary =
       kind === "purchase"
-        ? `${row.display_name} bought ${car} for ${Math.abs(Number(row.delta))} BC`
-        : `${row.display_name} sold ${car} for ${Math.abs(Number(row.delta))} BC`;
+        ? `${row.display_name} bought ${carLabel} for ${Math.abs(Number(row.delta))} BC`
+        : `${row.display_name} sold ${carLabel} for ${Math.abs(Number(row.delta))} BC`;
     items.push({
       id: `${kind}-${row.id}`,
       kind,
@@ -172,6 +220,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       summary,
       actorName: row.display_name,
       href: row.listing_id != null ? `/cars/${row.listing_id}` : null,
+      car: carVisual(row.make, row.model, row.trim_name, row.body_type, row.colour),
     });
   }
 
@@ -183,6 +232,13 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       summary: `${row.from_name} and ${row.to_name} swapped ${row.offer_make} ${row.offer_model} for ${row.request_make} ${row.request_model}`,
       actorName: row.from_name,
       href: "/trades",
+      car: carVisual(
+        row.offer_make,
+        row.offer_model,
+        row.offer_trim_name,
+        row.offer_body_type,
+        row.offer_colour,
+      ),
     });
   }
 
@@ -202,6 +258,13 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       summary: `${winnerPhrase(row.winner, row.challenger_name, opponentLabel)}${carBit} on ${categoryLabel(row.category)}`,
       actorName: row.challenger_name,
       href: "/play",
+      car: carVisual(
+        row.challenger_make,
+        row.challenger_model,
+        row.challenger_trim_name,
+        row.challenger_body_type,
+        row.challenger_colour,
+      ),
     });
   }
 
@@ -217,6 +280,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       summary: `${row.display_name} published “${row.title}” (${cars})`,
       actorName: row.display_name,
       href: `/reviews/${row.id}`,
+      car: carVisual(row.make, row.model, row.trim_name, row.body_type, REVIEW_STUDIO_COLOUR),
     });
   }
 

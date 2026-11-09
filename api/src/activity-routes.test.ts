@@ -55,6 +55,24 @@ describe.runIf(hasDb)("activity routes", () => {
         summary: expect.any(String),
         actorName: expect.any(String),
       });
+      expect(item.car === null || typeof item.car === "object").toBe(true);
+      if (item.car) {
+        expect(item.car).toMatchObject({
+          make: expect.any(String),
+          model: expect.any(String),
+          trimName: expect.any(String),
+          bodyType: expect.any(String),
+          colour: expect.any(String),
+        });
+      }
+    }
+    const purchase = res.body.items.find((i: { kind: string }) => i.kind === "purchase");
+    if (purchase) {
+      expect(purchase.car).toMatchObject({
+        make: expect.any(String),
+        model: expect.any(String),
+        colour: expect.any(String),
+      });
     }
     if (res.body.items.length >= 2) {
       expect(res.body.items[0].createdAt >= res.body.items[1].createdAt).toBe(true);

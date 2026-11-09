@@ -103,13 +103,24 @@ export function updateProfile(input: {
 
 export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
 
+/** Primary car on a family activity row (studio photo / SVG fallback). */
+export type ActivityCarVisual = {
+  make: string;
+  model: string;
+  trimName: string;
+  bodyType: string;
+  colour: string;
+};
+
 export type ActivityItem = {
   id: string;
   kind: ActivityKind;
   createdAt: string;
   summary: string;
+  /** Member display name for the primary actor. */
   actorName: string;
   href: string | null;
+  car: ActivityCarVisual | null;
 };
 
 export function fetchActivity(limit = 30): Promise<{ items: ActivityItem[] }> {
