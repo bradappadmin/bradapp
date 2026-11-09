@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import { RECENTLY_VIEWED_KEY } from "../recently-viewed";
 import { HomePage } from "./HomePage";
 
 vi.mock("../api", () => ({
@@ -18,9 +19,48 @@ vi.mock("../api", () => ({
 import * as api from "../api";
 
 describe("HomePage", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
     window.localStorage.clear();
+  });
+
+  it("shows recently viewed cars from localStorage on home", async () => {
+    window.localStorage.setItem(
+      RECENTLY_VIEWED_KEY,
+      JSON.stringify([
+        {
+          id: 42,
+          make: "Porsche",
+          model: "911",
+          trimName: "GT3",
+          bodyType: "Coupe",
+          colour: "Racing Red",
+          year: 2022,
+          bhp: 502,
+          topSpeedMph: 197,
+          zeroToSixtySecs: 3.2,
+          coinPrice: 420,
+          status: "available",
+          viewedAt: Date.now(),
+        },
+      ]),
+    );
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
+    expect(screen.getByText(/Porsche 911 GT3/i)).toBeInTheDocument();
   });
 
   it("shows BradApp brand and auth links when signed out", async () => {
@@ -32,7 +72,7 @@ describe("HomePage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("BradApp")).toBeInTheDocument();
+    expect((await screen.findAllByText("BradApp")).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Cars" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "How to" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Play" }).length).toBeGreaterThan(0);

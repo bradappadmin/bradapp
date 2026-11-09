@@ -6,6 +6,7 @@ import type { ListingDetail } from "../cars";
 import { formatCoins, formatMileage, listingTitle } from "../cars";
 import { CarHeroVisual } from "../components/CarCard";
 import { SiteHeader } from "../components/SiteHeader";
+import { rememberRecentlyViewed } from "../recently-viewed";
 
 export function ListingPage() {
   const { id } = useParams();
@@ -32,6 +33,20 @@ export function ListingPage() {
         if (!cancelled) {
           setListing(res.listing);
           setError(null);
+          rememberRecentlyViewed({
+            id: res.listing.id,
+            make: res.listing.make,
+            model: res.listing.model,
+            trimName: res.listing.trimName,
+            bodyType: res.listing.bodyType,
+            colour: res.listing.colour,
+            year: res.listing.year,
+            bhp: res.listing.bhp,
+            topSpeedMph: res.listing.topSpeedMph,
+            zeroToSixtySecs: res.listing.zeroToSixtySecs,
+            coinPrice: res.listing.coinPrice,
+            status: res.listing.status,
+          });
         }
       } catch (err) {
         if (!cancelled) {

@@ -5,6 +5,7 @@ import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { ActivityFeed } from "../components/ActivityFeed";
 import { FirstVisitTips } from "../components/FirstVisitTips";
+import { RecentlyViewedCars } from "../components/RecentlyViewedCars";
 import { SiteHeader } from "../components/SiteHeader";
 import { roleLabel } from "../types";
 
@@ -96,6 +97,8 @@ export function HomePage() {
               </Link>
             </div>
           </div>
+
+          <RecentlyViewedCars />
         </main>
       </div>
     );
@@ -224,6 +227,8 @@ export function HomePage() {
         </div>
 
         <FirstVisitTips user={user} />
+
+        <RecentlyViewedCars />
 
         <ActivityFeed />
       </main>
