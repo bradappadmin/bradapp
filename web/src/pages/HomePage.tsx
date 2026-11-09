@@ -71,6 +71,12 @@ export function HomePage() {
                 Cars
               </Link>
               <Link
+                to="/how-to"
+                className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+              >
+                How to
+              </Link>
+              <Link
                 to="/play"
                 className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
               >
@@ -84,7 +90,7 @@ export function HomePage() {
               </Link>
               <Link
                 to="/signin"
-                className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
               >
                 Sign in
               </Link>
@@ -138,7 +144,11 @@ export function HomePage() {
             </div>
           ) : null}
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-steel">
-            Browse the catalogue, manage your cars, play Top Trumps, and open bay reviews.
+            Browse the catalogue, manage your cars, play Top Trumps, and open bay reviews. New here?{" "}
+            <Link to="/how-to" className="text-lime no-underline hover:underline">
+              Read the how-to
+            </Link>
+            .
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
@@ -148,8 +158,14 @@ export function HomePage() {
               Cars
             </Link>
             <Link
-              to="/garage"
+              to="/how-to"
               className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+            >
+              How to
+            </Link>
+            <Link
+              to="/garage"
+              className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
             >
               My cars
             </Link>

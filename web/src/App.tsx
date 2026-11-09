@@ -4,6 +4,7 @@ import { AccountPage } from "./pages/AccountPage";
 import { CarsPage } from "./pages/CarsPage";
 import { GaragePage } from "./pages/GaragePage";
 import { HomePage } from "./pages/HomePage";
+import { HowToPage } from "./pages/HowToPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { ListingPage } from "./pages/ListingPage";
 import { MemberProfilePage } from "./pages/MemberProfilePage";
@@ -25,6 +26,7 @@ export function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/how-to" element={<HowToPage />} />
         <Route path="/cars" element={<CarsPage />} />
         <Route path="/cars/:id" element={<ListingPage />} />
         <Route path="/garage" element={<GaragePage />} />
