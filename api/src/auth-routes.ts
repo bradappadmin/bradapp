@@ -9,6 +9,11 @@ import {
   memberStartingCoins,
 } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
+import {
+  consumeInviteCode,
+  inviteFailureMessage,
+  normalizeInviteCode,
+} from "./invite-codes.js";
 import { hashPassword, verifyPassword } from "./password.js";
 import { createSession, destroySession, readSessionUser, type PublicUser } from "./session.js";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
@@ -19,6 +24,13 @@ const signUpSchema = z.object({
   email: emailSchema,
   password: z.string().min(8).max(128),
   displayName: z.string().trim().min(1).max(120),
+  /** Optional family invite — open signup still works without one. */
+  inviteCode: z
+    .string()
+    .trim()
+    .max(64)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? normalizeInviteCode(v) : undefined)),
 });
 
 const signInSchema = z.object({
@@ -92,7 +104,7 @@ export function createAuthRouter(): Router {
       return;
     }
 
-    const { email, password, displayName } = parsed.data;
+    const { email, password, displayName, inviteCode } = parsed.data;
     const pool = getPool();
     const [existing] = await pool.query<RowDataPacket[]>(
       "SELECT id FROM users WHERE email = ? LIMIT 1",
@@ -109,6 +121,17 @@ export function createAuthRouter(): Router {
     let coinBalance: number;
     try {
       await connection.beginTransaction();
+      if (inviteCode) {
+        const consumed = await consumeInviteCode(connection, inviteCode);
+        if (!consumed.ok) {
+          await connection.rollback();
+          res.status(400).json({
+            error: `invite_${consumed.reason}`,
+            message: inviteFailureMessage(consumed.reason),
+          });
+          return;
+        }
+      }
       const [result] = await connection.query<ResultSetHeader>(
         `INSERT INTO users (email, password_hash, display_name, role, coin_balance)
          VALUES (?, ?, ?, 'member', 0)`,

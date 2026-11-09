@@ -5,6 +5,7 @@ import {
 } from "./coins.js";
 import { closePool, getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { loadEnv } from "./env.js";
+import { seedDemoFamilyInvite } from "./invite-codes.js";
 import { hashPassword } from "./password.js";
 import { runMigrations } from "./migrate.js";
 import { seedCars } from "./seed-cars.js";
@@ -80,6 +81,15 @@ export async function seedAccounts(): Promise<void> {
   await seedBradStarterGarage();
   await seedDemoFamilyGarages();
   await ensureAffordableStock(12);
+
+  const [bradRows] = await pool.query<(RowDataPacket & { id: number })[]>(
+    "SELECT id FROM users WHERE email = ? LIMIT 1",
+    [BRAD_ADMIN_EMAIL],
+  );
+  const bradId = bradRows[0]?.id;
+  if (bradId) {
+    await seedDemoFamilyInvite(Number(bradId));
+  }
 }
 
 /**

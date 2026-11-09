@@ -3,6 +3,14 @@ import { z } from "zod";
 import { requireAdmin, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta, listAdminCoinAdjustments, listLedger } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
+import {
+  createInviteCode,
+  generateInviteCode,
+  isValidInviteCodeFormat,
+  listInviteCodes,
+  normalizeInviteCode,
+  revokeInviteCode,
+} from "./invite-codes.js";
 import { isAdminRole, isRole, type Role } from "./roles.js";
 
 const accountStatusSchema = z.enum(["active", "closed", "frozen"]);
@@ -481,6 +489,83 @@ export function createAdminRouter(): Router {
       [id],
     );
     res.json({ listing: (rows as unknown[])[0] });
+  });
+
+  const createInviteSchema = z.object({
+    code: z
+      .string()
+      .trim()
+      .max(64)
+      .optional()
+      .transform((v) => (v && v.length > 0 ? normalizeInviteCode(v) : undefined)),
+    maxUses: z.number().int().positive().max(10_000).nullable().optional(),
+    expiresAt: z.string().trim().max(64).nullable().optional(),
+  });
+
+  router.get("/invites", async (_req, res: Response) => {
+    const invites = await listInviteCodes();
+    res.json({ invites });
+  });
+
+  router.post("/invites", async (req, res: Response) => {
+    const parsed = createInviteSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "validation_error",
+        message: parsed.error.issues[0]?.message ?? "Invalid invite",
+      });
+      return;
+    }
+    const actor = (req as AuthedRequest).user;
+    const code = parsed.data.code ?? generateInviteCode();
+    if (!isValidInviteCodeFormat(code)) {
+      res.status(400).json({
+        error: "validation_error",
+        message: "Invite codes use letters, numbers, dashes, or underscores (3–64 chars).",
+      });
+      return;
+    }
+    let expiresAt: Date | null = null;
+    const rawExpiry = parsed.data.expiresAt;
+    if (rawExpiry) {
+      expiresAt = new Date(rawExpiry);
+      if (Number.isNaN(expiresAt.getTime())) {
+        res.status(400).json({ error: "validation_error", message: "Invalid expiry date." });
+        return;
+      }
+    }
+    try {
+      const invite = await createInviteCode({
+        createdByUserId: actor.id,
+        code,
+        maxUses: parsed.data.maxUses ?? null,
+        expiresAt,
+      });
+      res.status(201).json({ invite });
+    } catch (error) {
+      if (error instanceof Error && error.message === "code_taken") {
+        res.status(409).json({
+          error: "code_taken",
+          message: "That invite code already exists.",
+        });
+        return;
+      }
+      throw error;
+    }
+  });
+
+  router.post("/invites/:id/revoke", async (req, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid invite id" });
+      return;
+    }
+    const invite = await revokeInviteCode(id);
+    if (!invite) {
+      res.status(404).json({ error: "not_found", message: "Invite not found." });
+      return;
+    }
+    res.json({ invite });
   });
 
   return router;

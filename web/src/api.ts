@@ -40,6 +40,7 @@ export function signUp(input: {
   email: string;
   password: string;
   displayName: string;
+  inviteCode?: string;
 }): Promise<{ user: User }> {
   return request("/auth/signup", {
     method: "POST",
@@ -739,4 +740,32 @@ export function patchAdminListing(
   }>,
 ): Promise<{ listing: AdminListing }> {
   return request(`/admin/listings/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+export type FamilyInvite = {
+  id: number;
+  code: string;
+  createdByUserId: number;
+  createdByDisplayName: string | null;
+  createdAt: string;
+  maxUses: number | null;
+  usesCount: number;
+  expiresAt: string | null;
+  revokedAt: string | null;
+};
+
+export function fetchAdminInvites(): Promise<{ invites: FamilyInvite[] }> {
+  return request("/admin/invites");
+}
+
+export function createAdminInvite(body: {
+  code?: string;
+  maxUses?: number | null;
+  expiresAt?: string | null;
+}): Promise<{ invite: FamilyInvite }> {
+  return request("/admin/invites", { method: "POST", body: JSON.stringify(body) });
+}
+
+export function revokeAdminInvite(id: number): Promise<{ invite: FamilyInvite }> {
+  return request(`/admin/invites/${id}/revoke`, { method: "POST" });
 }

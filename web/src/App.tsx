@@ -16,6 +16,7 @@ import { MembersPage } from "./pages/MembersPage";
 import { AdminCoinHistoryPage } from "./pages/admin/AdminCoinHistoryPage";
 import { AdminHomePage } from "./pages/admin/AdminHomePage";
 import { AdminInventoryPage } from "./pages/admin/AdminInventoryPage";
+import { AdminInvitesPage } from "./pages/admin/AdminInvitesPage";
 import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { RecordReviewPage } from "./pages/RecordReviewPage";
 import { ReviewDetailPage } from "./pages/ReviewDetailPage";
@@ -49,6 +50,7 @@ export function App() {
         <Route path="/reviews/:id" element={<ReviewDetailPage />} />
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/invites" element={<AdminInvitesPage />} />
         <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
         <Route path="/admin/inventory" element={<AdminInventoryPage />} />
         <Route path="/account" element={<AccountPage />} />

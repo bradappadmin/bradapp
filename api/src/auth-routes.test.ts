@@ -4,7 +4,7 @@ import { createApp } from "./app.js";
 import { DAILY_LOGIN_BONUS, memberStartingCoins } from "./coins.js";
 import { closePool, getPool } from "./db.js";
 import { loadEnv } from "./env.js";
-import { seedAccounts } from "./seed.js";
+import { ensureUser, seedAccounts } from "./seed.js";
 
 loadEnv();
 
@@ -188,5 +188,70 @@ describe.runIf(hasDb)("auth routes", () => {
     expect(newSignin.body.user.email).toBe(email);
 
     await getPool().query("DELETE FROM users WHERE email = ?", [email]);
+  });
+
+  it("accepts an optional family invite on signup and rejects bad codes", async () => {
+    const adminEmail = `invite-admin-${Date.now()}@example.com`;
+    const admin = request.agent(app);
+    await ensureUser(adminEmail, "AdminPass-123!", "Invite Admin", "admin");
+    expect(
+      (await admin.post("/auth/signin").send({ email: adminEmail, password: "AdminPass-123!" }))
+        .status,
+    ).toBe(200);
+
+    const code = `SIGNUP-OK-${Date.now()}`;
+    const created = await admin.post("/admin/invites").send({ code, maxUses: 1 });
+    expect(created.status).toBe(201);
+
+    const withInvite = await request
+      .agent(app)
+      .post("/auth/signup")
+      .send({
+        email: `invite-ok-${Date.now()}@example.com`,
+        password: "MemberPass-123!",
+        displayName: "Invitee",
+        inviteCode: code,
+      });
+    expect(withInvite.status).toBe(201);
+
+    const exhausted = await request
+      .agent(app)
+      .post("/auth/signup")
+      .send({
+        email: `invite-used-${Date.now()}@example.com`,
+        password: "MemberPass-123!",
+        displayName: "Too Late",
+        inviteCode: code,
+      });
+    expect(exhausted.status).toBe(400);
+    expect(exhausted.body.error).toBe("invite_exhausted");
+
+    const bad = await request
+      .agent(app)
+      .post("/auth/signup")
+      .send({
+        email: `invite-bad-${Date.now()}@example.com`,
+        password: "MemberPass-123!",
+        displayName: "No Code",
+        inviteCode: "NOT-A-REAL-CODE",
+      });
+    expect(bad.status).toBe(400);
+    expect(bad.body.error).toBe("invite_not_found");
+
+    // Open signup still works with no invite code.
+    const open = await request
+      .agent(app)
+      .post("/auth/signup")
+      .send({
+        email: `invite-open-${Date.now()}@example.com`,
+        password: "MemberPass-123!",
+        displayName: "Open Join",
+      });
+    expect(open.status).toBe(201);
+
+    await getPool().query("DELETE FROM family_invite_codes WHERE code = ?", [code]);
+    await getPool().query("DELETE FROM users WHERE email LIKE 'invite-%@example.com' OR email = ?", [
+      adminEmail,
+    ]);
   });
 });

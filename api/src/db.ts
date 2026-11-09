@@ -1,4 +1,10 @@
-import mysql, { type Pool, type PoolOptions, type ResultSetHeader, type RowDataPacket } from "mysql2/promise";
+import mysql, {
+  type Pool,
+  type PoolConnection,
+  type PoolOptions,
+  type ResultSetHeader,
+  type RowDataPacket,
+} from "mysql2/promise";
 
 let pool: Pool | null = null;
 
@@ -41,4 +47,4 @@ export async function closePool(): Promise<void> {
   }
 }
 
-export type { ResultSetHeader, RowDataPacket };
+export type { PoolConnection, ResultSetHeader, RowDataPacket };

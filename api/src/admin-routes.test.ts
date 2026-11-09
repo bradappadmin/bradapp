@@ -181,4 +181,35 @@ describe.runIf(hasDb)("admin routes", () => {
     await parent.patch(`/admin/users/${bradId}`).send({ accountStatus: "active" });
     await getPool().query("DELETE FROM users WHERE email IN (?, ?)", [parentEmail, bradEmail]);
   });
+
+  it("lets admins create, list, and revoke family invite codes", async () => {
+    expect(
+      (
+        await member.post("/auth/signin").send({
+          email: memberEmail,
+          password: "MemberPass-123!",
+        })
+      ).status,
+    ).toBe(200);
+    const blocked = await member.get("/admin/invites");
+    expect(blocked.status).toBe(403);
+
+    const code = `TEST-INVITE-${Date.now()}`;
+    const created = await admin.post("/admin/invites").send({ code, maxUses: 2 });
+    expect(created.status).toBe(201);
+    expect(created.body.invite.code).toBe(code);
+    expect(created.body.invite.maxUses).toBe(2);
+    expect(created.body.invite.usesCount).toBe(0);
+    expect(created.body.invite.revokedAt).toBeNull();
+
+    const list = await admin.get("/admin/invites");
+    expect(list.status).toBe(200);
+    expect(list.body.invites.some((i: { code: string }) => i.code === code)).toBe(true);
+
+    const revoke = await admin.post(`/admin/invites/${created.body.invite.id}/revoke`);
+    expect(revoke.status).toBe(200);
+    expect(revoke.body.invite.revokedAt).toBeTruthy();
+
+    await getPool().query("DELETE FROM family_invite_codes WHERE code = ?", [code]);
+  });
 });

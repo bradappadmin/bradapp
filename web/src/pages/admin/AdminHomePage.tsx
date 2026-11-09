@@ -35,6 +35,14 @@ function AdminHomeInner() {
             </Link>
           </li>
           <li>
+            <Link to="/admin/invites" className="block py-5 text-mist no-underline hover:text-white">
+              <span className="font-display text-lg font-semibold">Family invites</span>
+              <span className="mt-1 block text-sm text-steel">
+                Create, copy, and revoke optional signup invite codes.
+              </span>
+            </Link>
+          </li>
+          <li>
             <Link
               to="/admin/coin-history"
               className="block py-5 text-mist no-underline hover:text-white"
