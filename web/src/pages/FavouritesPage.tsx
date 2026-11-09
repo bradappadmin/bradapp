@@ -76,7 +76,7 @@ export function FavouritesPage() {
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <p className="text-xs uppercase tracking-[0.2em] text-steel">Saved listings</p>
         <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
           Favourites
@@ -100,18 +100,18 @@ export function FavouritesPage() {
         ) : null}
 
         {cars.length > 0 ? (
-          <ul className="mt-8 grid gap-3 border-t border-white/10 pt-6">
+          <ul className="mt-8 grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2 xl:grid-cols-3">
             {cars.map((car) => {
               const selected = comparePicks.some((p) => p.id === car.id);
               return (
-                <li key={car.id}>
+                <li key={car.id} className="bay-rise">
                   <CarCard
                     car={car}
                     to={`/cars/${car.id}`}
                     badge={badgeForStatus(car.status, "price")}
-                    dense
+                    layout="media"
                     footer={
-                      <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                      <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
                         <button
                           type="button"
                           onClick={() => onToggleCompare(car)}
