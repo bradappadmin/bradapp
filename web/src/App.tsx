@@ -8,6 +8,7 @@ import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { ListingPage } from "./pages/ListingPage";
 import { MemberProfilePage } from "./pages/MemberProfilePage";
 import { MembersPage } from "./pages/MembersPage";
+import { AdminCoinHistoryPage } from "./pages/admin/AdminCoinHistoryPage";
 import { AdminHomePage } from "./pages/admin/AdminHomePage";
 import { AdminInventoryPage } from "./pages/admin/AdminInventoryPage";
 import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
@@ -37,6 +38,7 @@ export function App() {
         <Route path="/reviews/:id" element={<ReviewDetailPage />} />
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
         <Route path="/admin/inventory" element={<AdminInventoryPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/signin" element={<SignInPage />} />

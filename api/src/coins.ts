@@ -249,4 +249,70 @@ export async function listLedger(userId: number, limit = 20): Promise<
   }));
 }
 
+export type AdminCoinAdjustment = {
+  id: number;
+  userId: number;
+  userDisplayName: string;
+  userEmail: string;
+  delta: number;
+  balanceAfter: number;
+  note: string;
+  createdAt: string;
+  createdByUserId: number | null;
+  createdByDisplayName: string | null;
+};
+
+/** Recent admin balance corrections across the family — who changed whom. */
+export async function listAdminCoinAdjustments(
+  limit = 50,
+): Promise<AdminCoinAdjustment[]> {
+  const pool = getPool();
+  const safeLimit = Math.min(Math.max(limit, 1), 200);
+  const [rows] = await pool.query<
+    (RowDataPacket & {
+      id: number;
+      user_id: number;
+      user_display_name: string;
+      user_email: string;
+      delta: number;
+      balance_after: number;
+      note: string;
+      created_at: Date;
+      created_by_user_id: number | null;
+      created_by_display_name: string | null;
+    })[]
+  >(
+    `SELECT cl.id,
+            cl.user_id,
+            u.display_name AS user_display_name,
+            u.email AS user_email,
+            cl.delta,
+            cl.balance_after,
+            cl.note,
+            cl.created_at,
+            cl.created_by_user_id,
+            actor.display_name AS created_by_display_name
+     FROM coin_ledger cl
+     INNER JOIN users u ON u.id = cl.user_id
+     LEFT JOIN users actor ON actor.id = cl.created_by_user_id
+     WHERE cl.reason = 'admin_adjust'
+     ORDER BY cl.id DESC
+     LIMIT ?`,
+    [safeLimit],
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    userId: Number(r.user_id),
+    userDisplayName: r.user_display_name,
+    userEmail: r.user_email,
+    delta: Number(r.delta),
+    balanceAfter: Number(r.balance_after),
+    note: r.note,
+    createdAt: new Date(r.created_at).toISOString(),
+    createdByUserId:
+      r.created_by_user_id == null ? null : Number(r.created_by_user_id),
+    createdByDisplayName: r.created_by_display_name,
+  }));
+}
+
 export type { ResultSetHeader };

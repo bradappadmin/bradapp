@@ -1,7 +1,7 @@
 import { Router, type Response } from "express";
 import { z } from "zod";
 import { requireAdmin, type AuthedRequest } from "./auth-middleware.js";
-import { applyCoinDelta, listLedger } from "./coins.js";
+import { applyCoinDelta, listAdminCoinAdjustments, listLedger } from "./coins.js";
 import { getPool, type ResultSetHeader, type RowDataPacket } from "./db.js";
 import { isAdminRole, isRole, type Role } from "./roles.js";
 
@@ -193,6 +193,13 @@ export function createAdminRouter(): Router {
         accountStatus: u.account_status,
       },
     });
+  });
+
+  router.get("/coin-adjustments", async (req, res: Response) => {
+    const rawLimit = typeof req.query.limit === "string" ? Number(req.query.limit) : 50;
+    const limit = Number.isFinite(rawLimit) ? rawLimit : 50;
+    const adjustments = await listAdminCoinAdjustments(limit);
+    res.json({ adjustments });
   });
 
   router.post("/users/:id/coins", async (req, res: Response) => {

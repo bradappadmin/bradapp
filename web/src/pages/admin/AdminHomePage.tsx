@@ -35,6 +35,17 @@ function AdminHomeInner() {
             </Link>
           </li>
           <li>
+            <Link
+              to="/admin/coin-history"
+              className="block py-5 text-mist no-underline hover:text-white"
+            >
+              <span className="font-display text-lg font-semibold">Coin adjustments</span>
+              <span className="mt-1 block text-sm text-steel">
+                Who changed which balance, by how much, when, and the note.
+              </span>
+            </Link>
+          </li>
+          <li>
             <Link to="/admin/inventory" className="block py-5 text-mist no-underline hover:text-white">
               <span className="font-display text-lg font-semibold">Cars & garages</span>
               <span className="mt-1 block text-sm text-steel">

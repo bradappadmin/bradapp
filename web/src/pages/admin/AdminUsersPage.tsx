@@ -91,7 +91,11 @@ function AdminUsersInner() {
         <h1 className="bay-rise mt-4 font-display text-3xl font-semibold text-white">Accounts</h1>
         <p className="mt-2 text-sm text-steel">
           Correct friend and family accounts. Coin changes write an <code>admin_adjust</code> ledger
-          row.
+          row. See the full trail on{" "}
+          <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">
+            Coin adjustments
+          </Link>
+          .
         </p>
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {message ? <p className="mt-4 text-sm text-lime">{message}</p> : null}

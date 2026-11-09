@@ -491,6 +491,25 @@ export function adjustAdminCoins(
   return request(`/admin/users/${id}/coins`, { method: "POST", body: JSON.stringify(body) });
 }
 
+export type AdminCoinAdjustment = {
+  id: number;
+  userId: number;
+  userDisplayName: string;
+  userEmail: string;
+  delta: number;
+  balanceAfter: number;
+  note: string;
+  createdAt: string;
+  createdByUserId: number | null;
+  createdByDisplayName: string | null;
+};
+
+export function fetchAdminCoinAdjustments(
+  limit = 50,
+): Promise<{ adjustments: AdminCoinAdjustment[] }> {
+  return request(`/admin/coin-adjustments?limit=${limit}`);
+}
+
 export function fetchAdminGarages(): Promise<{ garages: AdminGarage[] }> {
   return request("/admin/garages");
 }

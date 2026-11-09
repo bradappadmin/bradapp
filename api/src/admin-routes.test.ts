@@ -74,6 +74,28 @@ describe.runIf(hasDb)("admin routes", () => {
     expect(res.body.ledger.some((e: { reason: string }) => e.reason === "admin_adjust")).toBe(true);
   });
 
+  it("lists admin coin-adjust history with actor, target, delta, note, and time", async () => {
+    const blocked = await member.get("/admin/coin-adjustments");
+    expect(blocked.status).toBe(403);
+
+    const res = await admin.get("/admin/coin-adjustments").query({ limit: 20 });
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.adjustments)).toBe(true);
+    const hit = res.body.adjustments.find(
+      (row: {
+        userEmail: string;
+        note: string;
+        delta: number;
+        createdByDisplayName: string | null;
+      }) => row.userEmail === memberEmail && row.note === "Goodwill top-up",
+    );
+    expect(hit).toBeTruthy();
+    expect(hit.delta).toBe(50);
+    expect(hit.createdByDisplayName).toBe("Area Admin");
+    expect(hit.createdAt).toBeTruthy();
+    expect(hit.balanceAfter).toBeGreaterThan(0);
+  });
+
   it("edits garages, car models, and listings", async () => {
     const garage = await admin.patch(`/admin/garages/${garageId}`).send({ tagline: "Admin-tuned bay." });
     expect(garage.status).toBe(200);
