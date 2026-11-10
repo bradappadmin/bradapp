@@ -15,8 +15,10 @@ type CompareCarPanelProps = {
   detail?: string;
   /** Play deep-link when this side’s owner is challengeable; omit to hide. */
   challengeHref?: string | null;
+  /** Trades deep-link when this side’s owner is tradeable; omit to hide. */
+  tradeHref?: string | null;
   /** Sign-in prompt when a member owns this side but the viewer is signed out. */
-  challengeSignInHref?: string | null;
+  signInHref?: string | null;
 };
 
 /** Large photo-first panel for one side of a listing compare. */
@@ -31,10 +33,12 @@ export function CompareCarPanel({
   coinPrice,
   detail,
   challengeHref,
-  challengeSignInHref,
+  tradeHref,
+  signInHref,
 }: CompareCarPanelProps) {
   const showChallenge = Boolean(challengeHref);
-  const showSignIn = !showChallenge && Boolean(challengeSignInHref);
+  const showTrade = Boolean(tradeHref);
+  const showSignIn = !showChallenge && !showTrade && Boolean(signInHref);
 
   return (
     <article className="overflow-hidden rounded-md border border-white/10 bg-bay-deep/40">
@@ -63,7 +67,7 @@ export function CompareCarPanel({
         <p className="pt-0.5 font-display text-lg font-semibold text-lime sm:text-xl">
           {formatCoins(coinPrice)}
         </p>
-        {showChallenge || showSignIn ? (
+        {showChallenge || showTrade || showSignIn ? (
           <div className="flex flex-wrap gap-2 pt-2" aria-label={`${title} play actions`}>
             {showChallenge && challengeHref ? (
               <Link
@@ -74,13 +78,22 @@ export function CompareCarPanel({
                 Challenge
               </Link>
             ) : null}
-            {showSignIn && challengeSignInHref ? (
+            {showTrade && tradeHref ? (
               <Link
-                to={challengeSignInHref}
-                aria-label={`Sign in to challenge ${title}`}
+                to={tradeHref}
+                aria-label={`Offer trade ${title}`}
+                className="inline-flex rounded-md border border-white/15 px-3 py-1.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+              >
+                Offer trade
+              </Link>
+            ) : null}
+            {showSignIn && signInHref ? (
+              <Link
+                to={signInHref}
+                aria-label={`Sign in to challenge or trade ${title}`}
                 className="inline-flex rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
               >
-                Sign in to challenge
+                Sign in to challenge or trade
               </Link>
             ) : null}
           </div>

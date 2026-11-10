@@ -34,9 +34,10 @@ describe("CompareCarPanel", () => {
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     expect(screen.queryByRole("link", { name: /Challenge/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Offer trade/i })).not.toBeInTheDocument();
   });
 
-  it("shows Challenge beside the hero when a play deep-link is provided", () => {
+  it("shows Challenge and Offer trade beside the hero when deep-links are provided", () => {
     render(
       <MemoryRouter>
         <CompareCarPanel
@@ -49,6 +50,7 @@ describe("CompareCarPanel", () => {
           model="RS6"
           coinPrice={310}
           challengeHref="/play?opponent=177&theirCar=11"
+          tradeHref="/trades?with=177&theirCar=11"
         />
       </MemoryRouter>,
     );
@@ -57,7 +59,12 @@ describe("CompareCarPanel", () => {
       "href",
       "/play?opponent=177&theirCar=11",
     );
+    expect(screen.getByRole("link", { name: "Offer trade Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/trades?with=177&theirCar=11",
+    );
     expect(screen.getByText("Challenge")).toBeInTheDocument();
+    expect(screen.getByText("Offer trade")).toBeInTheDocument();
     expect(screen.getByLabelText("Audi RS6 Avant play actions")).toBeInTheDocument();
   });
 });

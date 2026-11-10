@@ -21,6 +21,7 @@ import { CompareTrumpWinnersStrip } from "../components/CompareTrumpWinnersStrip
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { compareSharePath } from "../share-link";
 
@@ -98,6 +99,12 @@ export function ComparePage() {
     : "hidden";
   const rightChallenge = right
     ? listingChallengeAction({ ownerUserId: right.ownerUserId, viewerId: user?.id })
+    : "hidden";
+  const leftTrade = left
+    ? garageTradeOfferAction({ ownerUserId: left.ownerUserId, viewerId: user?.id })
+    : "hidden";
+  const rightTrade = right
+    ? garageTradeOfferAction({ ownerUserId: right.ownerUserId, viewerId: user?.id })
     : "hidden";
 
   function onClearTray() {
@@ -246,7 +253,14 @@ export function ComparePage() {
                     ? listingChallengeHref(left.ownerUserId, left.id)
                     : null
                 }
-                challengeSignInHref={leftChallenge === "signin" ? "/signin" : null}
+                tradeHref={
+                  leftTrade === "offer" && left.ownerUserId != null
+                    ? garageTradeOfferHref(left.ownerUserId, left.id)
+                    : null
+                }
+                signInHref={
+                  leftChallenge === "signin" || leftTrade === "signin" ? "/signin" : null
+                }
               />
               <p
                 className="hidden self-center text-center font-display text-sm font-semibold uppercase tracking-[0.2em] text-steel sm:block"
@@ -269,7 +283,14 @@ export function ComparePage() {
                     ? listingChallengeHref(right.ownerUserId, right.id)
                     : null
                 }
-                challengeSignInHref={rightChallenge === "signin" ? "/signin" : null}
+                tradeHref={
+                  rightTrade === "offer" && right.ownerUserId != null
+                    ? garageTradeOfferHref(right.ownerUserId, right.id)
+                    : null
+                }
+                signInHref={
+                  rightChallenge === "signin" || rightTrade === "signin" ? "/signin" : null
+                }
               />
             </div>
 
