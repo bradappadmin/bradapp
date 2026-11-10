@@ -271,7 +271,7 @@ describe("HomePage", () => {
     ).toBe(true);
   });
 
-  it("clears recently viewed from home and shows the empty bay", async () => {
+  it("clears recently viewed from home after confirm and shows the empty bay", async () => {
     const user = userEvent.setup();
     window.localStorage.setItem(
       RECENTLY_VIEWED_KEY,
@@ -306,10 +306,19 @@ describe("HomePage", () => {
 
     expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.getByRole("button", { name: "Confirm clear" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Keep" })).toBeInTheDocument();
+    expect(window.localStorage.getItem(RECENTLY_VIEWED_KEY)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Keep" }));
+    expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
+    expect(screen.getByText(/Porsche/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.click(screen.getByRole("button", { name: "Confirm clear" }));
     expect(screen.getByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
     expect(screen.getByLabelText("Empty recently viewed bay")).toBeInTheDocument();
     expect(screen.getByText("Empty bay")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm clear" })).not.toBeInTheDocument();
     expect(window.localStorage.getItem(RECENTLY_VIEWED_KEY)).toBeNull();
     expect(screen.getByText(/Cleared recently viewed on this device/i)).toBeInTheDocument();
   });

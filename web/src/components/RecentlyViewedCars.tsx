@@ -21,15 +21,17 @@ export function RecentlyViewedCars() {
   const toast = useToast();
   const [cars, setCars] = useState<RecentlyViewedCar[] | null>(null);
   const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   useEffect(() => {
     setCars(loadRecentlyViewed());
     setComparePicks(loadCompareSelection());
   }, []);
 
-  function onClear() {
+  function onConfirmClear() {
     clearRecentlyViewed();
     setCars([]);
+    setConfirmClear(false);
     toast.success("Cleared recently viewed on this device.");
   }
 
@@ -60,13 +62,32 @@ export function RecentlyViewedCars() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {!empty ? (
-            <button
-              type="button"
-              onClick={onClear}
-              className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-steel transition hover:border-rose/40 hover:text-rose"
-            >
-              Clear
-            </button>
+            confirmClear ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onConfirmClear}
+                  className="rounded-md border border-rose/45 bg-rose/10 px-3 py-1.5 font-display text-sm font-semibold text-rose transition hover:border-rose/70 hover:bg-rose/20"
+                >
+                  Confirm clear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClear(false)}
+                  className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-steel transition hover:border-white/30 hover:text-mist"
+                >
+                  Keep
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmClear(true)}
+                className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-steel transition hover:border-rose/40 hover:text-rose"
+              >
+                Clear
+              </button>
+            )
           ) : null}
           <Link
             to="/cars"

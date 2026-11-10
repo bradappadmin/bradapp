@@ -132,6 +132,9 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/Empty bay keeps Browse cars/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Clear asks Confirm clear before wiping the device history/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
     expect(
       screen.getByText(

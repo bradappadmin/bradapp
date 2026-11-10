@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   {
     id: "home-recent-compare",
     title: "Compare from Recently viewed",
-    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. Empty bay keeps Browse cars; Clear wipes the device history.",
+    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. Empty bay keeps Browse cars; Clear asks Confirm clear before wiping the device history (Keep cancels).",
     to: "/",
     cta: "Open Home",
   },
