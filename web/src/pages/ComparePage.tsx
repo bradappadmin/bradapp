@@ -236,7 +236,7 @@ export function ComparePage() {
             <div
               role="region"
               aria-label="Compare car photos"
-              className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch sm:gap-3"
+              className="compare-heroes grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch sm:gap-3"
             >
               <CompareCarPanel
                 listingId={left.id}

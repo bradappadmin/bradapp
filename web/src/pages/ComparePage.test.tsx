@@ -134,7 +134,10 @@ describe("ComparePage Midnight Garage UI", () => {
 
     expect(await screen.findByText(/Specs face-off · Midnight garage/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Compare" })).toBeInTheDocument();
-    expect(await screen.findByRole("region", { name: "Compare car photos" })).toBeInTheDocument();
+    const photos = await screen.findByRole("region", { name: "Compare car photos" });
+    expect(photos).toBeInTheDocument();
+    expect(photos.className).toMatch(/compare-heroes/);
+    expect(photos.querySelectorAll("[data-compare-hero].compare-hero-motion").length).toBe(2);
     expect(screen.getByRole("heading", { name: "Specs" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Compare actions" })).toBeInTheDocument();
     await waitFor(() => {

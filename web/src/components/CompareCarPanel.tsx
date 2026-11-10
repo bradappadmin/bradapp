@@ -41,7 +41,10 @@ export function CompareCarPanel({
   const showSignIn = !showChallenge && !showTrade && Boolean(signInHref);
 
   return (
-    <article className="overflow-hidden rounded-md border border-white/10 bg-bay-deep/40">
+    <article
+      className="compare-hero-motion overflow-hidden rounded-md border border-white/10 bg-bay-deep/40"
+      data-compare-hero
+    >
       <CarVisual
         colour={colour}
         bodyType={bodyType}

@@ -30,6 +30,9 @@ describe("CompareCarPanel", () => {
     );
     expect(screen.getByText("420 BC")).toBeInTheDocument();
     expect(document.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
+    const heroShell = document.querySelector("[data-compare-hero]");
+    expect(heroShell).not.toBeNull();
+    expect(heroShell?.className).toMatch(/compare-hero-motion/);
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
