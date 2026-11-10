@@ -13,13 +13,31 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
-describe("SignUpPage invite requirement", () => {
+describe("SignUpPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
 
   beforeEach(() => {
     vi.mocked(api.fetchSignupOptions).mockResolvedValue({ requireInviteCode: false });
+  });
+
+  it("shows BradApp brand hierarchy and bay atmosphere", async () => {
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SignUpPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Create your account" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(screen.getByText("BradApp")).toBeInTheDocument();
+    expect(document.querySelector(".play-bay-glow")).not.toBeNull();
+    expect(await screen.findByLabelText("Auth bay notes")).toBeInTheDocument();
+    expect(screen.getByText(/Invite optional/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/signin");
   });
 
   it("marks invite optional when require-invite is off", async () => {
@@ -48,5 +66,6 @@ describe("SignUpPage invite requirement", () => {
     const field = await screen.findByLabelText(/^Family invite code$/i);
     expect(field).toBeRequired();
     expect(screen.getByText(/invite-only right now/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Invite required/i)).toBeInTheDocument();
   });
 });
