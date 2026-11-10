@@ -16,6 +16,7 @@ import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { TrumpCard } from "../components/TrumpCard";
 import { WeeklyCupPanel } from "../components/WeeklyCupPanel";
+import { WinStreakPanel } from "../components/WinStreakPanel";
 import { useToast } from "../toast-context";
 import { prepareRematch, rematchPrompt } from "../top-trumps-rematch";
 
@@ -349,25 +350,10 @@ export function TopTrumpsPage() {
               <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                 Play +{rewards.play} BC
               </span>
-              <span
-                className="rounded-md border border-rose/35 bg-rose/10 px-3 py-1.5 font-display text-xs font-semibold text-rose"
-                title={streakMilestones
-                  .map((m) => `${m.streak} wins → +${m.coins} BC`)
-                  .join(" · ")}
-              >
-                Win streak ×{winStreak}
+              <span className="rounded-md border border-rose/35 bg-rose/10 px-3 py-1.5 font-display text-xs font-semibold text-rose">
+                Streak ×{winStreak}
               </span>
             </div>
-            <p className="mt-2 text-xs text-steel">
-              Streak bonuses:{" "}
-              {streakMilestones.map((m, i) => (
-                <span key={m.streak}>
-                  {i > 0 ? " · " : null}
-                  {m.streak} wins +{m.coins} BC
-                </span>
-              ))}
-              . A loss resets the streak; draws keep it.
-            </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <Link
@@ -392,6 +378,16 @@ export function TopTrumpsPage() {
         ) : null}
 
         {!bayReady ? <p className="mt-8 text-steel">Loading…</p> : null}
+
+        {bayReady && myCars.length > 0 ? (
+          <div className="bay-rise-delay mt-8">
+            <WinStreakPanel
+              streak={winStreak}
+              milestones={streakMilestones}
+              lastBonus={lastStreakBonus}
+            />
+          </div>
+        ) : null}
 
         {bayReady && myCars.length === 0 ? (
           <div

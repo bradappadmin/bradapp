@@ -133,8 +133,13 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "Top Trumps" })).toBeInTheDocument();
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(screen.getByText(/Win \+25 BC/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Win streak ×2/i)).toBeInTheDocument();
-    expect(screen.getByText(/3 wins \+15 BC/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Streak ×2/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Win streak")).toBeInTheDocument();
+    expect(screen.getByLabelText("Current win streak 2")).toBeInTheDocument();
+    expect(screen.getByText(/1 more win for \+15 BC/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Streak bonus thresholds")).toHaveTextContent("3 wins +15 BC");
+    expect(screen.getByLabelText("Streak bonus thresholds")).toHaveTextContent("5 wins +40 BC");
     expect(await screen.findByRole("heading", { name: "Top Trumps cup" })).toBeInTheDocument();
     expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
 
@@ -180,6 +185,7 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     expect(empty.querySelector('a[href="/garage"]')?.textContent).toMatch(/My garage/);
     expect(empty.querySelector('a[href="/members"]')?.textContent).toMatch(/Members/);
     expect(screen.queryByRole("button", { name: /Vs house/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Win streak" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Top Trumps" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Match history/i }).length).toBeGreaterThan(0);
   });
