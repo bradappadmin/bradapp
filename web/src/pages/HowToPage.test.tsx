@@ -95,10 +95,27 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Sort cars details follow Find, sort, and filter/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/Compare queues that car into the compare tray/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /same picks as Cars, Favourites, My cars, and home Recently viewed/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText(/when two are ready you land side by side/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Copy link puts the absolute URL/i).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/home Recently viewed Compare into the shared tray with Cars \/ My cars/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Compare from Recently viewed" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare on a card queues into the shared tray with Cars \/ My cars \(and Favourites\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Empty bay keeps Browse cars/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -335,7 +352,9 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/start from a listing.?s Compare CTA \(tray picks/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/or Compare on My cars/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compare on My cars, or Compare on home Recently viewed/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points to Members \/ Browse cars for sale/i)).toBeInTheDocument();
     expect(screen.getByText(/Offer trade or Challenge to Top Trumps/i)).toBeInTheDocument();
@@ -392,7 +411,10 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
-    expect(screen.getByRole("link", { name: "Open Home" })).toHaveAttribute("href", "/");
+    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
+    ).toBe(true);
     expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");

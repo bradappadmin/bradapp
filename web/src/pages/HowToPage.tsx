@@ -28,9 +28,16 @@ const STEPS: Step[] = [
     cta: "Open Home",
   },
   {
+    id: "home-recent-compare",
+    title: "Compare from Recently viewed",
+    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. Empty bay keeps Browse cars; Clear wipes the device history.",
+    to: "/",
+    cta: "Open Home",
+  },
+  {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars and Quick price chips are later steps). Sort cars details follow Find, sort, and filter.",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars, Favourites, My cars, and home Recently viewed) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars and Quick price chips are later steps). Sort cars details follow Find, sort, and filter.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -190,7 +197,8 @@ export function HowToPage() {
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
-            bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
+            bonuses, Brad Coins (tap the header balance for your ledger), home Recently viewed
+            Compare into the shared tray with Cars / My cars, photo-first cars with Find,
             listing Compare and Copy link, Cars Sort the bay (Highest / Lowest price, Name A–Z /
             Z–A), Favourites challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
@@ -330,8 +338,8 @@ export function HowToPage() {
                 Compare
               </Link>{" "}
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
-              ready), Favourites / Cars, or Compare on My cars; empty bay sends you to Favourites or
-              Browse cars.
+              ready), Favourites / Cars, Compare on My cars, or Compare on home Recently viewed
+              (shared tray); empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">
