@@ -129,6 +129,11 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.getByText("Bay drag")).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Newest" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Oldest" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Title A–Z" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Title Z–A" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Drag race" }));
     expect(await screen.findByRole("button", { name: "Drag race" })).toHaveAttribute(
@@ -143,6 +148,55 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(api.fetchReviews).toHaveBeenCalledWith(false, undefined, "review");
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.queryByText("Bay drag")).not.toBeInTheDocument();
+  });
+
+  it("sorts by title via Sort the bay and persists sort in the URL", async () => {
+    const user = userEvent.setup();
+    const older = {
+      ...cueCard,
+      id: 3,
+      title: "Alpha bay",
+      createdAt: "2026-11-07T12:00:00.000Z",
+    };
+    vi.mocked(api.fetchReviews).mockResolvedValue({
+      reviews: [cueCard, dragRace, older],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/reviews"
+              element={
+                <>
+                  <ReviewsPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
+    const sort = screen.getByRole("combobox", { name: "Sort reviews" });
+    expect(sort).toHaveValue("newest");
+
+    await user.selectOptions(sort, "title_asc");
+    await waitFor(() => {
+      expect(screen.getByTestId("reviews-params").textContent).toContain("sort=title_asc");
+    });
+    expect(sort).toHaveValue("title_asc");
+
+    const titles = screen.getAllByRole("link").map((a) => a.textContent ?? "");
+    const alpha = titles.findIndex((t) => /Alpha bay/i.test(t));
+    const bayCue = titles.findIndex((t) => /Bay cue card/i.test(t));
+    const bayDrag = titles.findIndex((t) => /Bay drag/i.test(t));
+    expect(alpha).toBeGreaterThanOrEqual(0);
+    expect(bayCue).toBeGreaterThan(alpha);
+    expect(bayDrag).toBeGreaterThan(bayCue);
   });
 
   it("searches by make/model/title and keeps type in the URL", async () => {
@@ -199,6 +253,15 @@ describe("ReviewsPage Midnight Garage UI", () => {
     });
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.queryByText("Bay drag")).not.toBeInTheDocument();
+
+    const sort = screen.getByRole("combobox", { name: "Sort reviews" });
+    await user.selectOptions(sort, "oldest");
+    await waitFor(() => {
+      const text = screen.getByTestId("reviews-params").textContent ?? "";
+      expect(text).toContain("q=porsche");
+      expect(text).toContain("type=review");
+      expect(text).toContain("sort=oldest");
+    });
   });
 
   it("shows empty filter state for unmatched search", async () => {
@@ -218,6 +281,7 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("heading", { name: "Find a review" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
   });
 
@@ -238,6 +302,7 @@ describe("ReviewsPage Midnight Garage UI", () => {
     const empty = screen.getByLabelText("Empty reviews bay");
     expect(empty.querySelector('a[href="/cars"]')?.textContent).toMatch(/Browse cars/);
     expect(screen.queryByRole("heading", { name: "Find a review" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Sort the bay")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 

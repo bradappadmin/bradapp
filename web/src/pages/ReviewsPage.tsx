@@ -13,6 +13,13 @@ import {
   REVIEWS_TYPE_FILTERS,
   type ReviewsTypeFilter,
 } from "../reviews-car-filter";
+import {
+  DEFAULT_REVIEWS_SORT,
+  parseReviewsSort,
+  REVIEWS_SORT_OPTIONS,
+  sortReviews,
+  type ReviewsSort,
+} from "../reviews-sort";
 
 const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
@@ -25,23 +32,26 @@ export function ReviewsPage() {
   const { user, loading: authLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const typeFilter = parseReviewsTypeFilter(searchParams.get("type"));
+  const sort = parseReviewsSort(searchParams.get("sort"));
   const qFromUrl = (searchParams.get("q") ?? "").trim();
   const [draft, setDraft] = useState(qFromUrl);
   const [reviews, setReviews] = useState<ReviewSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const visible = useMemo(
+  const filtered = useMemo(
     () => filterReviewsByCarQuery(reviews, qFromUrl),
     [reviews, qFromUrl],
   );
+  const visible = useMemo(() => sortReviews(filtered, sort), [filtered, sort]);
   const filtersOn = Boolean(qFromUrl) || typeFilter !== "all";
 
-  function writeParams(nextQ: string, nextType: ReviewsTypeFilter) {
+  function writeParams(nextQ: string, nextType: ReviewsTypeFilter, nextSort: ReviewsSort) {
     const params = new URLSearchParams();
     const q = nextQ.trim();
     if (q) params.set("q", q);
     if (nextType !== "all") params.set("type", nextType);
+    if (nextSort !== DEFAULT_REVIEWS_SORT) params.set("sort", nextSort);
     setSearchParams(params, { replace: true });
   }
 
@@ -83,10 +93,11 @@ export function ReviewsPage() {
       const params = new URLSearchParams();
       if (next) params.set("q", next);
       if (typeFilter !== "all") params.set("type", typeFilter);
+      if (sort !== DEFAULT_REVIEWS_SORT) params.set("sort", sort);
       setSearchParams(params, { replace: true });
     }, 280);
     return () => window.clearTimeout(timer);
-  }, [draft, qFromUrl, typeFilter, setSearchParams]);
+  }, [draft, qFromUrl, typeFilter, sort, setSearchParams]);
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
@@ -94,21 +105,25 @@ export function ReviewsPage() {
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    writeParams(draft, typeFilter);
+    writeParams(draft, typeFilter, sort);
   }
 
   function onClearSearch() {
     setDraft("");
-    writeParams("", typeFilter);
+    writeParams("", typeFilter, sort);
   }
 
   function onClearFilters() {
     setDraft("");
-    writeParams("", "all");
+    writeParams("", "all", DEFAULT_REVIEWS_SORT);
   }
 
   function setTypeFilter(next: ReviewsTypeFilter) {
-    writeParams(qFromUrl, next);
+    writeParams(qFromUrl, next, sort);
+  }
+
+  function setSort(next: ReviewsSort) {
+    writeParams(qFromUrl, typeFilter, next);
   }
 
   const admin = Boolean(user && isAdmin(user.role));
@@ -285,6 +300,35 @@ export function ReviewsPage() {
               </p>
             ) : null}
           </form>
+        ) : null}
+
+        {reviews.length > 0 ? (
+          <div
+            className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+            aria-label="Sort reviews"
+          >
+            <div className="min-w-0">
+              <p className="font-display text-lg text-mist">Sort the bay</p>
+              <p className="mt-1 text-sm text-steel">
+                Newest or oldest first, or title A–Z / Z–A. Choice stays in the URL.
+              </p>
+            </div>
+            <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+              Sort by
+              <select
+                className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                value={sort}
+                onChange={(e) => setSort(parseReviewsSort(e.target.value))}
+                aria-label="Sort reviews"
+              >
+                {REVIEWS_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         ) : null}
 
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
