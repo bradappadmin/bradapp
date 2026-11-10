@@ -54,6 +54,7 @@ describe("MembersPage Midnight Garage UI", () => {
   });
 
   beforeEach(() => {
+    vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
     vi.mocked(api.fetchMembers).mockImplementation(async (params) => {
       const q = params?.q?.trim().toLowerCase() ?? "";
       const all = [sam, jordan, empty];
@@ -247,5 +248,82 @@ describe("MembersPage Midnight Garage UI", () => {
     expect(screen.getByText(/bay directory is empty/i)).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Find a member" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+  });
+
+  it("hides Challenge and Offer trade when signed out", async () => {
+    render(
+      <MemoryRouter initialEntries={["/members"]}>
+        <AuthProvider>
+          <MembersPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Sam Bay")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Challenge .+ to Top Trumps/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Offer trade with /i })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Open garage" }).length).toBeGreaterThan(0);
+  });
+
+  it("deep-links Challenge and Offer trade for other members, hides for self", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 177,
+        email: "sam@example.com",
+        displayName: "Sam Bay",
+        bio: "Collects pace.",
+        role: "member",
+        coinBalance: 300,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-10",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 300,
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/members"]}>
+        <AuthProvider>
+          <MembersPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Sam Bay (you)")).toBeInTheDocument();
+    expect(screen.getByText("Jordan Pace")).toBeInTheDocument();
+    expect(screen.getByText("Empty Eddy")).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", { name: "Challenge Sam Bay to Top Trumps" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Offer trade with Sam Bay" }),
+    ).not.toBeInTheDocument();
+
+    const jordanChallenge = screen.getByRole("link", {
+      name: "Challenge Jordan Pace to Top Trumps",
+    });
+    expect(jordanChallenge).toHaveAttribute("href", "/play?opponent=178");
+    expect(jordanChallenge).toHaveTextContent("Challenge to Top Trumps");
+
+    const jordanTrade = screen.getByRole("link", { name: "Offer trade with Jordan Pace" });
+    expect(jordanTrade).toHaveAttribute("href", "/trades?with=178");
+    expect(jordanTrade).toHaveTextContent("Offer trade");
+
+    expect(
+      screen.getByRole("link", { name: "Challenge Empty Eddy to Top Trumps" }),
+    ).toHaveAttribute("href", "/play?opponent=179");
+    expect(screen.getByRole("link", { name: "Offer trade with Empty Eddy" })).toHaveAttribute(
+      "href",
+      "/trades?with=179",
+    );
+
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Filter members by garage cars")).toBeInTheDocument();
   });
 });

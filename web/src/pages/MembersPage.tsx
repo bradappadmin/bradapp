@@ -309,7 +309,7 @@ export function MembersPage() {
             <ul className="flex flex-col gap-3">
               {visible.map((member) => {
                 const isYou = Boolean(user && member.id === user.id);
-                const canAct = Boolean(user && !isYou && member.carCount > 0);
+                const canAct = Boolean(user && !isYou);
                 return (
                   <li key={member.id} className="play-panel rounded-md border p-4 sm:p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -325,38 +325,43 @@ export function MembersPage() {
                         {member.bio ? (
                           <p className="mt-1 max-w-md text-sm text-mist/90">{member.bio}</p>
                         ) : null}
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                          <span className="font-display text-lime">
+                            {formatCoins(member.coinBalance)}
+                          </span>
+                          <span className="text-steel">
+                            {member.carCount} {member.carCount === 1 ? "car" : "cars"}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <span className="font-display text-lime">
-                          {formatCoins(member.coinBalance)}
-                        </span>
-                        <span className="text-steel">
-                          {member.carCount} {member.carCount === 1 ? "car" : "cars"}
-                        </span>
-                        <Link
-                          to={`/members/${member.id}`}
-                          className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                        >
-                          Open garage
-                        </Link>
-                        {canAct ? (
-                          <>
-                            <Link
-                              to={`/play?opponent=${member.id}`}
-                              className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-sm text-lime no-underline transition hover:bg-lime/10"
-                            >
-                              Challenge
-                            </Link>
-                            <Link
-                              to={`/trades?with=${member.id}`}
-                              className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                            >
-                              Trade
-                            </Link>
-                          </>
-                        ) : null}
-                      </div>
+                      <Link
+                        to={`/members/${member.id}`}
+                        className="shrink-0 self-start rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime sm:self-center"
+                      >
+                        Open garage
+                      </Link>
                     </div>
+                    {canAct ? (
+                      <div
+                        className="mt-3 flex flex-wrap gap-2 border-t border-white/8 pt-3"
+                        aria-label={`Actions for ${member.displayName}`}
+                      >
+                        <Link
+                          to={`/play?opponent=${member.id}`}
+                          className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                          aria-label={`Challenge ${member.displayName} to Top Trumps`}
+                        >
+                          Challenge to Top Trumps
+                        </Link>
+                        <Link
+                          to={`/trades?with=${member.id}`}
+                          className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                          aria-label={`Offer trade with ${member.displayName}`}
+                        >
+                          Offer trade
+                        </Link>
+                      </div>
+                    ) : null}
                   </li>
                 );
               })}
