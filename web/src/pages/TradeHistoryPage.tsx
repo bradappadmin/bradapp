@@ -277,24 +277,38 @@ export function TradeHistoryPage() {
         {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
 
         {!loading && trades.length === 0 ? (
-          <div className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center">
-            <p className="font-display text-lg text-mist">Quiet bay</p>
-            <p className="mt-2 text-sm text-steel">
-              No resolved trades yet. Offer a free swap from Trades.
+          <div
+            className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center sm:py-14"
+            role="status"
+            aria-label="Empty trade history bay"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">Empty bay</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              No resolved trades yet. Open Trades to offer a free swap, or browse Members for a
+              garage to trade with — Trade again shows up here after deals resolve.
             </p>
-            <Link
-              to="/trades"
-              className="mt-5 inline-block rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime no-underline hover:bg-lime/10"
-            >
-              Open Trades
-            </Link>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <Link
+                to="/trades"
+                className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+              >
+                Open trades
+              </Link>
+              <Link
+                to="/members"
+                className="inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Browse members
+              </Link>
+            </div>
           </div>
         ) : null}
 
-        {!loading && trades.length > 0 && visible.length === 0 ? (
+        {!loading && trades.length > 0 && filtersOn && visible.length === 0 ? (
           <div
-            className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center"
+            className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center sm:py-14"
             role="status"
+            aria-label="No matching trade history"
           >
             <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
@@ -304,15 +318,30 @@ export function TradeHistoryPage() {
                 : statusGroup === "declined"
                   ? "declined"
                   : ""}{" "}
-              trades in this bay yet. Clear the filter to see the full reel.
+              trades in this filter. Clear the filter to see the full reel — Trade again stays on
+              rows when it applies.
             </p>
-            <button
-              type="button"
-              onClick={onClearFilters}
-              className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
-            >
-              Clear filter
-            </button>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={onClearFilters}
+                className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+              >
+                Clear filter
+              </button>
+              <Link
+                to="/trades"
+                className="inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Open trades
+              </Link>
+              <Link
+                to="/members"
+                className="inline-flex items-center justify-center rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+              >
+                Browse members
+              </Link>
+            </div>
           </div>
         ) : null}
 

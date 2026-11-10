@@ -202,7 +202,29 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     expect(screen.queryByRole("link", { name: "Trade again" })).not.toBeInTheDocument();
   });
 
-  it("shows empty filter state", async () => {
+  it("shows Empty bay with Open trades and Browse members when there is no history", async () => {
+    vi.mocked(api.fetchCompletedTrades).mockResolvedValue({ trades: [] });
+
+    render(
+      <MemoryRouter initialEntries={["/trades/history"]}>
+        <AuthProvider>
+          <TradeHistoryPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Empty bay")).toBeInTheDocument();
+    const empty = screen.getByLabelText("Empty trade history bay");
+    expect(empty).toBeInTheDocument();
+    expect(empty.querySelector('a[href="/trades"]')?.textContent).toMatch(/Open trades/i);
+    expect(empty.querySelector('a[href="/members"]')?.textContent).toMatch(/Browse members/i);
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Filter status" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Trade again" })).not.toBeInTheDocument();
+  });
+
+  it("shows No matches and Clear filter when Completed/Declined yields none", async () => {
+    const user = userEvent.setup();
     vi.mocked(api.fetchCompletedTrades).mockResolvedValue({
       trades: [
         {
@@ -234,14 +256,37 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
       <MemoryRouter initialEntries={["/trades/history?status=declined"]}>
         <AuthProvider>
           <Routes>
-            <Route path="/trades/history" element={<TradeHistoryPage />} />
+            <Route
+              path="/trades/history"
+              element={
+                <>
+                  <TradeHistoryPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
           </Routes>
         </AuthProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    const emptyFilter = screen.getByLabelText("No matching trade history");
+    expect(emptyFilter).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Filter status" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear filter" })).toBeInTheDocument();
+    expect(emptyFilter.querySelector('a[href="/trades"]')?.textContent).toMatch(/Open trades/i);
+    expect(emptyFilter.querySelector('a[href="/members"]')?.textContent).toMatch(
+      /Browse members/i,
+    );
+    expect(screen.queryByRole("link", { name: "Trade again" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear filter" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("trades-history-params").textContent).toBe("");
+    });
+    expect(screen.getByText(/with Sam Bay/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Trade again" })).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });
