@@ -5,12 +5,13 @@ import type { ActivityItem, ActivityKind } from "../api";
 import { listingTitle } from "../cars";
 import { CarVisual } from "./CarVisual";
 
-export type ActivityFilterId = "all" | "buys" | "trades" | "play" | "reviews";
+export type ActivityFilterId = "all" | "buys" | "trades" | "gifts" | "play" | "reviews";
 
 const FILTERS: { id: ActivityFilterId; label: string }[] = [
   { id: "all", label: "All" },
   { id: "buys", label: "Buys" },
   { id: "trades", label: "Trades" },
+  { id: "gifts", label: "Gifts" },
   { id: "play", label: "Play" },
   { id: "reviews", label: "Reviews" },
 ];
@@ -24,6 +25,8 @@ export function activityKindsForFilter(filter: ActivityFilterId): ActivityKind[]
       return ["purchase", "sale"];
     case "trades":
       return ["trade"];
+    case "gifts":
+      return ["gift"];
     case "play":
       return ["top_trumps"];
     case "reviews":
@@ -52,6 +55,8 @@ function kindLabel(kind: ActivityKind): string {
       return "Sell";
     case "trade":
       return "Trade";
+    case "gift":
+      return "Gift";
     case "top_trumps":
       return "Play";
     case "review":
@@ -71,6 +76,8 @@ function kindTone(kind: ActivityKind): string {
       return "border-lime/40 text-lime";
     case "trade":
       return "border-mist/30 text-mist";
+    case "gift":
+      return "border-lime/45 text-lime";
     case "top_trumps":
       return "border-lime/35 text-lime";
     case "review":
@@ -127,8 +134,8 @@ export function ActivityFeed() {
     >
       <h2 className="font-display text-xl font-semibold text-mist sm:text-2xl">Family activity</h2>
       <p className="mt-2 text-sm text-steel">
-        Recent buys, sells, free card trades, Top Trumps results, and published reviews — with a
-        studio thumb when a car is in the story.
+        Recent buys, sells, free card trades, Brad Coin gifts, Top Trumps results, and published
+        reviews — with a studio thumb when a car is in the story.
       </p>
 
       <fieldset className="mt-5">
@@ -225,7 +232,8 @@ export function ActivityFeed() {
 
       {!loading && !error && items.length === 0 ? (
         <p className="mt-4 text-sm text-steel">
-          Quiet bay for now — buy a car, trade a card, play Top Trumps, or publish a review.
+          Quiet bay for now — buy a car, trade a card, gift Brad Coins, play Top Trumps, or publish
+          a review.
         </p>
       ) : null}
       {!loading && !error && items.length > 0 && visible.length === 0 ? (

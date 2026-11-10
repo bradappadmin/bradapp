@@ -105,7 +105,7 @@ export function updateProfile(input: {
   });
 }
 
-export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
+export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review" | "gift";
 
 /** Primary car on a family activity row (studio photo / SVG fallback). */
 export type ActivityCarVisual = {

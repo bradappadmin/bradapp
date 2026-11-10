@@ -1,6 +1,6 @@
 import { getPool, type RowDataPacket } from "./db.js";
 
-export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review";
+export type ActivityKind = "purchase" | "sale" | "trade" | "top_trumps" | "review" | "gift";
 
 /** Studio visual for the primary car on a feed row (SVG fallback on the client). */
 export type ActivityCarVisual = {
@@ -83,6 +83,15 @@ type ReviewRow = RowDataPacket & {
   body_type: string;
   b_make: string | null;
   b_model: string | null;
+};
+
+type GiftRow = RowDataPacket & {
+  id: number;
+  delta: number;
+  created_at: Date;
+  sender_name: string;
+  receiver_name: string;
+  receiver_id: number;
 };
 
 function categoryLabel(category: string): string {
@@ -203,6 +212,33 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
     [take],
   );
 
+  // One feed row per gift_sent; pair with the matching gift_received for the receiver name.
+  const [giftRows] = await pool.query<GiftRow[]>(
+    `SELECT sent.id, sent.delta, sent.created_at,
+            su.display_name AS sender_name,
+            ru.display_name AS receiver_name,
+            ru.id AS receiver_id
+     FROM coin_ledger sent
+     INNER JOIN users su ON su.id = sent.user_id
+     INNER JOIN coin_ledger recv
+       ON recv.reason = 'gift_received'
+      AND recv.created_by_user_id = sent.user_id
+      AND recv.delta = -sent.delta
+      AND recv.id = (
+        SELECT MIN(r.id)
+        FROM coin_ledger r
+        WHERE r.reason = 'gift_received'
+          AND r.created_by_user_id = sent.user_id
+          AND r.delta = -sent.delta
+          AND r.id > sent.id
+      )
+     INNER JOIN users ru ON ru.id = recv.user_id
+     WHERE sent.reason = 'gift_sent'
+     ORDER BY sent.id DESC
+     LIMIT ?`,
+    [take],
+  );
+
   const items: ActivityItem[] = [];
 
   for (const row of ledgerRows) {
@@ -281,6 +317,19 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       actorName: row.display_name,
       href: `/reviews/${row.id}`,
       car: carVisual(row.make, row.model, row.trim_name, row.body_type, REVIEW_STUDIO_COLOUR),
+    });
+  }
+
+  for (const row of giftRows) {
+    const amount = Math.abs(Number(row.delta));
+    items.push({
+      id: `gift-${row.id}`,
+      kind: "gift",
+      createdAt: new Date(row.created_at).toISOString(),
+      summary: `${row.sender_name} gifted ${amount} BC to ${row.receiver_name}`,
+      actorName: row.sender_name,
+      href: `/members/${row.receiver_id}`,
+      car: null,
     });
   }
 

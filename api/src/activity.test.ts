@@ -22,4 +22,18 @@ describe("activity item shape", () => {
     expect(sample.id.startsWith("purchase-")).toBe(true);
     expect(sample.car?.make).toBe("Ford");
   });
+
+  it("supports gift kind without a car visual", () => {
+    const gift: ActivityItem = {
+      id: "gift-9",
+      kind: "gift",
+      createdAt: "2026-11-10T01:00:00.000Z",
+      summary: "Alex gifted 15 BC to Sam",
+      actorName: "Alex",
+      href: "/members/4",
+      car: null,
+    };
+    expect(gift.kind).toBe("gift");
+    expect(gift.car).toBeNull();
+  });
 });

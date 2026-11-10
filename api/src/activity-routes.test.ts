@@ -15,6 +15,8 @@ describe.runIf(hasDb)("activity routes", () => {
   const app = createApp();
   const agent = request.agent(app);
   const email = `activity-${Date.now()}@example.com`;
+  let receiverEmail = "";
+  let receiverId = 0;
 
   beforeAll(async () => {
     await seedAccounts();
@@ -25,16 +27,30 @@ describe.runIf(hasDb)("activity routes", () => {
     });
     expect(signup.status).toBe(201);
 
+    receiverEmail = `activity-recv-${Date.now()}@example.com`;
+    const other = await request(app).post("/auth/signup").send({
+      email: receiverEmail,
+      password: "ActivityPass-123!",
+      displayName: "Activity Receiver",
+    });
+    expect(other.status).toBe(201);
+    receiverId = Number(other.body.user.id);
+
     const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 5 });
     const cheap = search.body.listings.find((l: { coinPrice: number }) => l.coinPrice <= 100);
     if (cheap) {
       expect((await agent.post(`/trade/listings/${cheap.id}/buy`)).status).toBe(200);
     }
+
+    expect(
+      (await agent.post(`/members/${receiverId}/gift`).send({ amount: 12, note: "Bay cheer" }))
+        .status,
+    ).toBe(200);
   });
 
   afterAll(async () => {
     const pool = getPool();
-    await pool.query("DELETE FROM users WHERE email = ?", [email]);
+    await pool.query("DELETE FROM users WHERE email = ? OR email = ?", [email, receiverEmail]);
     await closePool();
   });
 
@@ -50,7 +66,7 @@ describe.runIf(hasDb)("activity routes", () => {
     for (const item of res.body.items) {
       expect(item).toMatchObject({
         id: expect.any(String),
-        kind: expect.stringMatching(/^(purchase|sale|trade|top_trumps|review)$/),
+        kind: expect.stringMatching(/^(purchase|sale|trade|top_trumps|review|gift)$/),
         createdAt: expect.any(String),
         summary: expect.any(String),
         actorName: expect.any(String),
@@ -74,10 +90,16 @@ describe.runIf(hasDb)("activity routes", () => {
         colour: expect.any(String),
       });
     }
+    const gift = res.body.items.find((i: { kind: string }) => i.kind === "gift");
+    expect(gift).toBeTruthy();
+    expect(gift.summary).toMatch(/Activity Fan gifted 12 BC to Activity Receiver/);
+    expect(gift.href).toBe(`/members/${receiverId}`);
+    expect(gift.car).toBeNull();
     if (res.body.items.length >= 2) {
       expect(res.body.items[0].createdAt >= res.body.items[1].createdAt).toBe(true);
     }
     const kinds = new Set(res.body.items.map((i: { kind: string }) => i.kind));
+    expect(kinds.has("gift")).toBe(true);
     // After a buy in beforeAll, purchase should appear when stock existed.
     if (res.body.items.some((i: { kind: string }) => i.kind === "purchase")) {
       expect(kinds.has("purchase")).toBe(true);

@@ -76,6 +76,15 @@ const SAMPLE: ActivityItem[] = [
       colour: "Midnight Black",
     },
   },
+  {
+    id: "gift-5",
+    kind: "gift",
+    createdAt: "2026-11-08T11:00:00.000Z",
+    summary: "Bay Friend gifted 25 BC to Sam Bay",
+    actorName: "Bay Friend",
+    href: "/members/12",
+    car: null,
+  },
 ];
 
 describe("activity filter helpers", () => {
@@ -83,14 +92,16 @@ describe("activity filter helpers", () => {
     expect(activityKindsForFilter("all")).toBeNull();
     expect(activityKindsForFilter("buys")).toEqual(["purchase", "sale"]);
     expect(activityKindsForFilter("trades")).toEqual(["trade"]);
+    expect(activityKindsForFilter("gifts")).toEqual(["gift"]);
     expect(activityKindsForFilter("play")).toEqual(["top_trumps"]);
     expect(activityKindsForFilter("reviews")).toEqual(["review"]);
   });
 
   it("filters items by chip", () => {
-    expect(filterActivityItems(SAMPLE, "all")).toHaveLength(4);
+    expect(filterActivityItems(SAMPLE, "all")).toHaveLength(5);
     expect(filterActivityItems(SAMPLE, "buys").map((i) => i.id)).toEqual(["purchase-9"]);
     expect(filterActivityItems(SAMPLE, "trades").map((i) => i.id)).toEqual(["trade-2"]);
+    expect(filterActivityItems(SAMPLE, "gifts").map((i) => i.id)).toEqual(["gift-5"]);
     expect(filterActivityItems(SAMPLE, "play").map((i) => i.id)).toEqual(["play-1"]);
     expect(filterActivityItems(SAMPLE, "reviews").map((i) => i.id)).toEqual(["review-3"]);
   });
@@ -113,10 +124,10 @@ describe("ActivityFeed car thumbs", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Family activity" })).toBeInTheDocument();
-    expect(screen.getByText("Bay Friend")).toBeInTheDocument();
+    expect(screen.getAllByText("Bay Friend").length).toBeGreaterThan(0);
     expect(screen.getByText("Brad")).toBeInTheDocument();
 
-    const purchase = screen.getByRole("link", { name: /Bay Friend/i });
+    const purchase = screen.getByRole("link", { name: /bought Porsche 911/i });
     expect(purchase).toHaveAttribute("href", "/cars/42");
     const img = purchase.querySelector("img");
     expect(img).not.toBeNull();
@@ -135,7 +146,7 @@ describe("ActivityFeed car thumbs", () => {
       "aria-pressed",
       "true",
     );
-    expect(screen.getByText("Bay Friend")).toBeInTheDocument();
+    expect(screen.getAllByText("Bay Friend").length).toBeGreaterThan(0);
     expect(screen.getByText("Casey Apex")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Play" }));
@@ -150,5 +161,14 @@ describe("ActivityFeed car thumbs", () => {
     await user.click(screen.getByRole("button", { name: "Reviews" }));
     expect(screen.getByText("Brad")).toBeInTheDocument();
     expect(screen.queryByText("Casey Apex")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Gifts" }));
+    expect(screen.getByRole("button", { name: "Gifts" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/gifted 25 BC to Sam Bay/i)).toBeInTheDocument();
+    expect(screen.queryByText("Brad")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /gifted 25 BC to Sam Bay/i })).toHaveAttribute(
+      "href",
+      "/members/12",
+    );
   });
 });
