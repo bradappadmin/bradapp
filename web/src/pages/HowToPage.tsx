@@ -23,14 +23,21 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Filter, compare, and open a listing for studio shots and Brad Coin prices — never real money. Save favourites, buy from Cars, then list or unlist from My cars.",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Compare two listings, open studio shots and Brad Coin prices — never real money. Save favourites, buy from Cars, then list or unlist from My cars (Find a car + Sort the bay there too).",
     to: "/cars",
     cta: "Open Cars",
   },
   {
+    id: "find-sort",
+    title: "Find, sort, and filter",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort. My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    to: "/cars",
+    cta: "Try Cars search",
+  },
+  {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing or public garage, rematch on Play when you’re done, or Rematch from Match history. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing or public garage, rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
   },
@@ -44,14 +51,14 @@ const STEPS: Step[] = [
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, or Offer trade on someone else’s listing. Accept or decline in your inbox — photo cards show what you’re swapping. Completed history lists who you traded with; Trade again reopens compose when they still have that car.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, or Offer trade on someone else’s listing. An empty inbox points you to Members or Cars. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
     to: "/trades",
     cta: "Open Trades",
   },
   {
     id: "reviews",
     title: "Reviews and drag races",
-    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand.",
+    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -90,9 +97,9 @@ export function HowToPage() {
           </h1>
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
-            A short tour of the midnight garage: invites, Brad Coins, photo-first cars, Top Trumps
-            streaks and the weekly cup, free trades, drag races, and your bay showcase. Nothing here
-            spends real money.
+            A short tour of the midnight garage: invites, Brad Coins, photo-first cars with Find and
+            sort, Top Trumps streaks and the weekly cup, free trades, drag races, empty-bay next
+            steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -152,49 +159,55 @@ export function HowToPage() {
               <Link to="/play/history" className="text-lime no-underline hover:underline">
                 Match history
               </Link>{" "}
-              — past Top Trumps; Rematch vs house or the same opponent.
+              — Wins/Losses chips; Rematch vs house or the same opponent.
             </li>
             <li>
               <Link to="/trades/history" className="text-lime no-underline hover:underline">
-                Completed trades
+                Trades history
               </Link>{" "}
-              — accepted swaps; Trade again when they still have that car.
+              — Completed/Declined chips; Trade again when they still have that car.
             </li>
             <li>
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
               </Link>{" "}
-              — open a public garage, then challenge or offer a free trade.
+              — Find a member + Has cars; open a garage, then challenge or offer a free trade.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
                 Leaderboard
               </Link>{" "}
-              — Brad Coin ranks, highlight cars, and this week’s Top Trumps cup (sign in).
+              — Find a member, Brad Coin ranks, highlight cars, and this week’s cup (sign in).
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
                 My cars
               </Link>{" "}
-              — garage value, list prices, unlist, and pin your showcase car.
+              — Find a car, Sort the bay, garage value, list prices, and pin your showcase.
             </li>
             <li>
               <Link to="/favourites" className="text-lime no-underline hover:underline">
                 Favourites
               </Link>{" "}
-              — listings you saved; select two and compare side by side (sign in).
+              — Find a favourite, Sort the bay, then select two and compare (sign in).
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
                 Compare
               </Link>{" "}
-              — photo + specs face-off for two cars from Cars or Favourites.
+              — needs two cars; empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">
                 Coin ledger
               </Link>{" "}
-              — every in/out for your Brad Coins (sign in).
+              — every in/out for your Brad Coins, with reason chips (sign in).
+            </li>
+            <li>
+              <Link to="/trades" className="text-lime no-underline hover:underline">
+                Trades inbox
+              </Link>{" "}
+              — empty inbox points to Members / Browse cars for sale.
             </li>
           </ul>
         </section>
