@@ -10,8 +10,14 @@ import {
   loadCompareSelection,
   type ComparePick,
 } from "../compare-selection";
-import { buildCompareRows, compareTitles, type CompareHighlight } from "../compare-specs";
+import {
+  buildCompareRows,
+  buildCompareTrumpRows,
+  compareTitles,
+  type CompareHighlight,
+} from "../compare-specs";
 import { CompareCarPanel } from "../components/CompareCarPanel";
+import { CompareTrumpWinnersStrip } from "../components/CompareTrumpWinnersStrip";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
@@ -81,6 +87,10 @@ export function ComparePage() {
     () => (left && right ? buildCompareRows(left, right) : []),
     [left, right],
   );
+  const trumpRows = useMemo(
+    () => (left && right ? buildCompareTrumpRows(left, right) : []),
+    [left, right],
+  );
   const titles = left && right ? compareTitles(left, right) : null;
 
   function onClearTray() {
@@ -115,7 +125,8 @@ export function ComparePage() {
                 </Link>
               </>
             ) : null}
-            , then open them side by side — studio photos first, Brad Coin price and key specs
+            , then open them side by side — studio photos first, Top Trumps category winners
+            (Power / 0–60 / Top speed, same rules as Play), then Brad Coin price and key specs
             below.
           </p>
         </header>
@@ -243,6 +254,12 @@ export function ComparePage() {
               />
             </div>
 
+            <CompareTrumpWinnersStrip
+              rows={trumpRows}
+              leftTitle={titles.left}
+              rightTitle={titles.right}
+            />
+
             <section
               className="play-panel bay-rise-delay mt-8 overflow-x-auto rounded-md border p-4 sm:p-5"
               aria-labelledby="compare-specs-heading"
@@ -251,7 +268,8 @@ export function ComparePage() {
                 Specs
               </h2>
               <p className="mt-1 text-sm text-steel">
-                Lime highlights the stronger value (or lower Brad Coin price / mileage / 0–60).
+                Lime highlights the stronger value (or lower Brad Coin price / mileage / 0–60). Top
+                Trumps Power / 0–60 / Top speed winners also sit above.
               </p>
               <table className="mt-4 w-full min-w-[28rem] border-collapse text-left text-sm">
                 <caption className="sr-only">Side-by-side listing comparison</caption>

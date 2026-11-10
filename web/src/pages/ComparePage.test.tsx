@@ -55,6 +55,8 @@ const rightListing: ListingDetail = {
   colour: "Nardo Grey",
   year: 2019,
   bhp: 591,
+  topSpeedMph: 190,
+  zeroToSixtySecs: 3.6,
   coinPrice: 310,
   doors: 5,
   seats: 5,
@@ -139,7 +141,14 @@ describe("ComparePage Midnight Garage UI", () => {
       expect(imgs.length).toBeGreaterThanOrEqual(2);
       expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     });
+    // Top Trumps category winners under heroes — Play rules (higher Power/top speed, lower 0–60).
+    expect(await screen.findByLabelText("Top Trumps winners")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Category winners" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Power Audi RS6 Avant · Wins/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/0–60 Porsche 911 GT3 · Wins/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Top speed Porsche 911 GT3 · Wins/i)).toBeInTheDocument();
     expect(screen.getByText("Brad Coin price")).toBeInTheDocument();
+    expect(screen.getAllByText("Power").length).toBeGreaterThanOrEqual(2);
     expect(screen.queryByRole("status", { name: /Empty compare bay/i })).not.toBeInTheDocument();
   });
 

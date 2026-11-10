@@ -10,7 +10,7 @@ export type CompareRow = {
   highlight: CompareHighlight;
 };
 
-function numericWinner(
+export function numericWinner(
   left: number,
   right: number,
   prefer: "higher" | "lower",
@@ -18,6 +18,36 @@ function numericWinner(
   if (left === right) return "tie";
   if (prefer === "higher") return left > right ? "left" : "right";
   return left < right ? "left" : "right";
+}
+
+/** Play Top Trumps categories only — Power / 0–60 / Top speed. */
+export function buildCompareTrumpRows(
+  left: ListingDetail,
+  right: ListingDetail,
+): CompareRow[] {
+  return [
+    {
+      id: "bhp",
+      label: "Power",
+      left: String(left.bhp),
+      right: String(right.bhp),
+      highlight: numericWinner(left.bhp, right.bhp, "higher"),
+    },
+    {
+      id: "zero-sixty",
+      label: "0–60",
+      left: `${left.zeroToSixtySecs}s`,
+      right: `${right.zeroToSixtySecs}s`,
+      highlight: numericWinner(left.zeroToSixtySecs, right.zeroToSixtySecs, "lower"),
+    },
+    {
+      id: "top-speed",
+      label: "Top speed",
+      left: `${left.topSpeedMph} mph`,
+      right: `${right.topSpeedMph} mph`,
+      highlight: numericWinner(left.topSpeedMph, right.topSpeedMph, "higher"),
+    },
+  ];
 }
 
 export function buildCompareRows(left: ListingDetail, right: ListingDetail): CompareRow[] {
@@ -45,7 +75,7 @@ export function buildCompareRows(left: ListingDetail, right: ListingDetail): Com
     },
     {
       id: "bhp",
-      label: "BHP",
+      label: "Power",
       left: `${left.bhp} bhp`,
       right: `${right.bhp} bhp`,
       highlight: numericWinner(left.bhp, right.bhp, "higher"),
