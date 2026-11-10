@@ -114,7 +114,14 @@ const STEPS: Step[] = [
   {
     id: "play-history-open-car",
     title: "Open car from Match history",
-    body: "On Match history rows, Open car takes you to the catalogue listing (/cars/:id) for your card when a listing id is known — and for theirs when known too (house cards often omit theirs). Rematch, Wins/Losses chips, and empty-bay CTAs stay. Open profile on a selected Play opponent is the next step.",
+    body: "On Match history rows, Open car takes you to the catalogue listing (/cars/:id) for your card when a listing id is known — and for theirs when known too (house cards often omit theirs). Rematch, Wins/Losses chips, and empty-bay CTAs stay. Open opponent from Match history is the next step.",
+    to: "/play/history",
+    cta: "Open Match history",
+  },
+  {
+    id: "play-history-open-opponent",
+    title: "Open opponent from Match history",
+    body: "On Match history Challenge rows, Open opponent takes you to that member’s public garage (/members/:id). The CTA hides for house, when the opponent is missing, or when the opponent is you. Rematch, Open car, Wins/Losses chips, and empty-bay CTAs stay. Open profile on a selected Play opponent is the next step.",
     to: "/play/history",
     cta: "Open Match history",
   },
@@ -332,7 +339,8 @@ export function HowToPage() {
             beside Copy code, admin inventory Open listing (/cars/:id), admin Accounts Open member
             (/members/:id), admin Coin adjustments Open member (/members/:id), Top Trumps streaks,
             Match history Rematch (PvP opponent deep-link or house
-            → Play), Match history Open car (/cars/:id when listing ids are known), Play Open profile
+            → Play), Match history Open car (/cars/:id when listing ids are known), Match history Open
+            opponent (/members/:id on PvP; hidden for house / self / missing), Play Open profile
             (/members/:id when a PvP opponent is selected; hidden for house / self), this week’s cup
             standings with an Ends in countdown (Europe/London week end, +50 BC prize), free trades,
             Trade history Offer again (/trades?with=), Trades Open car (/cars/:id on inbox and history
@@ -407,9 +415,9 @@ export function HowToPage() {
               <Link to="/play/history" className="text-lime no-underline hover:underline">
                 Match history
               </Link>{" "}
-              — Wins/Losses chips; Open car → /cars/:id when listing ids are known; Rematch
-              deep-links the same PvP opponent into Play, or Rematch vs house → Play (hidden for
-              missing or self).
+              — Wins/Losses chips; Open car → /cars/:id when listing ids are known; Open opponent →
+              /members/:id on PvP (hidden for house / self / missing); Rematch deep-links the same
+              PvP opponent into Play, or Rematch vs house → Play (hidden for missing or self).
             </li>
             <li>
               <Link to="/play" className="text-lime no-underline hover:underline">

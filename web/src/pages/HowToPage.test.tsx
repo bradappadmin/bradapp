@@ -60,6 +60,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Open car from Match history" }),
     ).toBeInTheDocument();
     expect(document.getElementById("play-history-open-car")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Open opponent from Match history" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("play-history-open-opponent")).not.toBeNull();
     expect(document.getElementById("play-open-opponent")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
     expect(
@@ -350,6 +354,19 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/and for theirs when known too \(house cards often omit theirs\)/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open opponent from Match history is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open opponent takes you to that member.?s public garage \(\/members\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /The CTA hides for house, when the opponent is missing, or when the opponent is you/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Open profile on a selected Play opponent is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -365,6 +382,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Match history Open car \(\/cars\/:id when listing ids are known\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Match history Open opponent \(\/members\/:id on PvP; hidden for house \/ self \/ missing\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -650,7 +672,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/Wins\/Losses chips/i).length).toBeGreaterThanOrEqual(2);
     expect(
       screen.getByText(
-        /Open car → \/cars\/:id when listing ids are known; Rematch deep-links the same PvP opponent into Play, or Rematch vs house → Play/i,
+        /Open car → \/cars\/:id when listing ids are known; Open opponent → \/members\/:id on PvP \(hidden for house \/ self \/ missing\); Rematch deep-links the same PvP opponent into Play, or Rematch vs house → Play/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/Completed\/Declined chips/i).length).toBeGreaterThanOrEqual(2);
@@ -767,7 +789,7 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getAllByRole("link", { name: "Open Play" }).every((a) => a.getAttribute("href") === "/play"),
     ).toBe(true);
     expect(screen.getAllByRole("link", { name: "Open Match history" }).length).toBeGreaterThanOrEqual(
-      2,
+      3,
     );
     expect(
       screen
