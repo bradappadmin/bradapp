@@ -1,9 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { CarCard, CarHeroVisual } from "./CarCard";
 
 describe("CarCard", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("shows colour cue, key specs, and a Brad Coin price badge", () => {
     render(
       <MemoryRouter>
@@ -73,6 +77,9 @@ describe("CarCard", () => {
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     expect(document.querySelector('[data-bay-frame="card"]')).not.toBeNull();
+    const mediaShell = document.querySelector(".car-card-media");
+    expect(mediaShell).not.toBeNull();
+    expect(mediaShell?.className).toMatch(/car-card-media/);
     const peek = screen.getByLabelText("Top Trumps peek");
     expect(peek).toBeInTheDocument();
     expect(peek.textContent).toMatch(/Power/);
@@ -83,6 +90,24 @@ describe("CarCard", () => {
     expect(screen.getByText("155 mph")).toBeInTheDocument();
     // Media peek replaces the denser SpecPills row under the title.
     expect(screen.queryByLabelText("Key specs")).not.toBeInTheDocument();
+  });
+
+  it("keeps row cards without the media hover shell class", () => {
+    render(
+      <MemoryRouter>
+        <CarCard
+          to="/cars/9"
+          car={{
+            id: 9,
+            make: "Ford",
+            model: "Focus",
+            colour: "Laser Blue",
+            year: 2020,
+          }}
+        />
+      </MemoryRouter>,
+    );
+    expect(document.querySelector(".car-card-media")).toBeNull();
   });
 
   it("renders a hero visual with bay framing and an accessible paint label", () => {

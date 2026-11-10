@@ -301,7 +301,7 @@ export function CarVisual({
         isHero
           ? "relative z-[1] h-auto w-full max-w-5xl object-contain object-bottom drop-shadow-[0_22px_48px_rgba(0,0,0,0.65)]"
           : isCard
-            ? "relative z-[1] h-full w-full object-contain object-bottom scale-[1.1] transition duration-500 group-hover:scale-[1.14]"
+            ? "relative z-[1] h-full w-full object-contain object-bottom"
             : "relative z-[1] h-full w-full object-contain object-bottom scale-[1.08]"
       }
       loading={isHero ? "eager" : "lazy"}

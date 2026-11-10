@@ -195,15 +195,12 @@ export function CarCard({
   );
 
   const shellClass = useMedia
-    ? `overflow-hidden rounded-md border border-white/10 bg-bay-deep/40 ${className}`
-    : `rounded-md border border-white/10 bg-bay-panel/40 p-3 sm:p-4 ${className}`;
+    ? `car-card-media group overflow-hidden rounded-md border border-white/10 bg-bay-deep/40 ${className}`
+    : `rounded-md border border-white/10 bg-bay-panel/40 p-3 sm:p-4 transition hover:border-lime/35 hover:bg-bay-panel/80 ${className}`;
 
   if (to && !footer) {
     return (
-      <Link
-        to={to}
-        className={`group block no-underline transition hover:border-lime/35 hover:bg-bay-panel/80 ${shellClass}`}
-      >
+      <Link to={to} className={`group block no-underline ${shellClass}`}>
         {main}
       </Link>
     );

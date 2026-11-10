@@ -309,3 +309,68 @@
     radial-gradient(ellipse 70% 80% at 20% 0%, rgba(163, 230, 53, 0.1), transparent 60%),
     radial-gradient(ellipse 60% 70% at 85% 20%, rgba(244, 63, 94, 0.08), transparent 55%);
 }
+
+/* Shared photo-first car media cards — soft bay lift, studio ease, lime/rose edge */
+.car-card-media {
+  position: relative;
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.car-card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow 0.35s ease;
+}
+
+.car-card-media:hover,
+.car-card-media:focus-within {
+  transform: translateY(-3px);
+  border-color: rgba(163, 230, 53, 0.38);
+  box-shadow:
+    0 14px 32px -16px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(244, 63, 94, 0.12);
+}
+
+.car-card-media:hover::after,
+.car-card-media:focus-within::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(163, 230, 53, 0.28),
+    inset 0 -1px 0 0 rgba(244, 63, 94, 0.2);
+}
+
+.car-card-media [data-bay-frame="card"] img {
+  transition: transform 0.5s ease;
+  transform: scale(1.1);
+  transform-origin: center bottom;
+}
+
+.car-card-media:hover [data-bay-frame="card"] img,
+.car-card-media:focus-within [data-bay-frame="card"] img {
+  transform: scale(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car-card-media,
+  .car-card-media::after,
+  .car-card-media [data-bay-frame="card"] img {
+    transition: none;
+  }
+
+  .car-card-media:hover,
+  .car-card-media:focus-within {
+    transform: none;
+  }
+
+  .car-card-media:hover [data-bay-frame="card"] img,
+  .car-card-media:focus-within [data-bay-frame="card"] img {
+    transform: scale(1.1);
+  }
+}
