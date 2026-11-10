@@ -120,10 +120,23 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
     expect(await screen.findByRole("heading", { name: "Saved" })).toBeInTheDocument();
+    expect(screen.getByText(/Top Trumps peek under the studio photo/i)).toBeInTheDocument();
+    expect(screen.getByText("Top Trumps peek")).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: /Audi RS6 Avant/i })).toHaveAttribute(
       "href",
       "/cars/11",
     );
+    const peek = screen.getByLabelText("Top Trumps peek");
+    expect(peek).toBeInTheDocument();
+    expect(peek.textContent).toMatch(/Power/);
+    expect(peek.textContent).toMatch(/0–60/);
+    expect(peek.textContent).toMatch(/Top speed/);
+    expect(screen.getByText("591")).toBeInTheDocument();
+    expect(screen.getByText("3.6s")).toBeInTheDocument();
+    expect(screen.getByText("155 mph")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to compare" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Challenge to Top Trumps" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Offer trade" })).toBeInTheDocument();
     const browseLinks = screen.getAllByRole("link", { name: "Browse cars" });
     expect(browseLinks.some((link) => link.getAttribute("href") === "/cars")).toBe(true);
     const img = document.querySelector("img");

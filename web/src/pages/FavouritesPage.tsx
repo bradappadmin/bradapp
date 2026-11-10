@@ -158,14 +158,18 @@ export function FavouritesPage() {
             </h1>
             <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
             <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
-              Cars you saved from the catalogue. Compare queues into the shared tray with Cars / My
-              cars — or open a listing anytime. Offer trade and Challenge stay on someone else’s
-              cars.
+              Cars you saved from the catalogue — each card keeps a compact Top Trumps peek under the
+              studio photo (Power / 0–60 / Top speed), same as Cars. Compare queues into the shared
+              tray with Cars / My cars — or open a listing anytime. Offer trade and Challenge stay on
+              someone else’s cars.
             </p>
             {!loading ? (
               <div className="mt-4 flex flex-wrap gap-2" aria-label="Favourites bay notes">
                 <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
                   Photo-first grid
+                </span>
+                <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  Top Trumps peek
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {filtersOn ? visibleCars.length : cars.length}{" "}
