@@ -17,7 +17,7 @@ import { useToast } from "../toast-context";
 export function ListingPage() {
   const { id } = useParams();
   const listingId = Number(id);
-  const { user, setUser, refresh } = useAuth();
+  const { user, setUser, refresh, refreshFavouriteCount } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [listing, setListing] = useState<ListingDetail | null>(null);
@@ -113,6 +113,7 @@ export function ListingPage() {
         await api.saveFavourite(listingId);
         setFavourited(true);
       }
+      await refreshFavouriteCount();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not update favourite");
     } finally {

@@ -16,8 +16,11 @@ type AuthContextValue = {
   dailyLogin: DailyLoginStatus | null;
   /** Pending incoming free-trade offers for the signed-in user. */
   pendingTradeInbox: number;
+  /** Saved favourites count for the signed-in user (nav badge). */
+  favouriteCount: number;
   refresh: () => Promise<void>;
   refreshTradeInbox: () => Promise<void>;
+  refreshFavouriteCount: () => Promise<void>;
   setUser: (user: User | null) => void;
 };
 
@@ -27,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(null);
   const [dailyLogin, setDailyLogin] = useState<DailyLoginStatus | null>(null);
   const [pendingTradeInbox, setPendingTradeInbox] = useState(0);
+  const [favouriteCount, setFavouriteCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const refreshTradeInbox = useCallback(async () => {
@@ -38,11 +42,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshFavouriteCount = useCallback(async () => {
+    try {
+      const res = await api.fetchFavouriteCount();
+      setFavouriteCount(Number(res.count) || 0);
+    } catch {
+      setFavouriteCount(0);
+    }
+  }, []);
+
   const setUser = useCallback(
     (next: User | null) => {
       setUserState(next);
       if (!next) {
         setPendingTradeInbox(0);
+        setFavouriteCount(0);
         setDailyLogin(null);
       }
     },
@@ -54,15 +68,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.fetchMe();
       setUserState(res.user);
       setDailyLogin(res.dailyLogin);
-      await refreshTradeInbox();
+      await Promise.all([refreshTradeInbox(), refreshFavouriteCount()]);
     } catch {
       setUserState(null);
       setDailyLogin(null);
       setPendingTradeInbox(0);
+      setFavouriteCount(0);
     } finally {
       setLoading(false);
     }
-  }, [refreshTradeInbox]);
+  }, [refreshTradeInbox, refreshFavouriteCount]);
 
   useEffect(() => {
     void refresh();
@@ -75,8 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         dailyLogin,
         pendingTradeInbox,
+        favouriteCount,
         refresh,
         refreshTradeInbox,
+        refreshFavouriteCount,
         setUser,
       }}
     >

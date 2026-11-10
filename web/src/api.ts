@@ -245,6 +245,10 @@ export function fetchFavourites(): Promise<{ cars: FavouriteCar[] }> {
   return request("/favourites");
 }
 
+export function fetchFavouriteCount(): Promise<{ count: number }> {
+  return request("/favourites/count");
+}
+
 export function fetchFavouriteStatus(id: number): Promise<{ favourited: boolean }> {
   return request(`/favourites/${id}`);
 }

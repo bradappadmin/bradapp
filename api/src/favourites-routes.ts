@@ -2,6 +2,7 @@ import { Router, type Response } from "express";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import {
   addFavourite,
+  countFavourites,
   isListingFavourited,
   listFavourites,
   listingExists,
@@ -21,6 +22,13 @@ export function createFavouritesRouter(): Router {
     const user = (req as AuthedRequest).user;
     const cars = await listFavourites(user.id);
     res.json({ cars });
+  });
+
+  // Registered before /:listingId so "count" is not parsed as an id.
+  router.get("/count", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const count = await countFavourites(user.id);
+    res.json({ count });
   });
 
   router.get("/:listingId", requireAuth, async (req, res: Response) => {

@@ -30,6 +30,16 @@ export async function isListingFavourited(userId: number, listingId: number): Pr
   return rows.length > 0;
 }
 
+/** Count of favourites for the nav badge (cheap COUNT). */
+export async function countFavourites(userId: number): Promise<number> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT COUNT(*) AS count FROM favourites WHERE user_id = ?`,
+    [userId],
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
 export async function listingExists(listingId: number): Promise<boolean> {
   const pool = getPool();
   const [rows] = await pool.query<RowDataPacket[]>(

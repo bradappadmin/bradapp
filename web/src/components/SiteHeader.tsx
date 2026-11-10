@@ -10,14 +10,22 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
       : "text-steel hover:bg-white/[0.03] hover:text-mist md:hover:bg-transparent"
   }`;
 
-function InboxBadge({ count }: { count: number }) {
+function NavCountBadge({
+  count,
+  ariaLabel,
+  testId,
+}: {
+  count: number;
+  ariaLabel: string;
+  testId: string;
+}) {
   if (count <= 0) return null;
   const label = count > 9 ? "9+" : String(count);
   return (
     <span
       className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-rose px-1.5 py-0.5 font-display text-[11px] font-semibold leading-none text-white ring-1 ring-lime/45"
-      aria-label={`${count} pending trade offer${count === 1 ? "" : "s"}`}
-      data-testid="trades-inbox-badge"
+      aria-label={ariaLabel}
+      data-testid={testId}
     >
       {label}
     </span>
@@ -43,7 +51,13 @@ function CoinBalanceLink({
 }
 
 export function SiteHeader() {
-  const { user, pendingTradeInbox, refreshTradeInbox } = useAuth();
+  const {
+    user,
+    pendingTradeInbox,
+    favouriteCount,
+    refreshTradeInbox,
+    refreshFavouriteCount,
+  } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -56,7 +70,8 @@ export function SiteHeader() {
   useEffect(() => {
     if (!user) return;
     void refreshTradeInbox();
-  }, [user, location.pathname, refreshTradeInbox]);
+    void refreshFavouriteCount();
+  }, [user, location.pathname, refreshTradeInbox, refreshFavouriteCount]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -102,10 +117,19 @@ export function SiteHeader() {
           </NavLink>
           <NavLink to="/favourites" className={linkClass}>
             Favourites
+            <NavCountBadge
+              count={favouriteCount}
+              ariaLabel={`${favouriteCount} favourite${favouriteCount === 1 ? "" : "s"}`}
+              testId="favourites-nav-badge"
+            />
           </NavLink>
           <NavLink to="/trades" className={linkClass}>
             Trades
-            <InboxBadge count={pendingTradeInbox} />
+            <NavCountBadge
+              count={pendingTradeInbox}
+              ariaLabel={`${pendingTradeInbox} pending trade offer${pendingTradeInbox === 1 ? "" : "s"}`}
+              testId="trades-inbox-badge"
+            />
           </NavLink>
           <NavLink to="/ledger" className={linkClass}>
             Ledger

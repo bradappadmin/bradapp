@@ -13,6 +13,7 @@ vi.mock("../api", () => ({
   claimDailyBonus: vi.fn(),
   fetchDailyBonus: vi.fn(),
   fetchTradeInboxCount: vi.fn(),
+  fetchFavouriteCount: vi.fn(),
 }));
 
 import * as api from "../api";
@@ -43,6 +44,7 @@ describe("SiteHeader", () => {
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
     vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 0 });
+    vi.mocked(api.fetchFavouriteCount).mockResolvedValue({ count: 0 });
   });
 
   it("toggles the mobile menu and shows primary links when open", async () => {
@@ -97,6 +99,23 @@ describe("SiteHeader", () => {
     expect(screen.queryByTestId("trades-inbox-menu-dot")).not.toBeInTheDocument();
   });
 
+  it("hides the Favourites badge when count is zero", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
+    vi.mocked(api.fetchFavouriteCount).mockResolvedValue({ count: 0 });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SiteHeader />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("link", { name: /^Favourites$/i })).toBeInTheDocument();
+    expect(screen.queryByTestId("favourites-nav-badge")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/favourite/i)).not.toBeInTheDocument();
+  });
+
   it("shows a pending inbox badge on Trades when signed in", async () => {
     vi.mocked(api.fetchMe).mockResolvedValue(member);
     vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 3 });
@@ -121,9 +140,30 @@ describe("SiteHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a favourites count badge when signed in", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
+    vi.mocked(api.fetchFavouriteCount).mockResolvedValue({ count: 2 });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SiteHeader />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("2 favourites")).toBeInTheDocument();
+    const badge = screen.getAllByTestId("favourites-nav-badge")[0]!;
+    expect(badge).toHaveTextContent("2");
+    expect(badge.className).toMatch(/bg-rose/);
+    expect(badge.className).toMatch(/ring-lime/);
+    expect(screen.getAllByRole("link", { name: /Favourites/i }).length).toBeGreaterThan(0);
+  });
+
   it("caps the badge label at 9+", async () => {
     vi.mocked(api.fetchMe).mockResolvedValue(member);
     vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 12 });
+    vi.mocked(api.fetchFavouriteCount).mockResolvedValue({ count: 15 });
 
     render(
       <MemoryRouter>
@@ -135,5 +175,7 @@ describe("SiteHeader", () => {
 
     expect(await screen.findByLabelText("12 pending trade offers")).toBeInTheDocument();
     expect(screen.getAllByTestId("trades-inbox-badge")[0]).toHaveTextContent("9+");
+    expect(await screen.findByLabelText("15 favourites")).toBeInTheDocument();
+    expect(screen.getAllByTestId("favourites-nav-badge")[0]).toHaveTextContent("9+");
   });
 });

@@ -44,6 +44,10 @@ describe.runIf(hasDb)("favourites routes", () => {
   });
 
   it("saves, lists, and unsaves a listing", async () => {
+    const emptyCount = await member.get("/favourites/count");
+    expect(emptyCount.status).toBe(200);
+    expect(emptyCount.body.count).toBe(0);
+
     const before = await member.get(`/favourites/${listingId}`);
     expect(before.status).toBe(200);
     expect(before.body.favourited).toBe(false);
@@ -55,6 +59,10 @@ describe.runIf(hasDb)("favourites routes", () => {
     const again = await member.post(`/favourites/${listingId}`);
     expect(again.status).toBe(200);
     expect(again.body.favourited).toBe(true);
+
+    const counted = await member.get("/favourites/count");
+    expect(counted.status).toBe(200);
+    expect(counted.body.count).toBe(1);
 
     const list = await member.get("/favourites");
     expect(list.status).toBe(200);
@@ -75,8 +83,17 @@ describe.runIf(hasDb)("favourites routes", () => {
     expect(remove.status).toBe(200);
     expect(remove.body.favourited).toBe(false);
 
+    const afterCount = await member.get("/favourites/count");
+    expect(afterCount.status).toBe(200);
+    expect(afterCount.body.count).toBe(0);
+
     const after = await member.get("/favourites");
     expect(after.body.cars.some((c: { id: number }) => c.id === listingId)).toBe(false);
+  });
+
+  it("requires sign-in for favourites count", async () => {
+    const res = await request(app).get("/favourites/count");
+    expect(res.status).toBe(401);
   });
 
   it("rejects favouriting a missing listing", async () => {

@@ -29,7 +29,7 @@ const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
 export function FavouritesPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshFavouriteCount } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const sort = parseFavouritesSort(searchParams.get("sort"));
   const qFromUrl = (searchParams.get("q") ?? "").trim();
@@ -139,6 +139,7 @@ export function FavouritesPage() {
     try {
       await api.removeFavourite(carId);
       await reload();
+      await refreshFavouriteCount();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not remove favourite");
     } finally {
