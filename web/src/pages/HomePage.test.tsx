@@ -377,6 +377,18 @@ describe("HomePage", () => {
         /Daily login \+25 BC · streak ×3 · \+15 streak BC · 2026-11-10 \(Europe\/London\)/i,
       ),
     ).toBeInTheDocument();
+    const banner = screen.getByLabelText("Daily login and login streak");
+    expect(banner).toBeInTheDocument();
+    expect(banner).toHaveTextContent(/Today.?s \+25 BC claimed/i);
+    expect(banner).toHaveTextContent(/Login streak ×3 · 4 more London days to day 7/i);
+    expect(
+      screen.getAllByRole("link", { name: "Coin ledger" }).some((a) => a.getAttribute("href") === "/ledger"),
+    ).toBe(true);
+    expect(
+      screen
+        .getAllByRole("link", { name: "How to" })
+        .some((a) => a.getAttribute("href") === "/how-to#daily-login"),
+    ).toBe(true);
   });
 
   it("shows dismissible first-visit tips after sign-in, including Admin for admins", async () => {

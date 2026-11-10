@@ -8,6 +8,7 @@ import { FeaturedReview } from "../components/FeaturedReview";
 import { FirstVisitTips } from "../components/FirstVisitTips";
 import { HomeBayAtmosphere } from "../components/HomeBayAtmosphere";
 import { LatestReviews } from "../components/LatestReviews";
+import { LoginStreakBanner } from "../components/LoginStreakBanner";
 import { RecentlyViewedCars } from "../components/RecentlyViewedCars";
 import { SiteHeader } from "../components/SiteHeader";
 import { dailyLoginToastMessage } from "../daily-login-toast";
@@ -287,6 +288,13 @@ export function HomePage() {
         </div>
 
         <div className="relative z-10">
+          {dailyLogin ? (
+            <LoginStreakBanner
+              dailyLogin={dailyLogin}
+              claimBusy={claimBusy}
+              onClaim={() => void onClaimDaily()}
+            />
+          ) : null}
           <FirstVisitTips user={user} />
           <RecentlyViewedCars />
           <FeaturedReview />
