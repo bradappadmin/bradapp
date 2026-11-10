@@ -16,12 +16,12 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
-describe("HowToPage", () => {
+describe("HowToPage Midnight Garage UI", () => {
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
   });
 
-  it("shows the family walkthrough sections and CTAs", async () => {
+  it("shows bay hierarchy, rematch/trade-again copy, and CTAs", async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -31,6 +31,7 @@ describe("HowToPage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "How to" })).toBeInTheDocument();
+    expect(screen.getByText(/Family walkthrough · Midnight garage/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Join the family bay" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Buy and sell cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
@@ -44,13 +45,23 @@ describe("HowToPage", () => {
 
     expect(screen.getByText(/invite codes are optional/i)).toBeInTheDocument();
     expect(screen.getByText(/photo-first catalogue/i)).toBeInTheDocument();
+    expect(screen.getByText(/Rematch from Match history/i)).toBeInTheDocument();
     expect(screen.getByText(/3 wins \+15 BC, 5 wins \+40 BC/i)).toBeInTheDocument();
     expect(screen.getByText(/Europe\/London week/i)).toBeInTheDocument();
     expect(screen.getByText(/\+50 Brad Coins once/i)).toBeInTheDocument();
-    expect(screen.getByText(/Offer trade on someone else’s listing/i)).toBeInTheDocument();
+    expect(screen.getByText(/Trade again reopens compose/i)).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
-    expect(screen.getByText(/select two and compare side by side/i)).toBeInTheDocument();
-    expect(screen.getByText(/this week’s Top Trumps cup/i)).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: "Match history" })).toHaveAttribute(
+      "href",
+      "/play/history",
+    );
+    expect(screen.getByRole("link", { name: "Completed trades" })).toHaveAttribute(
+      "href",
+      "/trades/history",
+    );
+    expect(screen.getByText(/Rematch vs house or the same opponent/i)).toBeInTheDocument();
+    expect(screen.getByText(/Trade again when they still have that car/i)).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
     expect(screen.getByRole("link", { name: "Open Cars" })).toHaveAttribute("href", "/cars");

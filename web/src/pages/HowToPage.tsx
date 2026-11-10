@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth-context";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 
 type Step = {
@@ -29,7 +30,7 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing or public garage, rematch when you’re done, and check Match history. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing or public garage, rematch on Play when you’re done, or Rematch from Match history. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
   },
@@ -43,7 +44,7 @@ const STEPS: Step[] = [
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, or Offer trade on someone else’s listing. Accept or decline in your inbox — photo cards show what you’re swapping. Completed history lists who you traded with.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, or Offer trade on someone else’s listing. Accept or decline in your inbox — photo cards show what you’re swapping. Completed history lists who you traded with; Trade again reopens compose when they still have that car.",
     to: "/trades",
     cta: "Open Trades",
   },
@@ -76,15 +77,19 @@ export function HowToPage() {
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(ellipse_at_top,rgba(244,63,94,0.16),transparent_70%)]" />
-
-        <div className="bay-rise relative">
-          <p className="text-xs uppercase tracking-wide text-steel">Family walkthrough</p>
-          <h1 className="mt-2 font-display text-3xl font-semibold text-white sm:text-4xl">How to</h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-steel">
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <header className="bay-rise">
+          <p className="text-xs uppercase tracking-[0.28em] text-steel">
+            Family walkthrough · Midnight garage
+          </p>
+          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            How to
+          </h1>
+          <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, Brad Coins, photo-first cars, Top Trumps
             streaks and the weekly cup, free trades, drag races, and your bay showcase. Nothing here
             spends real money.
@@ -101,13 +106,17 @@ export function HowToPage() {
               if you’re already in the bay.
             </p>
           ) : null}
-        </div>
+        </header>
 
-        <ol className="bay-rise-delay mt-10 list-none space-y-0 border-t border-white/10 p-0">
+        <ol className="bay-rise-delay mt-8 list-none space-y-3 p-0">
           {STEPS.map((step, index) => {
             const lockedAdmin = Boolean(step.adminOnly && !isAdmin);
             return (
-              <li key={step.id} id={step.id} className="border-b border-white/10 py-8">
+              <li
+                key={step.id}
+                id={step.id}
+                className="play-panel rounded-md border p-4 sm:p-5"
+              >
                 <p className="font-display text-xs uppercase tracking-wide text-steel">
                   Step {index + 1}
                   {step.adminOnly ? " · Brad & Napwood" : null}
@@ -121,7 +130,7 @@ export function HowToPage() {
                 ) : (
                   <Link
                     to={step.to}
-                    className="mt-5 inline-block rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime no-underline hover:bg-lime/10"
+                    className="mt-5 inline-block rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
                   >
                     {step.cta}
                   </Link>
@@ -131,9 +140,26 @@ export function HowToPage() {
           })}
         </ol>
 
-        <section className="mt-10">
-          <h2 className="font-display text-xl text-mist">Also handy</h2>
+        <section
+          className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+          aria-labelledby="howto-also-handy"
+        >
+          <h2 id="howto-also-handy" className="font-display text-xl text-mist">
+            Also handy
+          </h2>
           <ul className="mt-4 list-none space-y-3 border-t border-white/10 p-0 pt-4 text-sm text-steel">
+            <li>
+              <Link to="/play/history" className="text-lime no-underline hover:underline">
+                Match history
+              </Link>{" "}
+              — past Top Trumps; Rematch vs house or the same opponent.
+            </li>
+            <li>
+              <Link to="/trades/history" className="text-lime no-underline hover:underline">
+                Completed trades
+              </Link>{" "}
+              — accepted swaps; Trade again when they still have that car.
+            </li>
             <li>
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
