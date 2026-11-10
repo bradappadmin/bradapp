@@ -109,6 +109,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Top Trumps peek on a public garage" }),
     ).toBeInTheDocument();
     expect(document.getElementById("member-garage-trump-stats")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Public garage bay value strip" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("member-garage-bay-value")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Gift Brad Coins" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Filter the coin ledger" })).toBeInTheDocument();
     expect(document.getElementById("ledger-type")).not.toBeNull();
@@ -879,11 +883,27 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Challenge, Offer trade, Copy link, showcase hero, and the photo grid stay/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Public garage bay value strip is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /one Midnight Garage bay strip under the hero shows car count and total Brad Coin value — list prices on cars in that bay/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The strip hides on an empty garage/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Copy garage link stays on Account \/ My cars/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
         /public garage Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /public garage bay value strip \(car count \+ total BC; hides when empty\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -999,7 +1019,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Gift opens #gift-coins on their garage/i)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /open a garage \(Top Trumps peek under each studio photo: Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\) or Copy link on their profile/i,
+        /open a garage \(bay value strip with car count \+ total BC when they have cars; Top Trumps peek under each studio photo: Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\) or Copy link on their profile/i,
       ),
     ).toBeInTheDocument();
     expect(

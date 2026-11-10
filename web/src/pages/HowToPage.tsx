@@ -317,7 +317,14 @@ const STEPS: Step[] = [
   {
     id: "member-garage-trump-stats",
     title: "Top Trumps peek on a public garage",
-    body: "On a public garage (/members/:id), each photo-first garage media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars, Favourites, and My cars. Challenge, Offer trade, Copy link, showcase hero, and the photo grid stay. Tight Midnight Garage strip — not a stats dashboard.",
+    body: "On a public garage (/members/:id), each photo-first garage media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars, Favourites, and My cars. Challenge, Offer trade, Copy link, showcase hero, and the photo grid stay. Tight Midnight Garage strip — not a stats dashboard. Public garage bay value strip is the next step.",
+    to: "/members",
+    cta: "Open Members",
+  },
+  {
+    id: "member-garage-bay-value",
+    title: "Public garage bay value strip",
+    body: "On a public garage (/members/:id) when that member has at least one car, one Midnight Garage bay strip under the hero shows car count and total Brad Coin value — list prices on cars in that bay. The strip hides on an empty garage. Browse cars and How to sit on the strip; Top Trumps peek, Challenge, Offer trade, Copy link, and showcase stay. Tight strip — not a stats dashboard.",
     to: "/members",
     cta: "Open Members",
   },
@@ -434,7 +441,8 @@ export function HowToPage() {
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, leaderboard You highlight and Jump to my rank, Copy link on member profiles
             (Copy garage link stays on Account / My cars), public garage Top Trumps peek under each
-            studio photo (Power / 0–60 / Top speed, same as Cars / Favourites / My cars), My cars
+            studio photo (Power / 0–60 / Top speed, same as Cars / Favourites / My cars), public
+            garage bay value strip (car count + total BC; hides when empty), My cars
             Quick price chips (50 / 100 / 250 /
             500 BC) when listing or updating a sale, My cars bay value strip (owned count + total BC;
             sold history excluded), gift Quick amount chips, Coin ledger Find entry
@@ -550,9 +558,9 @@ export function HowToPage() {
               </Link>{" "}
               — Find a member, Has cars / Empty bay, Sort the bay; Challenge to Top Trumps, Offer
               trade, or Gift Brad Coins on other directory cards (sign in; hidden on your own row —
-              Gift opens #gift-coins on their garage); open a garage (Top Trumps peek under each
-              studio photo: Power / 0–60 / Top speed, same as Cars / Favourites / My cars) or Copy
-              link on their profile.
+              Gift opens #gift-coins on their garage); open a garage (bay value strip with car count
+              + total BC when they have cars; Top Trumps peek under each studio photo: Power / 0–60 /
+              Top speed, same as Cars / Favourites / My cars) or Copy link on their profile.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
