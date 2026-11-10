@@ -224,7 +224,7 @@ export function ListingPage() {
             </header>
 
             <div
-              className="-mx-4 overflow-hidden sm:mx-0 sm:rounded-md sm:border sm:border-white/10"
+              className="listing-hero-motion -mx-4 overflow-hidden sm:mx-0 sm:rounded-md sm:border sm:border-white/10"
               data-listing-hero
               aria-label="Listing bay photo"
             >

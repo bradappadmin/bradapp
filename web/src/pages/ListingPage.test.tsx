@@ -109,7 +109,9 @@ describe("ListingPage Midnight Garage UI", () => {
 
     const hero = screen.getByRole("img", { name: /Bugatti Chiron Sport/i });
     expect(hero.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
-    expect(screen.getByLabelText("Listing bay photo")).toBeInTheDocument();
+    const bayPhoto = screen.getByLabelText("Listing bay photo");
+    expect(bayPhoto).toBeInTheDocument();
+    expect(bayPhoto.className).toMatch(/listing-hero-motion/);
     expect(document.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
 
     // Top Trumps bay strip sits under the studio hero (same Power / 0–60 / Top speed as peeks).
