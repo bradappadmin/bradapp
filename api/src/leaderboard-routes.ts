@@ -18,6 +18,9 @@ type LeaderboardRow = RowDataPacket & {
   highlight_body_type: string | null;
   highlight_colour: string | null;
   highlight_coin_price: number | null;
+  highlight_bhp: number | null;
+  highlight_top_speed_mph: number | null;
+  highlight_zero_to_sixty_secs: number | null;
 };
 
 /**
@@ -36,6 +39,9 @@ function mapHighlightCar(row: LeaderboardRow) {
     bodyType: row.highlight_body_type ?? "",
     colour: row.highlight_colour ?? "Midnight Black",
     coinPrice: Number(row.highlight_coin_price ?? 0),
+    bhp: Number(row.highlight_bhp ?? 0),
+    topSpeedMph: Number(row.highlight_top_speed_mph ?? 0),
+    zeroToSixtySecs: Number(row.highlight_zero_to_sixty_secs ?? 0),
   };
 }
 
@@ -59,7 +65,10 @@ export function createLeaderboardRouter(): Router {
               cm.trim_name AS highlight_trim_name,
               cm.body_type AS highlight_body_type,
               hl.colour AS highlight_colour,
-              hl.coin_price AS highlight_coin_price
+              hl.coin_price AS highlight_coin_price,
+              cm.bhp AS highlight_bhp,
+              cm.top_speed_mph AS highlight_top_speed_mph,
+              cm.zero_to_sixty_secs AS highlight_zero_to_sixty_secs
        FROM users u
        LEFT JOIN listings hl
          ON hl.id = (

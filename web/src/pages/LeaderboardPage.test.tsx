@@ -79,6 +79,9 @@ describe("LeaderboardPage Midnight Garage UI", () => {
             bodyType: "Coupe",
             colour: "Racing Red",
             coinPrice: 420,
+            bhp: 502,
+            topSpeedMph: 197,
+            zeroToSixtySecs: 3.2,
           },
         },
         {
@@ -109,6 +112,9 @@ describe("LeaderboardPage Midnight Garage UI", () => {
             bodyType: "Hatchback",
             colour: "Blue",
             coinPrice: 180,
+            bhp: 280,
+            topSpeedMph: 155,
+            zeroToSixtySecs: 5.7,
           },
         },
       ],
@@ -154,9 +160,23 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
 
+    const peeks = screen.getAllByLabelText("Top Trumps peek");
+    expect(peeks.length).toBe(2);
+    expect(peeks[0]).toHaveTextContent("Power");
+    expect(peeks[0]).toHaveTextContent("502");
+    expect(peeks[0]).toHaveTextContent("0–60");
+    expect(peeks[0]).toHaveTextContent("3.2s");
+    expect(peeks[0]).toHaveTextContent("Top speed");
+    expect(peeks[0]).toHaveTextContent("197 mph");
+    expect(peeks[1]).toHaveTextContent("280");
+    expect(peeks[1]).toHaveTextContent("5.7s");
+    expect(peeks[1]).toHaveTextContent("155 mph");
+    expect(garageLink.querySelector('[aria-label="Top Trumps peek"]')).not.toBeNull();
+
     const selfLink = screen.getByRole("link", { name: /Member \(you\), rank 2, open garage/i });
     expect(selfLink).toHaveAttribute("href", "/members/2");
     expect(selfLink).toHaveTextContent("Empty bay");
+    expect(selfLink.querySelector('[aria-label="Top Trumps peek"]')).toBeNull();
     expect(selfLink).toHaveTextContent("You");
     expect(screen.getByText("Your rank #2")).toBeInTheDocument();
     const yourRow = document.getElementById("leaderboard-your-rank");

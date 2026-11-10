@@ -66,7 +66,13 @@ describe.runIf(hasDb)("leaderboard routes", () => {
           bodyType: expect.any(String),
           colour: expect.any(String),
           coinPrice: expect.any(Number),
+          bhp: expect.any(Number),
+          topSpeedMph: expect.any(Number),
+          zeroToSixtySecs: expect.any(Number),
         });
+        expect(entry.highlightCar.bhp).toBeGreaterThan(0);
+        expect(entry.highlightCar.topSpeedMph).toBeGreaterThan(0);
+        expect(entry.highlightCar.zeroToSixtySecs).toBeGreaterThan(0);
       }
       if (i > 0) {
         expect(entry.coinBalance).toBeLessThanOrEqual(res.body.entries[i - 1].coinBalance);

@@ -150,6 +150,9 @@ export type LeaderboardHighlightCar = {
   bodyType: string;
   colour: string;
   coinPrice: number;
+  bhp: number;
+  topSpeedMph: number;
+  zeroToSixtySecs: number;
 };
 
 export type LeaderboardEntry = {

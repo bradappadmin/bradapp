@@ -8,6 +8,7 @@ import { formatCoins, listingTitle } from "../cars";
 import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { TrumpStatsPeek } from "../components/TrumpStatsPeek";
 import { WeeklyCupPanel } from "../components/WeeklyCupPanel";
 import {
   filterLeaderboardMembers,
@@ -434,20 +435,23 @@ export function LeaderboardPage() {
                       #{entry.rank}
                     </span>
 
-                    <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-md border border-white/10 bg-bay-panel/60 sm:h-16 sm:w-28">
+                    <div className="w-[7.25rem] shrink-0 overflow-hidden rounded-md border border-white/10 bg-bay-panel/60 sm:w-36">
                       {car && carTitle ? (
-                        <CarVisual
-                          colour={car.colour}
-                          bodyType={car.bodyType}
-                          make={car.make}
-                          model={car.model}
-                          size="thumb"
-                          title={carTitle}
-                          className="!h-full !w-full !rounded-none !border-0"
-                        />
+                        <>
+                          <CarVisual
+                            colour={car.colour}
+                            bodyType={car.bodyType}
+                            make={car.make}
+                            model={car.model}
+                            size="thumb"
+                            title={carTitle}
+                            className="aspect-[3/2] !h-auto !w-full !rounded-none !border-0"
+                          />
+                          <TrumpStatsPeek car={car} />
+                        </>
                       ) : (
                         <div
-                          className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bay-panel to-bay-deep"
+                          className="flex aspect-[3/2] w-full items-center justify-center bg-gradient-to-b from-bay-panel to-bay-deep"
                           aria-hidden
                         >
                           <span className="font-display text-[10px] uppercase tracking-wide text-steel/80">
