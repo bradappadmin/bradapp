@@ -106,6 +106,8 @@ export function CarsPage() {
   const [form, setForm] = useState<SearchQuery>(draft);
   const chips = useMemo(() => activeFilterChips(draft), [draft]);
   const filtersOn = hasActiveFilters(draft);
+  // Search + sort stay while loading, when listings match, or while filters are active (no-match CTA).
+  const showSearch = loading || listings.length > 0 || filtersOn;
 
   useEffect(() => {
     setComparePicks(loadCompareSelection());
@@ -211,6 +213,22 @@ export function CarsPage() {
     "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
   const labelClass = "flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel";
 
+  let emptyTitle = "Nothing for sale";
+  let emptyBody =
+    "The bay is empty right now. Check back after members list cars from My cars.";
+  if (filtersOn) {
+    emptyTitle = "No matches";
+    const qText = draft.q?.trim() ?? "";
+    if (qText && chips.length === 1 && chips[0]?.key === "q") {
+      emptyBody = `Nothing for sale matches “${qText}”. Try another spelling or clear the filters.`;
+    } else if (qText) {
+      emptyBody = `Nothing for sale matches “${qText}” with those filters. Widen the bay or clear the filters.`;
+    } else {
+      emptyBody =
+        "Nothing for sale fits those filters. Drop a make or garage, widen the year or Brad Coin range, or clear everything and start again.";
+    }
+  }
+
   return (
     <div className="relative min-h-screen">
       <SiteHeader />
@@ -252,6 +270,8 @@ export function CarsPage() {
           </div>
         </header>
 
+        {showSearch ? (
+          <>
         <form
           onSubmit={onSubmit}
           className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-6"
@@ -548,47 +568,49 @@ export function CarsPage() {
             </select>
           </label>
         </div>
+          </>
+        ) : null}
 
-        <div className="mt-8 mb-4 flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="font-display text-xl text-mist">Listings</h2>
-          <p className="text-sm text-steel">
-            {loading
-              ? "Searching…"
-              : `${total.toLocaleString()} listing${total === 1 ? "" : "s"}${
-                  filtersOn ? " match" : " for sale"
-                }`}
-          </p>
-        </div>
+        {showSearch || loading ? (
+          <div className="mt-8 mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-display text-xl text-mist">Listings</h2>
+            <p className="text-sm text-steel">
+              {loading
+                ? "Searching…"
+                : `${total.toLocaleString()} listing${total === 1 ? "" : "s"}${
+                    filtersOn ? " match" : " for sale"
+                  }`}
+            </p>
+          </div>
+        ) : null}
 
         {error ? <p className="mb-4 text-sm text-rose">{error}</p> : null}
 
         {!loading && listings.length === 0 ? (
-          <div className="play-panel rounded-md border px-5 py-14 text-center">
+          <div
+            className={`play-panel rounded-md border px-5 py-12 text-center sm:py-14 ${
+              showSearch ? "bay-rise-delay mt-2" : "bay-rise-delay mt-10"
+            }`}
+            role="status"
+            aria-label={filtersOn ? "No matching cars" : "Empty cars bay"}
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">{emptyTitle}</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">{emptyBody}</p>
             {filtersOn ? (
-              <>
-                <p className="font-display text-xl text-mist">No cars match</p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-steel">
-                  Nothing for sale fits those filters. Drop a make or garage, widen the year or Brad
-                  Coin range, or clear everything and start again.
-                </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-5 rounded-md bg-rose px-5 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                  className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
                 >
                   Clear filters
                 </button>
-              </>
-            ) : (
-              <>
-                <p className="font-display text-xl text-mist">Nothing for sale</p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-steel">
-                  The bay is empty right now. Check back after members list cars from My cars.
-                </p>
-              </>
-            )}
+              </div>
+            ) : null}
           </div>
-        ) : (
+        ) : null}
+
+        {listings.length > 0 ? (
           <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => {
               const selected = comparePicks.some((p) => p.id === listing.id);
@@ -619,7 +641,7 @@ export function CarsPage() {
               );
             })}
           </ul>
-        )}
+        ) : null}
 
         <CompareTray picks={comparePicks} onChange={setComparePicks} />
       </main>

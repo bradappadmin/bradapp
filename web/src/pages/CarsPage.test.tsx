@@ -177,4 +177,82 @@ describe("CarsPage Midnight Garage UI", () => {
       );
     });
   });
+
+  it("shows No matches and Clear filters when search yields none", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.searchCars).mockResolvedValue({
+      total: 0,
+      limit: 24,
+      offset: 0,
+      listings: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cars?q=zzzz"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/cars"
+              element={
+                <>
+                  <CarsPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching cars")).toBeInTheDocument();
+    expect(screen.getByText(/Nothing for sale matches “zzzz”/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Search the bay" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("cars-search-params").textContent).toBe("");
+    });
+  });
+
+  it("keeps Search the bay when listings match", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cars"]}>
+        <AuthProvider>
+          <CarsPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Porsche Macan GTS")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Search the bay" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+  });
+
+  it("hides Search the bay when the catalogue is empty with no filters", async () => {
+    vi.mocked(api.searchCars).mockResolvedValue({
+      total: 0,
+      limit: 24,
+      offset: 0,
+      listings: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cars"]}>
+        <AuthProvider>
+          <CarsPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("Empty cars bay")).toBeInTheDocument();
+    expect(screen.getByText("Nothing for sale")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Search the bay" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+  });
 });
