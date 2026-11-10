@@ -48,6 +48,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Weekly Top Trumps cup" })).toBeInTheDocument();
     expect(document.getElementById("play-rematch")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Offer again from Trade history" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("trades-offer-again")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
     expect(
@@ -108,6 +112,20 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Match history Rematch \(PvP opponent deep-link or house → Play\)/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/Trades history: Completed\/Declined/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Offer again from Trade history is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Offer again deep-links Trades compose with that person ready \(\/trades\?with=/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Offer again hides when the other party is missing or is you/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Trade history Offer again \(\/trades\?with=\)/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/empty bay with Browse cars \/ My garage \/ Members/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points you to Members or Cars/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Find a review/i).length).toBeGreaterThan(0);
@@ -174,7 +192,12 @@ describe("HowToPage Midnight Garage UI", () => {
         /Rematch deep-links the same PvP opponent into Play, or Rematch vs house → Play/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Completed\/Declined chips/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Completed\/Declined chips/i).length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getByText(
+        /Offer again deep-links the other party into Trades \(\/trades\?with=/i,
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/start from a listing.?s Compare CTA \(tray picks/i),
     ).toBeInTheDocument();
@@ -234,6 +257,10 @@ describe("HowToPage Midnight Garage UI", () => {
       "/leaderboard",
     );
     expect(screen.getByRole("link", { name: "Open Trades" })).toHaveAttribute("href", "/trades");
+    expect(screen.getByRole("link", { name: "Open Trade history" })).toHaveAttribute(
+      "href",
+      "/trades/history",
+    );
     expect(screen.getByRole("link", { name: "Open Reviews" })).toHaveAttribute("href", "/reviews");
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
     expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(3);

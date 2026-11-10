@@ -79,9 +79,16 @@ const STEPS: Step[] = [
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, Offer trade from Favourites, Offer trade on the Members directory (not yourself), or Offer trade on the leaderboard standings and cup (not yourself). An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, Offer trade from Favourites, Offer trade on the Members directory (not yourself), or Offer trade on the leaderboard standings and cup (not yourself). An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined. Offer again from Trade history is the next step.",
     to: "/trades",
     cta: "Open Trades",
+  },
+  {
+    id: "trades-offer-again",
+    title: "Offer again from Trade history",
+    body: "Open Trade history after a deal resolves. Completed/Declined chips stay in the URL. On a row with another member, Offer again deep-links Trades compose with that person ready (/trades?with=…, plus theirCar when they still own that car). Offer again hides when the other party is missing or is you — Clear filter, Open trades, and Browse members still cover empty bays.",
+    to: "/trades/history",
+    cta: "Open Trade history",
   },
   {
     id: "reviews",
@@ -146,8 +153,8 @@ export function HowToPage() {
             Coins, leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage
             link stays on Account / My cars), gift Quick amount chips, Top Trumps streaks, Match
             history Rematch (PvP opponent deep-link or house → Play), this week’s cup standings, free
-            trades, member gifts, drag races, empty-bay next steps, and your bay showcase. Nothing
-            here spends real money.
+            trades, Trade history Offer again (/trades?with=), member gifts, drag races, empty-bay
+            next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -214,7 +221,8 @@ export function HowToPage() {
               <Link to="/trades/history" className="text-lime no-underline hover:underline">
                 Trades history
               </Link>{" "}
-              — Completed/Declined chips; Trade again when they still have that car.
+              — Completed/Declined chips; Offer again deep-links the other party into Trades
+              (/trades?with=, plus theirCar when still owned; hidden for missing or self).
             </li>
             <li>
               <Link to="/members" className="text-lime no-underline hover:underline">
