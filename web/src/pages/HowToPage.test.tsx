@@ -40,6 +40,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Gift Brad Coins" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Admin for Brad and Napwood" }),
     ).toBeInTheDocument();
@@ -54,6 +55,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/3 wins \+15 BC, 5 wins \+40 BC/i)).toBeInTheDocument();
     expect(screen.getByText(/Europe\/London week/i)).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
+    expect(screen.getByText(/Gift coins: enter an amount and an optional note/i)).toBeInTheDocument();
+    expect(screen.getByText(/Gift sent \/ Gift received/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Gifts/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/member gifts/i)).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Match history" })).toHaveAttribute(
       "href",
@@ -79,6 +84,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Open Trades" })).toHaveAttribute("href", "/trades");
     expect(screen.getByRole("link", { name: "Open Reviews" })).toHaveAttribute("href", "/reviews");
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
+    expect(screen.getByRole("link", { name: "Open Members" })).toHaveAttribute("href", "/members");
+    expect(screen.getAllByText(/gift Brad Coins/i).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: "Open Admin" })).not.toBeInTheDocument();
   });
 });

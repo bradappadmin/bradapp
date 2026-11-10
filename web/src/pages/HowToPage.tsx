@@ -30,7 +30,7 @@ const STEPS: Step[] = [
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort. My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort. My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
@@ -70,6 +70,13 @@ const STEPS: Step[] = [
     cta: "Open Account",
   },
   {
+    id: "gift-coins",
+    title: "Gift Brad Coins",
+    body: "Open another member’s public garage from Members. Use Gift coins: enter an amount and an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
+    to: "/members",
+    cta: "Open Members",
+  },
+  {
     id: "admin",
     title: "Admin for Brad and Napwood",
     body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood.",
@@ -98,8 +105,8 @@ export function HowToPage() {
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, Brad Coins, photo-first cars with Find and
-            sort, Top Trumps streaks and the weekly cup, free trades, drag races, empty-bay next
-            steps, and your bay showcase. Nothing here spends real money.
+            sort, Top Trumps streaks and the weekly cup, free trades, member gifts, drag races,
+            empty-bay next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -171,7 +178,8 @@ export function HowToPage() {
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
               </Link>{" "}
-              — Find a member + Has cars; open a garage, then challenge or offer a free trade.
+              — Find a member + Has cars; open a garage, then challenge, offer a free trade, or gift
+              Brad Coins.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
@@ -201,7 +209,7 @@ export function HowToPage() {
               <Link to="/ledger" className="text-lime no-underline hover:underline">
                 Coin ledger
               </Link>{" "}
-              — every in/out for your Brad Coins, with reason chips (sign in).
+              — every in/out for your Brad Coins, with reason chips including Gifts (sign in).
             </li>
             <li>
               <Link to="/trades" className="text-lime no-underline hover:underline">
