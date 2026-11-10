@@ -106,6 +106,36 @@ export function createAdminRouter(): Router {
   const router = Router();
   router.use(requireAdmin);
 
+  /** Lightweight bay overview counts for the admin home. */
+  router.get("/stats", async (_req, res: Response) => {
+    const pool = getPool();
+    const [[members]] = await pool.query<(RowDataPacket & { n: number })[]>(
+      `SELECT COUNT(*) AS n FROM users WHERE role = 'member'`,
+    );
+    const [[frozen]] = await pool.query<(RowDataPacket & { n: number })[]>(
+      `SELECT COUNT(*) AS n FROM users WHERE account_status = 'frozen'`,
+    );
+    const [[forSale]] = await pool.query<(RowDataPacket & { n: number })[]>(
+      `SELECT COUNT(*) AS n FROM listings WHERE status = 'available'`,
+    );
+    const [[pendingTrades]] = await pool.query<(RowDataPacket & { n: number })[]>(
+      `SELECT COUNT(*) AS n FROM card_trade_offers WHERE status = 'pending'`,
+    );
+    const [[publishedReviews]] = await pool.query<(RowDataPacket & { n: number })[]>(
+      `SELECT COUNT(*) AS n FROM video_reviews WHERE status = 'published'`,
+    );
+
+    res.json({
+      stats: {
+        memberAccounts: Number(members?.n ?? 0),
+        frozenAccounts: Number(frozen?.n ?? 0),
+        listingsForSale: Number(forSale?.n ?? 0),
+        pendingTradeOffers: Number(pendingTrades?.n ?? 0),
+        publishedReviews: Number(publishedReviews?.n ?? 0),
+      },
+    });
+  });
+
   router.get("/users", async (_req, res: Response) => {
     const pool = getPool();
     const [rows] = await pool.query<(RowDataPacket & {

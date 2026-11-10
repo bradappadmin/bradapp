@@ -816,6 +816,18 @@ export type AdminListing = {
   garageName: string;
 };
 
+export type AdminHomeStats = {
+  memberAccounts: number;
+  frozenAccounts: number;
+  listingsForSale: number;
+  pendingTradeOffers: number;
+  publishedReviews: number;
+};
+
+export function fetchAdminStats(): Promise<{ stats: AdminHomeStats }> {
+  return request("/admin/stats");
+}
+
 export function fetchAdminUsers(): Promise<{ users: AdminUser[] }> {
   return request("/admin/users");
 }

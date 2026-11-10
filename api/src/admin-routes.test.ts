@@ -55,6 +55,25 @@ describe.runIf(hasDb)("admin routes", () => {
     expect(res.status).toBe(403);
   });
 
+  it("returns quick stats for the admin home", async () => {
+    const blocked = await member.get("/admin/stats");
+    expect(blocked.status).toBe(403);
+
+    const res = await admin.get("/admin/stats");
+    expect(res.status).toBe(200);
+    expect(res.body.stats).toEqual(
+      expect.objectContaining({
+        memberAccounts: expect.any(Number),
+        frozenAccounts: expect.any(Number),
+        listingsForSale: expect.any(Number),
+        pendingTradeOffers: expect.any(Number),
+        publishedReviews: expect.any(Number),
+      }),
+    );
+    expect(res.body.stats.memberAccounts).toBeGreaterThanOrEqual(1);
+    expect(res.body.stats.listingsForSale).toBeGreaterThanOrEqual(0);
+  });
+
   it("lists users and corrects a member display name", async () => {
     const list = await admin.get("/admin/users");
     expect(list.status).toBe(200);
