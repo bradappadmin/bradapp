@@ -119,6 +119,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Reviews reel studio hover" }),
     ).toBeInTheDocument();
     expect(document.getElementById("reviews-studio-hover")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Review detail studio hero" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("review-detail-studio-hero")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Open a car from a review" })).toBeInTheDocument();
     expect(document.getElementById("reviews-open-car")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Compare from a review" })).toBeInTheDocument();
@@ -281,7 +285,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\), listing View seller \(\/members\/:id; hidden for self \/ house\), listing Top Trumps bay strip under the studio hero \(Power \/ 0–60 \/ Top speed\), listing studio hero motion \(entrance fade\/rise, photo ease, reduced-motion\)/i,
+        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\), listing View seller \(\/members\/:id; hidden for self \/ house\), listing Top Trumps bay strip under the studio hero \(Power \/ 0–60 \/ Top speed\), listing studio hero motion \(entrance fade\/rise, photo ease, reduced-motion\), review detail studio hero \(entrance fade\/rise, photo ease, dual heroes on drag races, reduced-motion\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -934,6 +938,32 @@ describe("HowToPage Midnight Garage UI", () => {
       ).length,
     ).toBeGreaterThanOrEqual(2);
     expect(
+      screen.getByText(/Review detail studio hero is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Review detail studio hero" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("review-detail-studio-hero")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /On a film \(\/reviews\/:id\), a dominant realistic studio car hero shows linked listing make\/model\/paint \(and year\) when known/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /soft-fades and rises in, eases the photo a little larger on hover\/focus, same presence as listing studio hero motion/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Drag races show dual lane heroes/i)).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        /Prefers-reduced-motion keeps the hero still \(no entrance \/ no photo ease \/ no bay pulse\)/i,
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getByText(/Copy link, Open car, likes, pin, Compare, and playback stay/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Open car from a review is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -965,7 +995,12 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /reel studio thumbs \(listing paint when known\) with bay lift \/ photo ease on hover \(reduced-motion keeps still\)/i,
+        /review detail studio hero \(entrance fade\/rise, photo ease, dual heroes on drag races, reduced-motion\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /reel studio thumbs \(listing paint when known\) with bay lift \/ photo ease on hover \(reduced-motion keeps still\); film detail studio hero \(listing paint\/year when known; dual heroes on drag races; entrance fade\/rise \+ photo ease; reduced-motion keeps still\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1014,13 +1049,13 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      screen.getAllByText(
         /Prefers-reduced-motion keeps the hero still \(no entrance \/ no photo ease \/ no bay pulse\)/i,
-      ),
-    ).toBeInTheDocument();
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
     expect(
       screen.getByText(
-        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\), Reviews reel studio hover \(realistic thumbs, bay lift \/ photo ease, reduced-motion\), Open car \(\/cars\/:id\) when a listing exists, and Reviews Compare into the shared tray when a listing is known/i,
+        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\), Reviews reel studio hover \(realistic thumbs, bay lift \/ photo ease, reduced-motion\), Review detail studio hero \(entrance fade\/rise, photo ease, dual heroes on drag races, reduced-motion\), Open car \(\/cars\/:id\) when a listing exists, and Reviews Compare into the shared tray when a listing is known/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1469,7 +1504,7 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Trade history" })
         .every((a) => a.getAttribute("href") === "/trades/history"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(4);
+    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(5);
     expect(
       screen
         .getAllByRole("link", { name: "Open Reviews" })
@@ -1477,7 +1512,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBe(true);
     expect(
       screen.getByText(
-        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); reel studio thumbs \(listing paint when known\) with bay lift \/ photo ease on hover \(reduced-motion keeps still\); Open car → \/cars\/:id when a listing exists; Compare into the shared tray when a listing is known; Copy link on a film/i,
+        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); reel studio thumbs \(listing paint when known\) with bay lift \/ photo ease on hover \(reduced-motion keeps still\); film detail studio hero \(listing paint\/year when known; dual heroes on drag races; entrance fade\/rise \+ photo ease; reduced-motion keeps still\); Open car → \/cars\/:id when a listing exists; Compare into the shared tray when a listing is known; Copy link on a film/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open Coin ledger" })).toHaveAttribute(

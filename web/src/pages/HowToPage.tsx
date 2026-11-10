@@ -352,14 +352,21 @@ const STEPS: Step[] = [
   {
     id: "reviews-studio-hover",
     title: "Reviews reel studio hover",
-    body: "On Video reviews, each reel card shows a realistic studio car thumb — linked listing make/model/paint (and year) when known — then soft-lifts the bay shell and eases the photo a little larger on hover/focus, same presence as Cars media cards. Prefers-reduced-motion keeps the card still (no lift / no photo zoom). Open car, Compare, Find, Sort the bay, type chips, and empty-bay CTAs stay. Open car from a review is the next step.",
+    body: "On Video reviews, each reel card shows a realistic studio car thumb — linked listing make/model/paint (and year) when known — then soft-lifts the bay shell and eases the photo a little larger on hover/focus, same presence as Cars media cards. Prefers-reduced-motion keeps the card still (no lift / no photo zoom). Open car, Compare, Find, Sort the bay, type chips, and empty-bay CTAs stay. Review detail studio hero is the next step.",
+    to: "/reviews",
+    cta: "Open Reviews",
+  },
+  {
+    id: "review-detail-studio-hero",
+    title: "Review detail studio hero",
+    body: "On a film (/reviews/:id), a dominant realistic studio car hero shows linked listing make/model/paint (and year) when known — soft-fades and rises in, eases the photo a little larger on hover/focus, same presence as listing studio hero motion. Drag races show dual lane heroes. Prefers-reduced-motion keeps the hero still (no entrance / no photo ease / no bay pulse). Copy link, Open car, likes, pin, Compare, and playback stay. Open car from a review is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
   },
   {
     id: "reviews-open-car",
     title: "Open a car from a review",
-    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, studio hover, empty-bay CTAs, and Copy link on a film stay. Compare from a review is the next step.",
+    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, studio hover, detail studio hero, empty-bay CTAs, and Copy link on a film stay. Compare from a review is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -535,7 +542,8 @@ export function HowToPage() {
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
             Trumps bay strip under the studio hero (Power / 0–60 / Top speed), listing studio hero
-            motion (entrance fade/rise, photo ease, reduced-motion), Cars Sort the
+            motion (entrance fade/rise, photo ease, reduced-motion), review detail studio hero
+            (entrance fade/rise, photo ease, dual heroes on drag races, reduced-motion), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
             (Power / 0–60 / Top speed), studio card hover motion (bay lift, photo ease, reduced-motion),
             Favourites Top Trumps peek (same Power / 0–60 / Top speed),
@@ -570,9 +578,10 @@ export function HowToPage() {
             when listing ids are known), Trades Open partner (/members/:id on inbox and history;
             hidden for self), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
             Z–A), Reviews reel studio hover (realistic thumbs, bay lift / photo ease, reduced-motion),
-            Open car (/cars/:id) when a listing exists, and Reviews Compare into the shared tray
-            when a listing is known, empty-bay next steps, and your bay showcase. Nothing here spends
-            real money.
+            Review detail studio hero (entrance fade/rise, photo ease, dual heroes on drag races,
+            reduced-motion), Open car (/cars/:id) when a listing exists, and Reviews Compare into the
+            shared tray when a listing is known, empty-bay next steps, and your bay showcase. Nothing
+            here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -738,8 +747,10 @@ export function HowToPage() {
               </Link>{" "}
               — Find a review; Cue card / Drag race chips; Sort the bay (Newest / Oldest, Title A–Z /
               Z–A); reel studio thumbs (listing paint when known) with bay lift / photo ease on hover
-              (reduced-motion keeps still); Open car → /cars/:id when a listing exists; Compare into
-              the shared tray when a listing is known; Copy link on a film.
+              (reduced-motion keeps still); film detail studio hero (listing paint/year when known;
+              dual heroes on drag races; entrance fade/rise + photo ease; reduced-motion keeps still);
+              Open car → /cars/:id when a listing exists; Compare into the shared tray when a listing
+              is known; Copy link on a film.
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
