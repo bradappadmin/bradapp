@@ -15,8 +15,9 @@ function InboxBadge({ count }: { count: number }) {
   const label = count > 9 ? "9+" : String(count);
   return (
     <span
-      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-rose px-1.5 py-0.5 font-display text-[11px] font-semibold leading-none text-white"
+      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-rose px-1.5 py-0.5 font-display text-[11px] font-semibold leading-none text-white ring-1 ring-lime/45"
       aria-label={`${count} pending trade offer${count === 1 ? "" : "s"}`}
+      data-testid="trades-inbox-badge"
     >
       {label}
     </span>
@@ -178,7 +179,8 @@ export function SiteHeader() {
             </span>
             {pendingTradeInbox > 0 && !menuOpen ? (
               <span
-                className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-rose ring-2 ring-bay-deep"
+                className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-rose ring-2 ring-bay-deep ring-offset-0"
+                data-testid="trades-inbox-menu-dot"
                 aria-hidden
               />
             ) : null}

@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { SiteHeader } from "./SiteHeader";
 
@@ -17,7 +17,29 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
+const member = {
+  user: {
+    id: 7,
+    email: "member@example.com",
+    displayName: "Member",
+    bio: null,
+    role: "member" as const,
+    coinBalance: 200,
+  },
+  dailyLogin: {
+    amount: 25,
+    claimDate: "2026-11-09",
+    claimedToday: true,
+    claimedJustNow: false,
+    balance: 200,
+  },
+};
+
 describe("SiteHeader", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
     vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 0 });
@@ -57,24 +79,26 @@ describe("SiteHeader", () => {
     expect(screen.queryByRole("navigation", { name: "Primary mobile" })).not.toBeInTheDocument();
   });
 
+  it("hides the Trades inbox badge when pending count is zero", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
+    vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 0 });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SiteHeader />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("link", { name: /^Trades$/i })).toBeInTheDocument();
+    expect(screen.queryByTestId("trades-inbox-badge")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/pending trade offer/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("trades-inbox-menu-dot")).not.toBeInTheDocument();
+  });
+
   it("shows a pending inbox badge on Trades when signed in", async () => {
-    vi.mocked(api.fetchMe).mockResolvedValue({
-      user: {
-        id: 7,
-        email: "member@example.com",
-        displayName: "Member",
-        bio: null,
-        role: "member",
-        coinBalance: 200,
-      },
-      dailyLogin: {
-        amount: 25,
-        claimDate: "2026-11-09",
-        claimedToday: true,
-        claimedJustNow: false,
-        balance: 200,
-      },
-    });
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
     vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 3 });
 
     render(
@@ -86,7 +110,30 @@ describe("SiteHeader", () => {
     );
 
     expect(await screen.findByLabelText("3 pending trade offers")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Trades/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Favourites" }).length).toBeGreaterThan(0);
+    const badge = screen.getAllByTestId("trades-inbox-badge")[0]!;
+    expect(badge).toHaveTextContent("3");
+    expect(badge.className).toMatch(/bg-rose/);
+    expect(badge.className).toMatch(/ring-lime/);
+    expect(screen.getAllByRole("link", { name: /Trades/i }).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("trades-inbox-menu-dot")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Open menu, 3 pending trade offers/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("caps the badge label at 9+", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
+    vi.mocked(api.fetchTradeInboxCount).mockResolvedValue({ pendingIncoming: 12 });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SiteHeader />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("12 pending trade offers")).toBeInTheDocument();
+    expect(screen.getAllByTestId("trades-inbox-badge")[0]).toHaveTextContent("9+");
   });
 });

@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
@@ -12,6 +13,8 @@ vi.mock("../api", () => ({
   fetchMembers: vi.fn(),
   fetchTrades: vi.fn(),
   fetchMemberCards: vi.fn(),
+  acceptTrade: vi.fn(),
+  declineTrade: vi.fn(),
 }));
 
 import * as api from "../api";
@@ -174,6 +177,62 @@ describe("TradesPage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
     expect(screen.queryByText("Inbox is empty")).not.toBeInTheDocument();
     expect(screen.queryByRole("status", { name: /Empty trade inbox/i })).not.toBeInTheDocument();
+  });
+
+  it("refreshes the pending inbox count after accepting an offer", async () => {
+    const user = userEvent.setup();
+    const pendingOffer = {
+      id: 55,
+      status: "pending" as const,
+      fromUserId: 177,
+      toUserId: 2,
+      fromDisplayName: "Sam Bay",
+      toDisplayName: "Member",
+      offerListingId: 12,
+      requestListingId: 9,
+      offerMake: "Ford",
+      offerModel: "Focus",
+      offerTrimName: "ST",
+      offerBodyType: "Hatchback",
+      offerColour: "Racing Red",
+      offerYear: 2020,
+      requestMake: "Porsche",
+      requestModel: "911",
+      requestTrimName: "GT3",
+      requestBodyType: "Coupe",
+      requestColour: "Racing Red",
+      requestYear: 2022,
+      createdAt: "2026-11-10T00:00:00.000Z",
+    };
+    vi.mocked(api.fetchTrades)
+      .mockResolvedValueOnce({ trades: [pendingOffer] })
+      .mockResolvedValue({ trades: [] });
+    vi.mocked(api.fetchTradeInboxCount)
+      .mockResolvedValueOnce({ pendingIncoming: 1 })
+      .mockResolvedValue({ pendingIncoming: 0 });
+    vi.mocked(api.acceptTrade).mockResolvedValue({ ok: true });
+
+    render(
+      <MemoryRouter initialEntries={["/trades"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TradesPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("button", { name: "Accept" })).toBeInTheDocument();
+    const inboxCallsBefore = vi.mocked(api.fetchTradeInboxCount).mock.calls.length;
+    await user.click(screen.getByRole("button", { name: "Accept" }));
+    await waitFor(() => {
+      expect(api.acceptTrade).toHaveBeenCalledWith(55);
+    });
+    await waitFor(() => {
+      expect(vi.mocked(api.fetchTradeInboxCount).mock.calls.length).toBeGreaterThan(
+        inboxCallsBefore,
+      );
+    });
   });
 
   it("honours offer-trade deeplink query params in compose", async () => {
