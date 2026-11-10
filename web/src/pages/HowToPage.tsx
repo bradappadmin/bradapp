@@ -184,7 +184,14 @@ const STEPS: Step[] = [
   {
     id: "reviews-open-car",
     title: "Open a car from a review",
-    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, empty-bay CTAs, and Copy link on a film stay. View reviews from a listing is the next step.",
+    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, empty-bay CTAs, and Copy link on a film stay. Compare from a review is the next step.",
+    to: "/reviews",
+    cta: "Open Reviews",
+  },
+  {
+    id: "reviews-compare",
+    title: "Compare from a review",
+    body: "On Video reviews (list or detail), Compare on a related car queues into the shared tray with Cars / Favourites / My cars / Recently viewed when a listing id is known — same sticky Compare (1/2) tray; when two are ready, Side by side. Drag races can show one Compare per lane. Open car, Copy link, Find, Sort, type chips, and empty-bay CTAs stay. View reviews from a listing is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -331,8 +338,9 @@ export function HowToPage() {
             Trade history Offer again (/trades?with=), Trades Open car (/cars/:id on inbox and history
             when listing ids are known), Trades Open partner (/members/:id on inbox and history;
             hidden for self), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
-            Z–A) and Open car (/cars/:id) when a listing exists, empty-bay next steps, and your bay
-            showcase. Nothing here spends real money.
+            Z–A), Open car (/cars/:id) when a listing exists, and Reviews Compare into the shared tray
+            when a listing is known, empty-bay next steps, and your bay showcase. Nothing here spends
+            real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -473,15 +481,16 @@ export function HowToPage() {
                 Reviews
               </Link>{" "}
               — Find a review; Cue card / Drag race chips; Sort the bay (Newest / Oldest, Title A–Z /
-              Z–A); Open car → /cars/:id when a listing exists; Copy link on a film.
+              Z–A); Open car → /cars/:id when a listing exists; Compare into the shared tray when a
+              listing is known; Copy link on a film.
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
                 Compare
               </Link>{" "}
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
-              ready), Compare on Favourites / Cars / My cars, or Compare on home Recently viewed
-              (shared tray); empty bay sends you to Favourites or Browse cars.
+              ready), Compare on Favourites / Cars / My cars / Reviews, or Compare on home Recently
+              viewed (shared tray); empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">

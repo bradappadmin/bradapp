@@ -75,6 +75,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(document.getElementById("reviews-sort")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Open a car from a review" })).toBeInTheDocument();
     expect(document.getElementById("reviews-open-car")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Compare from a review" })).toBeInTheDocument();
+    expect(document.getElementById("reviews-compare")).not.toBeNull();
     expect(
       screen.getByRole("heading", { name: "View reviews from a listing" }),
     ).toBeInTheDocument();
@@ -441,6 +443,17 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Drag races can show one Open car per lane when both listings are known/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Compare from a review is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare on a related car queues into the shared tray with Cars \/ Favourites \/ My cars \/ Recently viewed when a listing id is known/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Drag races can show one Compare per lane/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/View reviews from a listing is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -469,7 +482,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\) and Open car \(\/cars\/:id\) when a listing exists/i,
+        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\), Open car \(\/cars\/:id\) when a listing exists, and Reviews Compare into the shared tray when a listing is known/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -656,7 +669,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Compare on Favourites \/ Cars \/ My cars, or Compare on home Recently viewed/i,
+        /Compare on Favourites \/ Cars \/ My cars \/ Reviews, or Compare on home Recently viewed/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
@@ -791,14 +804,15 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Trade history" })
         .every((a) => a.getAttribute("href") === "/trades/history"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByRole("link", { name: "Open Reviews" })[0]).toHaveAttribute(
-      "href",
-      "/reviews",
-    );
+    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(4);
+    expect(
+      screen
+        .getAllByRole("link", { name: "Open Reviews" })
+        .every((a) => a.getAttribute("href") === "/reviews"),
+    ).toBe(true);
     expect(
       screen.getByText(
-        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); Open car → \/cars\/:id when a listing exists; Copy link on a film/i,
+        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); Open car → \/cars\/:id when a listing exists; Compare into the shared tray when a listing is known; Copy link on a film/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open Coin ledger" })).toHaveAttribute(
