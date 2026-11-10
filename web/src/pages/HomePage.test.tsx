@@ -179,6 +179,20 @@ describe("HomePage", () => {
     expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
     expect(screen.getByText(/Porsche 911 GT3/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Top Trumps peek under the studio photo \(Power \/ 0–60 \/ Top speed\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Top Trumps peek")).toBeInTheDocument();
+    expect(screen.getByLabelText("Recently viewed bay notes")).toBeInTheDocument();
+    // Media cards reuse the catalogue Top Trumps peek under the studio photo.
+    const peeks = screen.getAllByLabelText("Top Trumps peek");
+    expect(peeks.length).toBeGreaterThanOrEqual(1);
+    expect(peeks[0].textContent).toMatch(/Power/);
+    expect(peeks[0].textContent).toMatch(/0–60/);
+    expect(peeks[0].textContent).toMatch(/Top speed/);
+    expect(screen.getByText("502")).toBeInTheDocument();
+    expect(screen.getByText("3.2s")).toBeInTheDocument();
+    expect(screen.getByText("197 mph")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add to compare" })).toBeInTheDocument();
     expect(

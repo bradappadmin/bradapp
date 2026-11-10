@@ -53,12 +53,23 @@ export function RecentlyViewedCars() {
       aria-label="Recently viewed cars"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+        <div className="min-w-0 max-w-2xl">
           <h2 className="font-display text-xl text-mist sm:text-2xl">Recently viewed</h2>
           <p className="mt-1 text-sm text-steel">
-            Last few listings you opened on this device. Compare queues into the same tray as Cars
-            and My cars.
+            Last few listings you opened on this device — each card keeps a compact Top Trumps peek
+            under the studio photo (Power / 0–60 / Top speed), same as Cars and Favourites. Compare
+            queues into the same tray as Cars and My cars.
           </p>
+          {!empty ? (
+            <div className="mt-3 flex flex-wrap gap-2" aria-label="Recently viewed bay notes">
+              <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                Top Trumps peek
+              </span>
+              <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                {cars.length} {cars.length === 1 ? "listing" : "listings"}
+              </span>
+            </div>
+          ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {!empty ? (
