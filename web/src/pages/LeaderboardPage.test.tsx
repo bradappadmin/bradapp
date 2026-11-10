@@ -131,8 +131,9 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(
       await screen.findByRole("heading", { name: /This week.?s cup standings/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Europe\/London/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Europe\/London/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/2026-W46 · \+50 BC prize/i)).toBeInTheDocument();
+    expect(screen.getByRole("timer")).toBeInTheDocument();
     const cupStandings = screen.getByLabelText("This week Top Trumps cup standings");
     expect(cupStandings).toBeInTheDocument();
     expect(cupStandings).toHaveTextContent(/Bay Friend/);

@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { WeeklyCupSnapshot } from "../api";
+import { cupCountdownLabel } from "../weekly-cup-countdown";
 
 export function WeeklyCupPanel({
   cup,
@@ -13,6 +15,17 @@ export function WeeklyCupPanel({
   const top = cup.standings.slice(0, compact ? 5 : 10);
   const prev = cup.previousAward;
   const heading = compact ? "Top Trumps cup" : "This week’s cup standings";
+  const [countdown, setCountdown] = useState(() => cupCountdownLabel(cup.weekEnd));
+
+  useEffect(() => {
+    setCountdown(cupCountdownLabel(cup.weekEnd));
+    const tick = () => {
+      const next = cupCountdownLabel(cup.weekEnd);
+      setCountdown((prevLabel) => (prevLabel === next ? prevLabel : next));
+    };
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [cup.weekEnd]);
 
   return (
     <section
@@ -32,6 +45,17 @@ export function WeeklyCupPanel({
           {cup.weekKey} · +{cup.prizeAmount} BC prize
         </span>
       </div>
+      <p
+        className="mt-3 font-display text-sm tabular-nums tracking-wide text-mist"
+        role="timer"
+        aria-live="off"
+        aria-label={`Weekly cup countdown, Europe/London. ${countdown}`}
+      >
+        {countdown}
+        <span className="ml-2 text-xs font-normal uppercase tracking-[0.18em] text-steel">
+          Europe/London
+        </span>
+      </p>
       <p className="mt-2 text-sm leading-relaxed text-steel">
         House and PvP wins count for the current London ISO week. Last week’s top scorer (lowest id
         on a tie) gets +{cup.prizeAmount} Brad Coins once — play money only.
