@@ -93,7 +93,7 @@ const STEPS: Step[] = [
   {
     id: "weekly-cup",
     title: "Weekly Top Trumps cup",
-    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
+    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — an Ends in countdown ticks to London week end beside the +50 BC prize callout — Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
     to: "/leaderboard",
     cta: "Open cup standings",
   },
@@ -200,7 +200,8 @@ export function HowToPage() {
             Quick amount chips, Coin ledger Find entry plus type chips (All / Earn / Spend / Gift /
             Admin), admin coin-adjust Quick amount chips (+25 / +50 / +100 / +250 BC) for Brad and
             Napwood, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or house →
-            Play), this week’s cup standings, free trades, Trade history Offer again (/trades?with=),
+            Play), this week’s cup standings with an Ends in countdown (Europe/London week end, +50 BC
+            prize), free trades, Trade history Offer again (/trades?with=),
             member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay
             next steps, and your bay showcase. Nothing here spends real money.
           </p>
@@ -285,8 +286,8 @@ export function HowToPage() {
                 Leaderboard
               </Link>{" "}
               — Find a member, Brad Coin ranks, highlight cars, This week’s cup standings beside the
-              podium, and Challenge to Top Trumps or Offer trade on other members’ standings and cup
-              rows (sign in).
+              podium (Ends in countdown to Europe/London week end · +50 BC prize), and Challenge to
+              Top Trumps or Offer trade on other members’ standings and cup rows (sign in).
             </li>
             <li>
               <Link to="/cars" className="text-lime no-underline hover:underline">

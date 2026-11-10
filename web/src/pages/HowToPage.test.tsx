@@ -220,9 +220,19 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Reviews: Find a review plus Sort the bay/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/3 wins \+15 BC, 5 wins \+40 BC/i)).toBeInTheDocument();
-    expect(screen.getByText(/Europe\/London week/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Europe\/London week/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/This week.?s cup standings sit on Play/i)).toBeInTheDocument();
     expect(screen.getByText(/beside the all-time podium on the leaderboard/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Ends in countdown ticks to London week end beside the \+50 BC prize callout/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /this week.?s cup standings with an Ends in countdown \(Europe\/London week end, \+50 BC prize\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         /Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready/i,
@@ -344,6 +354,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/Login streak/i).length).toBeGreaterThan(0);
     expect(
       screen.getByText(/This week.?s cup standings beside the podium/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Ends in countdown to Europe\/London week end · \+50 BC prize/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
