@@ -208,7 +208,7 @@ describe("AdminInventoryPage listings search", () => {
     expect(await screen.findByText(/#42 Audi RS6/i)).toBeInTheDocument();
     expect(screen.queryByText(/#7 Ford Focus/i)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
     await waitFor(() => {
       expect(screen.getByTestId("admin-inventory-params").textContent).not.toContain("q=");
     });
@@ -253,13 +253,22 @@ describe("AdminInventoryPage listings search", () => {
     ).toHaveValue("Ford");
   });
 
-  it("shows empty filter state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/admin/inventory?q=zzzz"]}>
         <AuthProvider>
           <ToastProvider>
             <Routes>
-              <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+              <Route
+                path="/admin/inventory"
+                element={
+                  <>
+                    <AdminInventoryPage />
+                    <SearchParamsProbe />
+                  </>
+                }
+              />
             </Routes>
           </ToastProvider>
         </AuthProvider>
@@ -267,7 +276,18 @@ describe("AdminInventoryPage listings search", () => {
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching inventory listings")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a listing" })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Paint colour for listing/i)).not.toBeInTheDocument();
+
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(clearButtons[clearButtons.length - 1]!);
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-inventory-params").textContent).toBe("");
+    });
+    expect(await screen.findByText(/#42 Audi RS6/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Paint colour for listing 42/i)).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });
