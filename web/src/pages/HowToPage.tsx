@@ -29,9 +29,16 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge someone from their listing or public garage, rematch when you’re done, and check Match history for past games. Playing earns Brad Coins.",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing or public garage, rematch when you’re done, and check Match history. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
+  },
+  {
+    id: "weekly-cup",
+    title: "Weekly Top Trumps cup",
+    body: "House and PvP wins count for the Europe/London week. Standings sit on Play and the leaderboard. When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
+    to: "/play",
+    cta: "Open Play cup",
   },
   {
     id: "trades",
@@ -50,7 +57,7 @@ const STEPS: Step[] = [
   {
     id: "profile",
     title: "Your bay profile",
-    body: "Set a display name and short garage bio in Account. Friends see them on your public garage, the members list, and the leaderboard — never your email or password.",
+    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password.",
     to: "/account",
     cta: "Open Account",
   },
@@ -78,8 +85,9 @@ export function HowToPage() {
           <p className="text-xs uppercase tracking-wide text-steel">Family walkthrough</p>
           <h1 className="mt-2 font-display text-3xl font-semibold text-white sm:text-4xl">How to</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-steel">
-            A short tour of the midnight garage: invites, Brad Coins, photo-first cars, play, free
-            trades, drag races, and your bay profile. Nothing here spends real money.
+            A short tour of the midnight garage: invites, Brad Coins, photo-first cars, Top Trumps
+            streaks and the weekly cup, free trades, drag races, and your bay showcase. Nothing here
+            spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -136,25 +144,25 @@ export function HowToPage() {
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
                 Leaderboard
               </Link>{" "}
-              — Brad Coin ranks with a highlight car from each garage (sign in).
+              — Brad Coin ranks, highlight cars, and this week’s Top Trumps cup (sign in).
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
                 My cars
               </Link>{" "}
-              — garage value, list prices, and unlist.
+              — garage value, list prices, unlist, and pin your showcase car.
             </li>
             <li>
               <Link to="/favourites" className="text-lime no-underline hover:underline">
                 Favourites
               </Link>{" "}
-              — listings you saved (sign in).
+              — listings you saved; select two and compare side by side (sign in).
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
                 Compare
               </Link>{" "}
-              — pick two from Cars or Favourites for a photo + specs face-off.
+              — photo + specs face-off for two cars from Cars or Favourites.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">
