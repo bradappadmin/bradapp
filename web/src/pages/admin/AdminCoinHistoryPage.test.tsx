@@ -125,7 +125,7 @@ describe("AdminCoinHistoryPage member search", () => {
     ).toBeInTheDocument();
     expect(screen.queryByLabelText(/Coin delta for Brad/i)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
     await waitFor(() => {
       expect(screen.getByTestId("admin-coins-params").textContent).not.toContain("q=");
     });
@@ -167,19 +167,40 @@ describe("AdminCoinHistoryPage member search", () => {
     expect(await screen.findByText(/Balance corrected/i)).toBeInTheDocument();
   });
 
-  it("shows empty filter state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/admin/coin-history?q=zzzz"]}>
         <AuthProvider>
           <Routes>
-            <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
+            <Route
+              path="/admin/coin-history"
+              element={
+                <>
+                  <AdminCoinHistoryPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
           </Routes>
         </AuthProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching members")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Filter members by balance" })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Coin delta for/i)).not.toBeInTheDocument();
+
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(clearButtons[clearButtons.length - 1]!);
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-coins-params").textContent).toBe("");
+    });
+    expect(await screen.findByLabelText(/Coin delta for Sam Bay/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Coin delta for Brad/i)).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });
