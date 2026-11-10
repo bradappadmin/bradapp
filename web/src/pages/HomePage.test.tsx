@@ -169,7 +169,30 @@ describe("HomePage", () => {
     expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
   });
 
-  it("clears recently viewed from home and hides the section", async () => {
+  it("shows Empty bay and Browse cars when recently viewed is empty", async () => {
+    window.localStorage.removeItem(RECENTLY_VIEWED_KEY);
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Empty recently viewed bay")).toBeInTheDocument();
+    expect(screen.getByText("Empty bay")).toBeInTheDocument();
+    expect(screen.getByText(/No listings on this device yet/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
+    const browseLinks = screen.getAllByRole("link", { name: "Browse cars" });
+    expect(browseLinks.some((a) => a.getAttribute("href") === "/cars")).toBe(true);
+  });
+
+  it("clears recently viewed from home and shows the empty bay", async () => {
     const user = userEvent.setup();
     window.localStorage.setItem(
       RECENTLY_VIEWED_KEY,
@@ -204,7 +227,10 @@ describe("HomePage", () => {
 
     expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Clear" }));
-    expect(screen.queryByRole("region", { name: "Recently viewed cars" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Empty recently viewed bay")).toBeInTheDocument();
+    expect(screen.getByText("Empty bay")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
     expect(window.localStorage.getItem(RECENTLY_VIEWED_KEY)).toBeNull();
     expect(screen.getByText(/Cleared recently viewed on this device/i)).toBeInTheDocument();
   });
