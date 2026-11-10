@@ -214,7 +214,54 @@ describe("ReviewsPage Midnight Garage UI", () => {
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
     expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching reviews")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
+    expect(screen.getByRole("heading", { name: "Find a review" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
+  });
+
+  it("shows empty bay CTAs when the reel has no reviews", async () => {
+    vi.mocked(api.fetchReviews).mockResolvedValue({ reviews: [] });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Empty bay")).toBeInTheDocument();
+    const empty = screen.getByLabelText("Empty reviews bay");
+    expect(empty.querySelector('a[href="/cars"]')?.textContent).toMatch(/Browse cars/);
+    expect(screen.queryByRole("heading", { name: "Find a review" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+  });
+
+  it("keeps Find chips and Clear filters when a type filter yields none", async () => {
+    vi.mocked(api.fetchReviews).mockImplementation(async (_all, _limit, type) => {
+      if (type === "drag_race") return { reviews: [] };
+      return { reviews: [cueCard] };
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews?type=drag_race"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByText(/No drag races in this filter/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a review" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
   });
 
   it("shows a clearer Record CTA for admins", async () => {
