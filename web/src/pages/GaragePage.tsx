@@ -29,6 +29,9 @@ import { sumGarageValue } from "../garage-value";
 import { garageSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 
+/** Catalogue-scale Brad Coin asking prices — tap fills the free-form field. */
+const SELL_PRICE_PRESETS = [50, 100, 250, 500] as const;
+
 const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
@@ -300,28 +303,68 @@ export function GaragePage() {
             <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
               {(car.status === "owned" || car.status === "available") && (
                 <form
-                  className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
+                  className="flex w-full flex-col gap-2"
                   onSubmit={(e) => void onListOrUpdatePrice(e, car)}
                 >
-                  <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-auto">
-                    Brad Coin price
-                    <input
-                      className="w-full rounded-md border border-white/10 bg-bay-panel px-2 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
-                      type="number"
-                      min={1}
-                      value={sellPrices[car.id] ?? String(car.coinPrice)}
-                      onChange={(e) =>
-                        setSellPrices((prev) => ({ ...prev, [car.id]: e.target.value }))
-                      }
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={busyId === car.id}
-                    className="w-full rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto"
-                  >
-                    {car.status === "available" ? "Update price" : "List for sale"}
-                  </button>
+                  <div>
+                    <p className="mb-2 text-xs uppercase tracking-[0.2em] text-steel">
+                      Quick price
+                    </p>
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-label={`Sell price presets for ${car.make} ${car.model}`}
+                    >
+                      {SELL_PRICE_PRESETS.map((amount) => {
+                        const current = sellPrices[car.id] ?? String(car.coinPrice);
+                        const active = current === String(amount);
+                        return (
+                          <button
+                            key={amount}
+                            type="button"
+                            aria-pressed={active}
+                            disabled={busyId === car.id}
+                            onClick={() =>
+                              setSellPrices((prev) => ({
+                                ...prev,
+                                [car.id]: String(amount),
+                              }))
+                            }
+                            className={`rounded-md border px-3 py-1.5 font-display text-sm transition disabled:opacity-60 ${
+                              active
+                                ? "border-lime/50 bg-lime/10 text-lime"
+                                : "border-white/15 text-mist hover:border-lime/35 hover:text-lime"
+                            }`}
+                          >
+                            {amount} BC
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                    <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-auto">
+                      Brad Coin price
+                      <input
+                        className="w-full rounded-md border border-white/10 bg-bay-panel px-2 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
+                        type="number"
+                        min={1}
+                        inputMode="numeric"
+                        aria-label={`Brad Coin price for ${car.make} ${car.model}`}
+                        value={sellPrices[car.id] ?? String(car.coinPrice)}
+                        onChange={(e) =>
+                          setSellPrices((prev) => ({ ...prev, [car.id]: e.target.value }))
+                        }
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={busyId === car.id}
+                      className="w-full rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto"
+                    >
+                      {car.status === "available" ? "Update price" : "List for sale"}
+                    </button>
+                  </div>
                 </form>
               )}
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">

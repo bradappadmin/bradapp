@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -15,11 +15,14 @@ function SearchParamsProbe() {
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchGarage: vi.fn(),
   fetchWallet: vi.fn(),
   fetchSoldHistory: vi.fn(),
   fetchPurchaseHistory: vi.fn(),
   setGarageShowcase: vi.fn(),
+  sellListing: vi.fn(),
+  unlistListing: vi.fn(),
 }));
 
 vi.mock("../share-link", async () => {
@@ -65,6 +68,12 @@ describe("GaragePage Midnight Garage UI", () => {
       ok: true,
       showcaseListingId: listingId,
     }));
+    vi.mocked(api.sellListing).mockResolvedValue({
+      ok: true,
+      listingId: 9,
+      coinPrice: 100,
+      status: "available",
+    });
     vi.mocked(api.fetchGarage).mockResolvedValue({
       totalValue: 1240,
       showcaseListingId: null,
@@ -170,6 +179,14 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getAllByRole("button", { name: "List for sale" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Update price" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
+    expect(screen.getAllByText("Quick price").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("group", { name: /Sell price presets for Porsche 911/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "50 BC" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "100 BC" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "250 BC" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "500 BC" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "Make showcase" }).length).toBeGreaterThan(0);
     expect(screen.getByText(/Showcase: highest value/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Public garage" })).toHaveAttribute(
@@ -425,6 +442,51 @@ describe("GaragePage Midnight Garage UI", () => {
     await user.click(emptyClear);
     await waitFor(() => {
       expect(screen.getByTestId("garage-params").textContent).toBe("");
+    });
+  });
+
+  it("fills the sell price from quick preset chips and still accepts free-form", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Owned" })).toBeInTheDocument();
+    const presets = screen.getByRole("group", { name: /Sell price presets for Porsche 911/i });
+    const chip250 = within(presets).getByRole("button", { name: "250 BC" });
+    await user.click(chip250);
+
+    const priceInput = screen.getByRole("spinbutton", {
+      name: /Brad Coin price for Porsche 911/i,
+    });
+    expect(priceInput).toHaveValue(250);
+    expect(chip250).toHaveAttribute("aria-pressed", "true");
+    expect(within(presets).getByRole("button", { name: "50 BC" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    await user.clear(priceInput);
+    await user.type(priceInput, "333");
+    expect(priceInput).toHaveValue(333);
+    expect(chip250).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(within(presets).getByRole("button", { name: "100 BC" }));
+    expect(priceInput).toHaveValue(100);
+    const listForm = priceInput.closest("form");
+    expect(listForm).not.toBeNull();
+    await user.click(within(listForm as HTMLElement).getByRole("button", { name: "List for sale" }));
+
+    await waitFor(() => {
+      expect(api.sellListing).toHaveBeenCalledWith(9, 100);
     });
   });
 
