@@ -19,6 +19,10 @@ const sellSchema = z.object({
   colour: listingPaintColourSchema.optional(),
 });
 
+const paintSchema = z.object({
+  colour: listingPaintColourSchema,
+});
+
 const showcaseSchema = z.object({
   /** Listing id to pin, or null to unpin. */
   listingId: z.number().int().positive().nullable(),
@@ -331,6 +335,49 @@ export function createTradeRouter(): Router {
     } finally {
       connection.release();
     }
+  });
+
+  /**
+   * Update paint on a car that is already for sale — stays listed (no unlist).
+   * Same curated colours as admin / sell.
+   */
+  router.post("/listings/:id/paint", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const listingId = Number(req.params.id);
+    if (!Number.isFinite(listingId) || listingId <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid listing id" });
+      return;
+    }
+    const parsed = paintSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "validation_error",
+        message: parsed.error.issues[0]?.message ?? "Invalid paint colour",
+      });
+      return;
+    }
+
+    const pool = getPool();
+    const [result] = await pool.query(
+      `UPDATE listings
+       SET colour = ?
+       WHERE id = ? AND owner_user_id = ? AND status = 'available'`,
+      [parsed.data.colour, listingId, user.id],
+    );
+    const affected = Number((result as { affectedRows?: number }).affectedRows ?? 0);
+    if (affected === 0) {
+      res.status(409).json({
+        error: "not_listed",
+        message: "Paint can only be updated on a car you have listed for sale.",
+      });
+      return;
+    }
+    res.json({
+      ok: true,
+      listingId,
+      colour: parsed.data.colour,
+      status: "available" as const,
+    });
   });
 
   router.post("/listings/:id/unlist", requireAuth, async (req, res: Response) => {

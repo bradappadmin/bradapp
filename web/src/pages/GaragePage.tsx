@@ -272,6 +272,30 @@ export function GaragePage() {
     }
   }
 
+  async function onUpdatePaint(car: GarageCar) {
+    const colour = sellColours[car.id] ?? car.colour;
+    if (colour === car.colour) {
+      setNotice(`Paint is already ${colour}.`);
+      return;
+    }
+    setBusyId(car.id);
+    setError(null);
+    setNotice(null);
+    try {
+      await api.updateListingPaint(car.id, colour);
+      await reload();
+      const noticeText = `Updated paint to ${colour} — still for sale.`;
+      setNotice(noticeText);
+      toast.success(noticeText);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not update paint";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function onToggleShowcase(car: GarageCar) {
     const pinning = showcaseListingId !== car.id;
     setBusyId(car.id);
@@ -383,6 +407,17 @@ export function GaragePage() {
                         </select>
                       </label>
                     </div>
+                    {car.status === "available" ? (
+                      <button
+                        type="button"
+                        disabled={busyId === car.id || draftColour === car.colour}
+                        aria-label={`Update paint for ${car.make} ${car.model}`}
+                        onClick={() => void onUpdatePaint(car)}
+                        className="w-full rounded-md border border-lime/40 bg-bay-panel/70 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/10 disabled:opacity-60 sm:w-auto"
+                      >
+                        Update paint
+                      </button>
+                    ) : null}
                   </div>
                   <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
                     <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-auto">

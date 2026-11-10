@@ -247,12 +247,30 @@ describe.runIf(hasDb)("trade routes", () => {
     expect(publicListing.body.listing.coinPrice).toBe(88);
     expect(publicListing.body.listing.colour).toBe("Laser Blue");
 
+    const paintOnly = await buyer
+      .post(`/trade/listings/${carId}/paint`)
+      .send({ colour: "Midnight Black" });
+    expect(paintOnly.status).toBe(200);
+    expect(paintOnly.body.status).toBe("available");
+    expect(paintOnly.body.colour).toBe("Midnight Black");
+
+    const afterPaint = await request(app).get(`/cars/listings/${carId}`);
+    expect(afterPaint.body.listing.status).toBe("available");
+    expect(afterPaint.body.listing.colour).toBe("Midnight Black");
+    expect(afterPaint.body.listing.coinPrice).toBe(88);
+
     const unlist = await buyer.post(`/trade/listings/${carId}/unlist`);
     expect(unlist.status).toBe(200);
     expect(unlist.body.status).toBe("owned");
 
     const after = await request(app).get(`/cars/listings/${carId}`);
     expect(after.body.listing.status).toBe("owned");
+
+    const paintWhileOwned = await buyer
+      .post(`/trade/listings/${carId}/paint`)
+      .send({ colour: "Racing Red" });
+    expect(paintWhileOwned.status).toBe(409);
+    expect(paintWhileOwned.body.error).toBe("not_listed");
   });
 
   // silence unused

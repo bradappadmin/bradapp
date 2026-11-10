@@ -23,6 +23,7 @@ vi.mock("../api", () => ({
   setGarageShowcase: vi.fn(),
   sellListing: vi.fn(),
   unlistListing: vi.fn(),
+  updateListingPaint: vi.fn(),
 }));
 
 vi.mock("../share-link", async () => {
@@ -72,6 +73,12 @@ describe("GaragePage Midnight Garage UI", () => {
       ok: true,
       listingId: 9,
       coinPrice: 100,
+      status: "available",
+    });
+    vi.mocked(api.updateListingPaint).mockResolvedValue({
+      ok: true,
+      listingId: 10,
+      colour: "Laser Blue",
       status: "available",
     });
     vi.mocked(api.fetchGarage).mockResolvedValue({
@@ -490,6 +497,51 @@ describe("GaragePage Midnight Garage UI", () => {
     await waitFor(() => {
       expect(screen.getByTestId("garage-params").textContent).toBe("");
     });
+  });
+
+  it("updates paint on a for-sale car without unlisting", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "For sale" })).toBeInTheDocument();
+    const paint = screen.getByRole("combobox", { name: /Paint colour for Ford Focus/i });
+    const updatePaint = screen.getByRole("button", { name: /Update paint for Ford Focus/i });
+    expect(updatePaint).toBeDisabled();
+
+    await user.selectOptions(paint, "Laser Blue");
+    expect(paint).toHaveValue("Laser Blue");
+    expect(updatePaint).toBeEnabled();
+
+    const focusCard = paint.closest("li");
+    expect(focusCard).not.toBeNull();
+    const previewImgs = (focusCard as HTMLElement).querySelectorAll("img");
+    expect(
+      [...previewImgs].some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=Blue")),
+    ).toBe(true);
+
+    await user.click(updatePaint);
+    await waitFor(() => {
+      expect(api.updateListingPaint).toHaveBeenCalledWith(10, "Laser Blue");
+    });
+    expect(api.unlistListing).not.toHaveBeenCalled();
+    expect(api.sellListing).not.toHaveBeenCalled();
+    expect(screen.getAllByText(/Updated paint to Laser Blue — still for sale/i).length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /Sell price presets for Ford Focus/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Garage bay value" })).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Top Trumps peek").length).toBeGreaterThanOrEqual(1);
   });
 
   it("fills the sell price from quick preset chips and still accepts free-form", async () => {

@@ -411,6 +411,17 @@ export function unlistListing(id: number): Promise<{ ok: boolean; listingId: num
   return request(`/trade/listings/${id}/unlist`, { method: "POST" });
 }
 
+/** Update paint on a for-sale listing without unlisting or changing price. */
+export function updateListingPaint(
+  id: number,
+  colour: string,
+): Promise<{ ok: boolean; listingId: number; colour: string; status: "available" }> {
+  return request(`/trade/listings/${id}/paint`, {
+    method: "POST",
+    body: JSON.stringify({ colour }),
+  });
+}
+
 export type TopTrumpsCategory = "bhp" | "top_speed_mph" | "zero_to_sixty_secs";
 
 export type MemberCard = {
