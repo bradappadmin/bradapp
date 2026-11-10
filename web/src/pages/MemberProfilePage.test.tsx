@@ -14,7 +14,16 @@ vi.mock("../api", () => ({
   giftBradCoins: vi.fn(),
 }));
 
+vi.mock("../share-link", async () => {
+  const actual = await vi.importActual<typeof import("../share-link")>("../share-link");
+  return {
+    ...actual,
+    copyTextToClipboard: vi.fn(),
+  };
+});
+
 import * as api from "../api";
+import { copyTextToClipboard } from "../share-link";
 
 const porsche = {
   id: 42,
@@ -49,6 +58,7 @@ const audi = {
 describe("MemberProfilePage showcase garage", () => {
   afterEach(() => {
     cleanup();
+    vi.mocked(copyTextToClipboard).mockReset();
   });
 
   beforeEach(() => {
@@ -109,6 +119,11 @@ describe("MemberProfilePage showcase garage", () => {
       "href",
       "/cars/42",
     );
+    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Challenge" })).toHaveAttribute(
+      "href",
+      "/play?opponent=7",
+    );
     expect(
       screen.getAllByRole("link", { name: "Offer trade" }).some(
         (link) => link.getAttribute("href") === "/trades?with=7&theirCar=42",
@@ -117,6 +132,30 @@ describe("MemberProfilePage showcase garage", () => {
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
+  it("copies that member's public garage link with a toast", async () => {
+    vi.mocked(copyTextToClipboard).mockResolvedValue(true);
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/members/7"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Bay Friend" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Challenge" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Copy garage link" }));
+    expect(copyTextToClipboard).toHaveBeenCalled();
+    const copied = vi.mocked(copyTextToClipboard).mock.calls[0]?.[0] ?? "";
+    expect(copied).toMatch(/\/members\/7$/);
+    expect(await screen.findByRole("status")).toHaveTextContent("Link copied.");
   });
 
   it("lets you pin a showcase car on your own public garage", async () => {
