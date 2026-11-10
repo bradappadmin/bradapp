@@ -49,10 +49,11 @@ describe("WeeklyCupPanel", () => {
     expect(screen.getByLabelText(/Weekly cup countdown, Europe\/London/i)).toBeInTheDocument();
     expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
     expect(screen.getByText(/3 wins/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Member \(you\)/i })).toHaveAttribute(
-      "href",
-      "/members/2",
-    );
+    const youLink = screen.getByRole("link", { name: /Member \(you\)/i });
+    expect(youLink).toHaveAttribute("href", "/members/2");
+    expect(youLink).toHaveTextContent("You");
+    const youRow = youLink.closest("li");
+    expect(youRow).toHaveAttribute("aria-current", "true");
     expect(
       screen.getByRole("link", { name: /Challenge Bay Friend to Top Trumps/i }),
     ).toHaveAttribute("href", "/play?opponent=7");

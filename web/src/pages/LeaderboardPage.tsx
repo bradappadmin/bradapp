@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { LeaderboardEntry, WeeklyCupSnapshot } from "../api";
@@ -13,6 +13,8 @@ import {
   filterLeaderboardMembers,
   matchesLeaderboardMemberQuery,
 } from "../leaderboard-member-filter";
+
+export const LEADERBOARD_YOUR_RANK_ID = "leaderboard-your-rank";
 
 const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
@@ -31,19 +33,28 @@ function podiumRankClass(rank: number): string {
 }
 
 function rowPanelClass(rank: number, isYou: boolean): string {
+  const youRing = isYou ? " ring-2 ring-lime/50 ring-offset-0" : "";
   if (rank === 1) {
-    return "border-lime/30 bg-lime/[0.06]";
+    return `border-lime/30 bg-lime/[0.06]${youRing}`;
   }
   if (rank === 2) {
-    return "border-white/14 bg-bay-panel/55";
+    return `border-white/14 bg-bay-panel/55${youRing}`;
   }
   if (rank === 3) {
-    return "border-rose/25 bg-rose/[0.05]";
+    return `border-rose/25 bg-rose/[0.05]${youRing}`;
   }
   if (isYou) {
-    return "border-lime/20 bg-bay-panel/45";
+    return "border-lime/45 bg-lime/[0.08] ring-2 ring-lime/50";
   }
   return "border-white/10 bg-bay-panel/35";
+}
+
+function YouBadge() {
+  return (
+    <span className="ml-2 inline-flex align-middle rounded-md border border-lime/40 bg-lime/15 px-2 py-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-lime">
+      You
+    </span>
+  );
 }
 
 export function LeaderboardPage() {
@@ -55,12 +66,20 @@ export function LeaderboardPage() {
   const [weeklyCup, setWeeklyCup] = useState<WeeklyCupSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [yourRankInView, setYourRankInView] = useState(true);
+  const yourRankRef = useRef<HTMLLIElement | null>(null);
 
   const visible = useMemo(
     () => filterLeaderboardMembers(entries, qFromUrl),
     [entries, qFromUrl],
   );
   const filtersOn = Boolean(qFromUrl);
+  const myEntry = useMemo(
+    () => (user ? (entries.find((entry) => entry.id === user.id) ?? null) : null),
+    [entries, user],
+  );
+  const myRowVisible = Boolean(myEntry && visible.some((entry) => entry.id === myEntry.id));
+  const showJumpToRank = Boolean(myEntry && (!yourRankInView || !myRowVisible));
 
   useEffect(() => {
     setDraft(qFromUrl);
@@ -101,6 +120,27 @@ export function LeaderboardPage() {
     return () => window.clearTimeout(timer);
   }, [draft, qFromUrl, setSearchParams]);
 
+  // Compact Jump control when the signed-in standings row is off-screen or filtered out.
+  useEffect(() => {
+    if (!myRowVisible) {
+      setYourRankInView(false);
+      return;
+    }
+    const el = yourRankRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setYourRankInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setYourRankInView(Boolean(entry?.isIntersecting));
+      },
+      { root: null, threshold: 0.35 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [myRowVisible, myEntry?.id, visible.length, loading]);
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
@@ -120,6 +160,21 @@ export function LeaderboardPage() {
   function onClearFilters() {
     setDraft("");
     writeParams("");
+  }
+
+  function onJumpToMyRank() {
+    if (!myEntry) return;
+    if (!myRowVisible) {
+      setDraft("");
+      writeParams("");
+    }
+    window.requestAnimationFrame(() => {
+      const el =
+        yourRankRef.current ?? document.getElementById(LEADERBOARD_YOUR_RANK_ID);
+      if (el && typeof el.scrollIntoView === "function") {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
   }
 
   const topThree = entries.slice(0, 3);
@@ -154,6 +209,11 @@ export function LeaderboardPage() {
                 {weeklyCup ? (
                   <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                     Cup {weeklyCup.weekKey}
+                  </span>
+                ) : null}
+                {myEntry ? (
+                  <span className="rounded-md border border-lime/35 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
+                    Your rank #{myEntry.rank}
                   </span>
                 ) : null}
               </div>
@@ -266,7 +326,7 @@ export function LeaderboardPage() {
                           </span>
                           <p className="mt-3 font-display text-base font-semibold text-mist">
                             {entry.displayName}
-                            {isYou ? " (you)" : ""}
+                            {isYou ? <YouBadge /> : null}
                           </p>
                           <p className="mt-1 font-display text-sm text-lime">
                             {formatCoins(entry.coinBalance)}
@@ -287,14 +347,33 @@ export function LeaderboardPage() {
         ) : null}
 
         <section className="bay-rise-delay mt-10" aria-labelledby="leaderboard-standings">
-          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="leaderboard-standings" className="font-display text-xl text-mist">
-              All-time standings
-            </h2>
-            {!loading ? (
-              <p className="text-sm text-steel">
-                {visible.length} {visible.length === 1 ? "row" : "rows"}
-              </p>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h2 id="leaderboard-standings" className="font-display text-xl text-mist">
+                All-time standings
+              </h2>
+              {!loading ? (
+                <p className="mt-1 text-sm text-steel">
+                  {visible.length} {visible.length === 1 ? "row" : "rows"}
+                </p>
+              ) : null}
+            </div>
+            {showJumpToRank ? (
+              <button
+                type="button"
+                onClick={onJumpToMyRank}
+                className="rounded-md border border-lime/40 bg-lime/10 px-3 py-1.5 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/15"
+                aria-label={
+                  myEntry
+                    ? `Jump to my rank, currently #${myEntry.rank}`
+                    : "Jump to my rank"
+                }
+              >
+                Jump to my rank
+                {myEntry ? (
+                  <span className="ml-1.5 tabular-nums text-mist/90">#{myEntry.rank}</span>
+                ) : null}
+              </button>
             ) : null}
           </div>
 
@@ -339,7 +418,10 @@ export function LeaderboardPage() {
               return (
                 <li
                   key={entry.id}
+                  ref={isYou ? yourRankRef : undefined}
+                  id={isYou ? LEADERBOARD_YOUR_RANK_ID : undefined}
                   className={`play-panel flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4 ${rowPanelClass(entry.rank, isYou)}`}
+                  aria-current={isYou ? "true" : undefined}
                 >
                   <Link
                     to={`/members/${entry.id}`}
@@ -378,7 +460,7 @@ export function LeaderboardPage() {
                     <div className="min-w-0 flex-1">
                       <p className="font-display text-lg font-semibold text-mist transition group-hover:text-white">
                         {entry.displayName}
-                        {isYou ? " (you)" : ""}
+                        {isYou ? <YouBadge /> : null}
                       </p>
                       {snippet ? (
                         <p className="mt-0.5 line-clamp-2 text-sm text-mist/85">{snippet}</p>

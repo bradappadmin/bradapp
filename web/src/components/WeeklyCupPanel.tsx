@@ -89,16 +89,26 @@ export function WeeklyCupPanel({
             return (
               <li
                 key={row.userId}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-white/10 bg-bay-panel/40 px-3 py-2 text-sm"
+                className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm ${
+                  isYou
+                    ? "border-lime/45 bg-lime/[0.08] ring-2 ring-lime/45"
+                    : "border-white/10 bg-bay-panel/40"
+                }`}
+                aria-current={isYou ? "true" : undefined}
               >
                 <div className="min-w-0">
                   <span className="font-display text-steel">#{row.rank}</span>{" "}
                   <Link
                     to={`/members/${row.userId}`}
                     className="font-display text-mist no-underline hover:text-lime"
+                    aria-label={isYou ? `${row.displayName} (you)` : undefined}
                   >
                     {row.displayName}
-                    {isYou ? " (you)" : ""}
+                    {isYou ? (
+                      <span className="ml-2 inline-flex align-middle rounded-md border border-lime/40 bg-lime/15 px-2 py-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-lime">
+                        You
+                      </span>
+                    ) : null}
                   </Link>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

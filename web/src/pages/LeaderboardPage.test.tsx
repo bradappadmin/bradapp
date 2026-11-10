@@ -157,6 +157,11 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     const selfLink = screen.getByRole("link", { name: /Member \(you\), rank 2, open garage/i });
     expect(selfLink).toHaveAttribute("href", "/members/2");
     expect(selfLink).toHaveTextContent("Empty bay");
+    expect(selfLink).toHaveTextContent("You");
+    expect(screen.getByText("Your rank #2")).toBeInTheDocument();
+    const yourRow = document.getElementById("leaderboard-your-rank");
+    expect(yourRow).not.toBeNull();
+    expect(yourRow).toHaveAttribute("aria-current", "true");
 
     const standings = screen.getByRole("heading", { name: "All-time standings" }).closest("section");
     expect(standings).not.toBeNull();
@@ -180,6 +185,123 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(
       screen.queryByRole("link", { name: /Offer trade with Member/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("offers Jump to my rank when the signed-in row is off-screen", async () => {
+    const user = userEvent.setup();
+    const scrollIntoView = vi.fn();
+    const originalScroll = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    type ObserverCallback = IntersectionObserverCallback;
+    let observerCb: ObserverCallback | null = null;
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    const OriginalIO = window.IntersectionObserver;
+    window.IntersectionObserver = class {
+      constructor(cb: ObserverCallback) {
+        observerCb = cb;
+      }
+      observe = observe;
+      unobserve = vi.fn();
+      disconnect = disconnect;
+      takeRecords = () => [];
+      root = null;
+      rootMargin = "";
+      thresholds = [];
+    } as typeof IntersectionObserver;
+
+    try {
+      render(
+        <MemoryRouter>
+          <AuthProvider>
+            <LeaderboardPage />
+          </AuthProvider>
+        </MemoryRouter>,
+      );
+
+      expect(
+        await screen.findByRole("link", { name: /Member \(you\), rank 2, open garage/i }),
+      ).toBeInTheDocument();
+      expect(observe).toHaveBeenCalled();
+      expect(observerCb).not.toBeNull();
+
+      const target = document.getElementById("leaderboard-your-rank");
+      expect(target).not.toBeNull();
+      observerCb!(
+        [
+          {
+            isIntersecting: false,
+            target: target!,
+            intersectionRatio: 0,
+            boundingClientRect: target!.getBoundingClientRect(),
+            intersectionRect: target!.getBoundingClientRect(),
+            rootBounds: null,
+            time: 0,
+          },
+        ],
+        {} as IntersectionObserver,
+      );
+
+      const jump = await screen.findByRole("button", {
+        name: /Jump to my rank, currently #2/i,
+      });
+      expect(jump).toHaveTextContent("Jump to my rank");
+      expect(jump).toHaveTextContent("#2");
+      await user.click(jump);
+      await waitFor(() => {
+        expect(scrollIntoView).toHaveBeenCalled();
+      });
+    } finally {
+      Element.prototype.scrollIntoView = originalScroll;
+      window.IntersectionObserver = OriginalIO;
+    }
+  });
+
+  it("shows Jump to my rank when Find filters hide the signed-in row", async () => {
+    const user = userEvent.setup();
+    const scrollIntoView = vi.fn();
+    const originalScroll = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      render(
+        <MemoryRouter initialEntries={["/leaderboard?q=casey"]}>
+          <AuthProvider>
+            <Routes>
+              <Route
+                path="/leaderboard"
+                element={
+                  <>
+                    <LeaderboardPage />
+                    <SearchParamsProbe />
+                  </>
+                }
+              />
+            </Routes>
+          </AuthProvider>
+        </MemoryRouter>,
+      );
+
+      expect(
+        await screen.findByRole("link", { name: /Casey Apex, rank 3, open garage/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /Member \(you\), rank 2, open garage/i }),
+      ).not.toBeInTheDocument();
+      const jump = screen.getByRole("button", { name: /Jump to my rank, currently #2/i });
+      await user.click(jump);
+      await waitFor(() => {
+        expect(screen.getByTestId("leaderboard-params").textContent).not.toContain("q=");
+      });
+      expect(
+        await screen.findByRole("link", { name: /Member \(you\), rank 2, open garage/i }),
+      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(scrollIntoView).toHaveBeenCalled();
+      });
+    } finally {
+      Element.prototype.scrollIntoView = originalScroll;
+    }
   });
 
   it("deep-links Challenge and Offer trade from standings and cup for other members", async () => {
