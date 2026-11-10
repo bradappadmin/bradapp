@@ -121,7 +121,14 @@ const STEPS: Step[] = [
   {
     id: "garage-bay-value",
     title: "My cars bay value strip",
-    body: "On My cars when you hold at least one car, one Midnight Garage bay strip under the hero shows owned car count and total Brad Coin value — list / fair listing prices for cars you hold now (owned and for sale). Sold history stays out of the total. The strip hides on an empty bay. Browse cars and How to sit on the strip; Find, Sort the bay, Quick price chips, Compare, and showcase stay.",
+    body: "On My cars when you hold at least one car, one Midnight Garage bay strip under the hero shows owned car count and total Brad Coin value — list / fair listing prices for cars you hold now (owned and for sale). Sold history stays out of the total. The strip hides on an empty bay. Browse cars and How to sit on the strip; Find, Sort the bay, Quick price chips, Compare, and showcase stay. Top Trumps peek on My cars is the next step.",
+    to: "/garage",
+    cta: "Open My cars",
+  },
+  {
+    id: "garage-trump-stats",
+    title: "Top Trumps peek on My cars",
+    body: "On My cars, owned and for-sale photo-first media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars and Favourites. Bay value strip, Quick price chips, Compare, showcase, Find, Sort the bay, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard.",
     to: "/garage",
     cta: "Open My cars",
   },
@@ -357,6 +364,7 @@ export function HowToPage() {
             films exist), listing View seller (/members/:id; hidden for self / house), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
             (Power / 0–60 / Top speed), Favourites Top Trumps peek (same Power / 0–60 / Top speed),
+            My cars Top Trumps peek (same Power / 0–60 / Top speed on owned and for-sale cards),
             Favourites challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
@@ -499,10 +507,12 @@ export function HowToPage() {
                 My cars
               </Link>{" "}
               — Find a car; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
-              Favourites); bay value strip (owned count + total BC for cars you hold; sold history
-              excluded; hides when empty); Quick price chips (50 / 100 / 250 / 500 BC) or free-form
-              when listing / updating a sale; Compare garage cards into the same tray as Cars /
-              Favourites; pin your showcase, and Copy garage link (same URL as profile Copy link).
+              Favourites); Top Trumps peek under each studio photo (Power / 0–60 / Top speed, same as
+              Cars / Favourites) on owned and for-sale cards; bay value strip (owned count + total BC
+              for cars you hold; sold history excluded; hides when empty); Quick price chips (50 /
+              100 / 250 / 500 BC) or free-form when listing / updating a sale; Compare garage cards
+              into the same tray as Cars / Favourites; pin your showcase, and Copy garage link (same
+              URL as profile Copy link).
             </li>
             <li>
               <Link to="/account" className="text-lime no-underline hover:underline">

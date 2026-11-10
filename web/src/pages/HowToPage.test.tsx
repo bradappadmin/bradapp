@@ -53,6 +53,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(document.getElementById("sell-price-chips")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "My cars bay value strip" })).toBeInTheDocument();
     expect(document.getElementById("garage-bay-value")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Top Trumps peek on My cars" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-trump-stats")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Rematch from Match history" }),
@@ -359,6 +363,17 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Sold history stays out of the total/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Top Trumps peek on My cars is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /owned and for-sale photo-first media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/the same strip as Cars and Favourites/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /My cars Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) when listing or updating a sale/i,
       ),
@@ -366,6 +381,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /My cars bay value strip \(owned count \+ total BC; sold history excluded\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /My cars Top Trumps peek \(same Power \/ 0–60 \/ Top speed on owned and for-sale cards\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -380,7 +400,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(document.getElementById("favourites-trump-stats")).not.toBeNull();
     expect(
-      screen.getByText(/the same strip as Cars/i),
+      screen.getByText(/same strip as Cars\. Offer trade, Challenge, Compare/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Compare from Favourites is the next step/i),
@@ -824,6 +844,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
+        /Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites\) on owned and for-sale cards/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
         /bay value strip \(owned count \+ total BC for cars you hold; sold history excluded; hides when empty\)/i,
       ),
     ).toBeInTheDocument();
@@ -871,7 +896,7 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Favourites" })
         .every((a) => a.getAttribute("href") === "/favourites"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByRole("link", { name: "Open My cars" })[0]).toHaveAttribute(
       "href",
       "/garage",
