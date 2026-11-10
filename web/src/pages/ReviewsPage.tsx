@@ -379,47 +379,81 @@ export function ReviewsPage() {
 
         {visible.length > 0 ? (
           <ul className="flex flex-col gap-3">
-            {visible.map((review) => (
-              <li key={review.id}>
-                <Link
-                  to={`/reviews/${review.id}`}
-                  className="play-panel flex gap-4 rounded-md border p-4 no-underline transition hover:border-lime/30 hover:bg-white/[0.02] sm:items-center sm:justify-between sm:p-5"
-                >
-                  <ReviewCarsMedia
-                    type={review.type ?? "review"}
-                    car={review.car}
-                    carB={review.carB ?? null}
-                    className="w-28 shrink-0 sm:w-40"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-lg font-semibold text-mist">{review.title}</p>
-                    <p className="mt-1 text-sm text-steel">
-                      {review.type === "drag_race" ? (
-                        <span className="mr-2 rounded border border-rose/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose">
-                          Drag race
-                        </span>
-                      ) : (
-                        <span className="mr-2 rounded border border-lime/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-lime">
-                          Cue card
-                        </span>
-                      )}
-                      {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
-                      {review.publisher.displayName}
-                      {review.status === "unpublished" ? " · unpublished" : ""}
-                      {review.featured ? " · featured" : ""}
-                      {" · "}
-                      {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
-                    </p>
-                    <p className="mt-1 text-xs text-steel sm:hidden">
-                      {new Date(review.createdAt).toLocaleString()}
-                    </p>
+            {visible.map((review) => {
+              const openCars = [
+                review.car.listingId != null
+                  ? { listingId: review.car.listingId, make: review.car.make, model: review.car.model }
+                  : null,
+                review.carB?.listingId != null
+                  ? {
+                      listingId: review.carB.listingId,
+                      make: review.carB.make,
+                      model: review.carB.model,
+                    }
+                  : null,
+              ].filter((c): c is { listingId: number; make: string; model: string } => c != null);
+
+              return (
+                <li key={review.id}>
+                  <div className="play-panel overflow-hidden rounded-md border transition hover:border-lime/30 hover:bg-white/[0.02]">
+                    <Link
+                      to={`/reviews/${review.id}`}
+                      className="flex gap-4 p-4 no-underline sm:items-center sm:justify-between sm:p-5"
+                    >
+                      <ReviewCarsMedia
+                        type={review.type ?? "review"}
+                        car={review.car}
+                        carB={review.carB ?? null}
+                        className="w-28 shrink-0 sm:w-40"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-display text-lg font-semibold text-mist">{review.title}</p>
+                        <p className="mt-1 text-sm text-steel">
+                          {review.type === "drag_race" ? (
+                            <span className="mr-2 rounded border border-rose/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose">
+                              Drag race
+                            </span>
+                          ) : (
+                            <span className="mr-2 rounded border border-lime/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-lime">
+                              Cue card
+                            </span>
+                          )}
+                          {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
+                          {review.publisher.displayName}
+                          {review.status === "unpublished" ? " · unpublished" : ""}
+                          {review.featured ? " · featured" : ""}
+                          {" · "}
+                          {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
+                        </p>
+                        <p className="mt-1 text-xs text-steel sm:hidden">
+                          {new Date(review.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <p className="hidden shrink-0 text-xs text-steel sm:block">
+                        {new Date(review.createdAt).toLocaleString()}
+                      </p>
+                    </Link>
+                    {openCars.length > 0 ? (
+                      <div
+                        className="flex flex-wrap gap-2 border-t border-white/8 px-4 pb-4 sm:px-5 sm:pb-5"
+                        aria-label="Open related cars"
+                      >
+                        {openCars.map((car) => (
+                          <Link
+                            key={`${review.id}-${car.listingId}`}
+                            to={`/cars/${car.listingId}`}
+                            aria-label={`Open car ${car.make} ${car.model}`}
+                            className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                          >
+                            Open car
+                          </Link>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                  <p className="hidden shrink-0 text-xs text-steel sm:block">
-                    {new Date(review.createdAt).toLocaleString()}
-                  </p>
-                </Link>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         ) : null}
       </main>

@@ -171,6 +171,24 @@ export function ReviewDetailPage() {
                 label="Copy link"
                 className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
               />
+              {review.car.listingId != null ? (
+                <Link
+                  to={`/cars/${review.car.listingId}`}
+                  aria-label={`Open car ${review.car.make} ${review.car.model}`}
+                  className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                >
+                  Open car
+                </Link>
+              ) : null}
+              {review.carB?.listingId != null ? (
+                <Link
+                  to={`/cars/${review.carB.listingId}`}
+                  aria-label={`Open car ${review.carB.make} ${review.carB.model}`}
+                  className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                >
+                  Open car
+                </Link>
+              ) : null}
               <p className="text-sm text-steel" aria-live="polite">
                 {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
               </p>

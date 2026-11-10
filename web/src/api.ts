@@ -683,6 +683,8 @@ export type ReviewCar = {
   bhp: number;
   topSpeedMph: number;
   zeroToSixtySecs: number;
+  /** Catalogue listing for Open car → /cars/:id when a bay listing exists for this model. */
+  listingId: number | null;
 };
 
 export type ReviewSummary = {

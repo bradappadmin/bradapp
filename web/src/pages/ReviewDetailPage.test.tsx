@@ -46,6 +46,7 @@ const publishedReview = {
     bhp: 280,
     topSpeedMph: 155,
     zeroToSixtySecs: 5.7,
+    listingId: 143,
   },
   carB: null,
   cueCards: [{ id: "c1", title: "Look", prompt: "Walk around" }],
@@ -71,6 +72,7 @@ const dragRaceReview = {
     bhp: 315,
     topSpeedMph: 169,
     zeroToSixtySecs: 5.4,
+    listingId: 88,
   },
 };
 
@@ -131,6 +133,10 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Cue cards" })).toBeInTheDocument();
     expect(screen.getByLabelText("Review actions")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toHaveAttribute(
+      "href",
+      "/cars/143",
+    );
     expect(screen.getByText("0 likes")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Like" }));
@@ -188,6 +194,40 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     expect(screen.getByText(/Drag race · Midnight garage/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Lane cars" })).toBeInTheDocument();
     expect(screen.getByLabelText("Review status")).toHaveTextContent(/Drag race/i);
+    expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toHaveAttribute(
+      "href",
+      "/cars/143",
+    );
+    expect(screen.getByRole("link", { name: "Open car Honda Civic" })).toHaveAttribute(
+      "href",
+      "/cars/88",
+    );
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
+
+  it("hides Open car on detail when no related listing is known", async () => {
+    vi.mocked(api.fetchReview).mockResolvedValue({
+      review: {
+        ...publishedReview,
+        car: { ...publishedReview.car, listingId: null },
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews/9"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Bay burn — Focus ST" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
   });
 
   it("lets an admin pin and unpin a featured review", async () => {

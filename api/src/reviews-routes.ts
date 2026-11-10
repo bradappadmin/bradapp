@@ -90,6 +90,7 @@ type ReviewRow = RowDataPacket & {
   bhp: number;
   top_speed_mph: number;
   zero_to_sixty_secs: number;
+  listing_id: number | null;
   car_model_b_id: number | null;
   b_make: string | null;
   b_model: string | null;
@@ -98,6 +99,7 @@ type ReviewRow = RowDataPacket & {
   b_bhp: number | null;
   b_top_speed_mph: number | null;
   b_zero_to_sixty_secs: number | null;
+  listing_b_id: number | null;
   like_count: number;
   liked_by_me: number | boolean;
   is_featured: number | boolean;
@@ -127,6 +129,17 @@ function parseCues(raw: string | CueCardJson): CueCardJson {
   return raw;
 }
 
+/** Prefer an available bay listing for Open car; fall back to owned/sold when needed. */
+function listingIdForCarModelSql(carModelAlias: string): string {
+  return `(SELECT l.id FROM listings l
+     WHERE l.car_model_id = ${carModelAlias}.id
+     ORDER BY CASE l.status
+       WHEN 'available' THEN 0
+       WHEN 'owned' THEN 1
+       ELSE 2 END, l.id ASC
+     LIMIT 1)`;
+}
+
 function toCarPayload(input: {
   id: number;
   make: string;
@@ -136,6 +149,7 @@ function toCarPayload(input: {
   bhp: number;
   topSpeedMph: number;
   zeroToSixtySecs: number;
+  listingId: number | null;
 }) {
   return {
     id: input.id,
@@ -147,6 +161,7 @@ function toCarPayload(input: {
     bhp: input.bhp,
     topSpeedMph: input.topSpeedMph,
     zeroToSixtySecs: input.zeroToSixtySecs,
+    listingId: input.listingId,
   };
 }
 
@@ -174,6 +189,7 @@ function toReview(row: ReviewRow) {
     bhp: Number(row.bhp),
     topSpeedMph: Number(row.top_speed_mph),
     zeroToSixtySecs: Number(row.zero_to_sixty_secs),
+    listingId: row.listing_id == null ? null : Number(row.listing_id),
   });
   const carB =
     type === "drag_race" && row.car_model_b_id != null && row.b_make && row.b_model
@@ -186,6 +202,7 @@ function toReview(row: ReviewRow) {
           bhp: Number(row.b_bhp ?? 0),
           topSpeedMph: Number(row.b_top_speed_mph ?? 0),
           zeroToSixtySecs: Number(row.b_zero_to_sixty_secs ?? 0),
+          listingId: row.listing_b_id == null ? null : Number(row.listing_b_id),
         })
       : null;
   return {
@@ -223,9 +240,11 @@ function reviewSelectSql(viewerUserId: number | null): string {
          r.is_featured, r.publisher_user_id, u.display_name,
          cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.body_type,
          cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
+         ${listingIdForCarModelSql("cm")} AS listing_id,
          cmb.id AS car_model_b_id, cmb.make AS b_make, cmb.model AS b_model, cmb.trim_name AS b_trim_name,
          cmb.body_type AS b_body_type, cmb.bhp AS b_bhp, cmb.top_speed_mph AS b_top_speed_mph,
          cmb.zero_to_sixty_secs AS b_zero_to_sixty_secs,
+         ${listingIdForCarModelSql("cmb")} AS listing_b_id,
          (SELECT COUNT(*) FROM review_likes rlc WHERE rlc.review_id = r.id) AS like_count,
          ${likedExpr}
   FROM video_reviews r

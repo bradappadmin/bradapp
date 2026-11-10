@@ -36,6 +36,7 @@ const cueCard = {
     bhp: 502,
     topSpeedMph: 197,
     zeroToSixtySecs: 3.2,
+    listingId: 42,
   },
   carB: null,
   cueCards: [],
@@ -61,6 +62,7 @@ const dragRace = {
     bhp: 450,
     topSpeedMph: 155,
     zeroToSixtySecs: 4.2,
+    listingId: 77,
   },
   videoUrl: "/reviews/2/video",
 };
@@ -349,5 +351,67 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(record).toHaveAttribute("href", "/reviews/record");
     expect(screen.getByText(/Admin bay/i)).toBeInTheDocument();
     expect(api.fetchReviews).toHaveBeenCalledWith(true, undefined, "all");
+  });
+
+  it("links Open car to related listings when known and keeps Find/Sort", async () => {
+    render(
+      <MemoryRouter initialEntries={["/reviews"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a review" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+
+    const openPorsches = screen.getAllByRole("link", { name: "Open car Porsche 911" });
+    expect(openPorsches.length).toBeGreaterThanOrEqual(1);
+    expect(openPorsches.every((a) => a.getAttribute("href") === "/cars/42")).toBe(true);
+    expect(openPorsches[0]).toHaveTextContent("Open car");
+
+    expect(screen.getByRole("link", { name: "Open car Ford Mustang" })).toHaveAttribute(
+      "href",
+      "/cars/77",
+    );
+
+    // Film title still deep-links into the review (Open car sits outside that link).
+    expect(screen.getByRole("link", { name: /Bay cue card/i })).toHaveAttribute(
+      "href",
+      "/reviews/1",
+    );
+  });
+
+  it("hides Open car when no related listing is known", async () => {
+    vi.mocked(api.fetchReviews).mockResolvedValue({
+      reviews: [
+        {
+          ...cueCard,
+          car: { ...cueCard.car, listingId: null },
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Bay cue card/i })).toHaveAttribute(
+      "href",
+      "/reviews/1",
+    );
+    expect(screen.getByRole("heading", { name: "Find a review" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
   });
 });

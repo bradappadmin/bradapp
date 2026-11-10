@@ -38,6 +38,7 @@ const porsche = {
   bhp: 502,
   topSpeedMph: 197,
   zeroToSixtySecs: 3.2,
+  listingId: 42,
 };
 
 const mustang = {
@@ -50,6 +51,7 @@ const mustang = {
   bhp: 450,
   topSpeedMph: 155,
   zeroToSixtySecs: 4.2,
+  listingId: 77,
 };
 
 const rows: ReviewSummary[] = [
