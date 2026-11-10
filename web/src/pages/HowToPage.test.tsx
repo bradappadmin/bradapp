@@ -37,6 +37,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Daily login bonus" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Buy and sell cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Find, sort, and filter" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sort cars in the bay" })).toBeInTheDocument();
+    expect(document.getElementById("cars-sort")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Sort Members in the bay" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
@@ -78,13 +80,21 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/home wallet and Account/i)).toBeInTheDocument();
     expect(screen.getAllByText(/login streak bonuses/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/No second credit/i)).toBeInTheDocument();
-    expect(screen.getByText(/Find, filters, and price sort/i)).toBeInTheDocument();
+    expect(screen.getByText(/Find, filters, and Sort the bay/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sort cars details follow Find, sort, and filter/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Compare queues that car into the compare tray/i)).toBeInTheDocument();
     expect(screen.getByText(/when two are ready you land side by side/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Copy link puts the absolute URL/i).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Cars Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         /Members directory Sort the bay \(Name A–Z \/ Z–A, Most \/ Least cars\)/i,
@@ -94,6 +104,22 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(
         /Favourites and My cars Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A\)/i,
       ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On Cars, Sort the bay orders the catalogue: Highest price, Lowest price, Name A–Z, or Name Z–A/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/same options as Favourites and My cars/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Clear filters resets search, filters, and sort back to Lowest price/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cars: free-text \+ filters \+ Sort the bay \(Sort cars details are the next step/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(
@@ -109,7 +135,7 @@ describe("HowToPage Midnight Garage UI", () => {
         /On My cars, Sort the bay orders Owned and For sale: Highest price, Lowest price, Name A–Z, or Name Z–A/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/same options as Favourites/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/same options as Favourites/i).length).toBeGreaterThanOrEqual(2);
     expect(
       screen.getByText(/Clear filters resets search and sort back to Highest price/i),
     ).toBeInTheDocument();
@@ -281,8 +307,17 @@ describe("HowToPage Midnight Garage UI", () => {
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
     expect(screen.getByRole("link", { name: "Open Home" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: "Open Cars" })).toHaveAttribute("href", "/cars");
+    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");
+    expect(
+      screen.getByText(
+        /Find \+ filters; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Favourites \/ My cars\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: "Cars" }).some((el) => el.getAttribute("href") === "/cars"),
+    ).toBe(true);
     expect(screen.getByRole("link", { name: "Open Favourites" })).toHaveAttribute(
       "href",
       "/favourites",

@@ -30,16 +30,23 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars is a later step).",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars is a later step). Sort cars details follow Find, sort, and filter.",
     to: "/cars",
     cta: "Open Cars",
   },
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step). Reviews: Find a review plus Sort the bay (Sort reviews details are a later step). Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + Sort the bay (Sort cars details are the next step — Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step after Sort cars). Reviews: Find a review plus Sort the bay (Sort reviews details are a later step). Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
+  },
+  {
+    id: "cars-sort",
+    title: "Sort cars in the bay",
+    body: "On Cars, Sort the bay orders the catalogue: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Favourites and My cars. The choice stays in the URL alongside Find and the make/body/price filters. Clear filters resets search, filters, and sort back to Lowest price. Compare on each card still feeds the shared tray; empty-bay and no-match CTAs stay.",
+    to: "/cars",
+    cta: "Open Cars",
   },
   {
     id: "members-sort",
@@ -162,15 +169,16 @@ export function HowToPage() {
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
-            listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
-            Sort the bay (Name A–Z / Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad
-            Coins, Favourites and My cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A),
-            leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage link
-            stays on Account / My cars), gift Quick amount chips, Top Trumps streaks, Match history
-            Rematch (PvP opponent deep-link or house → Play), this week’s cup standings, free trades,
-            Trade history Offer again (/trades?with=), member gifts, drag races with Sort reviews
-            (Newest / Oldest, Title A–Z / Z–A), empty-bay next steps, and your bay showcase. Nothing
-            here spends real money.
+            listing Compare and Copy link, Cars Sort the bay (Highest / Lowest price, Name A–Z /
+            Z–A), Favourites challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
+            Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
+            cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
+            Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
+            gift Quick amount chips, Top Trumps streaks, Match history Rematch (PvP opponent
+            deep-link or house → Play), this week’s cup standings, free trades, Trade history Offer
+            again (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest,
+            Title A–Z / Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real
+            money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -255,6 +263,13 @@ export function HowToPage() {
               — Find a member, Brad Coin ranks, highlight cars, This week’s cup standings beside the
               podium, and Challenge to Top Trumps or Offer trade on other members’ standings and cup
               rows (sign in).
+            </li>
+            <li>
+              <Link to="/cars" className="text-lime no-underline hover:underline">
+                Cars
+              </Link>{" "}
+              — Find + filters; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
+              Favourites / My cars); Compare into the tray; Clear filters when nothing matches.
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
