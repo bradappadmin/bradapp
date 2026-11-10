@@ -51,7 +51,14 @@ const STEPS: Step[] = [
   {
     id: "home-activity-open-car",
     title: "Open car from Family activity",
-    body: "On Home, Family activity lists recent buys, sells, free trades, gifts, Top Trumps, and reviews — with studio thumbs and type chips. Open car on a row takes you to the catalogue listing (/cars/:id) when that event already knows a listing id. The CTA hides for gifts and any row without a listing. Empty bay Browse cars / Play / Members and No matches Clear filter stay.",
+    body: "On Home, Family activity lists recent buys, sells, free trades, gifts, Top Trumps, and reviews — with studio thumbs and type chips. Open car on a row takes you to the catalogue listing (/cars/:id) when that event already knows a listing id. The CTA hides for gifts and any row without a listing. Empty bay Browse cars / Play / Members and No matches Clear filter stay. Open member from Family activity is the next step.",
+    to: "/",
+    cta: "Open Home",
+  },
+  {
+    id: "home-activity-open-member",
+    title: "Open member from Family activity",
+    body: "On Home, Family activity rows that know an actor member show Open member to that person’s public garage (/members/:id). The CTA hides when the actor is missing, is you, or would be house (no member id). Open car, type chips, Empty bay Browse cars / Play / Members, No matches Clear filter, and studio thumbs stay.",
     to: "/",
     cta: "Open Home",
   },
@@ -382,7 +389,8 @@ export function HowToPage() {
             Power / 0–60 / Top speed), home Recently viewed Compare into the shared tray with Cars /
             My cars, Compare Top Trumps category winners (Power / 0–60 / Top speed, Play rules),
             Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
-            missing), Favourites Compare into that same tray, photo-first cars with
+            missing), Family activity Open member (/members/:id when an actor is known; hidden for
+            self / missing / house), Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
             Trumps bay strip under the studio hero (Power / 0–60 / Top speed), Cars Sort the
@@ -474,7 +482,9 @@ export function HowToPage() {
               — login streak bay strip: today’s +25 BC status and progress toward day 3 (+15) / day 7
               (+50); Coin ledger and How to on the strip; Recently viewed Top Trumps peek under each
               studio photo (Power / 0–60 / Top speed, same as Cars / Favourites); Family activity Open
-              car → /cars/:id when a listing is known (hidden for gifts / missing; sign in).
+              car → /cars/:id when a listing is known (hidden for gifts / missing; sign in); Family
+              activity Open member → /members/:id when an actor is known (hidden for self / missing /
+              house; sign in).
             </li>
             <li>
               <Link to="/play/history" className="text-lime no-underline hover:underline">

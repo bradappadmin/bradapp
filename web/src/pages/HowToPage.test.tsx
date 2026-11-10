@@ -274,6 +274,10 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(document.getElementById("home-activity-open-car")).not.toBeNull();
     expect(
+      screen.getByRole("heading", { name: "Open member from Family activity" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("home-activity-open-member")).not.toBeNull();
+    expect(
       screen.getByText(
         /Compare on a card queues into the shared tray with Cars \/ My cars \(and Favourites\)/i,
       ),
@@ -297,8 +301,26 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/The CTA hides for gifts and any row without a listing/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open member from Family activity is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Family activity rows that know an actor member show Open member to that person.?s public garage \(\/members\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /The CTA hides when the actor is missing, is you, or would be house \(no member id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Family activity Open car \(\/cars\/:id when a listing is known; hidden for gifts \/ missing\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Family activity Open member \(\/members\/:id when an actor is known; hidden for self \/ missing \/ house\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
@@ -821,7 +843,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\)/i,
+        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\); Family activity Open member → \/members\/:id when an actor is known \(hidden for self \/ missing \/ house; sign in\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
@@ -934,7 +956,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
-    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(4);
+    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(5);
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
