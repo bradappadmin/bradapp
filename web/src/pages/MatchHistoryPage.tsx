@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
-import type { MatchHistoryItem } from "../api";
+import type { MatchHistoryCar, MatchHistoryItem } from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
+import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import {
@@ -12,7 +13,10 @@ import {
   topTrumpsCategoryLabel,
 } from "../match-history-labels";
 
-function resultClass(result: MatchHistoryItem["result"]): string {
+/** History payload has make/model but not paint — Midnight Black keeps studio thumbs on-brand. */
+const HISTORY_STUDIO_COLOUR = "Midnight Black";
+
+function resultTextClass(result: MatchHistoryItem["result"]): string {
   switch (result) {
     case "win":
       return "text-lime";
@@ -25,6 +29,84 @@ function resultClass(result: MatchHistoryItem["result"]): string {
       return _exhaustive;
     }
   }
+}
+
+function resultBadgeClass(result: MatchHistoryItem["result"]): string {
+  switch (result) {
+    case "win":
+      return "border-lime/45 bg-lime/10 text-lime";
+    case "loss":
+      return "border-rose/45 bg-rose/10 text-rose";
+    case "draw":
+      return "border-white/20 bg-bay-panel/60 text-mist";
+    default: {
+      const _exhaustive: never = result;
+      return _exhaustive;
+    }
+  }
+}
+
+function resultRowClass(result: MatchHistoryItem["result"]): string {
+  switch (result) {
+    case "win":
+      return "border-lime/35 shadow-[inset_3px_0_0_0_rgba(163,230,53,0.85)]";
+    case "loss":
+      return "border-rose/35 shadow-[inset_3px_0_0_0_rgba(251,113,133,0.85)]";
+    case "draw":
+      return "border-white/15 shadow-[inset_3px_0_0_0_rgba(226,232,240,0.35)]";
+    default: {
+      const _exhaustive: never = result;
+      return _exhaustive;
+    }
+  }
+}
+
+function MatchCarThumb({
+  car,
+  side,
+}: {
+  car: MatchHistoryCar;
+  side: "you" | "them";
+}) {
+  const title = formatMatchCarTitle(car);
+  const body = (
+    <>
+      <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md border border-white/10 bg-bay-deep/50 sm:h-[4.5rem] sm:w-32">
+        <CarVisual
+          colour={HISTORY_STUDIO_COLOUR}
+          make={car.make}
+          model={car.model}
+          size="thumb"
+          title={title}
+          className="!h-full !w-full !rounded-none !border-0"
+        />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs uppercase tracking-wide text-steel">
+          {side === "you" ? "Your car" : "Their car"}
+        </p>
+        <p className="mt-1 font-display text-sm text-mist">{title}</p>
+        <p className="mt-0.5 text-xs text-steel">Value {car.value}</p>
+      </div>
+    </>
+  );
+
+  if (car.listingId != null) {
+    return (
+      <Link
+        to={`/cars/${car.listingId}`}
+        className="flex items-center gap-3 rounded-md border border-white/10 bg-bay-deep/40 px-3 py-2 no-underline transition hover:border-lime/35"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-md border border-white/10 bg-bay-deep/40 px-3 py-2">
+      {body}
+    </div>
+  );
 }
 
 export function MatchHistoryPage() {
@@ -62,58 +144,92 @@ export function MatchHistoryPage() {
     return <Navigate to="/signin" replace />;
   }
 
+  const wins = matches.filter((m) => m.result === "win").length;
+  const losses = matches.filter((m) => m.result === "loss").length;
+  const draws = matches.filter((m) => m.result === "draw").length;
+
   return (
     <div className="relative min-h-screen">
       <SiteHeader />
       <PlayBayAtmosphere />
       <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-        <header className="bay-rise">
-          <p className="text-xs uppercase tracking-[0.28em] text-steel">Top Trumps · Midnight garage</p>
-          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Match history
-          </h1>
-          <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full" />
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel">
-            Past matches — opponent, category, winner, and the cars you both put up. Newest first.
-          </p>
-          <p className="mt-5">
+        <header className="bay-rise flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 max-w-xl">
+            <p className="text-xs uppercase tracking-[0.28em] text-steel">
+              Top Trumps · Midnight garage
+            </p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Match history
+            </h1>
+            <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
+            <p className="mt-4 text-sm leading-relaxed text-steel sm:text-base">
+              Past matches — opponent, category, clearer win or loss, and the cars you both put up.
+              Newest first.
+            </p>
+            {!loading && matches.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2" aria-label="Match result summary">
+                <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
+                  {wins} win{wins === 1 ? "" : "s"}
+                </span>
+                <span className="rounded-md border border-rose/35 bg-rose/10 px-3 py-1.5 font-display text-xs font-semibold text-rose">
+                  {losses} loss{losses === 1 ? "" : "es"}
+                </span>
+                <span className="rounded-md border border-white/12 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  {draws} draw{draws === 1 ? "" : "s"}
+                </span>
+              </div>
+            ) : null}
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
             <Link
               to="/play"
               className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
             >
               ← Back to Play
             </Link>
-          </p>
+            <Link
+              to="/leaderboard"
+              className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+            >
+              Leaderboard
+            </Link>
+          </div>
         </header>
 
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
 
         {!loading && matches.length === 0 ? (
-          <div className="play-panel mt-8 rounded-md border p-5">
-            <p className="text-sm text-steel">
-              No matches yet.{" "}
-              <Link to="/play" className="text-lime no-underline hover:underline">
-                Play Top Trumps
-              </Link>{" "}
-              vs the house or a member.
+          <div className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center">
+            <p className="font-display text-lg text-mist">Quiet bay</p>
+            <p className="mt-2 text-sm text-steel">
+              No matches yet. Face the house or challenge a member.
             </p>
+            <Link
+              to="/play"
+              className="mt-5 inline-block rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime no-underline hover:bg-lime/10"
+            >
+              Play Top Trumps
+            </Link>
           </div>
         ) : null}
 
         {matches.length > 0 ? (
           <ul
-            className="mt-8 flex flex-col gap-3"
+            className="bay-rise-delay mt-8 flex flex-col gap-3"
             aria-label="Top Trumps match history"
           >
             {matches.map((match) => (
-              <li key={match.id} className="play-panel rounded-md border p-4 text-sm">
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <li
+                key={match.id}
+                className={`play-panel rounded-md border p-4 text-sm sm:p-5 ${resultRowClass(match.result)}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-display text-mist">
-                      vs {match.opponentName}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-display text-base text-mist">vs {match.opponentName}</p>
                       <span
-                        className={`ml-2 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${
+                        className={`rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${
                           match.mode === "house"
                             ? "border-lime/30 text-lime"
                             : "border-rose/35 text-rose"
@@ -121,52 +237,26 @@ export function MatchHistoryPage() {
                       >
                         {match.mode === "house" ? "House" : "Challenge"}
                       </span>
-                    </p>
+                    </div>
                     <p className="mt-1 text-xs text-steel">
                       {topTrumpsCategoryLabel(match.category)} ·{" "}
                       {new Date(match.createdAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className={`font-display font-semibold ${resultClass(match.result)}`}>
+                    <span
+                      className={`inline-flex rounded-md border px-2.5 py-1 font-display text-xs font-semibold uppercase tracking-wide ${resultBadgeClass(match.result)}`}
+                    >
                       {matchResultLabel(match.result)}
+                    </span>
+                    <p className={`mt-1.5 font-display text-sm ${resultTextClass(match.result)}`}>
+                      +{formatCoins(match.coinReward)}
                     </p>
-                    <p className="mt-0.5 text-xs text-lime">+{formatCoins(match.coinReward)}</p>
                   </div>
                 </div>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  <div className="rounded-md border border-white/10 bg-bay-deep/40 px-3 py-2">
-                    <p className="text-xs uppercase tracking-wide text-steel">Your car</p>
-                    <p className="mt-1 text-mist">
-                      {match.yourCar.listingId != null ? (
-                        <Link
-                          to={`/cars/${match.yourCar.listingId}`}
-                          className="text-mist no-underline hover:text-lime"
-                        >
-                          {formatMatchCarTitle(match.yourCar)}
-                        </Link>
-                      ) : (
-                        formatMatchCarTitle(match.yourCar)
-                      )}
-                    </p>
-                    <p className="mt-0.5 text-xs text-steel">Value {match.yourCar.value}</p>
-                  </div>
-                  <div className="rounded-md border border-white/10 bg-bay-deep/40 px-3 py-2">
-                    <p className="text-xs uppercase tracking-wide text-steel">Their car</p>
-                    <p className="mt-1 text-mist">
-                      {match.theirCar.listingId != null ? (
-                        <Link
-                          to={`/cars/${match.theirCar.listingId}`}
-                          className="text-mist no-underline hover:text-lime"
-                        >
-                          {formatMatchCarTitle(match.theirCar)}
-                        </Link>
-                      ) : (
-                        formatMatchCarTitle(match.theirCar)
-                      )}
-                    </p>
-                    <p className="mt-0.5 text-xs text-steel">Value {match.theirCar.value}</p>
-                  </div>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <MatchCarThumb car={match.yourCar} side="you" />
+                  <MatchCarThumb car={match.theirCar} side="them" />
                 </div>
               </li>
             ))}
