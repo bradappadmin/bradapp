@@ -144,9 +144,27 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
       "href",
       "/trades",
     );
-    expect(screen.getByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
+    expect(
+      screen.getAllByRole("link", { name: /Porsche 911 GT3/i }).some(
+        (a) => a.getAttribute("href") === "/cars/42",
+      ),
+    ).toBe(true);
+
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
       "href",
       "/cars/42",
+    );
+    expect(screen.getByRole("link", { name: "Open car BMW M3 Competition" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/11",
+    );
+    expect(screen.getByRole("link", { name: "Open car Ford Mustang GT" })).toHaveAttribute(
+      "href",
+      "/cars/15",
     );
 
     expect(screen.getByRole("link", { name: "Open partner Sam Bay" })).toHaveAttribute(
@@ -215,6 +233,56 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     expect(await screen.findByText(/with Member/i)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer again/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Open partner/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/42",
+    );
+    expect(screen.getByRole("link", { name: "Open car BMW M3 Competition" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+  });
+
+  it("hides Open car when neither side has a listing id", async () => {
+    vi.mocked(api.fetchCompletedTrades).mockResolvedValue({
+      trades: [
+        {
+          id: 12,
+          status: "accepted",
+          resolvedAt: "2026-11-09T20:00:00.000Z",
+          counterpartyName: "Sam Bay",
+          counterpartyUserId: 177,
+          theirCarListingId: 0,
+          theirCarAvailable: false,
+          youWere: "offerer",
+          youGave: {
+            listingId: 0,
+            make: "Porsche",
+            model: "911",
+            trimName: "GT3",
+          },
+          youGot: {
+            listingId: 0,
+            make: "BMW",
+            model: "M3",
+            trimName: "Competition",
+          },
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/trades/history"]}>
+        <AuthProvider>
+          <TradeHistoryPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/with Sam Bay/i)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open partner Sam Bay" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Offer again with Sam Bay" })).toBeInTheDocument();
   });
 
   it("filters completed and declined with status chips in the URL", async () => {

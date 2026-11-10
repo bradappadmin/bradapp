@@ -15,6 +15,7 @@ import {
   tradeOfferCar,
   tradeRequestCar,
 } from "../trade-cars";
+import { tradeOpenCarHref, tradeOpenCarLabel } from "../trade-open-car";
 import { openPartnerHref, openPartnerLabel } from "../trade-open-partner";
 
 const fieldClass =
@@ -341,6 +342,10 @@ export function TradesPage() {
           <ul className="flex flex-col gap-3">
             {incoming.map((trade) => {
               const partnerHref = openPartnerHref(trade.fromUserId, user?.id ?? null);
+              const offerHref = tradeOpenCarHref(trade.offerListingId);
+              const requestHref = tradeOpenCarHref(trade.requestListingId);
+              const openCarClass =
+                "rounded-md border border-white/15 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
               return (
               <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -361,6 +366,32 @@ export function TradesPage() {
                   requestCar={tradeRequestCar(trade)}
                 />
                 <div className="flex flex-wrap gap-2">
+                  {offerHref ? (
+                    <Link
+                      to={offerHref}
+                      className={openCarClass}
+                      aria-label={`${tradeOpenCarLabel()} ${listingTitle({
+                        make: trade.offerMake,
+                        model: trade.offerModel,
+                        trimName: trade.offerTrimName,
+                      })}`}
+                    >
+                      {tradeOpenCarLabel()}
+                    </Link>
+                  ) : null}
+                  {requestHref ? (
+                    <Link
+                      to={requestHref}
+                      className={openCarClass}
+                      aria-label={`${tradeOpenCarLabel()} ${listingTitle({
+                        make: trade.requestMake,
+                        model: trade.requestModel,
+                        trimName: trade.requestTrimName,
+                      })}`}
+                    >
+                      {tradeOpenCarLabel()}
+                    </Link>
+                  ) : null}
                   {partnerHref ? (
                     <Link
                       to={partnerHref}
@@ -434,6 +465,10 @@ export function TradesPage() {
           <ul className="flex flex-col gap-3">
             {outgoing.map((trade) => {
               const partnerHref = openPartnerHref(trade.toUserId, user?.id ?? null);
+              const offerHref = tradeOpenCarHref(trade.offerListingId);
+              const requestHref = tradeOpenCarHref(trade.requestListingId);
+              const openCarClass =
+                "rounded-md border border-white/15 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
               return (
               <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -453,6 +488,32 @@ export function TradesPage() {
                   requestCar={tradeRequestCar(trade)}
                 />
                 <div className="flex flex-wrap gap-2">
+                  {offerHref ? (
+                    <Link
+                      to={offerHref}
+                      className={openCarClass}
+                      aria-label={`${tradeOpenCarLabel()} ${listingTitle({
+                        make: trade.offerMake,
+                        model: trade.offerModel,
+                        trimName: trade.offerTrimName,
+                      })}`}
+                    >
+                      {tradeOpenCarLabel()}
+                    </Link>
+                  ) : null}
+                  {requestHref ? (
+                    <Link
+                      to={requestHref}
+                      className={openCarClass}
+                      aria-label={`${tradeOpenCarLabel()} ${listingTitle({
+                        make: trade.requestMake,
+                        model: trade.requestModel,
+                        trimName: trade.requestTrimName,
+                      })}`}
+                    >
+                      {tradeOpenCarLabel()}
+                    </Link>
+                  ) : null}
                   {partnerHref ? (
                     <Link
                       to={partnerHref}

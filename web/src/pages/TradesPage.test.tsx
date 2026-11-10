@@ -175,6 +175,14 @@ describe("TradesPage Midnight Garage UI", () => {
 
     expect(await screen.findByText(/wants a free swap/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Ford Focus ST" })).toHaveAttribute(
+      "href",
+      "/cars/12",
+    );
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
     expect(screen.getByRole("link", { name: "Open partner Sam Bay" })).toHaveAttribute(
       "href",
       "/members/177",
@@ -250,6 +258,16 @@ describe("TradesPage Midnight Garage UI", () => {
       "/members/177",
     );
     expect(screen.queryByRole("link", { name: "Open partner Member" })).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: "Open car Porsche 911 GT3" }).every(
+        (a) => a.getAttribute("href") === "/cars/9",
+      ),
+    ).toBe(true);
+    expect(
+      screen.getAllByRole("link", { name: "Open car Ford Focus ST" }).every(
+        (a) => a.getAttribute("href") === "/cars/12",
+      ),
+    ).toBe(true);
     expect(screen.getAllByRole("button", { name: "Cancel" }).length).toBe(2);
     expect(screen.getAllByText(/Waiting on/i).length).toBe(2);
   });

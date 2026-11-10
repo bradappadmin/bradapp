@@ -8,6 +8,7 @@ import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { offerAgainHref, offerAgainLabel } from "../trade-history-again";
+import { tradeOpenCarHref, tradeOpenCarLabel } from "../trade-open-car";
 import { openPartnerHref, openPartnerLabel } from "../trade-open-partner";
 import {
   filterTradesHistoryByStatus,
@@ -355,6 +356,10 @@ export function TradeHistoryPage() {
               const role = roleBadge(trade.youWere);
               const againHref = offerAgainHref(trade, user?.id ?? null);
               const partnerHref = openPartnerHref(trade.counterpartyUserId, user?.id ?? null);
+              const gaveHref = tradeOpenCarHref(trade.youGave.listingId);
+              const gotHref = tradeOpenCarHref(trade.youGot.listingId);
+              const openCarClass =
+                "rounded-md border border-white/15 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
               return (
                 <li
                   key={trade.id}
@@ -392,8 +397,26 @@ export function TradeHistoryPage() {
                     </p>
                     <TradeCarThumb car={trade.youGot} side="got" />
                   </div>
-                  {partnerHref || againHref ? (
+                  {gaveHref || gotHref || partnerHref || againHref ? (
                     <div className="mt-4 flex flex-wrap gap-2">
+                      {gaveHref ? (
+                        <Link
+                          to={gaveHref}
+                          className={openCarClass}
+                          aria-label={`${tradeOpenCarLabel()} ${listingTitle(trade.youGave)}`}
+                        >
+                          {tradeOpenCarLabel()}
+                        </Link>
+                      ) : null}
+                      {gotHref ? (
+                        <Link
+                          to={gotHref}
+                          className={openCarClass}
+                          aria-label={`${tradeOpenCarLabel()} ${listingTitle(trade.youGot)}`}
+                        >
+                          {tradeOpenCarLabel()}
+                        </Link>
+                      ) : null}
                       {partnerHref ? (
                         <Link
                           to={partnerHref}
