@@ -119,6 +119,16 @@ describe("MemberProfilePage showcase garage", () => {
       "href",
       "/cars/42",
     );
+    expect(
+      screen.getByText(/Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Top Trumps peek")).toBeInTheDocument();
+    // Media cards reuse the catalogue Top Trumps peek under the studio photo.
+    const peeks = screen.getAllByLabelText("Top Trumps peek");
+    expect(peeks.length).toBe(2);
+    expect(peeks[0]).toHaveTextContent(/Power/);
+    expect(peeks[0]).toHaveTextContent(/0–60/);
+    expect(peeks[0]).toHaveTextContent(/Top speed/);
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Challenge" })).toHaveAttribute(
       "href",

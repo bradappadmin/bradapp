@@ -188,6 +188,11 @@ export function MemberProfilePage() {
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {member.carCount} {member.carCount === 1 ? "car" : "cars"}
                 </span>
+                {cars.length > 0 ? (
+                  <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                    Top Trumps peek
+                  </span>
+                ) : null}
                 {showcase ? (
                   <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                     {showcaseHint(showcaseSource)}
@@ -195,8 +200,9 @@ export function MemberProfilePage() {
                 ) : null}
               </div>
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-steel">
-                Public bay — studio hero for the showcase car, then the rest of the garage. No
-                account secrets.
+                Public bay — studio hero for the showcase car, then photo-first garage cards with a
+                compact Top Trumps peek under each studio photo (Power / 0–60 / Top speed), same as
+                Cars and Favourites. No account secrets.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
