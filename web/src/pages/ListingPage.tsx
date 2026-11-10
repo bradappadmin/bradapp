@@ -273,7 +273,7 @@ export function ListingPage() {
                       ? "Saved · Unfavourite"
                       : "Save to favourites"}
               </button>
-              <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy share link" />
+              <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy link" />
             </div>
 
             {favourited ? (

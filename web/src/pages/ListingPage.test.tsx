@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
@@ -9,10 +10,20 @@ import { ListingPage } from "./ListingPage";
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchListing: vi.fn(),
 }));
 
+vi.mock("../share-link", async () => {
+  const actual = await vi.importActual<typeof import("../share-link")>("../share-link");
+  return {
+    ...actual,
+    copyTextToClipboard: vi.fn(),
+  };
+});
+
 import * as api from "../api";
+import { copyTextToClipboard } from "../share-link";
 
 const memberOwnedListing: ListingDetail = {
   id: 143,
@@ -100,6 +111,37 @@ describe("ListingPage Midnight Garage UI", () => {
     expect(trade).toHaveAttribute("href", "/trades?with=177&theirCar=143");
     expect(screen.getByRole("button", { name: /Buy for/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Save to favourites/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
+
+  it("copies the absolute listing URL with a success toast", async () => {
+    vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
+    vi.mocked(copyTextToClipboard).mockResolvedValue(true);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/cars/143"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Copy link" }));
+    expect(copyTextToClipboard).toHaveBeenCalled();
+    const copied = vi.mocked(copyTextToClipboard).mock.calls[0]?.[0] ?? "";
+    expect(copied).toMatch(/\/cars\/143$/);
+    expect(await screen.findByRole("status")).toHaveTextContent("Link copied.");
+    // Buy / favourite / challenge-or-trade stay available beside Copy link.
+    expect(screen.getByRole("button", { name: /Sign in to buy/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sign in to favourite/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Sign in to challenge or trade" }),
+    ).toBeInTheDocument();
   });
 
   it("prompts sign-in to challenge or trade when signed out", async () => {
