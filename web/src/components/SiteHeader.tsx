@@ -39,13 +39,15 @@ function CoinBalanceLink({
   balance: number;
   className?: string;
 }) {
+  const label = formatCoins(balance);
   return (
     <Link
-      to="/garage"
+      to="/ledger"
       className={`nav-coin-chip inline-flex items-center rounded-md px-2.5 py-1 font-display text-sm font-semibold no-underline transition hover:border-lime/55 hover:bg-bay-panel/80 ${className}`}
-      title="Brad Coin balance"
+      title="Open Brad Coin ledger"
+      aria-label={`${label} — open ledger`}
     >
-      {formatCoins(balance)}
+      {label}
     </Link>
   );
 }

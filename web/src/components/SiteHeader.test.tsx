@@ -178,4 +178,27 @@ describe("SiteHeader", () => {
     expect(await screen.findByLabelText("15 favourites")).toBeInTheDocument();
     expect(screen.getAllByTestId("favourites-nav-badge")[0]).toHaveTextContent("9+");
   });
+
+  it("links the Brad Coin balance chip to the ledger", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SiteHeader />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const chips = await screen.findAllByRole("link", {
+      name: /200 BC — open ledger/i,
+    });
+    expect(chips.length).toBeGreaterThan(0);
+    for (const chip of chips) {
+      expect(chip).toHaveAttribute("href", "/ledger");
+      expect(chip).toHaveAttribute("title", "Open Brad Coin ledger");
+      expect(chip.className).toMatch(/nav-coin-chip/);
+    }
+    expect(screen.getAllByRole("link", { name: /^Ledger$/i }).length).toBeGreaterThan(0);
+  });
 });
