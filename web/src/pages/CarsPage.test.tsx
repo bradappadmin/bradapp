@@ -155,13 +155,16 @@ describe("CarsPage Midnight Garage UI", () => {
 
     expect(await screen.findByRole("heading", { name: "Find a car" })).toBeInTheDocument();
     const sort = await screen.findByRole("combobox", {
-      name: /Sort catalogue by price or year/i,
+      name: /Sort catalogue by price or name/i,
     });
     expect(sort).toHaveValue("price_asc");
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Lowest price" })).toBeInTheDocument();
+    expect(screen.getByText(/same options as Favourites and My cars/i)).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Highest price" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Newest" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Lowest price" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Name A–Z" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Name Z–A" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Newest" })).not.toBeInTheDocument();
 
     await user.selectOptions(sort, "price_desc");
     expect(sort).toHaveValue("price_desc");
@@ -173,18 +176,18 @@ describe("CarsPage Midnight Garage UI", () => {
     });
     expect(screen.getByTestId("cars-search-params").textContent).toContain("sort=price_desc");
 
-    await user.selectOptions(sort, "year_desc");
+    await user.selectOptions(sort, "name_asc");
     await waitFor(() => {
       expect(api.searchCars).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: "year_desc" }),
+        expect.objectContaining({ sort: "name_asc" }),
       );
     });
-    expect(screen.getByTestId("cars-search-params").textContent).toContain("sort=year_desc");
+    expect(screen.getByTestId("cars-search-params").textContent).toContain("sort=name_asc");
   });
 
   it("reads sort from the URL on load", async () => {
     render(
-      <MemoryRouter initialEntries={["/cars?sort=year_desc"]}>
+      <MemoryRouter initialEntries={["/cars?sort=name_desc"]}>
         <AuthProvider>
           <Routes>
             <Route path="/cars" element={<CarsPage />} />
@@ -194,12 +197,12 @@ describe("CarsPage Midnight Garage UI", () => {
     );
 
     const sort = await screen.findByRole("combobox", {
-      name: /Sort catalogue by price or year/i,
+      name: /Sort catalogue by price or name/i,
     });
-    expect(sort).toHaveValue("year_desc");
+    expect(sort).toHaveValue("name_desc");
     await waitFor(() => {
       expect(api.searchCars).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: "year_desc" }),
+        expect.objectContaining({ sort: "name_desc" }),
       );
     });
   });

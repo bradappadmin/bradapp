@@ -64,7 +64,9 @@ export type SearchParams = {
     | "year_asc"
     | "year_desc"
     | "mileage_asc"
-    | "bhp_desc";
+    | "bhp_desc"
+    | "name_asc"
+    | "name_desc";
   limit?: number;
   offset?: number;
 };
@@ -186,6 +188,14 @@ export function buildSearchClause(params: SearchParams): {
       break;
     case "bhp_desc":
       orderSql = "ORDER BY cm.bhp DESC, l.id ASC";
+      break;
+    case "name_asc":
+      orderSql =
+        "ORDER BY cm.make ASC, cm.model ASC, cm.trim_name ASC, l.coin_price DESC, l.id ASC";
+      break;
+    case "name_desc":
+      orderSql =
+        "ORDER BY cm.make DESC, cm.model DESC, cm.trim_name DESC, l.coin_price DESC, l.id ASC";
       break;
     case undefined:
       break;

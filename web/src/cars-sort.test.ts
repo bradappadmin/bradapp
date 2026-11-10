@@ -4,6 +4,7 @@ import {
   DEFAULT_CARS_SORT,
   parseCarsSort,
 } from "./cars-sort";
+import { GARAGE_SORT_OPTIONS } from "./garage-sort";
 
 describe("cars-sort", () => {
   it("defaults to lowest price", () => {
@@ -12,19 +13,31 @@ describe("cars-sort", () => {
     expect(parseCarsSort(undefined)).toBe("price_asc");
     expect(parseCarsSort("")).toBe("price_asc");
     expect(parseCarsSort("bogus")).toBe("price_asc");
+    expect(parseCarsSort("year_desc")).toBe("price_asc");
   });
 
-  it("accepts lowest, highest, and newest", () => {
+  it("accepts highest/lowest price and name A–Z / Z–A", () => {
     expect(parseCarsSort("price_asc")).toBe("price_asc");
     expect(parseCarsSort("price_desc")).toBe("price_desc");
-    expect(parseCarsSort("year_desc")).toBe("year_desc");
+    expect(parseCarsSort("name_asc")).toBe("name_asc");
+    expect(parseCarsSort("name_desc")).toBe("name_desc");
   });
 
-  it("exposes Midnight Garage catalogue labels", () => {
+  it("reuses shared garage bay labels", () => {
+    expect(CARS_SORT_OPTIONS.map((o) => o.label)).toEqual(
+      GARAGE_SORT_OPTIONS.map((o) => o.label),
+    );
     expect(CARS_SORT_OPTIONS.map((o) => o.label)).toEqual([
-      "Lowest price",
       "Highest price",
-      "Newest",
+      "Lowest price",
+      "Name A–Z",
+      "Name Z–A",
+    ]);
+    expect(CARS_SORT_OPTIONS.map((o) => o.value)).toEqual([
+      "price_desc",
+      "price_asc",
+      "name_asc",
+      "name_desc",
     ]);
   });
 });

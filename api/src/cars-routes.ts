@@ -40,7 +40,16 @@ const searchQuerySchema = z.object({
   mileageMax: optionalInt,
   bhpMin: optionalInt,
   sort: z
-    .enum(["price_asc", "price_desc", "year_asc", "year_desc", "mileage_asc", "bhp_desc"])
+    .enum([
+      "price_asc",
+      "price_desc",
+      "year_asc",
+      "year_desc",
+      "mileage_asc",
+      "bhp_desc",
+      "name_asc",
+      "name_desc",
+    ])
     .optional(),
   limit: optionalInt,
   offset: optionalInt,

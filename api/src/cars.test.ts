@@ -66,4 +66,9 @@ describe("buildSearchClause", () => {
     expect(clause.values).toEqual(["SUV", "Petrol", 2018, 2024, 100, 800]);
     expect(clause.orderSql).toBe("ORDER BY l.year ASC, l.id ASC");
   });
+
+  it("sorts by make/model name A–Z and Z–A", () => {
+    expect(buildSearchClause({ sort: "name_asc" }).orderSql).toContain("cm.make ASC");
+    expect(buildSearchClause({ sort: "name_desc" }).orderSql).toContain("cm.make DESC");
+  });
 });

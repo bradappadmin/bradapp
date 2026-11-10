@@ -551,8 +551,8 @@ export function CarsPage() {
           <div className="min-w-0">
             <p className="font-display text-lg text-mist">Sort the bay</p>
             <p className="mt-1 text-sm text-steel">
-              Lowest price, highest price, or newest year. Choice stays in the URL and
-              reorders the server search.
+              Highest or lowest Brad Coin price, or name — same options as Favourites and My cars.
+              Choice stays in the URL and reorders the server search.
             </p>
           </div>
           <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
@@ -563,7 +563,7 @@ export function CarsPage() {
               onChange={(e) =>
                 applySelect("sort", parseCarsSort(e.target.value) as CarsSort)
               }
-              aria-label="Sort catalogue by price or year"
+              aria-label="Sort catalogue by price or name"
             >
               {CARS_SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
