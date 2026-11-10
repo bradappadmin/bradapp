@@ -5,7 +5,15 @@ import type { GarageCar, LedgerEntry, PurchasedCar, SoldCar } from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { badgeForStatus } from "../car-visuals";
+import {
+  ensureComparePick,
+  loadCompareSelection,
+  toComparePick,
+  toggleComparePick,
+  type ComparePick,
+} from "../compare-selection";
 import { CarCard } from "../components/CarCard";
+import { CompareTray } from "../components/CompareTray";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
@@ -77,6 +85,20 @@ export function GaragePage() {
   const [loading, setLoading] = useState(true);
   const [sellPrices, setSellPrices] = useState<Record<number, string>>({});
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
+
+  useEffect(() => {
+    setComparePicks(loadCompareSelection());
+  }, []);
+
+  function onCompareCard(car: GarageCar) {
+    const pick = toComparePick(car);
+    const already = comparePicks.some((p) => p.id === car.id);
+    // Same session tray as Cars / listing detail: ensure adds without toggling off;
+    // a second click on an already-queued card removes it.
+    const { picks } = already ? toggleComparePick(pick) : ensureComparePick(pick);
+    setComparePicks(picks);
+  }
 
   async function reload() {
     const [garage, wallet, sold, bought] = await Promise.all([
@@ -266,6 +288,7 @@ export function GaragePage() {
 
   function renderManagedCar(car: GarageCar) {
     const isShowcase = showcaseListingId === car.id;
+    const selected = comparePicks.some((p) => p.id === car.id);
     return (
       <li key={car.id} className="bay-rise">
         <CarCard
@@ -324,6 +347,19 @@ export function GaragePage() {
                     Unlist
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  aria-label={selected ? "Remove from compare" : "Add to compare"}
+                  onClick={() => onCompareCard(car)}
+                  className={`w-full rounded-md border px-4 py-2 font-display text-sm font-semibold transition sm:w-auto ${
+                    selected
+                      ? "border-lime/50 text-lime hover:bg-lime/10"
+                      : "border-white/15 text-steel hover:border-lime/40 hover:text-lime"
+                  }`}
+                >
+                  {selected ? "In compare" : "Compare"}
+                </button>
               </div>
             </div>
           }
@@ -391,6 +427,12 @@ export function GaragePage() {
               className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
             >
               Browse cars
+            </Link>
+            <Link
+              to="/compare"
+              className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+            >
+              Compare
             </Link>
             <Link
               to="/ledger"
@@ -727,6 +769,8 @@ export function GaragePage() {
             ) : null}
           </div>
         </section>
+
+        <CompareTray picks={comparePicks} onChange={setComparePicks} />
       </main>
     </div>
   );

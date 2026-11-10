@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import { COMPARE_SELECTION_KEY, clearCompareSelection } from "../compare-selection";
 import { ToastProvider } from "../toast-context";
 import { GaragePage } from "./GaragePage";
 
@@ -35,9 +36,11 @@ import { copyTextToClipboard } from "../share-link";
 describe("GaragePage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
+    clearCompareSelection();
   });
 
   beforeEach(() => {
+    clearCompareSelection();
     vi.mocked(api.fetchMe).mockResolvedValue({
       user: {
         id: 2,
@@ -169,10 +172,59 @@ describe("GaragePage Midnight Garage UI", () => {
       "/members/2",
     );
     expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: "Compare" }).some((a) => a.getAttribute("href") === "/compare"),
+    ).toBe(true);
+    expect(screen.getAllByRole("button", { name: "Add to compare" }).length).toBe(3);
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
 
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
+  it("queues owned and for-sale cars into the session compare tray", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Owned" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
+
+    const porscheCard = screen.getByRole("link", { name: /Porsche 911 GT3/i }).closest("li");
+    const fordCard = screen.getByRole("link", { name: /Ford Focus ST/i }).closest("li");
+    expect(porscheCard).not.toBeNull();
+    expect(fordCard).not.toBeNull();
+
+    await user.click(
+      porscheCard!.querySelector('button[aria-label="Add to compare"]') as HTMLButtonElement,
+    );
+    expect(screen.getByLabelText("Compare selection")).toBeInTheDocument();
+    expect(screen.getByText(/Compare \(1\/2\)/i)).toBeInTheDocument();
+    expect(sessionStorage.getItem(COMPARE_SELECTION_KEY)).toContain('"id":9');
+    expect(
+      porscheCard!.querySelector('button[aria-label="Remove from compare"]'),
+    ).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(
+      fordCard!.querySelector('button[aria-label="Add to compare"]') as HTMLButtonElement,
+    );
+    expect(screen.getByText(/Compare \(2\/2\)/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Side by side" })).toHaveAttribute(
+      "href",
+      "/compare?a=9&b=10",
+    );
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Owned" })).toBeInTheDocument();
   });
 
   it("copies the public garage link with a toast", async () => {
