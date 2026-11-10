@@ -53,8 +53,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByRole("heading", { name: "Rematch from Match history" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Open profile from Play" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Weekly Top Trumps cup" })).toBeInTheDocument();
     expect(document.getElementById("play-rematch")).not.toBeNull();
+    expect(document.getElementById("play-open-opponent")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Offer again from Trade history" }),
@@ -323,7 +325,23 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Rematch hides when the opponent is missing or is you/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open profile on a selected Play opponent is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open profile takes you to that member.?s public garage \(\/members\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The CTA hides for Vs house and when the opponent is you/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Match history Rematch \(PvP opponent deep-link or house → Play\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Play Open profile \(\/members\/:id when a PvP opponent is selected; hidden for house \/ self\)/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/Trades history: Completed\/Declined/i)).toBeInTheDocument();
     expect(
@@ -656,11 +674,22 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/garage",
     );
-    expect(screen.getByRole("link", { name: "Open Play" })).toHaveAttribute("href", "/play");
+    expect(screen.getAllByRole("link", { name: "Open Play" }).length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getAllByRole("link", { name: "Open Play" }).every((a) => a.getAttribute("href") === "/play"),
+    ).toBe(true);
     expect(screen.getByRole("link", { name: "Open Match history" })).toHaveAttribute(
       "href",
       "/play/history",
     );
+    expect(
+      screen.getAllByRole("link", { name: "Play" }).some((a) => a.getAttribute("href") === "/play"),
+    ).toBe(true);
+    expect(
+      screen.getByText(
+        /Challenge a member or land from Rematch \(\/play\?opponent=\); Open profile → \/members\/:id when an opponent is selected \(hidden for house or self\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open cup standings" })).toHaveAttribute(
       "href",
       "/leaderboard",
