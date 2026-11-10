@@ -591,6 +591,15 @@ export type CompletedTrade = {
   id: number;
   resolvedAt: string;
   counterpartyName: string;
+  /** Other member in this swap — for Trade again deep-links. */
+  counterpartyUserId: number;
+  /**
+   * Listing the counterparty received (your `youGave`). Use as `theirCar` when
+   * `theirCarAvailable` is true.
+   */
+  theirCarListingId: number;
+  /** True when the counterparty still owns `theirCarListingId`. */
+  theirCarAvailable: boolean;
   youGave: CompletedTradeCar;
   youGot: CompletedTradeCar;
   youWere: "offerer" | "receiver";

@@ -7,6 +7,7 @@ import { listingTitle } from "../cars";
 import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { tradeAgainAction, tradeAgainHref } from "../trade-history-again";
 
 /** History payload has make/model but not paint — Midnight Black keeps studio thumbs on-brand. */
 const HISTORY_STUDIO_COLOUR = "Midnight Black";
@@ -171,6 +172,8 @@ export function TradeHistoryPage() {
           >
             {trades.map((trade) => {
               const role = roleBadge(trade.youWere);
+              const again = tradeAgainAction(trade);
+              const againHref = tradeAgainHref(trade);
               return (
                 <li
                   key={trade.id}
@@ -206,6 +209,27 @@ export function TradeHistoryPage() {
                     </p>
                     <TradeCarThumb car={trade.youGot} side="got" />
                   </div>
+                  {again !== "hidden" ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {again === "offer" && againHref ? (
+                        <Link
+                          to={againHref}
+                          className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                        >
+                          Trade again
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          title="They no longer have that car"
+                          className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 font-display text-sm font-semibold text-steel/60"
+                        >
+                          Trade again
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
                 </li>
               );
             })}

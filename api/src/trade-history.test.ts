@@ -7,11 +7,16 @@ describe("completed trade history shape", () => {
       id: 1,
       resolvedAt: "2026-11-09T12:00:00.000Z",
       counterpartyName: "Player B",
+      counterpartyUserId: 22,
+      theirCarListingId: 10,
+      theirCarAvailable: true,
       youGave: { listingId: 10, make: "Ford", model: "Focus", trimName: "ST" },
       youGot: { listingId: 11, make: "BMW", model: "M2", trimName: "" },
       youWere: "offerer",
     };
     expect(row.counterpartyName).toBe("Player B");
+    expect(row.counterpartyUserId).toBe(22);
+    expect(row.theirCarAvailable).toBe(true);
     expect(row.youGave.make).toBe("Ford");
     expect(row.youGot.model).toBe("M2");
   });

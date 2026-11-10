@@ -11,6 +11,15 @@ export type CompletedTrade = {
   id: number;
   resolvedAt: string;
   counterpartyName: string;
+  /** Other member in this swap — for Trade again deep-links. */
+  counterpartyUserId: number;
+  /**
+   * Listing the counterparty received (your `youGave`). Use as `theirCar` when
+   * `theirCarAvailable` is true.
+   */
+  theirCarListingId: number;
+  /** True when the counterparty still owns `theirCarListingId`. */
+  theirCarAvailable: boolean;
   /** Car you gave away in this swap. */
   youGave: CompletedTradeCar;
   /** Car you received in this swap. */
@@ -34,6 +43,8 @@ type TradeRow = RowDataPacket & {
   request_make: string;
   request_model: string;
   request_trim: string;
+  offer_owner_user_id: number | null;
+  request_owner_user_id: number | null;
 };
 
 function toIso(value: Date | string | null | undefined, fallback: Date | string): string {
@@ -64,7 +75,9 @@ export async function listCompletedTrades(
        ocm.trim_name AS offer_trim,
        rcm.make AS request_make,
        rcm.model AS request_model,
-       rcm.trim_name AS request_trim
+       rcm.trim_name AS request_trim,
+       ol.owner_user_id AS offer_owner_user_id,
+       rl.owner_user_id AS request_owner_user_id
      FROM card_trade_offers t
      INNER JOIN users fu ON fu.id = t.from_user_id
      INNER JOIN users tu ON tu.id = t.to_user_id
@@ -97,13 +110,28 @@ export async function listCompletedTrades(
     // Offerer gave offer car, got request car. Receiver gave request car, got offer car.
     const youGave = youWere === "offerer" ? offerCar : requestCar;
     const youGot = youWere === "offerer" ? requestCar : offerCar;
+    const counterpartyUserId =
+      youWere === "offerer" ? Number(row.to_user_id) : Number(row.from_user_id);
     const counterpartyName =
       youWere === "offerer" ? String(row.to_name) : String(row.from_name);
+    const theirCarListingId = youGave.listingId;
+    const theirCarOwnerId =
+      youWere === "offerer"
+        ? row.offer_owner_user_id == null
+          ? null
+          : Number(row.offer_owner_user_id)
+        : row.request_owner_user_id == null
+          ? null
+          : Number(row.request_owner_user_id);
+    const theirCarAvailable = theirCarOwnerId === counterpartyUserId;
 
     return {
       id: Number(row.id),
       resolvedAt: toIso(row.resolved_at, row.created_at),
       counterpartyName,
+      counterpartyUserId,
+      theirCarListingId,
+      theirCarAvailable,
       youGave,
       youGot,
       youWere,

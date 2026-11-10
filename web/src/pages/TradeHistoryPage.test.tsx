@@ -41,6 +41,9 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
           id: 5,
           resolvedAt: "2026-11-09T20:00:00.000Z",
           counterpartyName: "Sam Bay",
+          counterpartyUserId: 177,
+          theirCarListingId: 42,
+          theirCarAvailable: true,
           youWere: "offerer",
           youGave: {
             listingId: 42,
@@ -59,6 +62,9 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
           id: 4,
           resolvedAt: "2026-11-08T18:00:00.000Z",
           counterpartyName: "Casey Apex",
+          counterpartyUserId: 88,
+          theirCarListingId: 11,
+          theirCarAvailable: false,
           youWere: "receiver",
           youGave: {
             listingId: 11,
@@ -77,7 +83,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     });
   });
 
-  it("shows bay hierarchy, accepted rows, studio thumbs, and trades CTA", async () => {
+  it("shows bay hierarchy, Trade again deep-links, and disabled when car is gone", async () => {
     render(
       <MemoryRouter initialEntries={["/trades/history"]}>
         <AuthProvider>
@@ -112,5 +118,13 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
       "href",
       "/cars/42",
     );
+
+    expect(screen.getByRole("link", { name: "Trade again" })).toHaveAttribute(
+      "href",
+      "/trades?with=177&theirCar=42",
+    );
+    const disabled = screen.getByRole("button", { name: "Trade again" });
+    expect(disabled).toBeDisabled();
+    expect(disabled).toHaveAttribute("title", "They no longer have that car");
   });
 });

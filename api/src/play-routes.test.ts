@@ -245,7 +245,13 @@ describe.runIf(hasDb)("play routes", () => {
     expect(completedA.youWere).toBe("offerer");
     expect(completedA.youGave.listingId).toBe(carA);
     expect(completedA.youGot.listingId).toBe(carB);
+    expect(completedA.theirCarListingId).toBe(carA);
+    expect(completedA.theirCarAvailable).toBe(true);
     expect(completedA.resolvedAt).toBeTruthy();
+
+    const meB = await b.get("/auth/me");
+    expect(meB.status).toBe(200);
+    expect(completedA.counterpartyUserId).toBe(meB.body.user.id);
 
     const historyB = await b.get("/play/trades/history");
     const completedB = historyB.body.trades.find((t: { id: number }) => t.id === tradeId);
@@ -254,6 +260,12 @@ describe.runIf(hasDb)("play routes", () => {
     expect(completedB.youWere).toBe("receiver");
     expect(completedB.youGave.listingId).toBe(carB);
     expect(completedB.youGot.listingId).toBe(carA);
+    expect(completedB.theirCarListingId).toBe(carB);
+    expect(completedB.theirCarAvailable).toBe(true);
+
+    const meA = await a.get("/auth/me");
+    expect(meA.status).toBe(200);
+    expect(completedB.counterpartyUserId).toBe(meA.body.user.id);
   });
 
   it("requires auth for completed trade history", async () => {
