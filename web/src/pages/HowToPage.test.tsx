@@ -53,6 +53,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Quick price when you list a car" }),
     ).toBeInTheDocument();
     expect(document.getElementById("sell-price-chips")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Paint colour when you list a car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-sell-paint")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "My cars bay value strip" })).toBeInTheDocument();
     expect(document.getElementById("garage-bay-value")).not.toBeNull();
     expect(
@@ -465,6 +469,18 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Paint colour when you list is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Paint colour when you list a car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-sell-paint")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /pick Paint from the same curated studio colours as admin — a live studio thumb \(and the card photo\) update as you change it/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/My cars bay value strip is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -486,6 +502,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /My cars Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) when listing or updating a sale/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /My cars Paint colour \(same curated studio paints as admin, live thumb\) when listing or updating a sale/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1190,7 +1211,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) or free-form when listing \/ updating a sale/i,
+        /Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) or free-form when listing \/ updating a sale; Paint colour \(same curated studio paints as admin\) with a live studio thumb/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1241,7 +1262,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Open Compare" }).every((a) => a.getAttribute("href") === "/compare"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(4);
     expect(screen.getAllByRole("link", { name: "Open My cars" })[0]).toHaveAttribute(
       "href",
       "/garage",
