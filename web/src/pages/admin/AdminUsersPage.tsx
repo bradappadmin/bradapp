@@ -95,11 +95,6 @@ function AdminUsersInner() {
     writeParams(draft, group);
   }
 
-  function onClearSearch() {
-    setDraft("");
-    writeParams("", group);
-  }
-
   function onClearFilters() {
     setDraft("");
     writeParams("", "all");
@@ -213,13 +208,13 @@ function AdminUsersInner() {
               >
                 Search
               </button>
-              {qFromUrl ? (
+              {filtersOn ? (
                 <button
                   type="button"
-                  onClick={onClearSearch}
+                  onClick={onClearFilters}
                   className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
                 >
-                  Clear
+                  Clear filters
                 </button>
               ) : null}
             </div>
@@ -295,8 +290,9 @@ function AdminUsersInner() {
 
       {!loading && visible.length === 0 ? (
         <div
-          className="play-panel rounded-md border px-5 py-12 text-center"
+          className="play-panel bay-rise-delay rounded-md border px-5 py-12 text-center sm:py-14"
           role="status"
+          aria-label={filtersOn ? "No matching accounts" : "Empty accounts directory"}
         >
           {filtersOn ? (
             <>
@@ -304,15 +300,17 @@ function AdminUsersInner() {
               <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
                 No accounts match
                 {qFromUrl ? ` “${qFromUrl}”` : " that filter"}. Try another spelling or clear the
-                filters.
+                filters — role chips stay ready above.
               </p>
-              <button
-                type="button"
-                onClick={onClearFilters}
-                className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
-              >
-                Clear filters
-              </button>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClearFilters}
+                  className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Clear filters
+                </button>
+              </div>
             </>
           ) : (
             <>

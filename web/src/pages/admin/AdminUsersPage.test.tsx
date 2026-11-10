@@ -112,7 +112,7 @@ describe("AdminUsersPage accounts search", () => {
     expect(await screen.findByText("Sam Bay")).toBeInTheDocument();
     expect(screen.queryByText("Frozen Friend")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
     await waitFor(() => {
       expect(screen.getByTestId("admin-users-params").textContent).not.toContain("q=");
     });
@@ -151,19 +151,42 @@ describe("AdminUsersPage accounts search", () => {
     ).toHaveValue("friend");
   });
 
-  it("shows empty filter state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/admin/users?q=zzzz"]}>
         <AuthProvider>
           <Routes>
-            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route
+              path="/admin/users"
+              element={
+                <>
+                  <AdminUsersPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
           </Routes>
         </AuthProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching accounts")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find an account" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Filter accounts by type" })).toBeInTheDocument();
+    expect(screen.queryByText("Sam Bay")).not.toBeInTheDocument();
+    expect(screen.queryByText("Brad")).not.toBeInTheDocument();
+
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(clearButtons[clearButtons.length - 1]!);
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-users-params").textContent).toBe("");
+    });
+    expect(await screen.findByText("Sam Bay")).toBeInTheDocument();
+    expect(screen.getByText("Brad")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Filter accounts by type" })).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });
