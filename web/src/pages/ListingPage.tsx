@@ -14,6 +14,7 @@ import {
 import { CarHeroVisual } from "../components/CarCard";
 import { CompareTray } from "../components/CompareTray";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
+import { ListingTrumpStatsStrip } from "../components/ListingTrumpStatsStrip";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
@@ -238,6 +239,14 @@ export function ListingPage() {
                 className="!mt-0 border-0 sm:rounded-md"
               />
             </div>
+
+            <ListingTrumpStatsStrip
+              car={{
+                bhp: listing.bhp,
+                zeroToSixtySecs: listing.zeroToSixtySecs,
+                topSpeedMph: listing.topSpeedMph,
+              }}
+            />
 
             <section
               className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-6 sm:p-5"

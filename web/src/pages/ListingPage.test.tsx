@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -111,6 +111,17 @@ describe("ListingPage Midnight Garage UI", () => {
     expect(hero.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     expect(screen.getByLabelText("Listing bay photo")).toBeInTheDocument();
     expect(document.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
+
+    // Top Trumps bay strip sits under the studio hero (same Power / 0–60 / Top speed as peeks).
+    const trumpStrip = screen.getByLabelText("Top Trumps bay strip");
+    expect(trumpStrip).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("Power")).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("0–60")).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("Top speed")).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("1479")).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("2.3s")).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("261 mph")).toBeInTheDocument();
+    expect(within(trumpStrip).getByText("Top Trumps · Play stats")).toBeInTheDocument();
 
     const challenge = screen.getByRole("link", { name: "Challenge to Top Trumps" });
     expect(challenge).toHaveAttribute("href", "/play?opponent=177&theirCar=143");
