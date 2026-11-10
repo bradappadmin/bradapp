@@ -120,7 +120,89 @@ describe("ListingPage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: /Save to favourites/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View seller Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
     expect(screen.queryByRole("link", { name: "View reviews" })).not.toBeInTheDocument();
+  });
+
+  it("hides View seller when the viewer owns the listing", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 177,
+        email: "sam@example.com",
+        displayName: "Sam Bay",
+        bio: null,
+        role: "member",
+        coinBalance: 400,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 400,
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cars/143"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /Bugatti Chiron Sport/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /View seller/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
+
+  it("hides View seller on house / garage-only stock with no member id", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 2,
+        email: "viewer@example.com",
+        displayName: "Viewer",
+        bio: null,
+        role: "member",
+        coinBalance: 400,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 400,
+      },
+    });
+    vi.mocked(api.fetchListing).mockResolvedValue({
+      listing: { ...memberOwnedListing, ownerUserId: null, ownerLabel: "Bay stock" },
+      favourited: false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cars/99"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /Bugatti Chiron Sport/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /View seller/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
   });
 
   it("links View reviews into Find when matching films exist, keeps Compare / Copy / Buy", async () => {
@@ -187,6 +269,10 @@ describe("ListingPage Midnight Garage UI", () => {
 
     const viewReviews = await screen.findByRole("link", { name: "View reviews" });
     expect(viewReviews).toHaveAttribute("href", "/reviews?q=Bugatti+Chiron");
+    expect(screen.getByRole("link", { name: "View seller Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
     expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Buy for/i })).toBeInTheDocument();

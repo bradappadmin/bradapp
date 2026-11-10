@@ -19,6 +19,11 @@ import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { listingReviewsHref, listingReviewsQuery } from "../listing-reviews";
+import {
+  canViewSeller,
+  listingViewSellerHref,
+  listingViewSellerLabel,
+} from "../listing-view-seller";
 import { rememberRecentlyViewed } from "../recently-viewed";
 import { filterReviewsByCarQuery } from "../reviews-car-filter";
 import { listingSharePath } from "../share-link";
@@ -325,6 +330,16 @@ export function ListingPage() {
                     : "Compare"}
               </button>
               <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy link" />
+              {canViewSeller(listing.ownerUserId, user?.id ?? null) &&
+              listing.ownerUserId != null ? (
+                <Link
+                  to={listingViewSellerHref(listing.ownerUserId)}
+                  className="inline-block rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                  aria-label={`${listingViewSellerLabel()} ${listing.ownerLabel}`}
+                >
+                  {listingViewSellerLabel()}
+                </Link>
+              ) : null}
               {hasReviews ? (
                 <Link
                   to={listingReviewsHref(listing.make, listing.model)}
