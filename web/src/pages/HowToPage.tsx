@@ -65,7 +65,14 @@ const STEPS: Step[] = [
   {
     id: "home-reviews-open-car",
     title: "Open car from Latest reviews",
-    body: "On Home, Latest reviews (and Featured when pinned) show Open car → /cars/:id when a related listing is known — drag races can show one Open car per lane. Watch / Watch featured still open the film; studio thumbs stay. The CTA hides when no listing is known.",
+    body: "On Home, Latest reviews (and Featured when pinned) show Open car → /cars/:id when a related listing is known — drag races can show one Open car per lane. Watch / Watch featured still open the film; studio thumbs stay. The CTA hides when no listing is known. Home reviews studio hover is the next step.",
+    to: "/",
+    cta: "Open Home",
+  },
+  {
+    id: "home-reviews-studio-hover",
+    title: "Home reviews studio hover",
+    body: "On Home, Latest reviews (and Featured when pinned) show realistic studio car thumbs — linked listing make/model/paint (and year) when known — then soft-lift the bay shell and ease the photo a little larger on hover/focus, same presence as the Video reviews reel and Cars media cards. Prefers-reduced-motion keeps the card still (no lift / no photo zoom). Watch / Watch featured and Open car stay.",
     to: "/",
     cta: "Open Home",
   },
@@ -522,7 +529,8 @@ export function HowToPage() {
             Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
             missing), Family activity Open member (/members/:id when an actor is known; hidden for
             self / missing / house), home Latest / Featured reviews Open car (/cars/:id when a
-            listing is known; hidden when missing), Favourites Compare into that same tray, Favourites bay value
+            listing is known; hidden when missing), home Latest / Featured reviews studio thumbs with
+            bay lift / photo ease (reduced-motion keeps still), Favourites Compare into that same tray, Favourites bay value
             strip (favourite count + total BC), photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
@@ -630,7 +638,8 @@ export function HowToPage() {
               car → /cars/:id when a listing is known (hidden for gifts / missing; sign in); Family
               activity Open member → /members/:id when an actor is known (hidden for self / missing /
               house; sign in); Latest / Featured reviews Open car → /cars/:id when a listing is known
-              (hidden when missing; Watch stays).
+              (hidden when missing; Watch stays); Latest / Featured reviews studio thumbs with bay
+              lift / photo ease on hover (reduced-motion keeps still).
             </li>
             <li>
               <Link to="/play/history" className="text-lime no-underline hover:underline">

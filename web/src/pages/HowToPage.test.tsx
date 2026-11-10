@@ -324,6 +324,10 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(document.getElementById("home-reviews-open-car")).not.toBeNull();
     expect(
+      screen.getByRole("heading", { name: "Home reviews studio hover" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("home-reviews-studio-hover")).not.toBeNull();
+    expect(
       screen.getByRole("heading", { name: "Open member from Family activity" }),
     ).toBeInTheDocument();
     expect(document.getElementById("home-activity-open-member")).not.toBeNull();
@@ -378,6 +382,27 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/The CTA hides when no listing is known/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Home reviews studio hover is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Latest reviews \(and Featured when pinned\) show realistic studio car thumbs — linked listing make\/model\/paint \(and year\) when known/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /soft-lift the bay shell and ease the photo a little larger on hover\/focus, same presence as the Video reviews reel and Cars media cards/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        /Prefers-reduced-motion keeps the card still \(no lift \/ no photo zoom\)/i,
+      ).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByText(/Watch \/ Watch featured and Open car stay/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Family activity Open car \(\/cars\/:id when a listing is known; hidden for gifts \/ missing\)/i,
       ),
@@ -385,6 +410,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /home Latest \/ Featured reviews Open car \(\/cars\/:id when a listing is known; hidden when missing\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /home Latest \/ Featured reviews studio thumbs with bay lift \/ photo ease \(reduced-motion keeps still\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1226,7 +1256,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\); Family activity Open member → \/members\/:id when an actor is known \(hidden for self \/ missing \/ house; sign in\); Latest \/ Featured reviews Open car → \/cars\/:id when a listing is known \(hidden when missing; Watch stays\)/i,
+        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\); Family activity Open member → \/members\/:id when an actor is known \(hidden for self \/ missing \/ house; sign in\); Latest \/ Featured reviews Open car → \/cars\/:id when a listing is known \(hidden when missing; Watch stays\); Latest \/ Featured reviews studio thumbs with bay lift \/ photo ease on hover \(reduced-motion keeps still\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
