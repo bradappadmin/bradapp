@@ -177,7 +177,14 @@ const STEPS: Step[] = [
   {
     id: "listing-view-reviews",
     title: "View reviews from a listing",
-    body: "On a catalogue listing (/cars/:id), View reviews deep-links into Video reviews Find for that make and model (/reviews?q=Make+Model) when matching films exist — the reverse of Open car from a review. The CTA hides when nothing in the reel matches. Compare, Copy link, and buy stay on the listing.",
+    body: "On a catalogue listing (/cars/:id), View reviews deep-links into Video reviews Find for that make and model (/reviews?q=Make+Model) when matching films exist — the reverse of Open car from a review. The CTA hides when nothing in the reel matches. Compare, Copy link, and buy stay on the listing. View seller on a member-owned listing is the next step.",
+    to: "/cars",
+    cta: "Open Cars",
+  },
+  {
+    id: "listing-view-seller",
+    title: "View seller from a listing",
+    body: "On a catalogue listing (/cars/:id) with a member owner, View seller takes you to that seller’s public garage (/members/:id). The CTA hides for house / garage stock (no member id) and when you own the car. Compare, Copy link, View reviews, Challenge, Offer trade, and buy stay on the listing.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -290,7 +297,8 @@ export function HowToPage() {
             (tap the header balance for your ledger), home Recently viewed Compare into the shared
             tray with Cars / My cars, Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
-            films exist), Cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), Favourites
+            films exist), listing View seller (/members/:id; hidden for self / house), Cars Sort the
+            bay (Highest / Lowest price, Name A–Z / Z–A), Favourites
             challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
@@ -417,8 +425,8 @@ export function HowToPage() {
               </Link>{" "}
               — Find + filters; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
               Favourites / My cars); Compare into the tray; on a listing, View reviews →
-              /reviews?q=Make+Model when films exist (hides when none); Clear filters when nothing
-              matches.
+              /reviews?q=Make+Model when films exist (hides when none); View seller → /members/:id
+              when a member owns it (hidden for self or house); Clear filters when nothing matches.
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">

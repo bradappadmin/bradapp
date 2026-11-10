@@ -73,6 +73,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "View reviews from a listing" }),
     ).toBeInTheDocument();
     expect(document.getElementById("listing-view-reviews")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "View seller from a listing" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("listing-view-seller")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
@@ -207,7 +211,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\)/i,
+        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\), listing View seller \(\/members\/:id; hidden for self \/ house\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -416,6 +420,19 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Compare, Copy link, and buy stay on the listing/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/View seller on a member-owned listing is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /View seller takes you to that seller.?s public garage \(\/members\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /The CTA hides for house \/ garage stock \(no member id\) and when you own the car/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -672,11 +689,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(4);
     expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
     expect(
       screen.getByText(
-        /on a listing, View reviews → \/reviews\?q=Make\+Model when films exist \(hides when none\)/i,
+        /on a listing, View reviews → \/reviews\?q=Make\+Model when films exist \(hides when none\); View seller → \/members\/:id when a member owns it \(hidden for self or house\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");
