@@ -86,14 +86,21 @@ const STEPS: Step[] = [
   {
     id: "favourites",
     title: "Favourites: challenge and trade",
-    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved. Compare from Favourites (shared tray) is the next step; My cars uses the same Sort the bay options after that.",
+    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved. Top Trumps peek on Favourites is the next step; My cars uses the same Sort the bay options after that.",
+    to: "/favourites",
+    cta: "Open Favourites",
+  },
+  {
+    id: "favourites-trump-stats",
+    title: "Top Trumps peek on Favourites",
+    body: "On Favourites, each photo-first media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars. Offer trade, Challenge, Compare, Find, Sort the bay, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard. Compare from Favourites is the next step.",
     to: "/favourites",
     cta: "Open Favourites",
   },
   {
     id: "favourites-compare",
     title: "Compare from Favourites",
-    body: "On Favourites, Compare on a saved card queues into the shared tray with Cars / My cars / Recently viewed — same sticky Compare (1/2) tray; when two are ready, Side by side. Offer trade and Challenge stay on someone else’s cars; Find, Sort the bay, and empty-bay CTAs stay.",
+    body: "On Favourites, Compare on a saved card queues into the shared tray with Cars / My cars / Recently viewed — same sticky Compare (1/2) tray; when two are ready, Side by side. Offer trade, Challenge, and the Top Trumps peek stay on the card; Find, Sort the bay, and empty-bay CTAs stay.",
     to: "/favourites",
     cta: "Open Favourites",
   },
@@ -349,8 +356,8 @@ export function HowToPage() {
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
-            (Power / 0–60 / Top speed), Favourites
-            challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
+            (Power / 0–60 / Top speed), Favourites Top Trumps peek (same Power / 0–60 / Top speed),
+            Favourites challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, leaderboard You highlight and Jump to my rank, Copy link on member profiles
@@ -507,9 +514,10 @@ export function HowToPage() {
               <Link to="/favourites" className="text-lime no-underline hover:underline">
                 Favourites
               </Link>{" "}
-              — Find a favourite, Sort the bay, Compare into the shared tray with Cars / My cars,
-              then Offer trade or Challenge to Top Trumps on someone else’s car (sign in). Nav badge
-              = saved count.
+              — Find a favourite, Sort the bay; Top Trumps peek under each studio photo (Power /
+              0–60 / Top speed, same as Cars); Compare into the shared tray with Cars / My cars, then
+              Offer trade or Challenge to Top Trumps on someone else’s car (sign in). Nav badge =
+              saved count.
             </li>
             <li>
               <Link to="/reviews" className="text-lime no-underline hover:underline">
