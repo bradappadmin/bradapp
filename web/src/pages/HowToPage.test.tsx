@@ -42,7 +42,11 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Rematch from Match history" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Weekly Top Trumps cup" })).toBeInTheDocument();
+    expect(document.getElementById("play-rematch")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
@@ -90,6 +94,19 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
+    expect(screen.getByText(/Match history Rematch is the next step/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On a Challenge row, Rematch deep-links Play with that opponent ready \(\/play\?opponent=/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/House rows offer Rematch vs house straight back to Play/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Rematch hides when the opponent is missing or is you/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Match history Rematch \(PvP opponent deep-link or house → Play\)/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Trades history: Completed\/Declined/i)).toBeInTheDocument();
     expect(screen.getByText(/empty bay with Browse cars \/ My garage \/ Members/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points you to Members or Cars/i)).toBeInTheDocument();
@@ -151,7 +168,12 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/trades/history",
     );
-    expect(screen.getByText(/Wins\/Losses chips/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Wins\/Losses chips/i).length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getByText(
+        /Rematch deep-links the same PvP opponent into Play, or Rematch vs house → Play/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Completed\/Declined chips/i)).toBeInTheDocument();
     expect(
       screen.getByText(/start from a listing.?s Compare CTA \(tray picks/i),
@@ -203,6 +225,10 @@ describe("HowToPage Midnight Garage UI", () => {
       "/favourites",
     );
     expect(screen.getByRole("link", { name: "Open Play" })).toHaveAttribute("href", "/play");
+    expect(screen.getByRole("link", { name: "Open Match history" })).toHaveAttribute(
+      "href",
+      "/play/history",
+    );
     expect(screen.getByRole("link", { name: "Open cup standings" })).toHaveAttribute(
       "href",
       "/leaderboard",

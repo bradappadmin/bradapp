@@ -58,9 +58,16 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, Challenge to Top Trumps on the Members directory (not yourself), or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, Challenge to Top Trumps on the Members directory (not yourself), or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), then rematch on Play when you’re done. Match history Rematch is the next step. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
+  },
+  {
+    id: "play-rematch",
+    title: "Rematch from Match history",
+    body: "Open Match history after a bout. Wins/Losses chips stay in the URL. On a Challenge row, Rematch deep-links Play with that opponent ready (/play?opponent=…, plus theirCar when known). House rows offer Rematch vs house straight back to Play. Rematch hides when the opponent is missing or is you — Clear filter and Play still cover empty bays.",
+    to: "/play/history",
+    cta: "Open Match history",
   },
   {
     id: "weekly-cup",
@@ -137,9 +144,10 @@ export function HowToPage() {
             listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
             Sort the bay (Name A–Z / Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad
             Coins, leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage
-            link stays on Account / My cars), gift Quick amount chips, Top Trumps streaks and this
-            week’s cup standings, free trades, member gifts, drag races, empty-bay next steps, and
-            your bay showcase. Nothing here spends real money.
+            link stays on Account / My cars), gift Quick amount chips, Top Trumps streaks, Match
+            history Rematch (PvP opponent deep-link or house → Play), this week’s cup standings, free
+            trades, member gifts, drag races, empty-bay next steps, and your bay showcase. Nothing
+            here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -199,7 +207,8 @@ export function HowToPage() {
               <Link to="/play/history" className="text-lime no-underline hover:underline">
                 Match history
               </Link>{" "}
-              — Wins/Losses chips; Rematch vs house or the same opponent.
+              — Wins/Losses chips; Rematch deep-links the same PvP opponent into Play, or Rematch vs
+              house → Play (hidden for missing or self).
             </li>
             <li>
               <Link to="/trades/history" className="text-lime no-underline hover:underline">
