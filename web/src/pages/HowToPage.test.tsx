@@ -105,6 +105,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Top Trumps peek on a public garage" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("member-garage-trump-stats")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Gift Brad Coins" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Filter the coin ledger" })).toBeInTheDocument();
     expect(document.getElementById("ledger-type")).not.toBeNull();
@@ -864,7 +868,23 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Account and My cars still offer Copy garage link for that same/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Top Trumps peek on a public garage is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /each photo-first garage media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars, Favourites, and My cars/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Challenge, Offer trade, Copy link, showcase hero, and the photo grid stay/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Copy garage link stays on Account \/ My cars/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /public garage Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Gift Brad Coins on someone else.?s card \(not yourself\) deep-links/i),
@@ -977,6 +997,11 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/Gift opens #gift-coins on their garage/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /open a garage \(Top Trumps peek under each studio photo: Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\) or Copy link on their profile/i,
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/Compare garage cards into the same tray as Cars/i),
     ).toBeInTheDocument();

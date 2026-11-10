@@ -310,7 +310,14 @@ const STEPS: Step[] = [
   {
     id: "copy-profile-link",
     title: "Copy link on member profiles",
-    body: "Open any public garage (/members/:id) and tap Copy link — the absolute profile URL lands on your clipboard with a Link copied toast, same pattern as listing and review Copy link. Account and My cars still offer Copy garage link for that same /members/:id URL when you’re sharing your own bay from those screens.",
+    body: "Open any public garage (/members/:id) and tap Copy link — the absolute profile URL lands on your clipboard with a Link copied toast, same pattern as listing and review Copy link. Account and My cars still offer Copy garage link for that same /members/:id URL when you’re sharing your own bay from those screens. Top Trumps peek on a public garage is the next step.",
+    to: "/members",
+    cta: "Open Members",
+  },
+  {
+    id: "member-garage-trump-stats",
+    title: "Top Trumps peek on a public garage",
+    body: "On a public garage (/members/:id), each photo-first garage media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars, Favourites, and My cars. Challenge, Offer trade, Copy link, showcase hero, and the photo grid stay. Tight Midnight Garage strip — not a stats dashboard.",
     to: "/members",
     cta: "Open Members",
   },
@@ -426,7 +433,9 @@ export function HowToPage() {
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, leaderboard You highlight and Jump to my rank, Copy link on member profiles
-            (Copy garage link stays on Account / My cars), My cars Quick price chips (50 / 100 / 250 /
+            (Copy garage link stays on Account / My cars), public garage Top Trumps peek under each
+            studio photo (Power / 0–60 / Top speed, same as Cars / Favourites / My cars), My cars
+            Quick price chips (50 / 100 / 250 /
             500 BC) when listing or updating a sale, My cars bay value strip (owned count + total BC;
             sold history excluded), gift Quick amount chips, Coin ledger Find entry
             plus type chips (All / Earn / Spend / Gift / Admin), admin coin-adjust Quick amount chips
@@ -541,7 +550,9 @@ export function HowToPage() {
               </Link>{" "}
               — Find a member, Has cars / Empty bay, Sort the bay; Challenge to Top Trumps, Offer
               trade, or Gift Brad Coins on other directory cards (sign in; hidden on your own row —
-              Gift opens #gift-coins on their garage); open a garage or Copy link on their profile.
+              Gift opens #gift-coins on their garage); open a garage (Top Trumps peek under each
+              studio photo: Power / 0–60 / Top speed, same as Cars / Favourites / My cars) or Copy
+              link on their profile.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
