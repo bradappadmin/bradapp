@@ -99,10 +99,81 @@ describe("TradesPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Send a free trade" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your outgoing offers" })).toBeInTheDocument();
 
-    const history = screen.getAllByRole("link", { name: /Completed history|Full history/i });
+    const history = screen.getAllByRole("link", { name: /Completed history|Full history|history/i });
     expect(history.some((link) => link.getAttribute("href") === "/trades/history")).toBe(true);
 
     expect(await screen.findByRole("button", { name: /Send free trade offer/i })).toBeInTheDocument();
+  });
+
+  it("shows an empty inbox bay with Members and Cars CTAs", async () => {
+    render(
+      <MemoryRouter initialEntries={["/trades"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TradesPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Inbox is empty")).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: /Empty trade inbox/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse members" })).toHaveAttribute(
+      "href",
+      "/members",
+    );
+    expect(screen.getByRole("link", { name: "Browse cars for sale" })).toHaveAttribute(
+      "href",
+      "/cars",
+    );
+    expect(screen.getByRole("heading", { name: "Send a free trade" })).toBeInTheDocument();
+    const history = screen.getAllByRole("link", { name: /Completed history|Full history|history/i });
+    expect(history.some((link) => link.getAttribute("href") === "/trades/history")).toBe(true);
+  });
+
+  it("hides the empty inbox bay when a pending offer arrives", async () => {
+    vi.mocked(api.fetchTrades).mockResolvedValue({
+      trades: [
+        {
+          id: 55,
+          status: "pending",
+          fromUserId: 177,
+          toUserId: 2,
+          fromDisplayName: "Sam Bay",
+          toDisplayName: "Member",
+          offerListingId: 12,
+          requestListingId: 9,
+          offerMake: "Ford",
+          offerModel: "Focus",
+          offerTrimName: "ST",
+          offerBodyType: "Hatchback",
+          offerColour: "Racing Red",
+          offerYear: 2020,
+          requestMake: "Porsche",
+          requestModel: "911",
+          requestTrimName: "GT3",
+          requestBodyType: "Coupe",
+          requestColour: "Racing Red",
+          requestYear: 2022,
+          createdAt: "2026-11-10T00:00:00.000Z",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/trades"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TradesPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/wants a free swap/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(screen.queryByText("Inbox is empty")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: /Empty trade inbox/i })).not.toBeInTheDocument();
   });
 
   it("honours offer-trade deeplink query params in compose", async () => {

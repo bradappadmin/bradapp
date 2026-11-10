@@ -357,8 +357,37 @@ export function TradesPage() {
             ))}
           </ul>
           {!loading && incoming.length === 0 ? (
-            <div className="play-panel rounded-md border p-4 sm:p-5">
-              <p className="text-sm text-steel">No pending offers in your inbox.</p>
+            <div
+              className="play-panel bay-rise-delay rounded-md border px-5 py-12 text-center sm:py-14"
+              role="status"
+              aria-label="Empty trade inbox"
+            >
+              <p className="font-display text-xl text-mist sm:text-2xl">Inbox is empty</p>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+                No pending free swaps waiting for you. Browse members with cars, or pick something
+                for sale and offer a trade from their garage.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                <Link
+                  to="/members"
+                  className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+                >
+                  Browse members
+                </Link>
+                <Link
+                  to="/cars"
+                  className="inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                >
+                  Browse cars for sale
+                </Link>
+              </div>
+              <p className="mt-4 text-xs text-steel">
+                Or compose a free trade below — completed swaps stay on{" "}
+                <Link to="/trades/history" className="text-lime no-underline hover:underline">
+                  history
+                </Link>
+                .
+              </p>
             </div>
           ) : null}
         </section>
