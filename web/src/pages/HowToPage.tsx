@@ -247,7 +247,14 @@ const STEPS: Step[] = [
   {
     id: "listing-view-seller",
     title: "View seller from a listing",
-    body: "On a catalogue listing (/cars/:id) with a member owner, View seller takes you to that seller’s public garage (/members/:id). The CTA hides for house / garage stock (no member id) and when you own the car. Compare, Copy link, View reviews, Challenge, Offer trade, and buy stay on the listing.",
+    body: "On a catalogue listing (/cars/:id) with a member owner, View seller takes you to that seller’s public garage (/members/:id). The CTA hides for house / garage stock (no member id) and when you own the car. Compare, Copy link, View reviews, Challenge, Offer trade, and buy stay on the listing. Top Trumps bay strip on a listing is the next step.",
+    to: "/cars",
+    cta: "Open Cars",
+  },
+  {
+    id: "listing-trump-stats",
+    title: "Top Trumps bay strip on a listing",
+    body: "On a catalogue listing (/cars/:id), one Midnight Garage bay strip sits under the studio hero: Power, 0–60, and Top speed — the same play stats as Cars / Favourites / My cars peeks. View reviews, View seller, Compare, Challenge, Offer trade, Copy link, and Favourites stay. Tight strip — not a stats dashboard.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -361,7 +368,8 @@ export function HowToPage() {
             tray with Cars / My cars, Family activity Open car (/cars/:id when a listing is known;
             hidden for gifts / missing), Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
-            films exist), listing View seller (/members/:id; hidden for self / house), Cars Sort the
+            films exist), listing View seller (/members/:id; hidden for self / house), listing Top
+            Trumps bay strip under the studio hero (Power / 0–60 / Top speed), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
             (Power / 0–60 / Top speed), Favourites Top Trumps peek (same Power / 0–60 / Top speed),
             My cars Top Trumps peek (same Power / 0–60 / Top speed on owned and for-sale cards),
@@ -498,9 +506,10 @@ export function HowToPage() {
               </Link>{" "}
               — Find + filters; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
               Favourites / My cars); Top Trumps peek under each studio photo (Power / 0–60 / Top
-              speed); Compare into the tray; on a listing, View reviews → /reviews?q=Make+Model when
-              films exist (hides when none); View seller → /members/:id when a member owns it (hidden
-              for self or house); Clear filters when nothing matches.
+              speed); Compare into the tray; on a listing, Top Trumps bay strip under the studio hero
+              (same Power / 0–60 / Top speed); View reviews → /reviews?q=Make+Model when films exist
+              (hides when none); View seller → /members/:id when a member owns it (hidden for self or
+              house); Clear filters when nothing matches.
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
