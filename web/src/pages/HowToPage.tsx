@@ -86,7 +86,7 @@ const STEPS: Step[] = [
   {
     id: "gift-coins",
     title: "Gift Brad Coins",
-    body: "Open another member’s public garage from Members — Copy garage link shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
+    body: "From the Members directory, Gift Brad Coins on someone else’s card (not yourself) deep-links into that member’s public garage gift form (#gift-coins). Or open the garage yourself — Copy garage link shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
     to: "/members",
     cta: "Open Members",
   },
@@ -121,10 +121,10 @@ export function HowToPage() {
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
             listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
-            Challenge and Offer trade, leaderboard Challenge and Offer trade, Copy garage link on
-            member profiles, gift Quick amount chips, Top Trumps streaks and this week’s cup
-            standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
-            showcase. Nothing here spends real money.
+            Challenge, Offer trade, and Gift Brad Coins, leaderboard Challenge and Offer trade, Copy
+            garage link on member profiles, gift Quick amount chips, Top Trumps streaks and this
+            week’s cup standings, free trades, member gifts, drag races, empty-bay next steps, and
+            your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -196,9 +196,9 @@ export function HowToPage() {
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
               </Link>{" "}
-              — Find a member + Has cars; Challenge to Top Trumps or Offer trade on other directory
-              cards (sign in; hidden on your own row); open a garage, Copy garage link, or gift Brad
-              Coins.
+              — Find a member + Has cars; Challenge to Top Trumps, Offer trade, or Gift Brad Coins on
+              other directory cards (sign in; hidden on your own row — Gift opens #gift-coins on
+              their garage); open a garage or Copy garage link.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">

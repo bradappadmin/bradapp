@@ -67,7 +67,9 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
-    expect(screen.getByText(/Members directory Challenge and Offer trade/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Members directory Challenge, Offer trade, and Gift Brad Coins/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
@@ -102,6 +104,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/Copy garage link \(Account, My cars, or any public garage\)/i),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Gift Brad Coins on someone else.?s card \(not yourself\) deep-links/i),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/#gift-coins/i).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/Copy garage link shares that bay/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Quick amount chip \(10 \/ 25 \/ 50 BC\)/i),
@@ -143,9 +149,10 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Challenge to Top Trumps or Offer trade on other directory cards/i,
+        /Challenge to Top Trumps, Offer trade, or Gift Brad Coins on other directory cards/i,
       ),
     ).toBeInTheDocument();
+    expect(screen.getByText(/Gift opens #gift-coins on their garage/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Compare garage cards into the same tray as Cars/i),
     ).toBeInTheDocument();
