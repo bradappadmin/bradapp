@@ -89,6 +89,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Open a listing from inventory" }),
     ).toBeInTheDocument();
     expect(document.getElementById("admin-open-listing")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Open a member from Accounts" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("admin-open-member")).not.toBeNull();
     expect(document.getElementById("members-sort")).not.toBeNull();
     expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
@@ -104,12 +108,23 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/admin inventory Open listing \(\/cars\/:id\)/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/admin Accounts Open member \(\/members\/:id\)/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Open listing on a row takes you to the public catalogue page for that car \(\/cars\/:id\)/i,
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(
+        /Open member on a row takes you to that member.?s public garage \(\/members\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Open listing from Cars & garages is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open member from Accounts is the next step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -119,6 +134,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Open listing → \/cars\/:id; Paint and Save/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open member → \/members\/:id; Quick amount chips; Adjust coins/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/daily login bonus/i).length).toBeGreaterThan(0);
@@ -386,7 +406,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory is last/i,
+        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory follows; Open member from Accounts is last/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -394,6 +414,9 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Open listing to the catalogue is a later step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open member on Accounts is a later step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -611,6 +634,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.queryByRole("link", { name: "Open Family invites" }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Open Accounts" })).not.toBeInTheDocument();
     expect(
       screen.getByText(
         /Brad & Napwood: Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) or free-form Coin delta/i,
@@ -620,6 +644,7 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/admin/coin-history",
     );
+    expect(screen.getByRole("link", { name: "Accounts" })).toHaveAttribute("href", "/admin/users");
     expect(
       screen.getByText(
         /Brad & Napwood: Find a listing; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Cars \/ My cars\)/i,
