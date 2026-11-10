@@ -12,6 +12,10 @@ import {
   matchResultLabel,
   topTrumpsCategoryLabel,
 } from "../match-history-labels";
+import {
+  matchHistoryRematchHref,
+  matchHistoryRematchLabel,
+} from "../match-history-rematch";
 
 /** History payload has make/model but not paint — Midnight Black keeps studio thumbs on-brand. */
 const HISTORY_STUDIO_COLOUR = "Midnight Black";
@@ -257,6 +261,14 @@ export function MatchHistoryPage() {
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   <MatchCarThumb car={match.yourCar} side="you" />
                   <MatchCarThumb car={match.theirCar} side="them" />
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    to={matchHistoryRematchHref(match)}
+                    className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                  >
+                    {matchHistoryRematchLabel(match)}
+                  </Link>
                 </div>
               </li>
             ))}

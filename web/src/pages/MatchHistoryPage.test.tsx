@@ -43,6 +43,7 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
           category: "bhp",
           createdAt: "2026-11-09T20:00:00.000Z",
           opponentName: "House",
+          opponentUserId: null,
           yourCar: {
             listingId: 42,
             make: "Porsche",
@@ -67,6 +68,7 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
           category: "top_speed_mph",
           createdAt: "2026-11-08T18:00:00.000Z",
           opponentName: "Sam Bay",
+          opponentUserId: 177,
           yourCar: {
             listingId: 7,
             make: "Audi",
@@ -105,8 +107,8 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
 
     expect(screen.getByText("Win")).toBeInTheDocument();
     expect(screen.getByText("Loss")).toBeInTheDocument();
-    expect(screen.getByText(/vs House/i)).toBeInTheDocument();
-    expect(screen.getByText(/vs Sam Bay/i)).toBeInTheDocument();
+    expect(screen.getByText("vs House")).toBeInTheDocument();
+    expect(screen.getByText("vs Sam Bay")).toBeInTheDocument();
 
     const imgs = screen.getAllByRole("img");
     expect(imgs.length).toBeGreaterThanOrEqual(2);
@@ -116,6 +118,15 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
       "href",
       "/cars/42",
+    );
+
+    expect(screen.getByRole("link", { name: "Rematch vs house" })).toHaveAttribute(
+      "href",
+      "/play",
+    );
+    expect(screen.getByRole("link", { name: "Rematch" })).toHaveAttribute(
+      "href",
+      "/play?opponent=177&theirCar=9",
     );
   });
 });

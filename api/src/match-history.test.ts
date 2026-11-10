@@ -9,6 +9,7 @@ describe("match history shape", () => {
       category: "bhp",
       createdAt: "2026-11-09T12:00:00.000Z",
       opponentName: "House",
+      opponentUserId: null,
       yourCar: {
         listingId: 10,
         make: "Ford",

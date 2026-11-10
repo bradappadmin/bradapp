@@ -19,6 +19,8 @@ export type MatchHistoryItem = {
   category: TopTrumpsCategory;
   createdAt: string;
   opponentName: string;
+  /** Other member for PvP rematch deep-links; null for house. */
+  opponentUserId: number | null;
   yourCar: MatchHistoryCar;
   theirCar: MatchHistoryCar;
   result: "win" | "loss" | "draw";
@@ -140,6 +142,15 @@ export async function listMatchHistory(
           ? String(row.opponent_name ?? "Member")
           : String(row.challenger_name);
 
+    const opponentUserId =
+      row.mode === "house"
+        ? null
+        : youWere === "challenger"
+          ? row.opponent_user_id == null
+            ? null
+            : Number(row.opponent_user_id)
+          : Number(row.challenger_user_id);
+
     return {
       id: Number(row.id),
       mode: row.mode,
@@ -149,6 +160,7 @@ export async function listMatchHistory(
           ? row.created_at.toISOString()
           : new Date(row.created_at).toISOString(),
       opponentName,
+      opponentUserId,
       yourCar,
       theirCar,
       result,

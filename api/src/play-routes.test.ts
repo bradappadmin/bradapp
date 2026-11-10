@@ -98,6 +98,7 @@ describe.runIf(hasDb)("play routes", () => {
     expect(houseMatch).toBeTruthy();
     expect(houseMatch.mode).toBe("house");
     expect(houseMatch.opponentName).toBe("House");
+    expect(houseMatch.opponentUserId).toBeNull();
     expect(houseMatch.category).toBe("bhp");
     expect(houseMatch.yourCar.listingId).toBe(carA);
     expect(houseMatch.theirCar.make).toBeTruthy();
@@ -122,8 +123,13 @@ describe.runIf(hasDb)("play routes", () => {
       (m: { id: number }) => m.id === play.body.match.id,
     );
     expect(asChallenger.opponentName).toBe("Player B");
+    expect(asChallenger.opponentUserId).toBe(play.body.match.opponent.userId);
     expect(asChallenger.yourCar.listingId).toBe(carA);
     expect(asChallenger.theirCar.listingId).toBe(carB);
+
+    const meA = await a.get("/auth/me");
+    expect(meA.status).toBe(200);
+    const playerAId = meA.body.user.id as number;
 
     const historyB = await b.get("/play/top-trumps/history");
     const asOpponent = historyB.body.matches.find(
@@ -131,6 +137,7 @@ describe.runIf(hasDb)("play routes", () => {
     );
     expect(asOpponent).toBeTruthy();
     expect(asOpponent.opponentName).toBe("Player A");
+    expect(asOpponent.opponentUserId).toBe(playerAId);
     expect(asOpponent.yourCar.listingId).toBe(carB);
     expect(asOpponent.theirCar.listingId).toBe(carA);
     expect(asOpponent.youWere).toBe("opponent");

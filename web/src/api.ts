@@ -459,6 +459,8 @@ export type MatchHistoryItem = {
   category: TopTrumpsCategory;
   createdAt: string;
   opponentName: string;
+  /** Other member for PvP rematch deep-links; null for house. */
+  opponentUserId: number | null;
   yourCar: MatchHistoryCar;
   theirCar: MatchHistoryCar;
   result: "win" | "loss" | "draw";
