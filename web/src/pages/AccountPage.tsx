@@ -4,8 +4,10 @@ import * as api from "../api";
 import { BIO_MAX_LENGTH } from "../api";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
+import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { garageSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 import { roleLabel } from "../types";
 
@@ -195,12 +197,19 @@ export function AccountPage() {
                 {profileBusy ? "Saving…" : "Save bay profile"}
               </button>
               {user ? (
-                <Link
-                  to={`/members/${user.id}`}
-                  className="rounded-md border border-white/15 px-4 py-2.5 text-center font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                >
-                  Open public garage
-                </Link>
+                <>
+                  <Link
+                    to={`/members/${user.id}`}
+                    className="rounded-md border border-white/15 px-4 py-2.5 text-center font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                  >
+                    Open public garage
+                  </Link>
+                  <CopyShareLinkButton
+                    path={garageSharePath(user.id)}
+                    label="Copy garage link"
+                    className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
+                  />
+                </>
               ) : null}
             </div>
           </form>

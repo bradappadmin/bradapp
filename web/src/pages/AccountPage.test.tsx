@@ -71,6 +71,7 @@ describe("AccountPage Midnight Garage UI", () => {
       "href",
       "/members/42",
     );
+    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open coin ledger" })).toHaveAttribute(
       "href",
       "/ledger",

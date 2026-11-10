@@ -6,9 +6,11 @@ import { useAuth } from "../auth-context";
 import { formatCoins, listingTitle } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import { CarCard, CarHeroVisual } from "../components/CarCard";
+import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
+import { garageSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 
 function showcaseHint(source: ShowcaseSource | null): string {
@@ -163,9 +165,14 @@ export function MemberProfilePage() {
               ) : null}
               {isSelf ? (
                 <>
+                  <CopyShareLinkButton
+                    path={garageSharePath(member.id)}
+                    label="Copy garage link"
+                    className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/10"
+                  />
                   <Link
                     to="/garage"
-                    className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                    className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
                   >
                     My cars
                   </Link>

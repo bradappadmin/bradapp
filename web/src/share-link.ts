@@ -1,4 +1,4 @@
-/** Absolute share URLs for listings (and compare) on this origin. */
+/** Absolute share URLs for listings, compare, and public garages on this origin. */
 
 export function listingSharePath(listingId: number): string {
   return `/cars/${listingId}`;
@@ -6,6 +6,11 @@ export function listingSharePath(listingId: number): string {
 
 export function compareSharePath(leftId: number, rightId: number): string {
   return `/compare?a=${leftId}&b=${rightId}`;
+}
+
+/** Public member garage path (`/members/:id`). */
+export function garageSharePath(memberUserId: number): string {
+  return `/members/${memberUserId}`;
 }
 
 export function absoluteShareUrl(

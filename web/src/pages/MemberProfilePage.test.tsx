@@ -182,6 +182,7 @@ describe("MemberProfilePage showcase garage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: /Bay Friend \(you\)/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
     const pinButtons = screen.getAllByRole("button", { name: "Make showcase" });
     await user.click(pinButtons[0]!);
     await vi.waitFor(() => {

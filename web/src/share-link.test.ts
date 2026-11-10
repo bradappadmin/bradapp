@@ -3,18 +3,23 @@ import {
   absoluteShareUrl,
   compareSharePath,
   copyTextToClipboard,
+  garageSharePath,
   listingSharePath,
 } from "./share-link";
 
 describe("share link", () => {
-  it("builds listing and compare paths and absolute URLs", () => {
+  it("builds listing, compare, and garage paths and absolute URLs", () => {
     expect(listingSharePath(42)).toBe("/cars/42");
     expect(compareSharePath(1, 2)).toBe("/compare?a=1&b=2");
+    expect(garageSharePath(7)).toBe("/members/7");
     expect(absoluteShareUrl("/cars/42", "https://bay.example")).toBe(
       "https://bay.example/cars/42",
     );
     expect(absoluteShareUrl("cars/7", "https://bay.example/")).toBe(
       "https://bay.example/cars/7",
+    );
+    expect(absoluteShareUrl(garageSharePath(7), "https://bay.example")).toBe(
+      "https://bay.example/members/7",
     );
   });
 

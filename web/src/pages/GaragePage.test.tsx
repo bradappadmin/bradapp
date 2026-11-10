@@ -16,7 +16,16 @@ vi.mock("../api", () => ({
   setGarageShowcase: vi.fn(),
 }));
 
+vi.mock("../share-link", async () => {
+  const actual = await vi.importActual<typeof import("../share-link")>("../share-link");
+  return {
+    ...actual,
+    copyTextToClipboard: vi.fn(),
+  };
+});
+
 import * as api from "../api";
+import { copyTextToClipboard } from "../share-link";
 
 describe("GaragePage Midnight Garage UI", () => {
   afterEach(() => {
@@ -150,10 +159,37 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Make showcase" }).length).toBeGreaterThan(0);
     expect(screen.getByText(/Showcase: highest value/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Public garage" })).toHaveAttribute(
+      "href",
+      "/members/2",
+    );
+    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
 
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+  });
+
+  it("copies the public garage link with a toast", async () => {
+    vi.mocked(copyTextToClipboard).mockResolvedValue(true);
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Copy garage link" }));
+    expect(copyTextToClipboard).toHaveBeenCalled();
+    const copied = vi.mocked(copyTextToClipboard).mock.calls[0]?.[0] ?? "";
+    expect(copied).toMatch(/\/members\/2$/);
+    expect(await screen.findByRole("status")).toHaveTextContent("Link copied.");
   });
 
   it("pins a showcase car from My cars", async () => {

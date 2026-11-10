@@ -6,6 +6,7 @@ import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import { CarCard } from "../components/CarCard";
+import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import {
@@ -15,6 +16,7 @@ import {
   type GarageSort,
 } from "../garage-sort";
 import { sumGarageValue } from "../garage-value";
+import { garageSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 
 function SectionShell({
@@ -321,12 +323,19 @@ export function GaragePage() {
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             {user ? (
-              <Link
-                to={`/members/${user.id}`}
-                className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
-              >
-                Public garage
-              </Link>
+              <>
+                <Link
+                  to={`/members/${user.id}`}
+                  className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                >
+                  Public garage
+                </Link>
+                <CopyShareLinkButton
+                  path={garageSharePath(user.id)}
+                  label="Copy garage link"
+                  className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm font-semibold text-mist transition hover:border-lime/35 hover:text-lime"
+                />
+              </>
             ) : null}
             <Link
               to="/cars"
