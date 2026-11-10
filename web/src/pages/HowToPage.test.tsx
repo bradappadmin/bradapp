@@ -79,7 +79,19 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Europe\/London week/i)).toBeInTheDocument();
     expect(screen.getByText(/This week.?s cup standings sit on Play/i)).toBeInTheDocument();
     expect(screen.getByText(/beside the all-time podium on the leaderboard/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Challenge to Top Trumps deep-links into Play with that member ready/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Challenge to Top Trumps on the leaderboard standings and cup/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/leaderboard Challenge to Top Trumps/i)).toBeInTheDocument();
+    expect(screen.getByText(/Copy garage link on member profiles/i)).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Copy garage link \(Account, My cars, or any public garage\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Copy garage link shares that bay/i)).toBeInTheDocument();
     expect(screen.getByText(/Gift coins: enter an amount and an optional note/i)).toBeInTheDocument();
     expect(screen.getByText(/Gift sent \/ Gift received/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Gifts/i).length).toBeGreaterThan(0);
@@ -110,6 +122,13 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/This week.?s cup standings beside the podium/i),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Challenge to Top Trumps on other members.? standings and cup rows/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/open a garage, Copy garage link, then challenge/i)).toBeInTheDocument();
+    expect(screen.getByText(/pin your showcase, and Copy garage link/i)).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
     expect(screen.getByRole("link", { name: "Open Home" })).toHaveAttribute("href", "/");

@@ -51,14 +51,14 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, or a public garage, rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
   },
   {
     id: "weekly-cup",
     title: "Weekly Top Trumps cup",
-    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard. When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
+    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — Challenge to Top Trumps deep-links into Play with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
     to: "/leaderboard",
     cta: "Open cup standings",
   },
@@ -79,14 +79,14 @@ const STEPS: Step[] = [
   {
     id: "profile",
     title: "Your bay profile",
-    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password.",
+    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. Copy garage link (Account, My cars, or any public garage) puts the absolute /members/:id URL on your clipboard with a toast. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password.",
     to: "/account",
     cta: "Open Account",
   },
   {
     id: "gift-coins",
     title: "Gift Brad Coins",
-    body: "Open another member’s public garage from Members. Use Gift coins: enter an amount and an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
+    body: "Open another member’s public garage from Members — Copy garage link shares that bay. Use Gift coins: enter an amount and an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
     to: "/members",
     cta: "Open Members",
   },
@@ -120,9 +120,10 @@ export function HowToPage() {
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
-            listing Compare and Copy link, Favourites challenge and trade CTAs, Top Trumps streaks
-            and this week’s cup standings, free trades, member gifts, drag races, empty-bay next
-            steps, and your bay showcase. Nothing here spends real money.
+            listing Compare and Copy link, Favourites challenge and trade CTAs, leaderboard Challenge
+            to Top Trumps, Copy garage link on member profiles, Top Trumps streaks and this week’s
+            cup standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
+            showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -194,21 +195,22 @@ export function HowToPage() {
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
               </Link>{" "}
-              — Find a member + Has cars; open a garage, then challenge, offer a free trade, or gift
-              Brad Coins.
+              — Find a member + Has cars; open a garage, Copy garage link, then challenge, offer a
+              free trade, or gift Brad Coins.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
                 Leaderboard
               </Link>{" "}
-              — Find a member, Brad Coin ranks, highlight cars, and This week’s cup standings beside
-              the podium (sign in).
+              — Find a member, Brad Coin ranks, highlight cars, This week’s cup standings beside the
+              podium, and Challenge to Top Trumps on other members’ standings and cup rows (sign in).
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
                 My cars
               </Link>{" "}
-              — Find a car, Sort the bay, garage value, list prices, and pin your showcase.
+              — Find a car, Sort the bay, garage value, list prices, pin your showcase, and Copy
+              garage link.
             </li>
             <li>
               <Link to="/favourites" className="text-lime no-underline hover:underline">
