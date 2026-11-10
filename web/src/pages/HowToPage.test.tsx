@@ -37,6 +37,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Daily login bonus" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Buy and sell cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Find, sort, and filter" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sort Members in the bay" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
     ).toBeInTheDocument();
@@ -52,6 +53,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByRole("heading", { name: "Admin for Brad and Napwood" }),
     ).toBeInTheDocument();
+    expect(document.getElementById("members-sort")).not.toBeNull();
     expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
     expect(screen.getByText(/invite codes are optional/i)).toBeInTheDocument();
@@ -72,9 +74,19 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Members directory Challenge, Offer trade, and Gift Brad Coins/i),
+      screen.getByText(
+        /Members directory Sort the bay \(Name A–Z \/ Z–A, Most \/ Least cars\)/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On Members, Sort the bay orders the directory: Name A–Z, Name Z–A, Most cars, or Least cars/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Clear filters resets search, garage chips, and sort back to Name A–Z/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
@@ -168,7 +180,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Members: name search, Has cars \/ Empty bay, and Sort the bay \(Name A–Z \/ Z–A, Most \/ Least cars\)/i,
+        /Members: name search and Has cars \/ Empty bay — plus Sort the bay on that directory/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/Gift opens #gift-coins on their garage/i)).toBeInTheDocument();
@@ -198,7 +210,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Open Trades" })).toHaveAttribute("href", "/trades");
     expect(screen.getByRole("link", { name: "Open Reviews" })).toHaveAttribute("href", "/reviews");
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
-    expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText(/gift Brad Coins/i).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: "Open Admin" })).not.toBeInTheDocument();
   });

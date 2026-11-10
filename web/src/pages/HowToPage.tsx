@@ -37,9 +37,16 @@ const STEPS: Step[] = [
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search, Has cars / Empty bay, and Sort the bay (Name A–Z / Z–A, Most / Least cars). Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step). Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
+  },
+  {
+    id: "members-sort",
+    title: "Sort Members in the bay",
+    body: "On Members, Sort the bay orders the directory: Name A–Z, Name Z–A, Most cars, or Least cars. The choice stays in the URL alongside Find and Has cars / Empty bay. Clear filters resets search, garage chips, and sort back to Name A–Z. Challenge, Offer trade, and Gift Brad Coins stay on each row when you’re signed in.",
+    to: "/members",
+    cta: "Open Members",
   },
   {
     id: "favourites",
@@ -128,10 +135,11 @@ export function HowToPage() {
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
             listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
-            Challenge, Offer trade, and Gift Brad Coins, leaderboard Challenge and Offer trade, Copy
-            link on member profiles (Copy garage link stays on Account / My cars), gift Quick amount
-            chips, Top Trumps streaks and this week’s cup standings, free trades, member gifts, drag
-            races, empty-bay next steps, and your bay showcase. Nothing here spends real money.
+            Sort the bay (Name A–Z / Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad
+            Coins, leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage
+            link stays on Account / My cars), gift Quick amount chips, Top Trumps streaks and this
+            week’s cup standings, free trades, member gifts, drag races, empty-bay next steps, and
+            your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
