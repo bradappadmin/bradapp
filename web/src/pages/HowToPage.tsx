@@ -30,21 +30,28 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Compare two listings, open studio shots and Brad Coin prices — never real money. Save favourites, buy from Cars, then list or unlist from My cars (Find a car + Sort the bay there too).",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Compare two listings, open studio shots and Brad Coin prices — never real money. On a listing, Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car + Sort the bay there too).",
     to: "/cars",
     cta: "Open Cars",
   },
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort. My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
   {
+    id: "favourites",
+    title: "Favourites: challenge and trade",
+    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay, or pick two and compare. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved.",
+    to: "/favourites",
+    cta: "Open Favourites",
+  },
+  {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing or public garage, rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, or a public garage, rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
   },
@@ -58,7 +65,7 @@ const STEPS: Step[] = [
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, or Offer trade on someone else’s listing. An empty inbox points you to Members or Cars. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, or Offer trade from Favourites. An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
     to: "/trades",
     cta: "Open Trades",
   },
@@ -111,10 +118,11 @@ export function HowToPage() {
           </h1>
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
-            A short tour of the midnight garage: invites, the daily login bonus, Brad Coins,
-            photo-first cars with Find and sort, Top Trumps streaks and this week’s cup standings,
-            free trades, member gifts, drag races, empty-bay next steps, and your bay showcase.
-            Nothing here spends real money.
+            A short tour of the midnight garage: invites, the daily login bonus, Brad Coins (tap the
+            header balance for your ledger), photo-first cars with Find and Copy link, Favourites
+            challenge and trade CTAs, Top Trumps streaks and this week’s cup standings, free trades,
+            member gifts, drag races, empty-bay next steps, and your bay showcase. Nothing here
+            spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -206,7 +214,8 @@ export function HowToPage() {
               <Link to="/favourites" className="text-lime no-underline hover:underline">
                 Favourites
               </Link>{" "}
-              — Find a favourite, Sort the bay, then select two and compare (sign in).
+              — Find a favourite, Sort the bay, compare two, then Offer trade or Challenge to Top
+              Trumps on someone else’s car (sign in). Nav badge = saved count.
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
@@ -218,14 +227,14 @@ export function HowToPage() {
               <Link to="/ledger" className="text-lime no-underline hover:underline">
                 Coin ledger
               </Link>{" "}
-              — every in/out for your Brad Coins, with reason chips including Daily login and Gifts
-              (sign in).
+              — every in/out for your Brad Coins (also open from the header balance chip), with
+              reason chips including Daily login and Gifts (sign in).
             </li>
             <li>
               <Link to="/trades" className="text-lime no-underline hover:underline">
                 Trades inbox
               </Link>{" "}
-              — empty inbox points to Members / Browse cars for sale.
+              — empty inbox points to Members / Browse cars for sale; nav badge = pending offers.
             </li>
           </ul>
         </section>

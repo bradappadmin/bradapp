@@ -12,6 +12,7 @@ vi.mock("../api", () => ({
   claimDailyBonus: vi.fn(),
   fetchDailyBonus: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
 }));
 
 import * as api from "../api";
@@ -36,6 +37,9 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Daily login bonus" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Buy and sell cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Find, sort, and filter" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Weekly Top Trumps cup" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
@@ -53,6 +57,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Daily login claimed/i)).toBeInTheDocument();
     expect(screen.getByText(/No second credit/i)).toBeInTheDocument();
     expect(screen.getByText(/Find, filters, and price sort/i)).toBeInTheDocument();
+    expect(screen.getByText(/Copy link puts the absolute URL/i)).toBeInTheDocument();
+    expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
+    expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
+    expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
+    expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
     expect(screen.getByText(/Trades history: Completed\/Declined/i)).toBeInTheDocument();
     expect(screen.getByText(/empty bay with Browse cars \/ My garage \/ Members/i)).toBeInTheDocument();
@@ -81,7 +90,9 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Completed\/Declined chips/i)).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points to Members \/ Browse cars for sale/i)).toBeInTheDocument();
-    expect(screen.getByText(/Find a favourite, Sort the bay/i)).toBeInTheDocument();
+    expect(screen.getByText(/Offer trade or Challenge to Top Trumps/i)).toBeInTheDocument();
+    expect(screen.getByText(/header balance chip/i)).toBeInTheDocument();
+    expect(screen.getByText(/nav badge = pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Find a car, Sort the bay/i)).toBeInTheDocument();
     expect(screen.getAllByText(/reason chips/i).length).toBeGreaterThan(0);
     expect(
@@ -92,6 +103,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Open Home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Open Cars" })).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");
+    expect(screen.getByRole("link", { name: "Open Favourites" })).toHaveAttribute(
+      "href",
+      "/favourites",
+    );
     expect(screen.getByRole("link", { name: "Open Play" })).toHaveAttribute("href", "/play");
     expect(screen.getByRole("link", { name: "Open cup standings" })).toHaveAttribute(
       "href",
