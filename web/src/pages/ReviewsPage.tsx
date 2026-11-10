@@ -305,7 +305,7 @@ export function ReviewsPage() {
         {reviews.length > 0 ? (
           <div
             className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
-            aria-label="Sort reviews"
+            aria-label="Sort reviews reel"
           >
             <div className="min-w-0">
               <p className="font-display text-lg text-mist">Sort the bay</p>
