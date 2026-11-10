@@ -117,7 +117,7 @@ export function LeaderboardPage() {
     writeParams(draft);
   }
 
-  function onClearSearch() {
+  function onClearFilters() {
     setDraft("");
     writeParams("");
   }
@@ -208,13 +208,13 @@ export function LeaderboardPage() {
                 >
                   Search
                 </button>
-                {qFromUrl ? (
+                {filtersOn ? (
                   <button
                     type="button"
-                    onClick={onClearSearch}
+                    onClick={onClearFilters}
                     className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
                   >
-                    Clear
+                    Clear filters
                   </button>
                 ) : null}
               </div>
@@ -299,20 +299,27 @@ export function LeaderboardPage() {
           </div>
 
           {!loading && visible.length === 0 ? (
-            <div className="play-panel rounded-md border px-5 py-12 text-center" role="status">
+            <div
+              className="play-panel bay-rise-delay rounded-md border px-5 py-12 text-center sm:py-14"
+              role="status"
+              aria-label={filtersOn ? "No matching leaderboard members" : "Empty leaderboard bay"}
+            >
               {filtersOn ? (
                 <>
                   <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
-                    No standings match “{qFromUrl}”. Try another spelling or clear the search.
+                    No standings match “{qFromUrl}”. Try another spelling or clear the filters —
+                    podium and this week’s cup stay on the full bay above.
                   </p>
-                  <button
-                    type="button"
-                    onClick={onClearSearch}
-                    className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
-                  >
-                    Clear search
-                  </button>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={onClearFilters}
+                      className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
                 </>
               ) : (
                 <p className="text-sm text-steel">No members yet.</p>

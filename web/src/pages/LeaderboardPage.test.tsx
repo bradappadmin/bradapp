@@ -202,7 +202,8 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(screen.getByLabelText("Top three on the podium")).toBeInTheDocument();
     expect(screen.getByText("Match")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    await user.click(clearButtons[0]!);
     await waitFor(() => {
       expect(screen.getByTestId("leaderboard-params").textContent).not.toContain("q=");
     });
@@ -211,20 +212,39 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows empty search state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/leaderboard?q=zzzz"]}>
         <AuthProvider>
           <Routes>
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route
+              path="/leaderboard"
+              element={
+                <>
+                  <LeaderboardPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
           </Routes>
         </AuthProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching leaderboard members")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
     expect(screen.getByLabelText("Top three on the podium")).toBeInTheDocument();
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(clearButtons[clearButtons.length - 1]!);
+    await waitFor(() => {
+      expect(screen.getByTestId("leaderboard-params").textContent).toBe("");
+    });
+    expect(
+      await screen.findByRole("link", { name: /Bay Friend, rank 1, open garage/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });
