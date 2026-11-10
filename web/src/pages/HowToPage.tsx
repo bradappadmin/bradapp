@@ -184,7 +184,7 @@ const STEPS: Step[] = [
   {
     id: "admin",
     title: "Admin for Brad and Napwood",
-    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that.",
+    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory is last in this admin walkthrough.",
     to: "/admin",
     cta: "Open Admin",
     adminOnly: true,
@@ -200,7 +200,7 @@ const STEPS: Step[] = [
   {
     id: "admin-inventory-sort",
     title: "Sort inventory listings in the bay",
-    body: "On Cars & garages (Listings), Sort the bay orders the directory: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Cars / My cars / Favourites. The choice stays in the URL alongside Find a listing and status chips. Clear filters resets search, group, and sort back to Highest price. Paint and Save stay on each row. Copy signup link on Family invites is the next step.",
+    body: "On Cars & garages (Listings), Sort the bay orders the directory: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Cars / My cars / Favourites. The choice stays in the URL alongside Find a listing and status chips. Clear filters resets search, group, and sort back to Highest price. Paint and Save stay on each row; Open listing to the catalogue is a later step. Copy signup link on Family invites is the next step.",
     to: "/admin/inventory",
     cta: "Open Cars & garages",
     adminOnly: true,
@@ -208,9 +208,17 @@ const STEPS: Step[] = [
   {
     id: "admin-invite-signup-link",
     title: "Copy signup link for invites",
-    body: "On Family invites, active codes offer Copy (bare code) and Copy signup link — the absolute /signup?invite=… URL with a toast. Opening that link prefills the invite field on Sign up. Used, expired, and revoked codes hide both copy actions. Require-invite, Find a code, and Revoke stay.",
+    body: "On Family invites, active codes offer Copy (bare code) and Copy signup link — the absolute /signup?invite=… URL with a toast. Opening that link prefills the invite field on Sign up. Used, expired, and revoked codes hide both copy actions. Require-invite, Find a code, and Revoke stay. Open listing from Cars & garages is the next step.",
     to: "/admin/invites",
     cta: "Open Family invites",
+    adminOnly: true,
+  },
+  {
+    id: "admin-open-listing",
+    title: "Open a listing from inventory",
+    body: "On Cars & garages (Listings), Open listing on a row takes you to the public catalogue page for that car (/cars/:id) — same in-app pattern as Open listing on a member garage. Find a listing, Sort the bay, Clear filters, Paint, and Save stay on the row.",
+    to: "/admin/inventory",
+    cta: "Open Cars & garages",
     adminOnly: true,
   },
 ];
@@ -248,11 +256,12 @@ export function HowToPage() {
             plus type chips (All / Earn / Spend / Gift / Admin), admin coin-adjust Quick amount chips
             (+25 / +50 / +100 / +250 BC) for Brad and Napwood, admin inventory Sort the bay (Highest /
             Lowest price, Name A–Z / Z–A), admin Family invites Copy signup link (/signup?invite=)
-            beside Copy code, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or
-            house → Play), this week’s cup standings with an Ends in countdown (Europe/London week
-            end, +50 BC prize), free trades, Trade history Offer again (/trades?with=), member gifts,
-            drag races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay next steps, and
-            your bay showcase. Nothing here spends real money.
+            beside Copy code, admin inventory Open listing (/cars/:id), Top Trumps streaks, Match
+            history Rematch (PvP opponent deep-link or house → Play), this week’s cup standings with
+            an Ends in countdown (Europe/London week end, +50 BC prize), free trades, Trade history
+            Offer again (/trades?with=), member gifts, drag races with Sort reviews (Newest /
+            Oldest, Title A–Z / Z–A), empty-bay next steps, and your bay showcase. Nothing here spends
+            real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -403,7 +412,8 @@ export function HowToPage() {
                 Cars & garages
               </Link>{" "}
               — Brad & Napwood: Find a listing; Sort the bay (Highest / Lowest price, Name A–Z /
-              Z–A, same as Cars / My cars); status chips; Clear filters.
+              Z–A, same as Cars / My cars); status chips; Clear filters; Open listing → /cars/:id;
+              Paint and Save.
             </li>
             <li>
               <Link to="/admin/invites" className="text-lime no-underline hover:underline">

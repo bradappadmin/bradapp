@@ -85,6 +85,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Copy signup link for invites" }),
     ).toBeInTheDocument();
     expect(document.getElementById("admin-invite-signup-link")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Open a listing from inventory" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("admin-open-listing")).not.toBeNull();
     expect(document.getElementById("members-sort")).not.toBeNull();
     expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
@@ -97,8 +101,24 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/admin Family invites Copy signup link \(\/signup\?invite=\)/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/admin inventory Open listing \(\/cars\/:id\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open listing on a row takes you to the public catalogue page for that car \(\/cars\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open listing from Cars & garages is the next step/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Brad & Napwood: Create codes; Copy the bare code or Copy signup link/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open listing → \/cars\/:id; Paint and Save/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/daily login bonus/i).length).toBeGreaterThan(0);
@@ -366,11 +386,14 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that/i,
+        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory is last/i,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Copy signup link on Family invites is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open listing to the catalogue is a later step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
