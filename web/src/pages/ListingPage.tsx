@@ -18,7 +18,9 @@ import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
+import { listingReviewsHref, listingReviewsQuery } from "../listing-reviews";
 import { rememberRecentlyViewed } from "../recently-viewed";
+import { filterReviewsByCarQuery } from "../reviews-car-filter";
 import { listingSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 
@@ -36,6 +38,7 @@ export function ListingPage() {
   const [busy, setBusy] = useState(false);
   const [favBusy, setFavBusy] = useState(false);
   const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
+  const [hasReviews, setHasReviews] = useState(false);
 
   useEffect(() => {
     setComparePicks(loadCompareSelection());
@@ -50,6 +53,7 @@ export function ListingPage() {
         return;
       }
       setLoading(true);
+      setHasReviews(false);
       try {
         const res = await api.fetchListing(listingId);
         if (!cancelled) {
@@ -71,10 +75,20 @@ export function ListingPage() {
             status: res.listing.status,
           });
         }
+        const q = listingReviewsQuery(res.listing.make, res.listing.model);
+        try {
+          const reviewsRes = await api.fetchReviews(false, 100);
+          if (!cancelled) {
+            setHasReviews(filterReviewsByCarQuery(reviewsRes.reviews, q).length > 0);
+          }
+        } catch {
+          if (!cancelled) setHasReviews(false);
+        }
       } catch (err) {
         if (!cancelled) {
           setListing(null);
           setFavourited(false);
+          setHasReviews(false);
           setError(err instanceof Error ? err.message : "Could not load listing");
         }
       } finally {
@@ -311,6 +325,14 @@ export function ListingPage() {
                     : "Compare"}
               </button>
               <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy link" />
+              {hasReviews ? (
+                <Link
+                  to={listingReviewsHref(listing.make, listing.model)}
+                  className="inline-block rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                >
+                  View reviews
+                </Link>
+              ) : null}
             </div>
 
             {favourited ? (

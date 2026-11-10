@@ -13,6 +13,7 @@ vi.mock("../api", () => ({
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
   fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchListing: vi.fn(),
+  fetchReviews: vi.fn(),
 }));
 
 vi.mock("../share-link", async () => {
@@ -64,6 +65,7 @@ describe("ListingPage Midnight Garage UI", () => {
       listing: memberOwnedListing,
       favourited: false,
     });
+    vi.mocked(api.fetchReviews).mockResolvedValue({ reviews: [] });
   });
 
   it("shows bay hierarchy, hero, specs, and Challenge / trade CTAs when signed in", async () => {
@@ -118,6 +120,76 @@ describe("ListingPage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: /Save to favourites/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "View reviews" })).not.toBeInTheDocument();
+  });
+
+  it("links View reviews into Find when matching films exist, keeps Compare / Copy / Buy", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 2,
+        email: "viewer@example.com",
+        displayName: "Viewer",
+        bio: null,
+        role: "member",
+        coinBalance: 400,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 400,
+      },
+    });
+    vi.mocked(api.fetchReviews).mockResolvedValue({
+      reviews: [
+        {
+          id: 9,
+          type: "review",
+          title: "Bay burn — Chiron",
+          status: "published",
+          createdAt: "2026-11-09T12:00:00.000Z",
+          publisher: { id: 1, displayName: "Brad" },
+          car: {
+            id: 8,
+            make: "Bugatti",
+            model: "Chiron",
+            trimName: "Sport",
+            bodyType: "Coupe",
+            colour: "Midnight Black",
+            bhp: 1479,
+            topSpeedMph: 261,
+            zeroToSixtySecs: 2.3,
+            listingId: 143,
+          },
+          carB: null,
+          cueCards: [],
+          videoUrl: "/reviews/9/video",
+          mimeType: "video/webm",
+          likeCount: 0,
+          likedByMe: false,
+          featured: false,
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cars/143"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const viewReviews = await screen.findByRole("link", { name: "View reviews" });
+    expect(viewReviews).toHaveAttribute("href", "/reviews?q=Bugatti+Chiron");
+    expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Buy for/i })).toBeInTheDocument();
   });
 
   it("queues the listing for compare and opens the compare bay", async () => {
