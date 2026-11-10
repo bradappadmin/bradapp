@@ -255,6 +255,7 @@ describe("MemberProfilePage showcase garage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: /Gift coins to Bay Friend/i })).toBeInTheDocument();
+    expect(document.getElementById("gift-coins")).not.toBeNull();
     expect(screen.getByText(/Play money only|No real money/i)).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Gift amount presets" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "10 BC" })).toHaveAttribute("aria-pressed", "false");
@@ -269,6 +270,32 @@ describe("MemberProfilePage showcase garage", () => {
     });
     expect(await screen.findByText(/Sent .* to Bay Friend/i)).toBeInTheDocument();
     expect(screen.getByText(/920 BC|920/i)).toBeInTheDocument();
+  });
+
+  it("exposes #gift-coins for Members directory Gift deep-links", async () => {
+    const scrollIntoView = vi.fn();
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    render(
+      <MemoryRouter initialEntries={["/members/7#gift-coins"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /Gift coins to Bay Friend/i })).toBeInTheDocument();
+    const section = document.getElementById("gift-coins");
+    expect(section).not.toBeNull();
+    await vi.waitFor(() => {
+      expect(scrollIntoView).toHaveBeenCalled();
+    });
+    Element.prototype.scrollIntoView = original;
   });
 
   it("fills the gift amount from quick preset chips", async () => {

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import * as api from "../api";
 import type { MemberProfileCar, MemberSummary, ShowcaseSource } from "../api";
 import { useAuth } from "../auth-context";
@@ -32,6 +32,7 @@ function showcaseHint(source: ShowcaseSource | null): string {
 
 export function MemberProfilePage() {
   const { id } = useParams();
+  const location = useLocation();
   const memberId = Number(id);
   const { user, setUser, loading: authLoading } = useAuth();
   const toast = useToast();
@@ -76,6 +77,16 @@ export function MemberProfilePage() {
       cancelled = true;
     };
   }, [memberId]);
+
+  // Deep-link from Members directory Gift Brad Coins → #gift-coins after profile loads.
+  useEffect(() => {
+    if (loading || authLoading) return;
+    if (location.hash !== "#gift-coins") return;
+    if (!user || !member || member.id === user.id) return;
+    const el = document.getElementById("gift-coins");
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [loading, authLoading, location.hash, member, user]);
 
   if (!Number.isFinite(memberId) || memberId <= 0) {
     return <Navigate to="/members" replace />;
@@ -241,6 +252,7 @@ export function MemberProfilePage() {
 
         {canGift && member && user ? (
           <section
+            id="gift-coins"
             className="play-panel bay-rise-delay mt-8 rounded-md border px-4 py-5 sm:px-5"
             aria-labelledby="gift-coins-heading"
           >

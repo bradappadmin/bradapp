@@ -360,6 +360,13 @@ export function MembersPage() {
                         >
                           Offer trade
                         </Link>
+                        <Link
+                          to={`/members/${member.id}#gift-coins`}
+                          className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                          aria-label={`Gift Brad Coins to ${member.displayName}`}
+                        >
+                          Gift Brad Coins
+                        </Link>
                       </div>
                     ) : null}
                   </li>

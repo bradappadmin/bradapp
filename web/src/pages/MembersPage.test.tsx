@@ -250,7 +250,7 @@ describe("MembersPage Midnight Garage UI", () => {
     expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 
-  it("hides Challenge and Offer trade when signed out", async () => {
+  it("hides Challenge, Offer trade, and Gift when signed out", async () => {
     render(
       <MemoryRouter initialEntries={["/members"]}>
         <AuthProvider>
@@ -264,10 +264,11 @@ describe("MembersPage Midnight Garage UI", () => {
       screen.queryByRole("link", { name: /Challenge .+ to Top Trumps/i }),
     ).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer trade with /i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Gift Brad Coins to /i })).not.toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Open garage" }).length).toBeGreaterThan(0);
   });
 
-  it("deep-links Challenge and Offer trade for other members, hides for self", async () => {
+  it("deep-links Challenge, Offer trade, and Gift for other members, hides for self", async () => {
     vi.mocked(api.fetchMe).mockResolvedValue({
       user: {
         id: 177,
@@ -304,6 +305,9 @@ describe("MembersPage Midnight Garage UI", () => {
     expect(
       screen.queryByRole("link", { name: "Offer trade with Sam Bay" }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Gift Brad Coins to Sam Bay" }),
+    ).not.toBeInTheDocument();
 
     const jordanChallenge = screen.getByRole("link", {
       name: "Challenge Jordan Pace to Top Trumps",
@@ -315,12 +319,20 @@ describe("MembersPage Midnight Garage UI", () => {
     expect(jordanTrade).toHaveAttribute("href", "/trades?with=178");
     expect(jordanTrade).toHaveTextContent("Offer trade");
 
+    const jordanGift = screen.getByRole("link", { name: "Gift Brad Coins to Jordan Pace" });
+    expect(jordanGift).toHaveAttribute("href", "/members/178#gift-coins");
+    expect(jordanGift).toHaveTextContent("Gift Brad Coins");
+
     expect(
       screen.getByRole("link", { name: "Challenge Empty Eddy to Top Trumps" }),
     ).toHaveAttribute("href", "/play?opponent=179");
     expect(screen.getByRole("link", { name: "Offer trade with Empty Eddy" })).toHaveAttribute(
       "href",
       "/trades?with=179",
+    );
+    expect(screen.getByRole("link", { name: "Gift Brad Coins to Empty Eddy" })).toHaveAttribute(
+      "href",
+      "/members/179#gift-coins",
     );
 
     expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
