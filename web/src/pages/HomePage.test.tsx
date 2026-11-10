@@ -41,7 +41,64 @@ describe("HomePage", () => {
     clearCompareSelection();
   });
 
-  it("shows latest published reviews with watch links on home", async () => {
+  it("shows latest published reviews with watch and Open car links on home", async () => {
+    vi.mocked(api.fetchReviews).mockResolvedValue({
+      reviews: [
+        {
+          id: 9,
+          type: "review",
+          title: "Bay burn — Focus ST",
+          status: "published",
+          createdAt: "2026-11-09T12:00:00.000Z",
+          publisher: { id: 1, displayName: "Brad" },
+          car: {
+            id: 3,
+            make: "Ford",
+            model: "Focus",
+            trimName: "ST",
+            bodyType: "Hatchback",
+            colour: "Midnight Black",
+            bhp: 280,
+            topSpeedMph: 155,
+            zeroToSixtySecs: 5.7,
+            listingId: 55,
+            listingYear: 2019,
+            listingCoinPrice: 120,
+          },
+          carB: null,
+          cueCards: [],
+          videoUrl: "/reviews/9/video",
+          mimeType: "video/webm",
+          likeCount: 3,
+          likedByMe: false,
+          featured: false,
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Latest bay reviews" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Latest reviews" })).toBeInTheDocument();
+    const watch = await screen.findByRole("link", { name: /Bay burn — Focus ST/i });
+    expect(watch).toHaveAttribute("href", "/reviews/9");
+    expect(screen.getByText("Watch →")).toBeInTheDocument();
+    expect(screen.getByText(/3 likes/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toHaveAttribute(
+      "href",
+      "/cars/55",
+    );
+  });
+
+  it("hides Open car on latest reviews when no listing is known", async () => {
     vi.mocked(api.fetchReviews).mockResolvedValue({
       reviews: [
         {
@@ -86,15 +143,83 @@ describe("HomePage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("region", { name: "Latest bay reviews" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Latest reviews" })).toBeInTheDocument();
-    const watch = await screen.findByRole("link", { name: /Bay burn — Focus ST/i });
-    expect(watch).toHaveAttribute("href", "/reviews/9");
+    expect(await screen.findByRole("link", { name: /Bay burn — Focus ST/i })).toBeInTheDocument();
     expect(screen.getByText("Watch →")).toBeInTheDocument();
-    expect(screen.getByText(/3 likes/)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
   });
 
-  it("shows a featured review pinned on home", async () => {
+  it("shows a featured review pinned on home with Open car when listing is known", async () => {
+    vi.mocked(api.fetchFeaturedReview).mockResolvedValue({
+      review: {
+        id: 11,
+        type: "drag_race",
+        title: "Pinned drag — GT-R",
+        status: "published",
+        createdAt: "2026-11-09T11:00:00.000Z",
+        publisher: { id: 1, displayName: "Brad" },
+        car: {
+          id: 8,
+          make: "Nissan",
+          model: "GT-R",
+          trimName: "",
+          bodyType: "Coupe",
+          colour: "Midnight Black",
+          bhp: 570,
+          topSpeedMph: 196,
+          zeroToSixtySecs: 2.9,
+          listingId: 88,
+          listingYear: 2020,
+          listingCoinPrice: 500,
+        },
+        carB: {
+          id: 9,
+          make: "Porsche",
+          model: "911",
+          trimName: "Turbo",
+          bodyType: "Coupe",
+          colour: "Racing Red",
+          bhp: 572,
+          topSpeedMph: 205,
+          zeroToSixtySecs: 2.7,
+          listingId: 91,
+          listingYear: 2021,
+          listingCoinPrice: 620,
+        },
+        cueCards: [],
+        videoUrl: "/reviews/11/video",
+        mimeType: "video/webm",
+        likeCount: 12,
+        likedByMe: false,
+        featured: true,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Featured bay review" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pinned from the bay" })).toBeInTheDocument();
+    const featured = screen.getByRole("link", { name: /Pinned drag — GT-R/i });
+    expect(featured).toHaveAttribute("href", "/reviews/11");
+    expect(screen.getByText("Watch featured →")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Nissan GT-R" })).toHaveAttribute(
+      "href",
+      "/cars/88",
+    );
+    expect(screen.getByRole("link", { name: "Open car Porsche 911" })).toHaveAttribute(
+      "href",
+      "/cars/91",
+    );
+  });
+
+  it("hides Open car on featured review when no listing is known", async () => {
     vi.mocked(api.fetchFeaturedReview).mockResolvedValue({
       review: {
         id: 11,
@@ -137,11 +262,9 @@ describe("HomePage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("region", { name: "Featured bay review" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Pinned from the bay" })).toBeInTheDocument();
-    const featured = screen.getByRole("link", { name: /Pinned drag — GT-R/i });
-    expect(featured).toHaveAttribute("href", "/reviews/11");
+    expect(await screen.findByRole("link", { name: /Pinned drag — GT-R/i })).toBeInTheDocument();
     expect(screen.getByText("Watch featured →")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
   });
 
   it("shows recently viewed cars from localStorage on home", async () => {
