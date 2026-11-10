@@ -13,6 +13,7 @@ import {
 } from "../compare-selection";
 import { CarCard } from "../components/CarCard";
 import { CompareTray } from "../components/CompareTray";
+import { FavouritesBayValueStrip } from "../components/FavouritesBayValueStrip";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { filterFavouritesByCarQuery } from "../favourites-car-filter";
@@ -199,6 +200,8 @@ export function FavouritesPage() {
 
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
+
+        {!loading && cars.length > 0 ? <FavouritesBayValueStrip cars={cars} /> : null}
 
         {!loading && cars.length === 0 ? (
           <div

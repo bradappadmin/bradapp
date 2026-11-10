@@ -120,6 +120,11 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
     expect(await screen.findByRole("heading", { name: "Saved" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Favourites bay value" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Favourites value 310 BC/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("1 favourite saved")).toBeInTheDocument();
     expect(screen.getByText(/Top Trumps peek under the studio photo/i)).toBeInTheDocument();
     expect(screen.getByText("Top Trumps peek")).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: /Audi RS6 Avant/i })).toHaveAttribute(
@@ -160,6 +165,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
     const cta = screen.getAllByRole("link", { name: "Browse cars" });
     expect(cta.some((link) => link.className.includes("bay-cta"))).toBe(true);
     expect(screen.queryByRole("heading", { name: "Saved" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Favourites bay value" })).not.toBeInTheDocument();
   });
 
   it("queues Favourites cards into the shared compare tray", async () => {
