@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { FavouriteCar } from "../api";
 import { useAuth } from "../auth-context";
@@ -16,9 +16,18 @@ import { listingTitle } from "../cars";
 import { CarCard } from "../components/CarCard";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import {
+  DEFAULT_FAVOURITES_SORT,
+  FAVOURITES_SORT_OPTIONS,
+  parseFavouritesSort,
+  sortFavouriteCars,
+  type FavouritesSort,
+} from "../favourites-sort";
 
 export function FavouritesPage() {
   const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sort = parseFavouritesSort(searchParams.get("sort"));
   const [cars, setCars] = useState<FavouriteCar[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +75,11 @@ export function FavouritesPage() {
     });
   }, [cars, loading]);
 
+  const selectedCount = comparePicks.length;
+  const canCompare = selectedCount === 2;
+  const compareTo = useMemo(() => compareHref(comparePicks), [comparePicks]);
+  const sortedCars = useMemo(() => sortFavouriteCars(cars, sort), [cars, sort]);
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
@@ -93,9 +107,17 @@ export function FavouritesPage() {
     setComparePicks([]);
   }
 
-  const selectedCount = comparePicks.length;
-  const canCompare = selectedCount === 2;
-  const compareTo = useMemo(() => compareHref(comparePicks), [comparePicks]);
+  function setSort(next: FavouritesSort) {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next === DEFAULT_FAVOURITES_SORT) params.delete("sort");
+        else params.set("sort", next);
+        return params;
+      },
+      { replace: true },
+    );
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -165,6 +187,34 @@ export function FavouritesPage() {
           <>
             <div
               className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+              role="search"
+              aria-label="Sort favourite cars"
+            >
+              <div className="min-w-0">
+                <p className="font-display text-lg text-mist">Sort the bay</p>
+                <p className="mt-1 text-sm text-steel">
+                  Highest or lowest Brad Coin price, or name. Choice stays in the URL.
+                </p>
+              </div>
+              <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+                Sort by
+                <select
+                  className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                  value={sort}
+                  onChange={(e) => setSort(parseFavouritesSort(e.target.value))}
+                  aria-label="Sort saved favourite cars"
+                >
+                  {FAVOURITES_SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div
+              className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
               role="region"
               aria-label="Compare favourites"
             >
@@ -224,7 +274,7 @@ export function FavouritesPage() {
                 </p>
               </div>
               <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {cars.map((car) => {
+                {sortedCars.map((car) => {
                   const selected = comparePicks.some((p) => p.id === car.id);
                   const selectionFull = selectedCount >= 2 && !selected;
                   const checkboxId = `favourite-compare-${car.id}`;

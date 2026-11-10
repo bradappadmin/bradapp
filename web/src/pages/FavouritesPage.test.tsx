@@ -1,10 +1,15 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { COMPARE_SELECTION_KEY } from "../compare-selection";
 import { FavouritesPage } from "./FavouritesPage";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="favourites-params">{params.toString()}</div>;
+}
 
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
@@ -147,5 +152,81 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(compareLink.getAttribute("href")).toMatch(/^\/compare\?a=\d+&b=\d+$/);
     expect(compareLink.getAttribute("href")).toContain("11");
     expect(compareLink.getAttribute("href")).toContain("9");
+  });
+
+  it("sorts the Saved grid via Sort the bay and persists sort in the URL", async () => {
+    const user = userEvent.setup();
+    const ford = {
+      ...audi,
+      id: 3,
+      make: "Ford",
+      model: "Focus",
+      trimName: "ST",
+      coinPrice: 80,
+    };
+    vi.mocked(api.fetchFavourites).mockResolvedValue({
+      cars: [audi, porsche, ford],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/favourites"
+              element={
+                <>
+                  <FavouritesPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Sort the bay")).toBeInTheDocument();
+    const sort = screen.getByRole("combobox", { name: /Sort saved favourite cars/i });
+    expect(sort).toHaveValue("value_desc");
+
+    const saved = screen.getByRole("heading", { name: "Saved" }).closest("section");
+    expect(saved).not.toBeNull();
+    let links = saved!.querySelectorAll("a[href^='/cars/']");
+    expect(links[0]?.textContent).toMatch(/Porsche 911/i);
+    expect(links[1]?.textContent).toMatch(/Audi RS6/i);
+
+    await user.selectOptions(sort, "name_asc");
+    expect(sort).toHaveValue("name_asc");
+    await waitFor(() => {
+      expect(screen.getByTestId("favourites-params").textContent).toContain("sort=name_asc");
+    });
+    links = saved!.querySelectorAll("a[href^='/cars/']");
+    expect(links[0]?.textContent).toMatch(/Audi RS6/i);
+    expect(links[1]?.textContent).toMatch(/Ford Focus/i);
+    expect(links[2]?.textContent).toMatch(/Porsche 911/i);
+  });
+
+  it("reads sort from the URL on load", async () => {
+    vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [audi, porsche] });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites?sort=value_asc"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/favourites" element={<FavouritesPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const sort = await screen.findByRole("combobox", {
+      name: /Sort saved favourite cars/i,
+    });
+    expect(sort).toHaveValue("value_asc");
+    const saved = screen.getByRole("heading", { name: "Saved" }).closest("section");
+    const links = saved!.querySelectorAll("a[href^='/cars/']");
+    expect(links[0]?.textContent).toMatch(/Audi RS6/i);
+    expect(links[1]?.textContent).toMatch(/Porsche 911/i);
   });
 });
