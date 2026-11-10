@@ -65,6 +65,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(document.getElementById("garage-trump-stats")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Play TrumpCard studio motion" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("play-trumpcard-motion")).not.toBeNull();
+    expect(
       screen.getByRole("heading", { name: "Rematch from Match history" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Open profile from Play" })).toBeInTheDocument();
@@ -694,7 +698,23 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
-    expect(screen.getByText(/Match history Rematch is the next step/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/TrumpCard studio motion is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Play TrumpCard studio motion" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /pick and face-off TrumpCards soft-fade and rise in \(face-off right card a beat later\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The winning face-off card adds a soft lime category pulse/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Match history Rematch is the next step/i),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         /On a Challenge row, Rematch deep-links Play with that opponent ready \(\/play\?opponent=/i,
@@ -738,6 +758,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/The CTA hides for Vs house and when the opponent is you/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Play TrumpCard studio motion \(entrance fade\/rise, photo ease, winner pulse, reduced-motion\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Match history Rematch \(PvP opponent deep-link or house → Play\)/i),
@@ -1290,7 +1315,7 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/garage",
     );
-    expect(screen.getAllByRole("link", { name: "Open Play" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Play" }).length).toBeGreaterThanOrEqual(3);
     expect(
       screen.getAllByRole("link", { name: "Open Play" }).every((a) => a.getAttribute("href") === "/play"),
     ).toBe(true);
@@ -1307,7 +1332,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBe(true);
     expect(
       screen.getByText(
-        /Challenge a member or land from Rematch \(\/play\?opponent=\); Open profile → \/members\/:id when an opponent is selected \(hidden for house or self\)/i,
+        /Challenge a member or land from Rematch \(\/play\?opponent=\); TrumpCard studio motion \(entrance fade\/rise, photo ease, winner pulse; reduced-motion keeps still\); Open profile → \/members\/:id when an opponent is selected \(hidden for house or self\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open cup standings" })).toHaveAttribute(

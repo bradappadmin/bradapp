@@ -219,7 +219,14 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, Challenge to Top Trumps on the Members directory (not yourself), or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), then rematch on Play when you’re done. Match history Rematch is the next step. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, Challenge to Top Trumps on the Members directory (not yourself), or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), then rematch on Play when you’re done. TrumpCard studio motion is the next step. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    to: "/play",
+    cta: "Open Play",
+  },
+  {
+    id: "play-trumpcard-motion",
+    title: "Play TrumpCard studio motion",
+    body: "On Play, pick and face-off TrumpCards soft-fade and rise in (face-off right card a beat later), ease the studio photo a little larger on hover/focus, and drift a gentle bay light — presence and hierarchy, not noise. The winning face-off card adds a soft lime category pulse. Prefers-reduced-motion keeps the cards still (no entrance / no photo ease / no bay or winner pulse). Open profile, win streak, Rematch, Match history, and empty-bay CTAs stay. Match history Rematch is the next step.",
     to: "/play",
     cta: "Open Play",
   },
@@ -247,7 +254,7 @@ const STEPS: Step[] = [
   {
     id: "play-open-opponent",
     title: "Open profile from Play",
-    body: "On Play, when you Challenge a member and an opponent is selected (picker or Rematch deep-link /play?opponent=…), Open profile takes you to that member’s public garage (/members/:id). The CTA hides for Vs house and when the opponent is you. Win streak, Rematch, and Match history stay.",
+    body: "On Play, when you Challenge a member and an opponent is selected (picker or Rematch deep-link /play?opponent=…), Open profile takes you to that member’s public garage (/members/:id). The CTA hides for Vs house and when the opponent is you. TrumpCard studio motion, win streak, Rematch, and Match history stay.",
     to: "/play",
     cta: "Open Play",
   },
@@ -522,7 +529,8 @@ export function HowToPage() {
             Lowest price, Name A–Z / Z–A), admin Family invites Copy signup link (/signup?invite=)
             beside Copy code, admin inventory Open listing (/cars/:id), admin Accounts Open member
             (/members/:id), admin Coin adjustments Open member (/members/:id), Top Trumps streaks,
-            Match history Rematch (PvP opponent deep-link or house
+            Play TrumpCard studio motion (entrance fade/rise, photo ease, winner pulse,
+            reduced-motion), Match history Rematch (PvP opponent deep-link or house
             → Play), Match history Open car (/cars/:id when listing ids are known), Match history Open
             opponent (/members/:id on PvP; hidden for house / self / missing), Play Open profile
             (/members/:id when a PvP opponent is selected; hidden for house / self), this week’s cup
@@ -612,8 +620,10 @@ export function HowToPage() {
               <Link to="/play" className="text-lime no-underline hover:underline">
                 Play
               </Link>{" "}
-              — Challenge a member or land from Rematch (/play?opponent=); Open profile →
-              /members/:id when an opponent is selected (hidden for house or self); win streak stays.
+              — Challenge a member or land from Rematch (/play?opponent=); TrumpCard studio motion
+              (entrance fade/rise, photo ease, winner pulse; reduced-motion keeps still); Open
+              profile → /members/:id when an opponent is selected (hidden for house or self); win
+              streak stays.
             </li>
             <li>
               <Link to="/trades/history" className="text-lime no-underline hover:underline">
