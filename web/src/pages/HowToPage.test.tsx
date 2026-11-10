@@ -41,6 +41,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(document.getElementById("cars-sort")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Top Trumps peek on Cars" })).toBeInTheDocument();
     expect(document.getElementById("cars-catalogue-trump-stats")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Studio card hover motion" })).toBeInTheDocument();
+    expect(document.getElementById("car-card-hover-motion")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Sort Members in the bay" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
@@ -368,8 +370,27 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/the same stats Play uses/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Studio card hover motion is the next step/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Studio card hover motion" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /hover soft-lifts the bay shell, eases the studio photo a little larger, and adds a lime\/rose edge accent/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Prefers-reduced-motion keeps the card still \(no lift \/ no photo zoom\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Cars Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /studio card hover motion \(bay lift, photo ease, reduced-motion\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1052,7 +1073,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(6);
+    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(7);
     expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
     expect(
       screen.getByText(
@@ -1063,6 +1084,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Find \+ filters; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Favourites \/ My cars\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /studio card hover motion \(bay lift, photo ease, lime\/rose edge; reduced-motion keeps still\)/i,
       ),
     ).toBeInTheDocument();
     expect(

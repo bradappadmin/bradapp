@@ -86,7 +86,14 @@ const STEPS: Step[] = [
   {
     id: "cars-catalogue-trump-stats",
     title: "Top Trumps peek on Cars",
-    body: "On the Cars catalogue, each photo-first media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same stats Play uses. Find, Sort the bay, Compare, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard.",
+    body: "On the Cars catalogue, each photo-first media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same stats Play uses. Find, Sort the bay, Compare, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard. Studio card hover motion is the next step.",
+    to: "/cars",
+    cta: "Open Cars",
+  },
+  {
+    id: "car-card-hover-motion",
+    title: "Studio card hover motion",
+    body: "On photo-first media cards (Cars, Favourites, My cars, Recently viewed, public garage), hover soft-lifts the bay shell, eases the studio photo a little larger, and adds a lime/rose edge accent — presence and hierarchy, not noise. Prefers-reduced-motion keeps the card still (no lift / no photo zoom). Top Trumps peek and card CTAs stay.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -434,7 +441,8 @@ export function HowToPage() {
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
             Trumps bay strip under the studio hero (Power / 0–60 / Top speed), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
-            (Power / 0–60 / Top speed), Favourites Top Trumps peek (same Power / 0–60 / Top speed),
+            (Power / 0–60 / Top speed), studio card hover motion (bay lift, photo ease, reduced-motion),
+            Favourites Top Trumps peek (same Power / 0–60 / Top speed),
             My cars Top Trumps peek (same Power / 0–60 / Top speed on owned and for-sale cards),
             Favourites challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
@@ -577,10 +585,11 @@ export function HowToPage() {
               </Link>{" "}
               — Find + filters; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
               Favourites / My cars); Top Trumps peek under each studio photo (Power / 0–60 / Top
-              speed); Compare into the tray; on a listing, Top Trumps bay strip under the studio hero
-              (same Power / 0–60 / Top speed); View reviews → /reviews?q=Make+Model when films exist
-              (hides when none); View seller → /members/:id when a member owns it (hidden for self or
-              house); Clear filters when nothing matches.
+              speed); studio card hover motion (bay lift, photo ease, lime/rose edge; reduced-motion
+              keeps still); Compare into the tray; on a listing, Top Trumps bay strip under the studio
+              hero (same Power / 0–60 / Top speed); View reviews → /reviews?q=Make+Model when films
+              exist (hides when none); View seller → /members/:id when a member owns it (hidden for
+              self or house); Clear filters when nothing matches.
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
