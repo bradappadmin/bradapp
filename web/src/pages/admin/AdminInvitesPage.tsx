@@ -12,6 +12,7 @@ import {
 } from "../../admin-invites-filter";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
+import { copyTextToClipboard } from "../../share-link";
 import { useToast } from "../../toast-context";
 
 const fieldClass =
@@ -182,18 +183,19 @@ function AdminInvitesInner() {
   }
 
   async function onCopy(invite: FamilyInvite) {
-    try {
-      await navigator.clipboard.writeText(invite.code);
+    const ok = await copyTextToClipboard(invite.code);
+    if (ok) {
       setCopiedId(invite.id);
-      const ok = `Copied ${invite.code}.`;
-      setMessage(ok);
-      toast.success(ok);
+      setError(null);
+      const note = `Copied ${invite.code}.`;
+      setMessage(note);
+      toast.success(note);
       window.setTimeout(() => setCopiedId((current) => (current === invite.id ? null : current)), 2000);
-    } catch {
-      const msg = "Could not copy — select the code manually.";
-      setError(msg);
-      toast.error(msg);
+      return;
     }
+    const msg = "Could not copy — select the code manually.";
+    setError(msg);
+    toast.error(msg);
   }
 
   return (
@@ -434,7 +436,9 @@ function AdminInvitesInner() {
       {visible.length > 0 ? (
         <ul className="mt-2 divide-y divide-white/10 border-t border-white/10">
           {visible.map((invite) => {
-            const status = inviteStatusLabel(inviteLifecycle(invite));
+            const lifecycle = inviteLifecycle(invite);
+            const status = inviteStatusLabel(lifecycle);
+            const isActive = lifecycle === "active";
             return (
               <li
                 key={invite.id}
@@ -443,7 +447,7 @@ function AdminInvitesInner() {
                 <div className="min-w-0">
                   <p className="font-display text-lg font-semibold text-mist">{invite.code}</p>
                   <p className="mt-1 text-sm text-steel">
-                    <span className={status === "Active" ? "text-lime" : undefined}>{status}</span>
+                    <span className={isActive ? "text-lime" : undefined}>{status}</span>
                     {" · "}
                     {invite.usesCount}
                     {invite.maxUses != null ? ` / ${invite.maxUses}` : " uses"}
@@ -457,13 +461,16 @@ function AdminInvitesInner() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => void onCopy(invite)}
-                    className="rounded-md border border-white/15 px-4 py-2 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
-                  >
-                    {copiedId === invite.id ? "Copied" : "Copy"}
-                  </button>
+                  {isActive ? (
+                    <button
+                      type="button"
+                      onClick={() => void onCopy(invite)}
+                      aria-label={`Copy invite code ${invite.code}`}
+                      className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/10"
+                    >
+                      {copiedId === invite.id ? "Copied" : "Copy"}
+                    </button>
+                  ) : null}
                   {!invite.revokedAt ? (
                     <button
                       type="button"

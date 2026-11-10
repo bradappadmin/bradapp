@@ -9,13 +9,23 @@ import { AdminInvitesPage } from "./AdminInvitesPage";
 vi.mock("../../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchAdminInvites: vi.fn(),
   setAdminRequireInvite: vi.fn(),
   createAdminInvite: vi.fn(),
   revokeAdminInvite: vi.fn(),
 }));
 
+vi.mock("../../share-link", async () => {
+  const actual = await vi.importActual<typeof import("../../share-link")>("../../share-link");
+  return {
+    ...actual,
+    copyTextToClipboard: vi.fn().mockResolvedValue(true),
+  };
+});
+
 import * as api from "../../api";
+import { copyTextToClipboard } from "../../share-link";
 
 function SearchParamsProbe() {
   const [params] = useSearchParams();
@@ -173,5 +183,38 @@ describe("AdminInvitesPage", () => {
     expect(await screen.findByText("No matches")).toBeInTheDocument();
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+  });
+
+  it("copies an active invite code and toasts success", async () => {
+    const user = userEvent.setup();
+    vi.mocked(copyTextToClipboard).mockResolvedValue(true);
+
+    render(
+      <MemoryRouter initialEntries={["/admin/invites"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <AdminInvitesPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("FAMILY-BAY-2026")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Copy invite code FAMILY-BAY-2026" }),
+    ).toBeInTheDocument();
+    // Used/redeemed codes do not get a Copy control.
+    expect(
+      screen.queryByRole("button", { name: "Copy invite code USED-ONCE" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Copy invite code FAMILY-BAY-2026" }));
+    await waitFor(() => {
+      expect(copyTextToClipboard).toHaveBeenCalledWith("FAMILY-BAY-2026");
+    });
+    expect(await screen.findByRole("status")).toHaveTextContent(/Copied FAMILY-BAY-2026/i);
+    expect(screen.getByRole("button", { name: "Copy invite code FAMILY-BAY-2026" })).toHaveTextContent(
+      "Copied",
+    );
   });
 });
