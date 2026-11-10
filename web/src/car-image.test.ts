@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   carStudioImageUrl,
+  paintOptionsFor,
   resolveStudioCarTokens,
   STUDIO_PAINT_COLOURS,
 } from "./car-image";
@@ -94,6 +95,10 @@ describe("carStudioImageUrl", () => {
   it("exposes a curated paint list that the studio helper accepts", () => {
     expect(STUDIO_PAINT_COLOURS).toContain("Racing Red");
     expect(STUDIO_PAINT_COLOURS).toContain("Midnight Black");
+    expect(paintOptionsFor("Racing Red")[0]).toBe("Arctic White");
+    expect(paintOptionsFor("Racing Red")).toEqual([...STUDIO_PAINT_COLOURS]);
+    expect(paintOptionsFor("Custom Blue")[0]).toBe("Custom Blue");
+    expect(paintOptionsFor("Custom Blue")).toContain("Racing Red");
     for (const colour of STUDIO_PAINT_COLOURS) {
       const url = carStudioImageUrl({ make: "BMW", model: "M3", colour, bodyType: "Saloon" });
       expect(url).toContain("paintDescription=");

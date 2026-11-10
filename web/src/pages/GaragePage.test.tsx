@@ -201,6 +201,12 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(
       screen.getByRole("group", { name: /Sell price presets for Porsche 911/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /Paint colour for Porsche 911/i }),
+    ).toHaveValue("Racing Red");
+    expect(
+      screen.getByRole("combobox", { name: /Paint colour for Ford Focus/i }),
+    ).toHaveValue("Blue");
     expect(screen.getAllByRole("button", { name: "50 BC" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "100 BC" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "250 BC" }).length).toBeGreaterThan(0);
@@ -524,10 +530,19 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(priceInput).toHaveValue(100);
     const listForm = priceInput.closest("form");
     expect(listForm).not.toBeNull();
+    const paint = within(listForm as HTMLElement).getByRole("combobox", {
+      name: /Paint colour for Porsche 911/i,
+    });
+    await user.selectOptions(paint, "Laser Blue");
+    expect(paint).toHaveValue("Laser Blue");
+    const previewImgs = (listForm as HTMLElement).querySelectorAll("img");
+    expect(
+      [...previewImgs].some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=Blue")),
+    ).toBe(true);
     await user.click(within(listForm as HTMLElement).getByRole("button", { name: "List for sale" }));
 
     await waitFor(() => {
-      expect(api.sellListing).toHaveBeenCalledWith(9, 100);
+      expect(api.sellListing).toHaveBeenCalledWith(9, 100, "Laser Blue");
     });
   });
 

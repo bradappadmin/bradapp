@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
 import { applyCoinDelta, getCoinBalance, listLedger } from "./coins.js";
 import { getPool, type RowDataPacket } from "./db.js";
+import { LISTING_PAINT_COLOURS } from "./listing-colours.js";
 import { listPurchaseHistory } from "./purchase-history.js";
 import {
   clearShowcaseForListings,
@@ -10,8 +11,12 @@ import {
 } from "./showcase.js";
 import { listSoldHistory } from "./sold-history.js";
 
+const listingPaintColourSchema = z.enum(LISTING_PAINT_COLOURS);
+
 const sellSchema = z.object({
   coinPrice: z.number().int().min(1).max(1_000_000),
+  /** Optional curated paint — same options as admin listing paint. */
+  colour: listingPaintColourSchema.optional(),
 });
 
 const showcaseSchema = z.object({
@@ -297,17 +302,27 @@ export function createTradeRouter(): Router {
         return;
       }
 
-      await connection.query(
-        `UPDATE listings
-         SET coin_price = ?, status = 'available', owner_label = ?
-         WHERE id = ?`,
-        [parsed.data.coinPrice, user.displayName, listingId],
-      );
+      if (parsed.data.colour) {
+        await connection.query(
+          `UPDATE listings
+           SET coin_price = ?, colour = ?, status = 'available', owner_label = ?
+           WHERE id = ?`,
+          [parsed.data.coinPrice, parsed.data.colour, user.displayName, listingId],
+        );
+      } else {
+        await connection.query(
+          `UPDATE listings
+           SET coin_price = ?, status = 'available', owner_label = ?
+           WHERE id = ?`,
+          [parsed.data.coinPrice, user.displayName, listingId],
+        );
+      }
       await connection.commit();
       res.json({
         ok: true,
         listingId,
         coinPrice: parsed.data.coinPrice,
+        colour: parsed.data.colour ?? undefined,
         status: "available" as const,
       });
     } catch (error) {

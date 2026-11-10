@@ -15,7 +15,7 @@ import {
   sortAdminInventoryListings,
   type AdminInventorySort,
 } from "../../admin-inventory-sort";
-import { STUDIO_PAINT_COLOURS } from "../../car-image";
+import { paintOptionsFor } from "../../car-image";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
 import { CarVisual } from "../../components/CarVisual";
@@ -488,13 +488,6 @@ function AdminInventoryInner() {
       ) : null}
     </AdminShell>
   );
-}
-
-function paintOptionsFor(current: string): string[] {
-  if (STUDIO_PAINT_COLOURS.includes(current)) {
-    return STUDIO_PAINT_COLOURS;
-  }
-  return [current, ...STUDIO_PAINT_COLOURS];
 }
 
 function ListingPaintRow({

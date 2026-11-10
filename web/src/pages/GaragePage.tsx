@@ -3,6 +3,7 @@ import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { GarageCar, LedgerEntry, PurchasedCar, SoldCar } from "../api";
 import { useAuth } from "../auth-context";
+import { paintOptionsFor } from "../car-image";
 import { formatCoins } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import {
@@ -13,6 +14,7 @@ import {
   type ComparePick,
 } from "../compare-selection";
 import { CarCard } from "../components/CarCard";
+import { CarVisual } from "../components/CarVisual";
 import { CompareTray } from "../components/CompareTray";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { GarageBayValueStrip } from "../components/GarageBayValueStrip";
@@ -88,6 +90,7 @@ export function GaragePage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sellPrices, setSellPrices] = useState<Record<number, string>>({});
+  const [sellColours, setSellColours] = useState<Record<number, string>>({});
   const [busyId, setBusyId] = useState<number | null>(null);
   const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
 
@@ -227,17 +230,18 @@ export function GaragePage() {
       setError("Enter a Brad Coin price of at least 1");
       return;
     }
+    const colour = sellColours[car.id] ?? car.colour;
     setBusyId(car.id);
     setError(null);
     setNotice(null);
     try {
-      await api.sellListing(car.id, Math.trunc(price));
+      await api.sellListing(car.id, Math.trunc(price), colour);
       await reload();
       await refresh();
       const noticeText =
         car.status === "available"
-          ? `Updated asking price to ${formatCoins(Math.trunc(price))}.`
-          : `Listed for sale at ${formatCoins(Math.trunc(price))}. Other members can buy it from Cars.`;
+          ? `Updated asking price to ${formatCoins(Math.trunc(price))} · ${colour}.`
+          : `Listed for sale at ${formatCoins(Math.trunc(price))} · ${colour}. Other members can buy it from Cars.`;
       setNotice(noticeText);
       toast.success(noticeText);
     } catch (err) {
@@ -293,10 +297,12 @@ export function GaragePage() {
   function renderManagedCar(car: GarageCar) {
     const isShowcase = showcaseListingId === car.id;
     const selected = comparePicks.some((p) => p.id === car.id);
+    const draftColour = sellColours[car.id] ?? car.colour;
+    const displayCar = { ...car, colour: draftColour };
     return (
       <li key={car.id} className="bay-rise">
         <CarCard
-          car={car}
+          car={displayCar}
           to={`/cars/${car.id}`}
           badge={badgeForStatus(car.status, "for_sale")}
           layout="media"
@@ -341,6 +347,41 @@ export function GaragePage() {
                           </button>
                         );
                       })}
+                    </div>
+                  </div>
+                  <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <CarVisual
+                        colour={draftColour}
+                        make={car.make}
+                        model={car.model}
+                        year={car.year}
+                        bodyType={car.bodyType}
+                        size="thumb"
+                        title={`${car.make} ${car.model} paint preview`}
+                        className="h-14 w-20 shrink-0"
+                      />
+                      <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel">
+                        Paint
+                        <select
+                          aria-label={`Paint colour for ${car.make} ${car.model}`}
+                          className="w-full rounded-md border border-white/10 bg-bay-panel px-2 py-2 text-sm normal-case tracking-normal text-mist outline-none ring-lime/40 focus:ring-2"
+                          value={draftColour}
+                          disabled={busyId === car.id}
+                          onChange={(e) =>
+                            setSellColours((prev) => ({
+                              ...prev,
+                              [car.id]: e.target.value,
+                            }))
+                          }
+                        >
+                          {paintOptionsFor(car.colour).map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                     </div>
                   </div>
                   <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">

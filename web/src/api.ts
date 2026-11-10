@@ -393,10 +393,17 @@ export function buyListing(id: number): Promise<{ ok: boolean; listingId: number
 export function sellListing(
   id: number,
   coinPrice: number,
-): Promise<{ ok: boolean; listingId: number; coinPrice: number; status: "available" }> {
+  colour?: string,
+): Promise<{
+  ok: boolean;
+  listingId: number;
+  coinPrice: number;
+  colour?: string;
+  status: "available";
+}> {
   return request(`/trade/listings/${id}/sell`, {
     method: "POST",
-    body: JSON.stringify({ coinPrice }),
+    body: JSON.stringify(colour ? { coinPrice, colour } : { coinPrice }),
   });
 }
 

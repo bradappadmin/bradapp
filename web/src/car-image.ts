@@ -19,6 +19,14 @@ export const STUDIO_PAINT_COLOURS = Object.keys(COLOUR_TO_PAINT).sort((a, b) =>
   a.localeCompare(b),
 );
 
+/** Paint `<select>` options — curated list, plus current if it is outside the set. */
+export function paintOptionsFor(current: string): string[] {
+  if (STUDIO_PAINT_COLOURS.includes(current)) {
+    return [...STUDIO_PAINT_COLOURS];
+  }
+  return [current, ...STUDIO_PAINT_COLOURS];
+}
+
 const MAKE_ALIASES: Record<string, string> = {
   "Mercedes-Benz": "mercedes",
   "Mercedes-AMG": "mercedes",
