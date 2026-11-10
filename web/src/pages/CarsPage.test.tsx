@@ -1,9 +1,14 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { CarsPage } from "./CarsPage";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="cars-search-params">{params.toString()}</div>;
+}
 
 vi.mock("../api", () => ({
   fetchMe: vi.fn().mockRejectedValue(new Error("unauthenticated")),
@@ -99,6 +104,77 @@ describe("CarsPage Midnight Garage UI", () => {
 
     await waitFor(() => {
       expect(api.searchCars).toHaveBeenCalled();
+    });
+  });
+
+  it("sorts via Sort the bay control and persists sort in the URL", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/cars"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/cars"
+              element={
+                <>
+                  <CarsPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a car" })).toBeInTheDocument();
+    const sort = await screen.findByRole("combobox", {
+      name: /Sort catalogue by price or year/i,
+    });
+    expect(sort).toHaveValue("price_asc");
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Lowest price" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Highest price" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Newest" })).toBeInTheDocument();
+
+    await user.selectOptions(sort, "price_desc");
+    expect(sort).toHaveValue("price_desc");
+
+    await waitFor(() => {
+      expect(api.searchCars).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: "price_desc" }),
+      );
+    });
+    expect(screen.getByTestId("cars-search-params").textContent).toContain("sort=price_desc");
+
+    await user.selectOptions(sort, "year_desc");
+    await waitFor(() => {
+      expect(api.searchCars).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: "year_desc" }),
+      );
+    });
+    expect(screen.getByTestId("cars-search-params").textContent).toContain("sort=year_desc");
+  });
+
+  it("reads sort from the URL on load", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cars?sort=year_desc"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/cars" element={<CarsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const sort = await screen.findByRole("combobox", {
+      name: /Sort catalogue by price or year/i,
+    });
+    expect(sort).toHaveValue("year_desc");
+    await waitFor(() => {
+      expect(api.searchCars).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: "year_desc" }),
+      );
     });
   });
 });

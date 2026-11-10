@@ -3,11 +3,16 @@ import { Link, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { CarFilters, ListingSummary, SearchQuery } from "../cars";
 import {
-  SORT_OPTIONS,
   activeFilterChips,
   clearFilterChip,
   hasActiveFilters,
 } from "../cars";
+import {
+  CARS_SORT_OPTIONS,
+  DEFAULT_CARS_SORT,
+  parseCarsSort,
+  type CarsSort,
+} from "../cars-sort";
 import {
   loadCompareSelection,
   toComparePick,
@@ -34,7 +39,7 @@ const emptyQuery: SearchQuery = {
   coinMax: "",
   mileageMax: "",
   bhpMin: "",
-  sort: "price_asc",
+  sort: DEFAULT_CARS_SORT,
 };
 
 function queryFromParams(params: URLSearchParams): SearchQuery {
@@ -67,15 +72,20 @@ function queryFromParams(params: URLSearchParams): SearchQuery {
   if (mileageMax != null) next.mileageMax = mileageMax;
   const bhpMin = params.get("bhpMin");
   if (bhpMin != null) next.bhpMin = bhpMin;
-  const sort = params.get("sort");
-  if (sort != null) next.sort = sort;
+  next.sort = parseCarsSort(params.get("sort"));
   return next;
 }
 
 function paramsFromQuery(query: SearchQuery): URLSearchParams {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value == null || value === "" || (key === "sort" && value === "price_asc")) continue;
+    if (
+      value == null ||
+      value === "" ||
+      (key === "sort" && value === DEFAULT_CARS_SORT)
+    ) {
+      continue;
+    }
     params.set(key, String(value));
   }
   return params;
@@ -358,20 +368,6 @@ export function CarsPage() {
                   <option value="used">Used</option>
                 </select>
               </label>
-              <label className={labelClass}>
-                Sort
-                <select
-                  className={fieldClass}
-                  value={form.sort ?? "price_asc"}
-                  onChange={(e) => applySelect("sort", e.target.value)}
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
             </div>
           </div>
 
@@ -521,6 +517,37 @@ export function CarsPage() {
             ))}
           </ul>
         ) : null}
+
+        <div
+          className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+          role="search"
+          aria-label="Sort catalogue listings"
+        >
+          <div className="min-w-0">
+            <p className="font-display text-lg text-mist">Sort the bay</p>
+            <p className="mt-1 text-sm text-steel">
+              Lowest price, highest price, or newest year. Choice stays in the URL and
+              reorders the server search.
+            </p>
+          </div>
+          <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+            Sort by
+            <select
+              className={fieldClass}
+              value={parseCarsSort(draft.sort)}
+              onChange={(e) =>
+                applySelect("sort", parseCarsSort(e.target.value) as CarsSort)
+              }
+              aria-label="Sort catalogue by price or year"
+            >
+              {CARS_SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <div className="mt-8 mb-4 flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="font-display text-xl text-mist">Listings</h2>

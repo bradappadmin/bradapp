@@ -1,3 +1,5 @@
+import { DEFAULT_CARS_SORT } from "./cars-sort";
+
 export type ListingSummary = {
   id: number;
   make: string;
@@ -58,17 +60,12 @@ export type SearchQuery = {
   coinMax?: string;
   mileageMax?: string;
   bhpMin?: string;
+  /** Catalogue sort — see `cars-sort` (`price_asc` default). */
   sort?: string;
 };
 
-export const SORT_OPTIONS = [
-  { value: "price_asc", label: "Brad Coins: low to high" },
-  { value: "price_desc", label: "Brad Coins: high to low" },
-  { value: "year_desc", label: "Year: newest" },
-  { value: "year_asc", label: "Year: oldest" },
-  { value: "mileage_asc", label: "Mileage: lowest" },
-  { value: "bhp_desc", label: "BHP: highest" },
-] as const;
+export { CARS_SORT_OPTIONS as SORT_OPTIONS, DEFAULT_CARS_SORT } from "./cars-sort";
+export type { CarsSort } from "./cars-sort";
 
 export type ActiveFilterChip = {
   key: keyof SearchQuery;
@@ -165,7 +162,7 @@ export function clearFilterChip(query: SearchQuery, key: keyof SearchQuery): Sea
     return next;
   }
   if (key === "sort") {
-    next.sort = "price_asc";
+    next.sort = DEFAULT_CARS_SORT;
     return next;
   }
   next[key] = "";
