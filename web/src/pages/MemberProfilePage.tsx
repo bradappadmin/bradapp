@@ -13,6 +13,8 @@ import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-of
 import { garageSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 
+const GIFT_AMOUNT_PRESETS = [10, 25, 50] as const;
+
 function showcaseHint(source: ShowcaseSource | null): string {
   switch (source) {
     case "pinned":
@@ -251,43 +253,72 @@ export function MemberProfilePage() {
               money.
             </p>
             <form
-              className="mt-4 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+              className="mt-4 flex max-w-xl flex-col gap-3"
               onSubmit={(e) => void onGiftSubmit(e)}
             >
-              <label className="flex min-w-[8rem] flex-1 flex-col gap-1.5 text-sm text-steel">
-                Amount
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  step={1}
-                  name="giftAmount"
-                  value={giftAmount}
-                  onChange={(e) => setGiftAmount(e.target.value)}
-                  placeholder="25"
-                  required
-                  className="rounded-md border border-white/15 bg-bay-void/80 px-3 py-2 font-display text-mist outline-none focus:border-lime/50"
-                />
-              </label>
-              <label className="flex min-w-[12rem] flex-[2] flex-col gap-1.5 text-sm text-steel">
-                Note (optional)
-                <input
-                  type="text"
-                  name="giftNote"
-                  maxLength={200}
-                  value={giftNote}
-                  onChange={(e) => setGiftNote(e.target.value)}
-                  placeholder="Thanks for the bay tip"
-                  className="rounded-md border border-white/15 bg-bay-void/80 px-3 py-2 text-mist outline-none focus:border-lime/50"
-                />
-              </label>
-              <button
-                type="submit"
-                disabled={gifting}
-                className="rounded-md bg-lime px-4 py-2.5 font-display text-sm font-semibold text-bay-void transition hover:brightness-110 disabled:opacity-60"
-              >
-                {gifting ? "Sending…" : "Send gift"}
-              </button>
+              <div>
+                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-steel">Quick amount</p>
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="group"
+                  aria-label="Gift amount presets"
+                >
+                  {GIFT_AMOUNT_PRESETS.map((amount) => {
+                    const active = giftAmount === String(amount);
+                    return (
+                      <button
+                        key={amount}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setGiftAmount(String(amount))}
+                        className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                          active
+                            ? "border-lime/50 bg-lime/10 text-lime"
+                            : "border-white/15 text-mist hover:border-lime/35 hover:text-lime"
+                        }`}
+                      >
+                        {amount} BC
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+                <label className="flex min-w-[8rem] flex-1 flex-col gap-1.5 text-sm text-steel">
+                  Amount
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    step={1}
+                    name="giftAmount"
+                    value={giftAmount}
+                    onChange={(e) => setGiftAmount(e.target.value)}
+                    placeholder="25"
+                    required
+                    className="rounded-md border border-white/15 bg-bay-void/80 px-3 py-2 font-display text-mist outline-none focus:border-lime/50"
+                  />
+                </label>
+                <label className="flex min-w-[12rem] flex-[2] flex-col gap-1.5 text-sm text-steel">
+                  Note (optional)
+                  <input
+                    type="text"
+                    name="giftNote"
+                    maxLength={200}
+                    value={giftNote}
+                    onChange={(e) => setGiftNote(e.target.value)}
+                    placeholder="Thanks for the bay tip"
+                    className="rounded-md border border-white/15 bg-bay-void/80 px-3 py-2 text-mist outline-none focus:border-lime/50"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={gifting}
+                  className="rounded-md bg-lime px-4 py-2.5 font-display text-sm font-semibold text-bay-void transition hover:brightness-110 disabled:opacity-60"
+                >
+                  {gifting ? "Sending…" : "Send gift"}
+                </button>
+              </div>
             </form>
           </section>
         ) : null}

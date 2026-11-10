@@ -256,6 +256,10 @@ describe("MemberProfilePage showcase garage", () => {
 
     expect(await screen.findByRole("heading", { name: /Gift coins to Bay Friend/i })).toBeInTheDocument();
     expect(screen.getByText(/Play money only|No real money/i)).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Gift amount presets" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "10 BC" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "25 BC" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "50 BC" })).toBeInTheDocument();
     await user.type(screen.getByLabelText(/^Amount$/i), "40");
     await user.type(screen.getByLabelText(/Note \(optional\)/i), "Bay tip");
     await user.click(screen.getByRole("button", { name: "Send gift" }));
@@ -265,6 +269,48 @@ describe("MemberProfilePage showcase garage", () => {
     });
     expect(await screen.findByText(/Sent .* to Bay Friend/i)).toBeInTheDocument();
     expect(screen.getByText(/920 BC|920/i)).toBeInTheDocument();
+  });
+
+  it("fills the gift amount from quick preset chips", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.giftBradCoins).mockResolvedValue({
+      ok: true,
+      amount: 25,
+      senderBalance: 175,
+      receiverBalance: 905,
+      receiver: { id: 7, displayName: "Bay Friend", coinBalance: 905 },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/members/7"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /Gift coins to Bay Friend/i })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "25 BC" }));
+    expect(screen.getByLabelText(/^Amount$/i)).toHaveValue(25);
+    expect(screen.getByRole("button", { name: "25 BC" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "10 BC" })).toHaveAttribute("aria-pressed", "false");
+
+    await user.clear(screen.getByLabelText(/^Amount$/i));
+    await user.type(screen.getByLabelText(/^Amount$/i), "18");
+    expect(screen.getByRole("button", { name: "25 BC" })).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(screen.getByRole("button", { name: "50 BC" }));
+    expect(screen.getByLabelText(/^Amount$/i)).toHaveValue(50);
+    await user.click(screen.getByRole("button", { name: "25 BC" }));
+    await user.click(screen.getByRole("button", { name: "Send gift" }));
+
+    await vi.waitFor(() => {
+      expect(api.giftBradCoins).toHaveBeenCalledWith(7, { amount: 25 });
+    });
   });
 
   it("hides the gift form on your own garage", async () => {
