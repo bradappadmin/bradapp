@@ -1,5 +1,12 @@
 import type { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { getPool } from "./db.js";
+import {
+  LOGIN_STREAK_MILESTONES,
+  asClaimDate,
+  loginStreakBonusFor,
+  nextLoginStreak,
+  type LoginStreakMilestone,
+} from "./login-streak.js";
 
 /** Default starter Brad Coins when `MEMBER_STARTING_COINS` env is unset. */
 export const DEFAULT_MEMBER_STARTING_COINS = 100;
@@ -36,7 +43,8 @@ export type LedgerReason =
   | "tt_streak_bonus"
   | "weekly_cup"
   | "gift_sent"
-  | "gift_received";
+  | "gift_received"
+  | "login_streak_bonus";
 
 export type DailyLoginStatus = {
   amount: number;
@@ -44,7 +52,19 @@ export type DailyLoginStatus = {
   claimedToday: boolean;
   claimedJustNow: boolean;
   balance: number;
+  /** Consecutive Europe/London daily-login days after today’s claim (0 if never claimed). */
+  streak: number;
+  /** Milestone bonus credited with this claim (0 when none / already claimed). */
+  streakBonusAwarded: number;
+  streakMilestones: Array<{ streak: number; coins: number }>;
 };
+
+function streakMilestonesPayload(): Array<{ streak: number; coins: number }> {
+  return LOGIN_STREAK_MILESTONES.map((m: LoginStreakMilestone) => ({
+    streak: m.streak,
+    coins: m.coins,
+  }));
+}
 
 export async function getCoinBalance(userId: number): Promise<number> {
   const pool = getPool();
@@ -163,6 +183,7 @@ export function utcClaimDate(now = new Date()): string {
 
 /**
  * Credits the daily login bonus at most once per Europe/London calendar day.
+ * Also advances the login streak and awards day-3 / day-7 milestone bonuses.
  * Idempotent: safe to call on every /me or sign-in.
  */
 export async function claimDailyLoginBonus(
@@ -170,10 +191,27 @@ export async function claimDailyLoginBonus(
   now = new Date(),
 ): Promise<DailyLoginStatus> {
   const claimDate = londonClaimDate(now);
+  const milestones = streakMilestonesPayload();
   const pool = getPool();
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    const [userRows] = await connection.query<
+      (RowDataPacket & {
+        coin_balance: number;
+        login_streak: number;
+        login_streak_last_date: Date | string | null;
+      })[]
+    >(
+      `SELECT coin_balance, login_streak, login_streak_last_date
+       FROM users WHERE id = ? FOR UPDATE`,
+      [userId],
+    );
+    const userRow = userRows[0];
+    if (!userRow) {
+      throw new Error("User not found");
+    }
+
     const [existing] = await connection.query<(RowDataPacket & { id: number })[]>(
       `SELECT id FROM coin_ledger
        WHERE user_id = ?
@@ -184,26 +222,46 @@ export async function claimDailyLoginBonus(
       [userId, `Daily login ${claimDate}`],
     );
     if (existing.length > 0) {
-      const [balRows] = await connection.query<(RowDataPacket & { coin_balance: number })[]>(
-        "SELECT coin_balance FROM users WHERE id = ? LIMIT 1",
-        [userId],
-      );
       await connection.commit();
       return {
         amount: DAILY_LOGIN_BONUS,
         claimDate,
         claimedToday: true,
         claimedJustNow: false,
-        balance: Number(balRows[0]?.coin_balance ?? 0),
+        balance: Number(userRow.coin_balance),
+        streak: Number(userRow.login_streak) || 0,
+        streakBonusAwarded: 0,
+        streakMilestones: milestones,
       };
     }
 
-    const balance = await applyCoinDelta(connection, {
+    const streak = nextLoginStreak({
+      previousStreak: Number(userRow.login_streak) || 0,
+      lastClaimDate: asClaimDate(userRow.login_streak_last_date),
+      claimDate,
+    });
+    const streakBonus = loginStreakBonusFor(streak);
+
+    let balance = await applyCoinDelta(connection, {
       userId,
       delta: DAILY_LOGIN_BONUS,
       reason: "daily_login",
       note: `Daily login ${claimDate}`,
     });
+    if (streakBonus > 0) {
+      balance = await applyCoinDelta(connection, {
+        userId,
+        delta: streakBonus,
+        reason: "login_streak_bonus",
+        note: `Login streak ×${streak}`,
+      });
+    }
+    await connection.query(
+      `UPDATE users
+       SET login_streak = ?, login_streak_last_date = ?
+       WHERE id = ?`,
+      [streak, claimDate, userId],
+    );
     await connection.commit();
     return {
       amount: DAILY_LOGIN_BONUS,
@@ -211,6 +269,9 @@ export async function claimDailyLoginBonus(
       claimedToday: true,
       claimedJustNow: true,
       balance,
+      streak,
+      streakBonusAwarded: streakBonus,
+      streakMilestones: milestones,
     };
   } catch (error) {
     await connection.rollback();
@@ -225,6 +286,7 @@ export async function getDailyLoginStatus(
   now = new Date(),
 ): Promise<DailyLoginStatus> {
   const claimDate = londonClaimDate(now);
+  const milestones = streakMilestonesPayload();
   const pool = getPool();
   const [existing] = await pool.query<(RowDataPacket & { id: number })[]>(
     `SELECT id FROM coin_ledger
@@ -234,13 +296,21 @@ export async function getDailyLoginStatus(
      LIMIT 1`,
     [userId, `Daily login ${claimDate}`],
   );
-  const balance = await getCoinBalance(userId);
+  const [userRows] = await pool.query<
+    (RowDataPacket & {
+      coin_balance: number;
+      login_streak: number;
+    })[]
+  >("SELECT coin_balance, login_streak FROM users WHERE id = ? LIMIT 1", [userId]);
   return {
     amount: DAILY_LOGIN_BONUS,
     claimDate,
     claimedToday: existing.length > 0,
     claimedJustNow: false,
-    balance,
+    balance: Number(userRows[0]?.coin_balance ?? 0),
+    streak: Number(userRows[0]?.login_streak) || 0,
+    streakBonusAwarded: 0,
+    streakMilestones: milestones,
   };
 }
 

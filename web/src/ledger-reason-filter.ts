@@ -19,7 +19,7 @@ const GROUP_REASONS: Record<Exclude<LedgerReasonGroup, "all">, LedgerReasonLabel
   play: ["play_reward"],
   trades: ["purchase", "sale"],
   gifts: ["gift_sent", "gift_received"],
-  bonuses: ["seed", "daily_login", "tt_streak_bonus", "weekly_cup"],
+  bonuses: ["seed", "daily_login", "tt_streak_bonus", "login_streak_bonus", "weekly_cup"],
   admin: ["admin_adjust"],
 };
 

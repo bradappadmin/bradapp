@@ -52,12 +52,18 @@ export function fetchSignupOptions(): Promise<{ requireInviteCode: boolean }> {
   return request("/auth/signup-options");
 }
 
+export type DailyLoginStreakMilestone = { streak: number; coins: number };
+
 export type DailyLoginStatus = {
   amount: number;
   claimDate: string;
   claimedToday: boolean;
   claimedJustNow: boolean;
   balance: number;
+  /** Consecutive London login days; older clients may omit until refreshed. */
+  streak?: number;
+  streakBonusAwarded?: number;
+  streakMilestones?: DailyLoginStreakMilestone[];
 };
 
 export function signIn(input: {
@@ -281,7 +287,8 @@ export type LedgerEntry = {
     | "tt_streak_bonus"
     | "weekly_cup"
     | "gift_sent"
-    | "gift_received";
+    | "gift_received"
+    | "login_streak_bonus";
   listingId: number | null;
   note: string;
   createdAt: string;

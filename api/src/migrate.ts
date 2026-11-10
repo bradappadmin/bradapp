@@ -38,6 +38,7 @@ export async function runMigrations(): Promise<void> {
     "017_showcase_listing.sql",
     "018_weekly_top_trumps_cup.sql",
     "019_brad_coin_gift.sql",
+    "020_login_streak.sql",
   ];
 
 

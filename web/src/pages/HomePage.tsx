@@ -10,6 +10,7 @@ import { HomeBayAtmosphere } from "../components/HomeBayAtmosphere";
 import { LatestReviews } from "../components/LatestReviews";
 import { RecentlyViewedCars } from "../components/RecentlyViewedCars";
 import { SiteHeader } from "../components/SiteHeader";
+import { dailyLoginToastMessage } from "../daily-login-toast";
 import { useToast } from "../toast-context";
 import { roleLabel } from "../types";
 
@@ -28,9 +29,7 @@ export function HomePage() {
     if (!dailyLogin?.claimedJustNow) return;
     if (toastedClaimDate.current === dailyLogin.claimDate) return;
     toastedClaimDate.current = dailyLogin.claimDate;
-    toast.success(
-      `Daily login +${dailyLogin.amount} BC · ${dailyLogin.claimDate} (Europe/London).`,
-    );
+    toast.success(dailyLoginToastMessage(dailyLogin));
   }, [dailyLogin, toast]);
 
   async function onSignOut() {
@@ -47,11 +46,17 @@ export function HomePage() {
       await refresh();
       if (res.dailyLogin.claimedJustNow) {
         toastedClaimDate.current = res.dailyLogin.claimDate;
-        toast.success(
-          `Daily login +${res.dailyLogin.amount} BC · ${res.dailyLogin.claimDate} (Europe/London).`,
-        );
+        toast.success(dailyLoginToastMessage(res.dailyLogin));
+        const streak = res.dailyLogin.streak ?? 0;
+        const streakBonus = res.dailyLogin.streakBonusAwarded ?? 0;
+        const streakNote =
+          streakBonus > 0
+            ? ` · streak ×${streak} (+${streakBonus} BC)`
+            : streak > 0
+              ? ` · streak ×${streak}`
+              : "";
         setClaimNote(
-          `Claimed +${res.dailyLogin.amount} BC for ${res.dailyLogin.claimDate} (Europe/London).`,
+          `Claimed +${res.dailyLogin.amount} BC for ${res.dailyLogin.claimDate} (Europe/London)${streakNote}.`,
         );
       } else {
         setClaimNote(
@@ -197,6 +202,17 @@ export function HomePage() {
                       </button>
                     </p>
                   )}
+                  {(dailyLogin.streak ?? 0) > 0 ? (
+                    <p
+                      className="mt-1 text-mist"
+                      aria-label={`Login streak ${dailyLogin.streak}`}
+                    >
+                      Login streak ×{dailyLogin.streak}
+                      {(dailyLogin.streakBonusAwarded ?? 0) > 0
+                        ? ` · +${dailyLogin.streakBonusAwarded} BC`
+                        : ""}
+                    </p>
+                  ) : null}
                   {claimNote ? <p className="mt-1 text-mist">{claimNote}</p> : null}
                 </div>
               ) : null}

@@ -38,6 +38,7 @@ describe("ledger reason filter", () => {
       "seed",
       "daily_login",
       "tt_streak_bonus",
+      "login_streak_bonus",
       "weekly_cup",
     ]);
     expect(ledgerReasonsForGroup("admin")).toEqual(["admin_adjust"]);

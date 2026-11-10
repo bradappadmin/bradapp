@@ -113,6 +113,12 @@ describe.runIf(hasDb)("auth routes", () => {
     expect(me.body.dailyLogin.claimedJustNow).toBe(true);
     expect(me.body.dailyLogin.amount).toBe(DAILY_LOGIN_BONUS);
     expect(me.body.dailyLogin.claimDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(me.body.dailyLogin.streak).toBe(1);
+    expect(me.body.dailyLogin.streakBonusAwarded).toBe(0);
+    expect(me.body.dailyLogin.streakMilestones).toEqual([
+      { streak: 3, coins: 15 },
+      { streak: 7, coins: 50 },
+    ]);
     expect(me.body.user.coinBalance).toBe(starting + DAILY_LOGIN_BONUS);
 
     const again = await agent.get("/auth/me");
@@ -120,6 +126,7 @@ describe.runIf(hasDb)("auth routes", () => {
     expect(again.body.dailyLogin.claimedToday).toBe(true);
     expect(again.body.dailyLogin.claimedJustNow).toBe(false);
     expect(again.body.dailyLogin.claimDate).toBe(me.body.dailyLogin.claimDate);
+    expect(again.body.dailyLogin.streak).toBe(1);
     expect(again.body.user.coinBalance).toBe(starting + DAILY_LOGIN_BONUS);
 
     const status = await agent.get("/auth/daily-bonus");

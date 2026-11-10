@@ -244,7 +244,13 @@ describe("HomePage", () => {
         claimDate: "2026-11-10",
         claimedToday: true,
         claimedJustNow: true,
-        balance: 125,
+        balance: 140,
+        streak: 3,
+        streakBonusAwarded: 15,
+        streakMilestones: [
+          { streak: 3, coins: 15 },
+          { streak: 7, coins: 50 },
+        ],
       },
     });
 
@@ -260,8 +266,11 @@ describe("HomePage", () => {
 
     expect(await screen.findByText(/Daily login claimed/i)).toBeInTheDocument();
     expect(screen.getByText(/2026-11-10 · Europe\/London/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Login streak 3")).toBeInTheDocument();
     expect(
-      await screen.findByText(/Daily login \+25 BC · 2026-11-10 \(Europe\/London\)/i),
+      await screen.findByText(
+        /Daily login \+25 BC · streak ×3 · \+15 streak BC · 2026-11-10 \(Europe\/London\)/i,
+      ),
     ).toBeInTheDocument();
   });
 

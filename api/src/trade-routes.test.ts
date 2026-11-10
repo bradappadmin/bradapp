@@ -176,6 +176,9 @@ describe.runIf(hasDb)("trade routes", () => {
           "admin_adjust",
           "tt_streak_bonus",
           "weekly_cup",
+          "gift_sent",
+          "gift_received",
+          "login_streak_bonus",
         ].includes(entry.reason),
       ).toBe(true);
     }

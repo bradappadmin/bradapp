@@ -15,7 +15,7 @@ const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
 export function AccountPage() {
-  const { user, loading: authLoading, setUser } = useAuth();
+  const { user, loading: authLoading, setUser, dailyLogin } = useAuth();
   const toast = useToast();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
@@ -125,6 +125,14 @@ export function AccountPage() {
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {formatCoins(user.coinBalance)}
                 </span>
+                {dailyLogin && (dailyLogin.streak ?? 0) > 0 ? (
+                  <span
+                    className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime"
+                    aria-label={`Login streak ${dailyLogin.streak}`}
+                  >
+                    Login streak ×{dailyLogin.streak}
+                  </span>
+                ) : null}
                 <span className="max-w-full truncate rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-steel">
                   {user.email}
                 </span>
