@@ -149,7 +149,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(screen.queryByRole("heading", { name: "Saved" })).not.toBeInTheDocument();
   });
 
-  it("enables Compare these only after selecting exactly two favourites", async () => {
+  it("queues Favourites cards into the shared compare tray", async () => {
     const user = userEvent.setup();
     vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [audi, porsche] });
 
@@ -163,20 +163,36 @@ describe("FavouritesPage Midnight Garage UI", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Compare favourites")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Compare these" })).toBeDisabled();
+    expect(await screen.findByRole("heading", { name: "Saved" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Add to compare" })).toHaveLength(2);
+    expect(
+      screen.getAllByRole("link", { name: "Compare" }).some((a) => a.getAttribute("href") === "/compare"),
+    ).toBe(true);
 
-    const boxes = await screen.findAllByRole("checkbox", { name: /Select for compare/i });
-    expect(boxes).toHaveLength(2);
-    await user.click(boxes[0]!);
-    expect(screen.getByRole("button", { name: "Compare these" })).toBeDisabled();
-    expect(screen.getByText(/1\/2/)).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Add to compare" })[0]!);
+    expect(screen.getByLabelText("Compare selection")).toBeInTheDocument();
+    expect(screen.getByText(/Compare \(1\/2\)/i)).toBeInTheDocument();
+    // Default sort is Highest price → Porsche (9) then Audi (11).
+    expect(sessionStorage.getItem(COMPARE_SELECTION_KEY)).toContain('"id":9');
+    expect(screen.getByRole("button", { name: "Remove from compare" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
-    await user.click(boxes[1]!);
-    const compareLink = await screen.findByRole("link", { name: "Compare these" });
-    expect(compareLink.getAttribute("href")).toMatch(/^\/compare\?a=\d+&b=\d+$/);
-    expect(compareLink.getAttribute("href")).toContain("11");
-    expect(compareLink.getAttribute("href")).toContain("9");
+    await user.click(screen.getAllByRole("button", { name: "Add to compare" })[0]!);
+    expect(screen.getByText(/Compare \(2\/2\)/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Side by side" })).toHaveAttribute(
+      "href",
+      "/compare?a=9&b=11",
+    );
+    // Search / sort / Offer trade stay while compare tray is active.
+    expect(screen.getByRole("heading", { name: "Find a favourite" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Offer trade" }).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole("link", { name: "Challenge to Top Trumps" }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("sorts the Saved grid via Sort the bay and persists sort in the URL", async () => {
@@ -279,7 +295,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
 
     expect(await screen.findByRole("heading", { name: "Find a favourite" })).toBeInTheDocument();
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
-    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Add to compare" }).length).toBeGreaterThanOrEqual(1);
 
     const input = screen.getByRole("searchbox", {
       name: /Search favourites by make or model/i,
@@ -333,7 +349,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(clearButtons.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole("heading", { name: "Find a favourite" })).toBeInTheDocument();
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
-    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add to compare" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Saved" })).not.toBeInTheDocument();
 
     const emptyClear = clearButtons.find((btn) => empty.contains(btn)) ?? clearButtons[0]!;
@@ -388,7 +404,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
     // Only one Offer trade — own + bay stock stay hidden.
     expect(screen.getAllByRole("link", { name: "Offer trade" })).toHaveLength(1);
     expect(screen.getByText("Find a favourite")).toBeInTheDocument();
-    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Add to compare" })).toHaveLength(3);
   });
 
   it("challenges Top Trumps on someone else’s favourite and hides it for own/stock cars", async () => {
@@ -418,6 +434,6 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(screen.getAllByRole("link", { name: "Offer trade" })).toHaveLength(1);
     expect(screen.getByText("Find a favourite")).toBeInTheDocument();
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
-    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Add to compare" })).toHaveLength(3);
   });
 });
