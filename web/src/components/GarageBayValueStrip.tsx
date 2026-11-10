@@ -40,7 +40,7 @@ export function GarageBayValueStrip({ cars }: GarageBayValueStripProps) {
             Browse cars
           </Link>
           <Link
-            to="/how-to#sell-price-chips"
+            to="/how-to#garage-bay-value"
             className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
           >
             How to

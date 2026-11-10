@@ -25,7 +25,7 @@ describe("GarageBayValueStrip", () => {
     expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("link", { name: "How to" })).toHaveAttribute(
       "href",
-      "/how-to#sell-price-chips",
+      "/how-to#garage-bay-value",
     );
   });
 

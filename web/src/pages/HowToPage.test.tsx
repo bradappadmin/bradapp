@@ -49,6 +49,8 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Quick price when you list a car" }),
     ).toBeInTheDocument();
     expect(document.getElementById("sell-price-chips")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "My cars bay value strip" })).toBeInTheDocument();
+    expect(document.getElementById("garage-bay-value")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Rematch from Match history" }),
@@ -327,8 +329,24 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/My cars bay value strip is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /one Midnight Garage bay strip under the hero shows owned car count and total Brad Coin value/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sold history stays out of the total/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /My cars Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) when listing or updating a sale/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /My cars bay value strip \(owned count \+ total BC; sold history excluded\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -764,6 +782,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Gift opens #gift-coins on their garage/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Compare garage cards into the same tray as Cars/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /bay value strip \(owned count \+ total BC for cars you hold; sold history excluded; hides when empty\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
