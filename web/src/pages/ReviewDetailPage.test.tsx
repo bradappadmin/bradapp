@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import {
+  clearCompareSelection,
+  loadCompareSelection,
+} from "../compare-selection";
 import { ToastProvider } from "../toast-context";
 import { ReviewDetailPage } from "./ReviewDetailPage";
 
@@ -47,6 +51,8 @@ const publishedReview = {
     topSpeedMph: 155,
     zeroToSixtySecs: 5.7,
     listingId: 143,
+    listingYear: 2019,
+    listingCoinPrice: 180,
   },
   carB: null,
   cueCards: [{ id: "c1", title: "Look", prompt: "Walk around" }],
@@ -73,15 +79,19 @@ const dragRaceReview = {
     topSpeedMph: 169,
     zeroToSixtySecs: 5.4,
     listingId: 88,
+    listingYear: 2021,
+    listingCoinPrice: 260,
   },
 };
 
 describe("ReviewDetailPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
+    clearCompareSelection();
   });
 
   beforeEach(() => {
+    clearCompareSelection();
     vi.mocked(api.fetchMe).mockResolvedValue({
       user: {
         id: 2,
@@ -137,6 +147,7 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
       "href",
       "/cars/143",
     );
+    expect(screen.getByRole("button", { name: "Compare Ford Focus" })).toBeInTheDocument();
     expect(screen.getByText("0 likes")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Like" }));
@@ -202,14 +213,45 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
       "href",
       "/cars/88",
     );
+    expect(screen.getByRole("button", { name: "Compare Ford Focus" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Compare Honda Civic" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
   });
 
-  it("hides Open car on detail when no related listing is known", async () => {
+  it("queues Compare into the shared tray from detail", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/reviews/9"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("button", { name: "Compare Ford Focus" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Compare Ford Focus" }));
+    expect(screen.getByLabelText("Compare selection")).toBeInTheDocument();
+    expect(screen.getByText(/Compare \(1\/2\)/i)).toBeInTheDocument();
+    expect(loadCompareSelection()[0]?.id).toBe(143);
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toBeInTheDocument();
+  });
+
+  it("hides Open car and Compare on detail when no related listing is known", async () => {
     vi.mocked(api.fetchReview).mockResolvedValue({
       review: {
         ...publishedReview,
-        car: { ...publishedReview.car, listingId: null },
+        car: {
+          ...publishedReview.car,
+          listingId: null,
+          listingYear: null,
+          listingCoinPrice: null,
+        },
       },
     });
 
@@ -227,6 +269,7 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
 
     expect(await screen.findByRole("heading", { name: "Bay burn — Focus ST" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Compare/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
   });
 

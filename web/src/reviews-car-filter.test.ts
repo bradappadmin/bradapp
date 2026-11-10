@@ -39,6 +39,8 @@ const porsche = {
   topSpeedMph: 197,
   zeroToSixtySecs: 3.2,
   listingId: 42,
+  listingYear: 2022,
+  listingCoinPrice: 420,
 };
 
 const mustang = {
@@ -52,6 +54,8 @@ const mustang = {
   topSpeedMph: 155,
   zeroToSixtySecs: 4.2,
   listingId: 77,
+  listingYear: 2020,
+  listingCoinPrice: 280,
 };
 
 const rows: ReviewSummary[] = [

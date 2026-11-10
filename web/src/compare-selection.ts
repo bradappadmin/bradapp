@@ -1,4 +1,4 @@
-/** Session compare tray — up to two listings picked from Cars, Favourites, My cars, home Recently viewed, or a listing. */
+/** Session compare tray — up to two listings picked from Cars, Favourites, My cars, home Recently viewed, Reviews, or a listing. */
 
 export const COMPARE_SELECTION_KEY = "bradapp:compare-selection:v1";
 export const COMPARE_SELECTION_LIMIT = 2;

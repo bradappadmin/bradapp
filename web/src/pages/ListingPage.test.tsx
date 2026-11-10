@@ -243,6 +243,8 @@ describe("ListingPage Midnight Garage UI", () => {
             topSpeedMph: 261,
             zeroToSixtySecs: 2.3,
             listingId: 143,
+            listingYear: 2020,
+            listingCoinPrice: 900,
           },
           carB: null,
           cueCards: [],

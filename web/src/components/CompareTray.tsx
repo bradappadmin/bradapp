@@ -39,7 +39,7 @@ export function CompareTray({ picks, onChange }: CompareTrayProps) {
           </ul>
           {picks.length === 1 ? (
             <p className="mt-1 text-xs text-steel">
-              Pick one more from Cars, Favourites, My cars, or Recently viewed.
+              Pick one more from Cars, Favourites, My cars, Recently viewed, or Reviews.
             </p>
           ) : null}
         </div>

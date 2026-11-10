@@ -685,6 +685,9 @@ export type ReviewCar = {
   zeroToSixtySecs: number;
   /** Catalogue listing for Open car → /cars/:id when a bay listing exists for this model. */
   listingId: number | null;
+  /** Year / Brad Coin price for the related listing — used by Compare tray picks. */
+  listingYear: number | null;
+  listingCoinPrice: number | null;
 };
 
 export type ReviewSummary = {

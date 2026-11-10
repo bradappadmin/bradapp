@@ -82,6 +82,10 @@ describe.runIf(hasDb)("reviews routes", () => {
     expect(res.body.review.car.colour).toBe("Midnight Black");
     expect(typeof res.body.review.car.listingId).toBe("number");
     expect(res.body.review.car.listingId).toBeGreaterThan(0);
+    expect(typeof res.body.review.car.listingYear).toBe("number");
+    expect(res.body.review.car.listingYear).toBeGreaterThan(0);
+    expect(typeof res.body.review.car.listingCoinPrice).toBe("number");
+    expect(res.body.review.car.listingCoinPrice).toBeGreaterThanOrEqual(0);
     reviewId = res.body.review.id;
   });
 

@@ -91,6 +91,8 @@ type ReviewRow = RowDataPacket & {
   top_speed_mph: number;
   zero_to_sixty_secs: number;
   listing_id: number | null;
+  listing_year: number | null;
+  listing_coin_price: number | null;
   car_model_b_id: number | null;
   b_make: string | null;
   b_model: string | null;
@@ -100,6 +102,8 @@ type ReviewRow = RowDataPacket & {
   b_top_speed_mph: number | null;
   b_zero_to_sixty_secs: number | null;
   listing_b_id: number | null;
+  listing_b_year: number | null;
+  listing_b_coin_price: number | null;
   like_count: number;
   liked_by_me: number | boolean;
   is_featured: number | boolean;
@@ -129,9 +133,12 @@ function parseCues(raw: string | CueCardJson): CueCardJson {
   return raw;
 }
 
-/** Prefer an available bay listing for Open car; fall back to owned/sold when needed. */
-function listingIdForCarModelSql(carModelAlias: string): string {
-  return `(SELECT l.id FROM listings l
+/** Prefer an available bay listing for Open car / Compare; fall back to owned/sold when needed. */
+function listingFieldForCarModelSql(
+  carModelAlias: string,
+  field: "id" | "year" | "coin_price",
+): string {
+  return `(SELECT l.${field} FROM listings l
      WHERE l.car_model_id = ${carModelAlias}.id
      ORDER BY CASE l.status
        WHEN 'available' THEN 0
@@ -150,6 +157,8 @@ function toCarPayload(input: {
   topSpeedMph: number;
   zeroToSixtySecs: number;
   listingId: number | null;
+  listingYear: number | null;
+  listingCoinPrice: number | null;
 }) {
   return {
     id: input.id,
@@ -162,6 +171,8 @@ function toCarPayload(input: {
     topSpeedMph: input.topSpeedMph,
     zeroToSixtySecs: input.zeroToSixtySecs,
     listingId: input.listingId,
+    listingYear: input.listingYear,
+    listingCoinPrice: input.listingCoinPrice,
   };
 }
 
@@ -190,6 +201,9 @@ function toReview(row: ReviewRow) {
     topSpeedMph: Number(row.top_speed_mph),
     zeroToSixtySecs: Number(row.zero_to_sixty_secs),
     listingId: row.listing_id == null ? null : Number(row.listing_id),
+    listingYear: row.listing_year == null ? null : Number(row.listing_year),
+    listingCoinPrice:
+      row.listing_coin_price == null ? null : Number(row.listing_coin_price),
   });
   const carB =
     type === "drag_race" && row.car_model_b_id != null && row.b_make && row.b_model
@@ -203,6 +217,9 @@ function toReview(row: ReviewRow) {
           topSpeedMph: Number(row.b_top_speed_mph ?? 0),
           zeroToSixtySecs: Number(row.b_zero_to_sixty_secs ?? 0),
           listingId: row.listing_b_id == null ? null : Number(row.listing_b_id),
+          listingYear: row.listing_b_year == null ? null : Number(row.listing_b_year),
+          listingCoinPrice:
+            row.listing_b_coin_price == null ? null : Number(row.listing_b_coin_price),
         })
       : null;
   return {
@@ -240,11 +257,15 @@ function reviewSelectSql(viewerUserId: number | null): string {
          r.is_featured, r.publisher_user_id, u.display_name,
          cm.id AS car_model_id, cm.make, cm.model, cm.trim_name, cm.body_type,
          cm.bhp, cm.top_speed_mph, cm.zero_to_sixty_secs,
-         ${listingIdForCarModelSql("cm")} AS listing_id,
+         ${listingFieldForCarModelSql("cm", "id")} AS listing_id,
+         ${listingFieldForCarModelSql("cm", "year")} AS listing_year,
+         ${listingFieldForCarModelSql("cm", "coin_price")} AS listing_coin_price,
          cmb.id AS car_model_b_id, cmb.make AS b_make, cmb.model AS b_model, cmb.trim_name AS b_trim_name,
          cmb.body_type AS b_body_type, cmb.bhp AS b_bhp, cmb.top_speed_mph AS b_top_speed_mph,
          cmb.zero_to_sixty_secs AS b_zero_to_sixty_secs,
-         ${listingIdForCarModelSql("cmb")} AS listing_b_id,
+         ${listingFieldForCarModelSql("cmb", "id")} AS listing_b_id,
+         ${listingFieldForCarModelSql("cmb", "year")} AS listing_b_year,
+         ${listingFieldForCarModelSql("cmb", "coin_price")} AS listing_b_coin_price,
          (SELECT COUNT(*) FROM review_likes rlc WHERE rlc.review_id = r.id) AS like_count,
          ${likedExpr}
   FROM video_reviews r

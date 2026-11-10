@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import * as api from "../api";
-import type { ReviewSummary } from "../api";
+import type { ReviewCar, ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
+import {
+  ensureComparePick,
+  loadCompareSelection,
+  toggleComparePick,
+  type ComparePick,
+} from "../compare-selection";
+import { CompareTray } from "../components/CompareTray";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
+import { reviewCarComparePick, reviewCompareLabel } from "../review-compare";
 import { reviewSharePath } from "../share-link";
 
 function isAdmin(role: string): boolean {
@@ -22,6 +30,20 @@ export function ReviewDetailPage() {
   const [busy, setBusy] = useState(false);
   const [likeBusy, setLikeBusy] = useState(false);
   const [featureBusy, setFeatureBusy] = useState(false);
+  const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
+
+  useEffect(() => {
+    setComparePicks(loadCompareSelection());
+  }, []);
+
+  function onCompareCar(car: ReviewCar) {
+    const pick = reviewCarComparePick(car);
+    if (!pick) return;
+    const already = comparePicks.some((p) => p.id === pick.id);
+    // Same session tray as Cars / Favourites / My cars / Recently viewed / Reviews list.
+    const { picks } = already ? toggleComparePick(pick) : ensureComparePick(pick);
+    setComparePicks(picks);
+  }
 
   useEffect(() => {
     if (!user || !Number.isFinite(reviewId)) return;
@@ -171,24 +193,42 @@ export function ReviewDetailPage() {
                 label="Copy link"
                 className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
               />
-              {review.car.listingId != null ? (
-                <Link
-                  to={`/cars/${review.car.listingId}`}
-                  aria-label={`Open car ${review.car.make} ${review.car.model}`}
-                  className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                >
-                  Open car
-                </Link>
-              ) : null}
-              {review.carB?.listingId != null ? (
-                <Link
-                  to={`/cars/${review.carB.listingId}`}
-                  aria-label={`Open car ${review.carB.make} ${review.carB.model}`}
-                  className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                >
-                  Open car
-                </Link>
-              ) : null}
+              {[review.car, review.carB]
+                .filter((c): c is ReviewCar => c != null && c.listingId != null)
+                .map((car) => {
+                  const pick = reviewCarComparePick(car);
+                  const selected = pick != null && comparePicks.some((p) => p.id === pick.id);
+                  return (
+                    <span key={car.listingId} className="flex flex-wrap gap-2">
+                      <Link
+                        to={`/cars/${car.listingId}`}
+                        aria-label={`Open car ${car.make} ${car.model}`}
+                        className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                      >
+                        Open car
+                      </Link>
+                      {pick ? (
+                        <button
+                          type="button"
+                          aria-pressed={selected}
+                          aria-label={
+                            selected
+                              ? `Remove ${car.make} ${car.model} from compare`
+                              : `Compare ${car.make} ${car.model}`
+                          }
+                          onClick={() => onCompareCar(car)}
+                          className={`rounded-md border px-4 py-2 font-display text-sm font-semibold transition ${
+                            selected
+                              ? "border-lime/50 text-lime hover:bg-lime/10"
+                              : "border-white/15 text-steel hover:border-lime/40 hover:text-lime"
+                          }`}
+                        >
+                          {reviewCompareLabel(selected)}
+                        </button>
+                      ) : null}
+                    </span>
+                  );
+                })}
               <p className="text-sm text-steel" aria-live="polite">
                 {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
               </p>
@@ -288,6 +328,8 @@ export function ReviewDetailPage() {
             ) : null}
           </article>
         ) : null}
+
+        <CompareTray picks={comparePicks} onChange={setComparePicks} />
       </main>
     </div>
   );
