@@ -9,7 +9,9 @@ import { CarCard } from "../components/CarCard";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { filterGarageCarsByQuery } from "../garage-car-filter";
 import {
+  DEFAULT_GARAGE_SORT,
   GARAGE_SORT_OPTIONS,
   parseGarageSort,
   sortGarageCars,
@@ -18,6 +20,9 @@ import {
 import { sumGarageValue } from "../garage-value";
 import { garageSharePath } from "../share-link";
 import { useToast } from "../toast-context";
+
+const fieldClass =
+  "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
 function SectionShell({
   id,
@@ -59,6 +64,8 @@ export function GaragePage() {
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const sort = parseGarageSort(searchParams.get("sort"));
+  const qFromUrl = (searchParams.get("q") ?? "").trim();
+  const [draft, setDraft] = useState(qFromUrl);
   const [cars, setCars] = useState<GarageCar[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [showcaseListingId, setShowcaseListingId] = useState<number | null>(null);
@@ -114,33 +121,73 @@ export function GaragePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when signed-in user id changes
   }, [user?.id]);
 
+  useEffect(() => {
+    setDraft(qFromUrl);
+  }, [qFromUrl]);
+
+  // Filter-as-you-type: debounce URL updates (client filter over owned / for-sale).
+  useEffect(() => {
+    const next = draft.trim();
+    if (next === qFromUrl) return;
+    const timer = window.setTimeout(() => {
+      writeParams(next, sort);
+    }, 280);
+    return () => window.clearTimeout(timer);
+  }, [draft, qFromUrl, sort]);
+
+  const filteredCars = useMemo(
+    () => filterGarageCarsByQuery(cars, qFromUrl),
+    [cars, qFromUrl],
+  );
   const ownedCars = useMemo(
-    () => sortGarageCars(
-      cars.filter((c) => c.status === "owned"),
-      sort,
-    ),
-    [cars, sort],
+    () =>
+      sortGarageCars(
+        filteredCars.filter((c) => c.status === "owned"),
+        sort,
+      ),
+    [filteredCars, sort],
   );
   const forSaleCars = useMemo(
-    () => sortGarageCars(
-      cars.filter((c) => c.status === "available"),
-      sort,
-    ),
-    [cars, sort],
+    () =>
+      sortGarageCars(
+        filteredCars.filter((c) => c.status === "available"),
+        sort,
+      ),
+    [filteredCars, sort],
+  );
+  const ownedTotal = useMemo(
+    () => cars.filter((c) => c.status === "owned").length,
+    [cars],
+  );
+  const forSaleTotal = useMemo(
+    () => cars.filter((c) => c.status === "available").length,
+    [cars],
   );
   const garageValue =
     totalValue > 0 || cars.length === 0 ? totalValue : sumGarageValue(cars);
+  const filtersOn = Boolean(qFromUrl);
+  const managedMatchCount = ownedCars.length + forSaleCars.length;
+
+  function writeParams(nextQ: string, nextSort: GarageSort) {
+    const params = new URLSearchParams();
+    const q = nextQ.trim();
+    if (q) params.set("q", q);
+    if (nextSort !== DEFAULT_GARAGE_SORT) params.set("sort", nextSort);
+    setSearchParams(params, { replace: true });
+  }
 
   function setSort(next: GarageSort) {
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        if (next === "value_desc") params.delete("sort");
-        else params.set("sort", next);
-        return params;
-      },
-      { replace: true },
-    );
+    writeParams(qFromUrl, next);
+  }
+
+  function onSubmitSearch(event: FormEvent) {
+    event.preventDefault();
+    writeParams(draft, sort);
+  }
+
+  function onClearSearch() {
+    setDraft("");
+    writeParams("", sort);
   }
 
   if (!authLoading && !user) {
@@ -313,7 +360,9 @@ export function GaragePage() {
                   Garage value {formatCoins(garageValue)}
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
-                  {cars.length} owned · {forSaleCars.length} for sale
+                  {filtersOn
+                    ? `${managedMatchCount} match${managedMatchCount === 1 ? "" : "es"}`
+                    : `${cars.length} owned · ${forSaleTotal} for sale`}
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {showcaseListingId != null ? "Showcase pinned" : "Showcase: highest value"}
@@ -356,9 +405,65 @@ export function GaragePage() {
         {notice ? <p className="mt-4 text-sm text-lime">{notice}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
 
+        {cars.length > 0 ? (
+          <form
+            onSubmit={onSubmitSearch}
+            className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+            role="search"
+            aria-label="Search garage cars"
+          >
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+              <h2 className="font-display text-lg text-mist sm:text-xl">Find a car</h2>
+              <p className="text-xs text-steel">
+                Make or model · Owned &amp; For sale · stays in the URL
+              </p>
+            </div>
+            <label className="mt-4 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+              Search
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <input
+                  className={fieldClass}
+                  type="search"
+                  name="q"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Make or model…"
+                  aria-label="Search garage by make or model"
+                  autoComplete="off"
+                />
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="submit"
+                    className="rounded-md bg-rose px-4 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                  >
+                    Search
+                  </button>
+                  {qFromUrl ? (
+                    <button
+                      type="button"
+                      onClick={onClearSearch}
+                      className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
+                    >
+                      Clear
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </label>
+            {filtersOn ? (
+              <p className="mt-4 text-sm text-steel">
+                Showing {managedMatchCount} of {cars.length}{" "}
+                {cars.length === 1 ? "car" : "cars"} for{" "}
+                <span className="font-display text-lime">“{qFromUrl}”</span>
+              </p>
+            ) : null}
+          </form>
+        ) : null}
+
         <div
-          className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
-          role="search"
+          className={`play-panel bay-rise-delay rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5 ${
+            cars.length > 0 ? "mt-6" : "mt-8"
+          }`}
           aria-label="Sort garage cars"
         >
           <div className="min-w-0">
@@ -384,49 +489,82 @@ export function GaragePage() {
           </label>
         </div>
 
-        <SectionShell
-          id="garage-owned"
-          title="Owned"
-          count={loading ? undefined : ownedCars.length}
-          hint="In your bay only — list one to put it on the Cars catalogue."
-        >
-          {ownedCars.length === 0 && !loading ? (
-            <EmptyBay>
-              {cars.length === 0 ? (
-                <>
-                  Empty bay.{" "}
-                  <Link to="/cars" className="text-lime no-underline hover:underline">
-                    Search cars
-                  </Link>{" "}
-                  to buy one with Brad Coins.
-                </>
-              ) : (
-                "Every car you own is listed for sale right now."
-              )}
-            </EmptyBay>
-          ) : null}
-          {ownedCars.length > 0 ? (
-            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {ownedCars.map((car) => renderManagedCar(car))}
-            </ul>
-          ) : null}
-        </SectionShell>
+        {filtersOn && managedMatchCount === 0 && !loading ? (
+          <div
+            className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-14 text-center"
+            role="status"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              No owned or for-sale cars match “{qFromUrl}”. Try another spelling or clear the search.
+            </p>
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+            >
+              Clear search
+            </button>
+          </div>
+        ) : null}
 
-        <SectionShell
-          id="garage-for-sale"
-          title="For sale"
-          count={loading ? undefined : forSaleCars.length}
-          hint="Live on the Cars catalogue. Update the Brad Coin price or unlist anytime."
-        >
-          {forSaleCars.length === 0 && !loading ? (
-            <EmptyBay>Nothing listed. Pick an owned car and list it for sale.</EmptyBay>
-          ) : null}
-          {forSaleCars.length > 0 ? (
-            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {forSaleCars.map((car) => renderManagedCar(car))}
-            </ul>
-          ) : null}
-        </SectionShell>
+        {!(filtersOn && managedMatchCount === 0) ? (
+          <>
+            <SectionShell
+              id="garage-owned"
+              title="Owned"
+              count={loading ? undefined : ownedCars.length}
+              hint="In your bay only — list one to put it on the Cars catalogue."
+            >
+              {ownedCars.length === 0 && !loading ? (
+                <EmptyBay>
+                  {filtersOn ? (
+                    <>No owned cars match “{qFromUrl}”.</>
+                  ) : cars.length === 0 ? (
+                    <>
+                      Empty bay.{" "}
+                      <Link to="/cars" className="text-lime no-underline hover:underline">
+                        Search cars
+                      </Link>{" "}
+                      to buy one with Brad Coins.
+                    </>
+                  ) : ownedTotal === 0 ? (
+                    "Every car you own is listed for sale right now."
+                  ) : (
+                    "No owned cars in this view."
+                  )}
+                </EmptyBay>
+              ) : null}
+              {ownedCars.length > 0 ? (
+                <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {ownedCars.map((car) => renderManagedCar(car))}
+                </ul>
+              ) : null}
+            </SectionShell>
+
+            <SectionShell
+              id="garage-for-sale"
+              title="For sale"
+              count={loading ? undefined : forSaleCars.length}
+              hint="Live on the Cars catalogue. Update the Brad Coin price or unlist anytime."
+            >
+              {forSaleCars.length === 0 && !loading ? (
+                <EmptyBay>
+                  {filtersOn
+                    ? `No for-sale cars match “${qFromUrl}”.`
+                    : forSaleTotal === 0
+                      ? "Nothing listed. Pick an owned car and list it for sale."
+                      : "No for-sale cars in this view."}
+                </EmptyBay>
+              ) : null}
+              {forSaleCars.length > 0 ? (
+                <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {forSaleCars.map((car) => renderManagedCar(car))}
+                </ul>
+              ) : null}
+            </SectionShell>
+          </>
+        ) : null}
 
         <SectionShell
           id="garage-purchases"

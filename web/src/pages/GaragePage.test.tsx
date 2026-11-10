@@ -1,10 +1,15 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { ToastProvider } from "../toast-context";
 import { GaragePage } from "./GaragePage";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="garage-params">{params.toString()}</div>;
+}
 
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
@@ -244,5 +249,75 @@ describe("GaragePage Midnight Garage UI", () => {
     const resortedLinks = resortedOwned!.querySelectorAll("a[href^='/cars/']");
     expect(resortedLinks[0]?.textContent).toMatch(/Audi RS3/i);
     expect(resortedLinks[1]?.textContent).toMatch(/Porsche 911/i);
+  });
+
+  it("searches owned and for-sale by make/model and keeps sort in the URL", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route
+                path="/garage"
+                element={
+                  <>
+                    <GaragePage />
+                    <SearchParamsProbe />
+                  </>
+                }
+              />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a car" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
+
+    const input = screen.getByRole("searchbox", {
+      name: /Search garage by make or model/i,
+    });
+    await user.clear(input);
+    await user.type(input, "ford");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("garage-params").textContent).toContain("q=ford");
+    });
+    expect(screen.getByRole("link", { name: /Ford Focus ST/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Porsche 911/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Audi RS3/i })).not.toBeInTheDocument();
+
+    const sort = screen.getByRole("combobox", { name: /Sort Owned and For sale cars/i });
+    await user.selectOptions(sort, "name_asc");
+    await waitFor(() => {
+      const text = screen.getByTestId("garage-params").textContent ?? "";
+      expect(text).toContain("q=ford");
+      expect(text).toContain("sort=name_asc");
+    });
+  });
+
+  it("shows empty search state across owned and for-sale", async () => {
+    render(
+      <MemoryRouter initialEntries={["/garage?q=zzzz"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a car" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Owned" })).not.toBeInTheDocument();
   });
 });
