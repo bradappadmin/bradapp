@@ -1,8 +1,10 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { RECENTLY_VIEWED_KEY } from "../recently-viewed";
+import { ToastProvider } from "../toast-context";
 import { HomePage } from "./HomePage";
 
 vi.mock("../api", () => ({
@@ -67,7 +69,9 @@ describe("HomePage", () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <HomePage />
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -113,7 +117,9 @@ describe("HomePage", () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <HomePage />
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -150,7 +156,9 @@ describe("HomePage", () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <HomePage />
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -158,13 +166,56 @@ describe("HomePage", () => {
     expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
     expect(screen.getByText(/Porsche 911 GT3/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
+  });
+
+  it("clears recently viewed from home and hides the section", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(
+      RECENTLY_VIEWED_KEY,
+      JSON.stringify([
+        {
+          id: 42,
+          make: "Porsche",
+          model: "911",
+          trimName: "GT3",
+          bodyType: "Coupe",
+          colour: "Racing Red",
+          year: 2022,
+          bhp: 502,
+          topSpeedMph: 197,
+          zeroToSixtySecs: 3.2,
+          coinPrice: 420,
+          status: "available",
+          viewedAt: Date.now(),
+        },
+      ]),
+    );
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.queryByRole("region", { name: "Recently viewed cars" })).not.toBeInTheDocument();
+    expect(window.localStorage.getItem(RECENTLY_VIEWED_KEY)).toBeNull();
+    expect(screen.getByText(/Cleared recently viewed on this device/i)).toBeInTheDocument();
   });
 
   it("shows BradApp brand and auth links when signed out", async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <HomePage />
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -200,7 +251,9 @@ describe("HomePage", () => {
     render(
       <MemoryRouter>
         <AuthProvider>
-          <HomePage />
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );

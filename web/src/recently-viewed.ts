@@ -75,3 +75,12 @@ export function rememberRecentlyViewed(
   }
   return merged;
 }
+
+/** Wipe the device recently-viewed list. */
+export function clearRecentlyViewed(storage: Storage = localStorage): void {
+  try {
+    storage.removeItem(RECENTLY_VIEWED_KEY);
+  } catch {
+    // Ignore private-mode failures.
+  }
+}

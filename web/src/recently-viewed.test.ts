@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  RECENTLY_VIEWED_KEY,
   RECENTLY_VIEWED_LIMIT,
+  clearRecentlyViewed,
+  loadRecentlyViewed,
   parseRecentlyViewed,
   rememberRecentlyViewed,
 } from "./recently-viewed";
@@ -65,5 +68,34 @@ describe("recently viewed cars", () => {
     const capped = rememberRecentlyViewed(sample(99), storage, 999);
     expect(capped).toHaveLength(RECENTLY_VIEWED_LIMIT);
     expect(capped[0]?.id).toBe(99);
+  });
+
+  it("clears the stored list", () => {
+    const storage = {
+      data: "" as string,
+      getItem() {
+        return this.data || null;
+      },
+      setItem(_key: string, value: string) {
+        this.data = value;
+      },
+      removeItem(key: string) {
+        if (key === RECENTLY_VIEWED_KEY) this.data = "";
+      },
+      clear() {
+        this.data = "";
+      },
+      key() {
+        return null;
+      },
+      get length() {
+        return 0;
+      },
+    } as Storage;
+
+    rememberRecentlyViewed(sample(3), storage, 1);
+    expect(loadRecentlyViewed(storage)).toHaveLength(1);
+    clearRecentlyViewed(storage);
+    expect(loadRecentlyViewed(storage)).toEqual([]);
   });
 });
