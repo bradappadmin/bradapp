@@ -7,8 +7,8 @@ export type GarageSort =
   | "name_desc";
 
 export const GARAGE_SORT_OPTIONS: Array<{ value: GarageSort; label: string }> = [
-  { value: "value_desc", label: "Highest value" },
-  { value: "value_asc", label: "Lowest value" },
+  { value: "value_desc", label: "Highest price" },
+  { value: "value_asc", label: "Lowest price" },
   { value: "name_asc", label: "Name A–Z" },
   { value: "name_desc", label: "Name Z–A" },
 ];

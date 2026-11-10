@@ -538,7 +538,8 @@ export function GaragePage() {
             <div className="min-w-0">
               <p className="font-display text-lg text-mist">Sort the bay</p>
               <p className="mt-1 text-sm text-steel">
-                Applies to Owned and For sale. Choice stays in the URL.
+                Highest or lowest Brad Coin price, or name — same as Favourites. Applies to Owned
+                and For sale. Choice stays in the URL.
               </p>
             </div>
             <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">

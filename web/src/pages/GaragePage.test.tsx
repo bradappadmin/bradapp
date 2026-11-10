@@ -153,6 +153,11 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Sold" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Coin ledger" })).toBeInTheDocument();
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Highest price" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Lowest price" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Name A–Z" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Name Z–A" })).toBeInTheDocument();
+    expect(screen.getByText(/same as Favourites/i)).toBeInTheDocument();
 
     expect(await screen.findByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
       "href",
