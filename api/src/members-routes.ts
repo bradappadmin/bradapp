@@ -1,11 +1,22 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
+import { requireAuth, type AuthedRequest } from "./auth-middleware.js";
+import { applyCoinDelta } from "./coins.js";
 import { getPool, type RowDataPacket } from "./db.js";
 import { isRole, roleLabel, type Role } from "./roles.js";
 import { readShowcaseListingId, resolveShowcaseCar } from "./showcase.js";
 
 const membersQuerySchema = z.object({
   q: z.string().trim().max(120).optional(),
+});
+
+const giftCoinsSchema = z.object({
+  amount: z
+    .number()
+    .int()
+    .positive()
+    .max(1_000_000, "Amount is too large"),
+  note: z.string().trim().max(200).optional(),
 });
 
 type MemberListRow = RowDataPacket & {
@@ -158,6 +169,134 @@ export function createMembersRouter(): Router {
       showcaseSource: resolved?.source ?? null,
       showcaseListingId: pinnedListingId,
     });
+  });
+
+  /**
+   * Gift Brad Coins to another active member.
+   * Debits sender (`gift_sent`) and credits receiver (`gift_received`) in one txn.
+   * Play money only — no real currency.
+   */
+  router.post("/:id/gift", requireAuth, async (req, res: Response) => {
+    const sender = (req as AuthedRequest).user;
+    const receiverId = Number(req.params.id);
+    if (!Number.isFinite(receiverId) || receiverId <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid member id" });
+      return;
+    }
+    if (receiverId === sender.id) {
+      res.status(400).json({
+        error: "validation_error",
+        message: "You cannot gift Brad Coins to yourself.",
+      });
+      return;
+    }
+
+    const parsed = giftCoinsSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "validation_error",
+        message: parsed.error.issues[0]?.message ?? "Invalid gift",
+      });
+      return;
+    }
+
+    const amount = parsed.data.amount;
+    const userNote = parsed.data.note?.trim() ?? "";
+    const pool = getPool();
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Lock both wallets in id order to avoid deadlocks.
+      const firstId = Math.min(sender.id, receiverId);
+      const secondId = Math.max(sender.id, receiverId);
+      const [locked] = await connection.query<
+        (RowDataPacket & {
+          id: number;
+          display_name: string;
+          account_status: string;
+          coin_balance: number;
+        })[]
+      >(
+        `SELECT id, display_name, account_status, coin_balance
+         FROM users
+         WHERE id IN (?, ?)
+         ORDER BY id ASC
+         FOR UPDATE`,
+        [firstId, secondId],
+      );
+
+      const senderRow = locked.find((r) => Number(r.id) === sender.id);
+      const receiverRow = locked.find((r) => Number(r.id) === receiverId);
+      if (!senderRow) {
+        await connection.rollback();
+        res.status(404).json({ error: "not_found", message: "Sender not found." });
+        return;
+      }
+      if (!receiverRow || receiverRow.account_status !== "active") {
+        await connection.rollback();
+        res.status(404).json({ error: "not_found", message: "Member not found." });
+        return;
+      }
+
+      const receiverName = receiverRow.display_name;
+      const senderName = senderRow.display_name;
+      const sentNote =
+        userNote.length > 0
+          ? `Gift to ${receiverName}: ${userNote}`
+          : `Gift to ${receiverName}`;
+      const receivedNote =
+        userNote.length > 0
+          ? `Gift from ${senderName}: ${userNote}`
+          : `Gift from ${senderName}`;
+
+      let senderBalance: number;
+      try {
+        senderBalance = await applyCoinDelta(connection, {
+          userId: sender.id,
+          delta: -amount,
+          reason: "gift_sent",
+          note: sentNote,
+          createdByUserId: sender.id,
+        });
+      } catch (error) {
+        await connection.rollback();
+        if (error instanceof Error && error.message === "insufficient_coins") {
+          res.status(400).json({
+            error: "insufficient_coins",
+            message: "Not enough Brad Coins to send this gift.",
+          });
+          return;
+        }
+        throw error;
+      }
+
+      const receiverBalance = await applyCoinDelta(connection, {
+        userId: receiverId,
+        delta: amount,
+        reason: "gift_received",
+        note: receivedNote,
+        createdByUserId: sender.id,
+      });
+
+      await connection.commit();
+      res.json({
+        ok: true,
+        amount,
+        senderBalance,
+        receiverBalance,
+        receiver: {
+          id: receiverId,
+          displayName: receiverName,
+          coinBalance: receiverBalance,
+        },
+      });
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   });
 
   return router;

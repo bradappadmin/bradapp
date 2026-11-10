@@ -24,6 +24,7 @@ describe("ledger reason filter", () => {
     expect(parseLedgerReasonGroup("play")).toBe("play");
     expect(parseLedgerReasonGroup("trades")).toBe("trades");
     expect(parseLedgerReasonGroup("bonuses")).toBe("bonuses");
+    expect(parseLedgerReasonGroup("gifts")).toBe("gifts");
     expect(parseLedgerReasonGroup("admin")).toBe("admin");
     expect(parseLedgerReasonGroup("nope")).toBe("all");
   });
@@ -32,6 +33,7 @@ describe("ledger reason filter", () => {
     expect(ledgerReasonsForGroup("all")).toBeNull();
     expect(ledgerReasonsForGroup("play")).toEqual(["play_reward"]);
     expect(ledgerReasonsForGroup("trades")).toEqual(["purchase", "sale"]);
+    expect(ledgerReasonsForGroup("gifts")).toEqual(["gift_sent", "gift_received"]);
     expect(ledgerReasonsForGroup("bonuses")).toEqual([
       "seed",
       "daily_login",
@@ -48,10 +50,13 @@ describe("ledger reason filter", () => {
       entry(3, "daily_login"),
       entry(4, "admin_adjust"),
       entry(5, "sale"),
+      entry(6, "gift_sent"),
+      entry(7, "gift_received"),
     ];
-    expect(filterLedgerByReasonGroup(rows, "all")).toHaveLength(5);
+    expect(filterLedgerByReasonGroup(rows, "all")).toHaveLength(7);
     expect(filterLedgerByReasonGroup(rows, "play").map((e) => e.id)).toEqual([1]);
     expect(filterLedgerByReasonGroup(rows, "trades").map((e) => e.id)).toEqual([2, 5]);
+    expect(filterLedgerByReasonGroup(rows, "gifts").map((e) => e.id)).toEqual([6, 7]);
     expect(filterLedgerByReasonGroup(rows, "bonuses").map((e) => e.id)).toEqual([3]);
     expect(filterLedgerByReasonGroup(rows, "admin").map((e) => e.id)).toEqual([4]);
   });

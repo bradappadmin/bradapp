@@ -143,4 +143,67 @@ describe.runIf(hasDb)("members routes", () => {
       true,
     );
   });
+
+  it("gifts Brad Coins to another member with ledger gift_sent / gift_received", async () => {
+    const beforeSelf = await agent.get("/auth/me");
+    expect(beforeSelf.status).toBe(200);
+    const beforeBalance = Number(beforeSelf.body.user.coinBalance);
+
+    const beforeOther = await request(app).get(`/members/${otherId}`);
+    expect(beforeOther.status).toBe(200);
+    const beforeReceiver = Number(beforeOther.body.member.coinBalance);
+
+    const gift = await agent.post(`/members/${otherId}/gift`).send({
+      amount: 15,
+      note: "Bay tip",
+    });
+    expect(gift.status).toBe(200);
+    expect(gift.body.ok).toBe(true);
+    expect(gift.body.amount).toBe(15);
+    expect(gift.body.senderBalance).toBe(beforeBalance - 15);
+    expect(gift.body.receiverBalance).toBe(beforeReceiver + 15);
+    expect(gift.body.receiver.displayName).toBe("Challenge Rival");
+
+    const wallet = await agent.get("/trade/wallet");
+    expect(wallet.status).toBe(200);
+    expect(wallet.body.balance).toBe(beforeBalance - 15);
+    expect(
+      wallet.body.ledger.some(
+        (e: { reason: string; delta: number; note: string }) =>
+          e.reason === "gift_sent" && e.delta === -15 && e.note.includes("Bay tip"),
+      ),
+    ).toBe(true);
+
+    const otherAgent = request.agent(app);
+    expect(
+      (await otherAgent.post("/auth/signin").send({ email: otherEmail, password: "MembersPass-123!" }))
+        .status,
+    ).toBe(200);
+    const otherWallet = await otherAgent.get("/trade/wallet");
+    expect(otherWallet.status).toBe(200);
+    expect(otherWallet.body.balance).toBe(beforeReceiver + 15);
+    expect(
+      otherWallet.body.ledger.some(
+        (e: { reason: string; delta: number; note: string }) =>
+          e.reason === "gift_received" && e.delta === 15 && e.note.includes("Bay tip"),
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects gifts that exceed balance, self-gifts, and unauthenticated gifts", async () => {
+    const selfGift = await agent.post(`/members/${selfId}/gift`).send({ amount: 5 });
+    expect(selfGift.status).toBe(400);
+
+    const before = await agent.get("/auth/me");
+    expect(before.status).toBe(200);
+    const balance = Number(before.body.user.coinBalance);
+    const tooMuch = await agent
+      .post(`/members/${otherId}/gift`)
+      .send({ amount: Math.max(balance + 1, 1) });
+    expect(tooMuch.status).toBe(400);
+    expect(tooMuch.body.error).toBe("insufficient_coins");
+
+    const anon = await request(app).post(`/members/${otherId}/gift`).send({ amount: 5 });
+    expect(anon.status).toBe(401);
+  });
 });

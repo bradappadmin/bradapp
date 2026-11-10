@@ -273,7 +273,9 @@ export type LedgerEntry = {
     | "play_reward"
     | "daily_login"
     | "tt_streak_bonus"
-    | "weekly_cup";
+    | "weekly_cup"
+    | "gift_sent"
+    | "gift_received";
   listingId: number | null;
   note: string;
   createdAt: string;
@@ -574,6 +576,22 @@ export function fetchMemberProfile(id: number): Promise<{
   showcaseListingId: number | null;
 }> {
   return request(`/members/${id}`);
+}
+
+export function giftBradCoins(
+  memberId: number,
+  input: { amount: number; note?: string },
+): Promise<{
+  ok: true;
+  amount: number;
+  senderBalance: number;
+  receiverBalance: number;
+  receiver: { id: number; displayName: string; coinBalance: number };
+}> {
+  return request(`/members/${memberId}/gift`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 export function fetchTrades(): Promise<{ trades: TradeRow[] }> {

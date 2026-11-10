@@ -11,6 +11,8 @@ describe("ledger labels", () => {
     expect(ledgerReasonLabel("tt_streak_bonus")).toBe("Win streak");
     expect(ledgerReasonLabel("weekly_cup")).toBe("Weekly cup");
     expect(ledgerReasonLabel("admin_adjust")).toBe("Admin adjust");
+    expect(ledgerReasonLabel("gift_sent")).toBe("Gift sent");
+    expect(ledgerReasonLabel("gift_received")).toBe("Gift received");
   });
 
   it("labels direction from delta", () => {

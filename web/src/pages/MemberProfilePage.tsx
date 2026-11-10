@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import * as api from "../api";
 import type { MemberProfileCar, MemberSummary, ShowcaseSource } from "../api";
@@ -31,7 +31,7 @@ function showcaseHint(source: ShowcaseSource | null): string {
 export function MemberProfilePage() {
   const { id } = useParams();
   const memberId = Number(id);
-  const { user, loading: authLoading } = useAuth();
+  const { user, setUser, loading: authLoading } = useAuth();
   const toast = useToast();
   const [member, setMember] = useState<MemberSummary | null>(null);
   const [cars, setCars] = useState<MemberProfileCar[]>([]);
@@ -41,6 +41,9 @@ export function MemberProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [giftAmount, setGiftAmount] = useState("");
+  const [giftNote, setGiftNote] = useState("");
+  const [gifting, setGifting] = useState(false);
 
   async function reload(idToLoad: number) {
     const res = await api.fetchMemberProfile(idToLoad);
@@ -78,6 +81,43 @@ export function MemberProfilePage() {
 
   const isSelf = Boolean(user && member && member.id === user.id);
   const canChallengeOrTrade = Boolean(user && member && !isSelf && member.carCount > 0);
+  const canGift = Boolean(user && member && !isSelf);
+
+  async function onGiftSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!user || !member || !canGift) return;
+    const amount = Number(giftAmount);
+    if (!Number.isFinite(amount) || amount < 1 || !Number.isInteger(amount)) {
+      toast.error("Enter a whole number of Brad Coins to gift.");
+      return;
+    }
+    if (amount > user.coinBalance) {
+      toast.error("Not enough Brad Coins to send this gift.");
+      return;
+    }
+    setGifting(true);
+    setError(null);
+    try {
+      const note = giftNote.trim();
+      const res = await api.giftBradCoins(member.id, {
+        amount,
+        ...(note ? { note } : {}),
+      });
+      setUser({ ...user, coinBalance: res.senderBalance });
+      setMember({ ...member, coinBalance: res.receiverBalance });
+      setGiftAmount("");
+      setGiftNote("");
+      toast.success(
+        `Sent ${formatCoins(amount)} to ${member.displayName}. Play money only.`,
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not send gift";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setGifting(false);
+    }
+  }
 
   async function onToggleShowcase(car: MemberProfileCar) {
     if (!isSelf) return;
@@ -193,8 +233,63 @@ export function MemberProfilePage() {
             <Link to="/signin" className="text-lime no-underline hover:underline">
               Sign in
             </Link>{" "}
-            to challenge or offer a free trade.
+            to challenge, offer a free trade, or gift Brad Coins.
           </p>
+        ) : null}
+
+        {canGift && member && user ? (
+          <section
+            className="play-panel bay-rise-delay mt-8 rounded-md border px-4 py-5 sm:px-5"
+            aria-labelledby="gift-coins-heading"
+          >
+            <p className="text-xs uppercase tracking-[0.2em] text-steel">Brad Coins</p>
+            <h2 id="gift-coins-heading" className="mt-1 font-display text-xl text-mist">
+              Gift coins to {member.displayName}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-steel">
+              Send play-money Brad Coins from your wallet ({formatCoins(user.coinBalance)}). No real
+              money.
+            </p>
+            <form
+              className="mt-4 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+              onSubmit={(e) => void onGiftSubmit(e)}
+            >
+              <label className="flex min-w-[8rem] flex-1 flex-col gap-1.5 text-sm text-steel">
+                Amount
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  step={1}
+                  name="giftAmount"
+                  value={giftAmount}
+                  onChange={(e) => setGiftAmount(e.target.value)}
+                  placeholder="25"
+                  required
+                  className="rounded-md border border-white/15 bg-bay-void/80 px-3 py-2 font-display text-mist outline-none focus:border-lime/50"
+                />
+              </label>
+              <label className="flex min-w-[12rem] flex-[2] flex-col gap-1.5 text-sm text-steel">
+                Note (optional)
+                <input
+                  type="text"
+                  name="giftNote"
+                  maxLength={200}
+                  value={giftNote}
+                  onChange={(e) => setGiftNote(e.target.value)}
+                  placeholder="Thanks for the bay tip"
+                  className="rounded-md border border-white/15 bg-bay-void/80 px-3 py-2 text-mist outline-none focus:border-lime/50"
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={gifting}
+                className="rounded-md bg-lime px-4 py-2.5 font-display text-sm font-semibold text-bay-void transition hover:brightness-110 disabled:opacity-60"
+              >
+                {gifting ? "Sending…" : "Send gift"}
+              </button>
+            </form>
+          </section>
         ) : null}
 
         {showcase ? (

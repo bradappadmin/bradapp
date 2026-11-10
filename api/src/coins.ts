@@ -31,7 +31,9 @@ export type LedgerReason =
   | "play_reward"
   | "daily_login"
   | "tt_streak_bonus"
-  | "weekly_cup";
+  | "weekly_cup"
+  | "gift_sent"
+  | "gift_received";
 
 export type DailyLoginStatus = {
   amount: number;

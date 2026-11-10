@@ -11,6 +11,7 @@ vi.mock("../api", () => ({
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
   fetchMemberProfile: vi.fn(),
   setGarageShowcase: vi.fn(),
+  giftBradCoins: vi.fn(),
 }));
 
 import * as api from "../api";
@@ -190,5 +191,75 @@ describe("MemberProfilePage showcase garage", () => {
     });
     expect((await screen.findAllByText(/Pinned showcase/i)).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "Unpin showcase" }).length).toBeGreaterThan(0);
+  });
+
+  it("lets a signed-in visitor gift Brad Coins with amount and optional note", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.giftBradCoins).mockResolvedValue({
+      ok: true,
+      amount: 40,
+      senderBalance: 160,
+      receiverBalance: 920,
+      receiver: { id: 7, displayName: "Bay Friend", coinBalance: 920 },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/members/7"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /Gift coins to Bay Friend/i })).toBeInTheDocument();
+    expect(screen.getByText(/Play money only|No real money/i)).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/^Amount$/i), "40");
+    await user.type(screen.getByLabelText(/Note \(optional\)/i), "Bay tip");
+    await user.click(screen.getByRole("button", { name: "Send gift" }));
+
+    await vi.waitFor(() => {
+      expect(api.giftBradCoins).toHaveBeenCalledWith(7, { amount: 40, note: "Bay tip" });
+    });
+    expect(await screen.findByText(/Sent .* to Bay Friend/i)).toBeInTheDocument();
+    expect(screen.getByText(/920 BC|920/i)).toBeInTheDocument();
+  });
+
+  it("hides the gift form on your own garage", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 7,
+        email: "owner@example.com",
+        displayName: "Bay Friend",
+        bio: "Collects pace in the family bay.",
+        role: "member",
+        coinBalance: 880,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 880,
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/members/7"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /Bay Friend \(you\)/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /Gift coins/i })).not.toBeInTheDocument();
   });
 });
