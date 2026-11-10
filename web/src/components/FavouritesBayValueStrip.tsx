@@ -40,7 +40,7 @@ export function FavouritesBayValueStrip({ cars }: FavouritesBayValueStripProps) 
             Browse cars
           </Link>
           <Link
-            to="/how-to"
+            to="/how-to#favourites-bay-value"
             className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
           >
             How to

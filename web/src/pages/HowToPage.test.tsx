@@ -449,7 +449,16 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/same strip as Cars\. Offer trade, Challenge, Compare/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Compare from Favourites is the next step/i),
+      screen.getByText(/Favourites bay value strip is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Favourites bay value strip" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("favourites-bay-value")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /one Midnight Garage bay strip under the hero shows favourite count and total Brad Coin value — list prices on cars you.?ve saved\. The strip hides on an empty bay/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/My cars uses the same Sort the bay options after that/i),
@@ -462,6 +471,9 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Offer trade, Challenge, and the Top Trumps peek stay on the card/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compare from Favourites is the next step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Top Trumps winners on Compare is the next step/i),
@@ -492,6 +504,9 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Favourites Compare into that same tray/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Favourites bay value strip \(favourite count \+ total BC\)/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
@@ -888,7 +903,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Find a favourite, Sort the bay; Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars\)/i,
+        /bay value strip \(favourite count \+ total BC when you have saves\); Find a favourite, Sort the bay; Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points to Members \/ Browse cars for sale/i)).toBeInTheDocument();
@@ -981,7 +996,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Cars" }).some((el) => el.getAttribute("href") === "/cars"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Favourites" }).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByRole("link", { name: "Open Favourites" }).length).toBeGreaterThanOrEqual(4);
     expect(
       screen
         .getAllByRole("link", { name: "Open Favourites" })

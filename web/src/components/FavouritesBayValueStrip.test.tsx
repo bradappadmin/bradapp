@@ -23,7 +23,10 @@ describe("FavouritesBayValueStrip", () => {
     expect(screen.getByText("3 favourites saved")).toBeInTheDocument();
     expect(screen.getByText(/remove a favourite and the total updates/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
-    expect(screen.getByRole("link", { name: "How to" })).toHaveAttribute("href", "/how-to");
+    expect(screen.getByRole("link", { name: "How to" })).toHaveAttribute(
+      "href",
+      "/how-to#favourites-bay-value",
+    );
   });
 
   it("handles an empty favourites list", () => {

@@ -107,7 +107,14 @@ const STEPS: Step[] = [
   {
     id: "favourites-trump-stats",
     title: "Top Trumps peek on Favourites",
-    body: "On Favourites, each photo-first media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars. Offer trade, Challenge, Compare, Find, Sort the bay, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard. Compare from Favourites is the next step.",
+    body: "On Favourites, each photo-first media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars. Offer trade, Challenge, Compare, Find, Sort the bay, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard. Favourites bay value strip is the next step.",
+    to: "/favourites",
+    cta: "Open Favourites",
+  },
+  {
+    id: "favourites-bay-value",
+    title: "Favourites bay value strip",
+    body: "On Favourites when you have at least one saved car, one Midnight Garage bay strip under the hero shows favourite count and total Brad Coin value — list prices on cars you’ve saved. The strip hides on an empty bay. Browse cars and How to sit on the strip; Top Trumps peek, Compare, Challenge, Offer trade, Find, Sort the bay, and empty/no-match CTAs stay. Tight strip — not a stats dashboard. Compare from Favourites is the next step.",
     to: "/favourites",
     cta: "Open Favourites",
   },
@@ -390,7 +397,8 @@ export function HowToPage() {
             My cars, Compare Top Trumps category winners (Power / 0–60 / Top speed, Play rules),
             Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
             missing), Family activity Open member (/members/:id when an actor is known; hidden for
-            self / missing / house), Favourites Compare into that same tray, photo-first cars with
+            self / missing / house), Favourites Compare into that same tray, Favourites bay value
+            strip (favourite count + total BC), photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
             Trumps bay strip under the studio hero (Power / 0–60 / Top speed), Cars Sort the
@@ -560,10 +568,10 @@ export function HowToPage() {
               <Link to="/favourites" className="text-lime no-underline hover:underline">
                 Favourites
               </Link>{" "}
-              — Find a favourite, Sort the bay; Top Trumps peek under each studio photo (Power /
-              0–60 / Top speed, same as Cars); Compare into the shared tray with Cars / My cars, then
-              Offer trade or Challenge to Top Trumps on someone else’s car (sign in). Nav badge =
-              saved count.
+              — bay value strip (favourite count + total BC when you have saves); Find a favourite,
+              Sort the bay; Top Trumps peek under each studio photo (Power / 0–60 / Top speed, same as
+              Cars); Compare into the shared tray with Cars / My cars, then Offer trade or Challenge
+              to Top Trumps on someone else’s car (sign in). Nav badge = saved count.
             </li>
             <li>
               <Link to="/reviews" className="text-lime no-underline hover:underline">
