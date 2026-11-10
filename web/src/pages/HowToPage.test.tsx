@@ -71,6 +71,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByRole("heading", { name: "Admin for Brad and Napwood" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Quick amount on admin coin adjust" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("admin-coin-chips")).not.toBeNull();
     expect(document.getElementById("members-sort")).not.toBeNull();
     expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
@@ -234,6 +238,22 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/leaderboard Challenge and Offer trade/i)).toBeInTheDocument();
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /admin coin-adjust Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) for Brad and Napwood/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Quick amount chips on coin adjust are the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) — same chip pattern as gift Quick amount/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Free-form still covers debit corrections/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Share the bay with Copy link on any public garage/i),
@@ -382,5 +402,17 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText(/gift Brad Coins/i).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: "Open Admin" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Open Coin adjustments" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Brad & Napwood: Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) or free-form Coin delta/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Coin adjustments" })).toHaveAttribute(
+      "href",
+      "/admin/coin-history",
+    );
   });
 });

@@ -149,9 +149,17 @@ const STEPS: Step[] = [
   {
     id: "admin",
     title: "Admin for Brad and Napwood",
-    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood.",
+    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust are the next step.",
     to: "/admin",
     cta: "Open Admin",
+    adminOnly: true,
+  },
+  {
+    id: "admin-coin-chips",
+    title: "Quick amount on admin coin adjust",
+    body: "On Coin adjustments and Accounts, Brad and Napwood correct a member’s Brad Coin balance with Quick amount chips (+25 / +50 / +100 / +250 BC) — same chip pattern as gift Quick amount — or type any signed Coin delta, add a note on Coin adjustments, then Adjust coins. Free-form still covers debit corrections.",
+    to: "/admin/coin-history",
+    cta: "Open Coin adjustments",
     adminOnly: true,
   },
 ];
@@ -182,7 +190,8 @@ export function HowToPage() {
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
             My cars Quick price chips (50 / 100 / 250 / 500 BC) when listing or updating a sale, gift
-            Quick amount chips, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or
+            Quick amount chips, admin coin-adjust Quick amount chips (+25 / +50 / +100 / +250 BC) for
+            Brad and Napwood, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or
             house → Play), this week’s cup standings, free trades, Trade history Offer again
             (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
             Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real money.
@@ -314,6 +323,13 @@ export function HowToPage() {
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
               ready), Favourites / Cars, or Compare on My cars; empty bay sends you to Favourites or
               Browse cars.
+            </li>
+            <li>
+              <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">
+                Coin adjustments
+              </Link>{" "}
+              — Brad & Napwood: Quick amount chips (+25 / +50 / +100 / +250 BC) or free-form Coin
+              delta on Coin adjustments and Accounts.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">
