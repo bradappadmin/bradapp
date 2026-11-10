@@ -52,6 +52,7 @@ export function TrumpCard({
           bodyType={car.bodyType}
           make={car.make}
           model={car.model}
+          year={car.year ?? undefined}
           size="card"
           title={title}
           className="aspect-[16/10] w-full"

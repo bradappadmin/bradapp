@@ -209,6 +209,8 @@ export function ListingPage() {
                 bodyType={listing.bodyType}
                 make={listing.make}
                 model={listing.model}
+                year={listing.year}
+                fuel={listing.fuel}
                 title={listingTitle(listing)}
                 className="!mt-0"
               />

@@ -355,6 +355,7 @@ export function MemberProfilePage() {
                 bodyType={showcase.bodyType}
                 make={showcase.make}
                 model={showcase.model}
+                year={showcase.year}
                 title={listingTitle(showcase)}
                 className="min-h-[14rem] w-full sm:min-h-[20rem]"
               />

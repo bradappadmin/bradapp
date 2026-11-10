@@ -35,6 +35,7 @@ export function CompareCarPanel({
           bodyType={bodyType}
           make={make}
           model={model}
+          year={year}
           size="hero"
           title={title}
           className="!mt-0 border-0"

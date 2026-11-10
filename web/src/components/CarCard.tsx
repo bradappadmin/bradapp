@@ -12,6 +12,7 @@ export type CarCardData = {
   bodyType?: string;
   colour: string;
   year: number;
+  fuel?: string;
   bhp?: number;
   topSpeedMph?: number;
   zeroToSixtySecs?: number;
@@ -134,6 +135,8 @@ export function CarCard({
           bodyType={car.bodyType}
           make={car.make}
           model={car.model}
+          year={car.year}
+          fuel={car.fuel}
           size="card"
           title={title}
           className="aspect-[16/10] w-full"
@@ -153,6 +156,8 @@ export function CarCard({
         bodyType={car.bodyType}
         make={car.make}
         model={car.model}
+        year={car.year}
+        fuel={car.fuel}
         size="thumb"
         className={dense ? "h-16 w-28" : "h-24 w-36 sm:h-28 sm:w-44"}
       />
@@ -195,6 +200,8 @@ export function CarHeroVisual({
   bodyType,
   make,
   model,
+  year,
+  fuel,
   title,
   className = "",
 }: {
@@ -202,6 +209,8 @@ export function CarHeroVisual({
   bodyType?: string;
   make?: string;
   model?: string;
+  year?: number;
+  fuel?: string;
   title: string;
   className?: string;
 }) {
@@ -211,6 +220,8 @@ export function CarHeroVisual({
       bodyType={bodyType}
       make={make}
       model={model}
+      year={year}
+      fuel={fuel}
       size="hero"
       title={title}
       className={className}

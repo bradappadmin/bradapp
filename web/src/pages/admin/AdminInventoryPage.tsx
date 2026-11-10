@@ -472,6 +472,7 @@ function ListingPaintRow({
     make: listing.make,
     model: listing.model,
     colour,
+    year: listing.year,
     width: 240,
   });
 

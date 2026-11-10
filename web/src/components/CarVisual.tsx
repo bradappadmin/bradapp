@@ -7,6 +7,8 @@ type CarVisualProps = {
   bodyType?: string;
   make?: string;
   model?: string;
+  year?: number;
+  fuel?: string;
   /** Thumbnail strip, photo-first card, or listing hero. */
   size?: "thumb" | "card" | "hero";
   title?: string;
@@ -207,6 +209,8 @@ export function CarVisual({
   bodyType,
   make,
   model,
+  year,
+  fuel,
   size = "thumb",
   title,
   className = "",
@@ -220,6 +224,9 @@ export function CarVisual({
           make,
           model,
           colour,
+          bodyType,
+          year,
+          fuel,
           width: photoWidth(size),
           angle: "23",
         })
@@ -241,8 +248,8 @@ export function CarVisual({
         isHero
           ? "h-auto w-full max-w-4xl object-contain object-bottom drop-shadow-[0_18px_40px_rgba(0,0,0,0.55)]"
           : isCard
-            ? "h-full w-full object-contain object-bottom scale-[1.04] transition duration-500 group-hover:scale-[1.08]"
-            : "h-full w-full object-contain object-center"
+            ? "h-full w-full object-contain object-bottom scale-[1.08] transition duration-500 group-hover:scale-[1.12]"
+            : "h-full w-full object-contain object-bottom scale-[1.06]"
       }
       loading={isHero ? "eager" : "lazy"}
       decoding="async"
