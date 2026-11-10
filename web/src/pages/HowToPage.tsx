@@ -30,14 +30,21 @@ const STEPS: Step[] = [
   {
     id: "home-streak-banner",
     title: "Home login streak bay strip",
-    body: "On Home when you’re signed in, one Midnight Garage bay strip under the hero shows today’s daily bonus (+25 BC claimed or ready to claim) and login streak progress toward day 3 (+15 BC) and day 7 (+50 BC). Coin ledger and How to links sit on the strip; Claim appears when today’s +25 is still available. The wallet chip still echoes Login streak ×N — this strip is the clear progress view.",
+    body: "On Home when you’re signed in, one Midnight Garage bay strip under the hero shows today’s daily bonus (+25 BC claimed or ready to claim) and login streak progress toward day 3 (+15 BC) and day 7 (+50 BC). Coin ledger and How to links sit on the strip; Claim appears when today’s +25 is still available. The wallet chip still echoes Login streak ×N — this strip is the clear progress view. Top Trumps peek on Recently viewed is the next step.",
+    to: "/",
+    cta: "Open Home",
+  },
+  {
+    id: "home-recent-trump-stats",
+    title: "Top Trumps peek on Recently viewed",
+    body: "On Home, Recently viewed media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars and Favourites. Compare, Clear / Confirm clear, and empty-bay Browse cars stay. Tight Midnight Garage strip — not a stats dashboard. Compare from Recently viewed is the next step.",
     to: "/",
     cta: "Open Home",
   },
   {
     id: "home-recent-compare",
     title: "Compare from Recently viewed",
-    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. Empty bay keeps Browse cars; Clear asks Confirm clear before wiping the device history (Keep cancels). Open car from Family activity is the next step.",
+    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. The Top Trumps peek stays on each card. Empty bay keeps Browse cars; Clear asks Confirm clear before wiping the device history (Keep cancels). Open car from Family activity is the next step.",
     to: "/",
     cta: "Open Home",
   },
@@ -364,9 +371,10 @@ export function HowToPage() {
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, home login streak bay strip (+25 today, day 3 / day 7 progress), Brad Coins
-            (tap the header balance for your ledger), home Recently viewed Compare into the shared
-            tray with Cars / My cars, Family activity Open car (/cars/:id when a listing is known;
-            hidden for gifts / missing), Favourites Compare into that same tray, photo-first cars with
+            (tap the header balance for your ledger), home Recently viewed Top Trumps peek (same
+            Power / 0–60 / Top speed), home Recently viewed Compare into the shared tray with Cars /
+            My cars, Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
+            missing), Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
             Trumps bay strip under the studio hero (Power / 0–60 / Top speed), Cars Sort the
@@ -456,8 +464,9 @@ export function HowToPage() {
                 Home
               </Link>{" "}
               — login streak bay strip: today’s +25 BC status and progress toward day 3 (+15) / day 7
-              (+50); Coin ledger and How to on the strip; Family activity Open car → /cars/:id when a
-              listing is known (hidden for gifts / missing; sign in).
+              (+50); Coin ledger and How to on the strip; Recently viewed Top Trumps peek under each
+              studio photo (Power / 0–60 / Top speed, same as Cars / Favourites); Family activity Open
+              car → /cars/:id when a listing is known (hidden for gifts / missing; sign in).
             </li>
             <li>
               <Link to="/play/history" className="text-lime no-underline hover:underline">

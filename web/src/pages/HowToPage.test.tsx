@@ -244,7 +244,27 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(
+        /home Recently viewed Top Trumps peek \(same Power \/ 0–60 \/ Top speed\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/home Recently viewed Compare into the shared tray with Cars \/ My cars/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Top Trumps peek on Recently viewed is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Top Trumps peek on Recently viewed" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("home-recent-trump-stats")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /Recently viewed media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compare from Recently viewed is the next step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Compare from Recently viewed" }),
@@ -257,6 +277,9 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(
         /Compare on a card queues into the shared tray with Cars \/ My cars \(and Favourites\)/i,
       ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The Top Trumps peek stays on each card/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/Empty bay keeps Browse cars/i)).toBeInTheDocument();
     expect(
@@ -371,11 +394,8 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /owned and for-sale photo-first media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed/i,
+        /owned and for-sale photo-first media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars and Favourites/i,
       ),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/the same strip as Cars and Favourites/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -774,6 +794,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
+        /Recently viewed Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
         /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\)/i,
       ),
     ).toBeInTheDocument();
@@ -882,7 +907,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
-    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(4);
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
