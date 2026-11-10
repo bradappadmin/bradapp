@@ -122,9 +122,24 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
 
     expect(screen.getByRole("link", { name: /Back to Play/i })).toHaveAttribute("href", "/play");
-    expect(screen.getByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
+    expect(
+      screen.getAllByRole("link", { name: /Porsche 911 GT3/i }).every(
+        (a) => a.getAttribute("href") === "/cars/42",
+      ),
+    ).toBe(true);
+
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
       "href",
       "/cars/42",
+    );
+    // House opponent card has no listing id — only your car gets Open car on that row.
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/7",
+    );
+    expect(screen.getByRole("link", { name: "Open car BMW M3 Competition" })).toHaveAttribute(
+      "href",
+      "/cars/9",
     );
 
     expect(screen.getByRole("link", { name: "Rematch vs house" })).toHaveAttribute(
@@ -134,6 +149,53 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Rematch Sam Bay" })).toHaveAttribute(
       "href",
       "/play?opponent=177&theirCar=9",
+    );
+  });
+
+  it("hides Open car when neither side has a listing id", async () => {
+    vi.mocked(api.fetchTopTrumpsHistory).mockResolvedValue({
+      matches: [
+        {
+          id: 30,
+          mode: "house",
+          category: "bhp",
+          createdAt: "2026-11-09T12:00:00.000Z",
+          opponentName: "House",
+          opponentUserId: null,
+          yourCar: {
+            listingId: null,
+            make: "Mystery",
+            model: "Bay",
+            trimName: "",
+            value: 100,
+          },
+          theirCar: {
+            listingId: null,
+            make: "House",
+            model: "Card",
+            trimName: "",
+            value: 90,
+          },
+          result: "win",
+          coinReward: 25,
+          youWere: "challenger",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/play/history"]}>
+        <AuthProvider>
+          <MatchHistoryPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("vs House")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rematch vs house" })).toHaveAttribute(
+      "href",
+      "/play",
     );
   });
 

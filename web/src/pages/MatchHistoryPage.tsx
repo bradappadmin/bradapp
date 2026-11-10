@@ -13,6 +13,10 @@ import {
   topTrumpsCategoryLabel,
 } from "../match-history-labels";
 import {
+  matchHistoryOpenCarHref,
+  matchHistoryOpenCarLabel,
+} from "../match-history-open-car";
+import {
   matchHistoryRematchHref,
   matchHistoryRematchLabel,
 } from "../match-history-rematch";
@@ -119,27 +123,52 @@ function MatchCarThumb({
   );
 }
 
-function MatchHistoryRematchCta({
+function MatchHistoryRowActions({
   match,
   viewerUserId,
 }: {
   match: MatchHistoryItem;
   viewerUserId: number | null;
 }) {
+  const yourCarHref = matchHistoryOpenCarHref(match.yourCar);
+  const theirCarHref = matchHistoryOpenCarHref(match.theirCar);
   const rematchHref = matchHistoryRematchHref(match, viewerUserId);
-  if (!rematchHref) return null;
+  if (!yourCarHref && !theirCarHref && !rematchHref) return null;
+
+  const openCarClass =
+    "rounded-md border border-white/15 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
 
   return (
     <div className="mt-4 flex flex-wrap gap-2">
-      <Link
-        to={rematchHref}
-        className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
-        aria-label={
-          match.mode === "house" ? "Rematch vs house" : `Rematch ${match.opponentName}`
-        }
-      >
-        {matchHistoryRematchLabel(match)}
-      </Link>
+      {yourCarHref ? (
+        <Link
+          to={yourCarHref}
+          className={openCarClass}
+          aria-label={`Open car ${formatMatchCarTitle(match.yourCar)}`}
+        >
+          {matchHistoryOpenCarLabel()}
+        </Link>
+      ) : null}
+      {theirCarHref ? (
+        <Link
+          to={theirCarHref}
+          className={openCarClass}
+          aria-label={`Open car ${formatMatchCarTitle(match.theirCar)}`}
+        >
+          {matchHistoryOpenCarLabel()}
+        </Link>
+      ) : null}
+      {rematchHref ? (
+        <Link
+          to={rematchHref}
+          className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+          aria-label={
+            match.mode === "house" ? "Rematch vs house" : `Rematch ${match.opponentName}`
+          }
+        >
+          {matchHistoryRematchLabel(match)}
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -410,7 +439,7 @@ export function MatchHistoryPage() {
                   <MatchCarThumb car={match.yourCar} side="you" />
                   <MatchCarThumb car={match.theirCar} side="them" />
                 </div>
-                <MatchHistoryRematchCta match={match} viewerUserId={user?.id ?? null} />
+                <MatchHistoryRowActions match={match} viewerUserId={user?.id ?? null} />
               </li>
             ))}
           </ul>
