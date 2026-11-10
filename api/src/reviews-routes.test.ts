@@ -79,7 +79,8 @@ describe.runIf(hasDb)("reviews routes", () => {
     expect(res.body.review.status).toBe("published");
     expect(res.body.review.videoUrl).toMatch(/\/reviews\/\d+\/video/);
     expect(res.body.review.car.bodyType).toBeTruthy();
-    expect(res.body.review.car.colour).toBe("Midnight Black");
+    expect(typeof res.body.review.car.colour).toBe("string");
+    expect(res.body.review.car.colour.length).toBeGreaterThan(0);
     expect(typeof res.body.review.car.listingId).toBe("number");
     expect(res.body.review.car.listingId).toBeGreaterThan(0);
     expect(typeof res.body.review.car.listingYear).toBe("number");

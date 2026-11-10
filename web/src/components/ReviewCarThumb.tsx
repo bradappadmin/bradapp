@@ -7,6 +7,8 @@ export type ReviewCarVisualData = {
   trimName?: string;
   bodyType?: string;
   colour: string;
+  /** Linked listing year when known — improves studio photo match. */
+  year?: number | null;
 };
 
 type ReviewCarThumbProps = {
@@ -16,7 +18,7 @@ type ReviewCarThumbProps = {
   className?: string;
 };
 
-/** Studio photo (or SVG fallback) for a review’s car model. */
+/** Studio photo (or SVG fallback) for a review’s car model / linked listing paint. */
 export function ReviewCarThumb({ car, size = "thumb", className = "" }: ReviewCarThumbProps) {
   const title = listingTitle({
     make: car.make,
@@ -27,6 +29,7 @@ export function ReviewCarThumb({ car, size = "thumb", className = "" }: ReviewCa
     size === "card"
       ? `aspect-[16/10] w-full ${className}`
       : `h-16 w-28 sm:h-[4.5rem] sm:w-32 ${className}`;
+  const year = typeof car.year === "number" && car.year > 0 ? car.year : undefined;
 
   return (
     <CarVisual
@@ -34,6 +37,7 @@ export function ReviewCarThumb({ car, size = "thumb", className = "" }: ReviewCa
       bodyType={car.bodyType}
       make={car.make}
       model={car.model}
+      year={year}
       size={size}
       title={title}
       className={frame}

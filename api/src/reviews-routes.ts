@@ -93,6 +93,7 @@ type ReviewRow = RowDataPacket & {
   listing_id: number | null;
   listing_year: number | null;
   listing_coin_price: number | null;
+  listing_colour: string | null;
   car_model_b_id: number | null;
   b_make: string | null;
   b_model: string | null;
@@ -104,12 +105,13 @@ type ReviewRow = RowDataPacket & {
   listing_b_id: number | null;
   listing_b_year: number | null;
   listing_b_coin_price: number | null;
+  listing_b_colour: string | null;
   like_count: number;
   liked_by_me: number | boolean;
   is_featured: number | boolean;
 };
 
-/** Reviews are on car models (no listing paint) — Midnight Black keeps studio photos on-brand. */
+/** Fallback studio paint when no linked listing colour is known. */
 const REVIEW_STUDIO_COLOUR = "Midnight Black";
 
 type CueCardJson = Array<{ id: string; title: string; prompt: string }>;
@@ -136,7 +138,7 @@ function parseCues(raw: string | CueCardJson): CueCardJson {
 /** Prefer an available bay listing for Open car / Compare; fall back to owned/sold when needed. */
 function listingFieldForCarModelSql(
   carModelAlias: string,
-  field: "id" | "year" | "coin_price",
+  field: "id" | "year" | "coin_price" | "colour",
 ): string {
   return `(SELECT l.${field} FROM listings l
      WHERE l.car_model_id = ${carModelAlias}.id
@@ -159,14 +161,20 @@ function toCarPayload(input: {
   listingId: number | null;
   listingYear: number | null;
   listingCoinPrice: number | null;
+  /** Linked listing paint when known — otherwise Midnight Black studio default. */
+  colour?: string | null;
 }) {
+  const colour =
+    typeof input.colour === "string" && input.colour.trim().length > 0
+      ? input.colour.trim()
+      : REVIEW_STUDIO_COLOUR;
   return {
     id: input.id,
     make: input.make,
     model: input.model,
     trimName: input.trimName,
     bodyType: input.bodyType,
-    colour: REVIEW_STUDIO_COLOUR,
+    colour,
     bhp: input.bhp,
     topSpeedMph: input.topSpeedMph,
     zeroToSixtySecs: input.zeroToSixtySecs,
@@ -204,6 +212,7 @@ function toReview(row: ReviewRow) {
     listingYear: row.listing_year == null ? null : Number(row.listing_year),
     listingCoinPrice:
       row.listing_coin_price == null ? null : Number(row.listing_coin_price),
+    colour: row.listing_colour,
   });
   const carB =
     type === "drag_race" && row.car_model_b_id != null && row.b_make && row.b_model
@@ -220,6 +229,7 @@ function toReview(row: ReviewRow) {
           listingYear: row.listing_b_year == null ? null : Number(row.listing_b_year),
           listingCoinPrice:
             row.listing_b_coin_price == null ? null : Number(row.listing_b_coin_price),
+          colour: row.listing_b_colour,
         })
       : null;
   return {
@@ -260,12 +270,14 @@ function reviewSelectSql(viewerUserId: number | null): string {
          ${listingFieldForCarModelSql("cm", "id")} AS listing_id,
          ${listingFieldForCarModelSql("cm", "year")} AS listing_year,
          ${listingFieldForCarModelSql("cm", "coin_price")} AS listing_coin_price,
+         ${listingFieldForCarModelSql("cm", "colour")} AS listing_colour,
          cmb.id AS car_model_b_id, cmb.make AS b_make, cmb.model AS b_model, cmb.trim_name AS b_trim_name,
          cmb.body_type AS b_body_type, cmb.bhp AS b_bhp, cmb.top_speed_mph AS b_top_speed_mph,
          cmb.zero_to_sixty_secs AS b_zero_to_sixty_secs,
          ${listingFieldForCarModelSql("cmb", "id")} AS listing_b_id,
          ${listingFieldForCarModelSql("cmb", "year")} AS listing_b_year,
          ${listingFieldForCarModelSql("cmb", "coin_price")} AS listing_b_coin_price,
+         ${listingFieldForCarModelSql("cmb", "colour")} AS listing_b_colour,
          (SELECT COUNT(*) FROM review_likes rlc WHERE rlc.review_id = r.id) AS like_count,
          ${likedExpr}
   FROM video_reviews r

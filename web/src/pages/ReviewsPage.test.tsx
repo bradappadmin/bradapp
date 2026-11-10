@@ -141,6 +141,22 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.getByText("Bay drag")).toBeInTheDocument();
+    expect(document.querySelectorAll(".car-card-media").length).toBeGreaterThanOrEqual(2);
+    expect(document.querySelectorAll(".bay-rise").length).toBeGreaterThanOrEqual(2);
+    const studioImgs = [...document.querySelectorAll(".car-card-media img")];
+    expect(studioImgs.length).toBeGreaterThanOrEqual(2);
+    expect(
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+    ).toBe(true);
+    expect(
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=")),
+    ).toBe(true);
+    expect(screen.getAllByRole("link", { name: /Open car Porsche 911/i }).length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(
+      screen.getAllByRole("button", { name: /Compare Porsche 911/i }).length,
+    ).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Newest" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Oldest" })).toBeInTheDocument();

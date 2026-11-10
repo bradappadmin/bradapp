@@ -408,11 +408,11 @@ export function ReviewsPage() {
               const hasActions = relatedCars.length > 0;
 
               return (
-                <li key={review.id}>
-                  <div className="play-panel overflow-hidden rounded-md border transition hover:border-lime/30 hover:bg-white/[0.02]">
+                <li key={review.id} className="bay-rise">
+                  <div className="car-card-media play-panel overflow-hidden rounded-md border border-white/10 bg-bay-deep/40">
                     <Link
                       to={`/reviews/${review.id}`}
-                      className="flex gap-4 p-4 no-underline sm:items-center sm:justify-between sm:p-5"
+                      className="group flex gap-4 p-4 no-underline sm:items-center sm:justify-between sm:p-5"
                     >
                       <ReviewCarsMedia
                         type={review.type ?? "review"}

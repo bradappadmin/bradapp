@@ -346,21 +346,25 @@
     inset 0 -1px 0 0 rgba(244, 63, 94, 0.2);
 }
 
-.car-card-media [data-bay-frame="card"] img {
+.car-card-media [data-bay-frame="card"] img,
+.car-card-media [data-bay-frame="thumb"] img {
   transition: transform 0.5s ease;
   transform: scale(1.1);
   transform-origin: center bottom;
 }
 
 .car-card-media:hover [data-bay-frame="card"] img,
-.car-card-media:focus-within [data-bay-frame="card"] img {
+.car-card-media:focus-within [data-bay-frame="card"] img,
+.car-card-media:hover [data-bay-frame="thumb"] img,
+.car-card-media:focus-within [data-bay-frame="thumb"] img {
   transform: scale(1.15);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .car-card-media,
   .car-card-media::after,
-  .car-card-media [data-bay-frame="card"] img {
+  .car-card-media [data-bay-frame="card"] img,
+  .car-card-media [data-bay-frame="thumb"] img {
     transition: none;
   }
 
@@ -370,7 +374,9 @@
   }
 
   .car-card-media:hover [data-bay-frame="card"] img,
-  .car-card-media:focus-within [data-bay-frame="card"] img {
+  .car-card-media:focus-within [data-bay-frame="card"] img,
+  .car-card-media:hover [data-bay-frame="thumb"] img,
+  .car-card-media:focus-within [data-bay-frame="thumb"] img {
     transform: scale(1.1);
   }
 }

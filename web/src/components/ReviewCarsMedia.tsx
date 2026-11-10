@@ -1,8 +1,19 @@
 import type { ReviewCar, ReviewType } from "../api";
-import { ReviewCarThumb } from "./ReviewCarThumb";
+import { ReviewCarThumb, type ReviewCarVisualData } from "./ReviewCarThumb";
 
 function carLabel(car: Pick<ReviewCar, "make" | "model" | "trimName">): string {
   return `${car.make} ${car.model}${car.trimName ? ` ${car.trimName}` : ""}`;
+}
+
+function toVisualCar(car: ReviewCar): ReviewCarVisualData {
+  return {
+    make: car.make,
+    model: car.model,
+    trimName: car.trimName,
+    bodyType: car.bodyType,
+    colour: car.colour,
+    year: car.listingYear,
+  };
 }
 
 type ReviewCarsMediaProps = {
@@ -33,12 +44,12 @@ export function ReviewCarsMedia({
         ) : null}
         <div className={`grid grid-cols-2 gap-1 ${size === "card" ? "gap-2" : ""}`}>
           <ReviewCarThumb
-            car={car}
+            car={toVisualCar(car)}
             size={size}
             className="rounded-md border border-white/10"
           />
           <ReviewCarThumb
-            car={carB}
+            car={toVisualCar(carB)}
             size={size}
             className="rounded-md border border-white/10"
           />
@@ -49,7 +60,11 @@ export function ReviewCarsMedia({
 
   return (
     <div className={`relative ${className}`}>
-      <ReviewCarThumb car={car} size={size} className="rounded-md border border-white/10" />
+      <ReviewCarThumb
+        car={toVisualCar(car)}
+        size={size}
+        className="rounded-md border border-white/10"
+      />
     </div>
   );
 }
