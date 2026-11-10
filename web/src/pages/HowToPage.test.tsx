@@ -65,6 +65,14 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Open profile from Play" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Weekly Top Trumps cup" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Find your rank on the leaderboard" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("leaderboard-your-rank")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Top Trumps peek on leaderboard cars" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("leaderboard-trump-stats")).not.toBeNull();
     expect(document.getElementById("play-rematch")).not.toBeNull();
     expect(
       screen.getByRole("heading", { name: "Open car from Match history" }),
@@ -835,6 +843,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/leaderboard Challenge and Offer trade/i)).toBeInTheDocument();
     expect(screen.getByText(/leaderboard You highlight and Jump to my rank/i)).toBeInTheDocument();
     expect(
+      screen.getByText(
+        /leaderboard highlight Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("heading", { name: "Find your rank on the leaderboard" }),
     ).toBeInTheDocument();
     expect(
@@ -849,8 +862,25 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Your rank You highlight and Jump to my rank are the next step/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Top Trumps peek on highlight cars is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Top Trumps peek on leaderboard cars" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /each photo-first highlight garage car shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars \/ Favourites \/ My cars/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Empty-bay rows stay without a peek/i)).toBeInTheDocument();
+    expect(
       screen.getByText(
         /You badge on your standings \/ cup \/ podium row with Jump to my rank when scrolled away/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /highlight cars with Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
@@ -1178,10 +1208,14 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/leaderboard",
     );
-    expect(screen.getByRole("link", { name: "Open Leaderboard" })).toHaveAttribute(
-      "href",
-      "/leaderboard",
+    expect(screen.getAllByRole("link", { name: "Open Leaderboard" }).length).toBeGreaterThanOrEqual(
+      2,
     );
+    expect(
+      screen
+        .getAllByRole("link", { name: "Open Leaderboard" })
+        .every((a) => a.getAttribute("href") === "/leaderboard"),
+    ).toBe(true);
     expect(screen.getAllByRole("link", { name: "Open Trades" }).length).toBeGreaterThanOrEqual(2);
     expect(
       screen
