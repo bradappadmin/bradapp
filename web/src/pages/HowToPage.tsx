@@ -135,7 +135,14 @@ const STEPS: Step[] = [
   {
     id: "compare-challenge",
     title: "Challenge from Compare",
-    body: "On Compare, Challenge under a studio hero deep-links Play with that member and car ready (/play?opponent=…&theirCar=…). The CTA hides for bay stock, when the owner is missing, or when the owner is you — signed-out viewers get Sign in to challenge when a member owns that side. Category winners, Specs, and empty-bay CTAs stay.",
+    body: "On Compare, Challenge under a studio hero deep-links Play with that member and car ready (/play?opponent=…&theirCar=…). The CTA hides for bay stock, when the owner is missing, or when the owner is you — signed-out viewers get Sign in to challenge or trade when a member owns that side. Category winners, Specs, and empty-bay CTAs stay. Offer trade from Compare is the next step.",
+    to: "/compare",
+    cta: "Open Compare",
+  },
+  {
+    id: "compare-offer-trade",
+    title: "Offer trade from Compare",
+    body: "On Compare, Offer trade under a studio hero deep-links Trades compose with that member and car ready (/trades?with=…&theirCar=…). The CTA hides for bay stock, when the owner is missing, or when the owner is you — Challenge stays on the same hero when challengeable. Category winners, Specs, and empty-bay CTAs stay.",
     to: "/compare",
     cta: "Open Compare",
   },
@@ -403,7 +410,8 @@ export function HowToPage() {
             Power / 0–60 / Top speed), home Recently viewed Compare into the shared tray with Cars /
             My cars, Compare Top Trumps category winners (Power / 0–60 / Top speed, Play rules),
             Compare Challenge → Play (/play?opponent=&theirCar=; hidden for self / house /
-            missing),
+            missing), Compare Offer trade → Trades (/trades?with=&theirCar=; hidden for self /
+            house / missing),
             Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
             missing), Family activity Open member (/members/:id when an actor is known; hidden for
             self / missing / house), Favourites Compare into that same tray, Favourites bay value
@@ -597,9 +605,9 @@ export function HowToPage() {
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
               ready), Compare on Favourites / Cars / My cars / Reviews, or Compare on home Recently
               viewed (shared tray); Category winners under the studio heroes for Power / 0–60 / Top
-              speed (Play rules; ties neutral); Challenge → /play?opponent=&theirCar= on a member-owned
-              hero (hidden for self / house / missing); empty bay sends you to Favourites or Browse
-              cars.
+              speed (Play rules; ties neutral); Challenge → /play?opponent=&theirCar= and Offer trade →
+              /trades?with=&theirCar= on a member-owned hero (hidden for self / house / missing);
+              empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">

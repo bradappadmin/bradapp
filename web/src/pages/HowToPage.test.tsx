@@ -503,9 +503,17 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Offer trade from Compare is the next step/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Offer trade from Compare" })).toBeInTheDocument();
+    expect(document.getElementById("compare-offer-trade")).not.toBeNull();
+    expect(
       screen.getByText(
-        /The CTA hides for bay stock, when the owner is missing, or when the owner is you/i,
+        /Offer trade under a studio hero deep-links Trades compose with that member and car ready \(\/trades\?with=/i,
       ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Challenge stays on the same hero when challengeable/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -520,6 +528,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Compare Challenge → Play \(\/play\?opponent=&theirCar=; hidden for self \/ house \/ missing\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare Offer trade → Trades \(\/trades\?with=&theirCar=; hidden for self \/ house \/ missing\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -917,7 +930,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Challenge → \/play\?opponent=&theirCar= on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
+        /Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Challenge → \/play\?opponent=&theirCar= and Offer trade → \/trades\?with=&theirCar= on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1021,7 +1034,7 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Favourites" })
         .every((a) => a.getAttribute("href") === "/favourites"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(3);
     expect(
       screen.getAllByRole("link", { name: "Open Compare" }).every((a) => a.getAttribute("href") === "/compare"),
     ).toBe(true);
