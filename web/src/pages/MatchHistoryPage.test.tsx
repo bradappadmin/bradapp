@@ -179,7 +179,28 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Rematch" })).toBeInTheDocument();
   });
 
-  it("shows empty filter state", async () => {
+  it("shows Empty bay and Play when there is no history", async () => {
+    vi.mocked(api.fetchTopTrumpsHistory).mockResolvedValue({ matches: [] });
+
+    render(
+      <MemoryRouter initialEntries={["/play/history"]}>
+        <AuthProvider>
+          <MatchHistoryPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Empty bay")).toBeInTheDocument();
+    const empty = screen.getByLabelText("Empty match history bay");
+    expect(empty).toBeInTheDocument();
+    expect(empty.querySelector('a[href="/play"]')?.textContent).toMatch(/^Play$/);
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Filter results" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Rematch/i })).not.toBeInTheDocument();
+  });
+
+  it("shows No matches and Clear filter when Wins/Losses yields none", async () => {
+    const user = userEvent.setup();
     vi.mocked(api.fetchTopTrumpsHistory).mockResolvedValue({
       matches: [
         {
@@ -214,14 +235,34 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
       <MemoryRouter initialEntries={["/play/history?result=losses"]}>
         <AuthProvider>
           <Routes>
-            <Route path="/play/history" element={<MatchHistoryPage />} />
+            <Route
+              path="/play/history"
+              element={
+                <>
+                  <MatchHistoryPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
           </Routes>
         </AuthProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    const emptyFilter = screen.getByLabelText("No matching match history");
+    expect(emptyFilter).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Filter results" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear filter" })).toBeInTheDocument();
+    expect(emptyFilter.querySelector('a[href="/play"]')?.textContent).toMatch(/^Play$/);
+    expect(screen.queryByRole("link", { name: /Rematch/i })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear filter" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("play-history-params").textContent).toBe("");
+    });
+    expect(screen.getByText("vs House")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rematch vs house" })).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });
