@@ -44,8 +44,15 @@ describe("WeeklyCupPanel", () => {
     expect(
       screen.getByRole("link", { name: /Challenge Bay Friend to Top Trumps/i }),
     ).toHaveAttribute("href", "/play?opponent=7");
+    expect(screen.getByRole("link", { name: /Offer trade with Bay Friend/i })).toHaveAttribute(
+      "href",
+      "/trades?with=7",
+    );
     expect(
       screen.queryByRole("link", { name: /Challenge Member to Top Trumps/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Offer trade with Member/i }),
     ).not.toBeInTheDocument();
   });
 

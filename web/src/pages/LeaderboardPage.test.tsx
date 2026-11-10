@@ -166,12 +166,22 @@ describe("LeaderboardPage Midnight Garage UI", () => {
       "/play?opponent=7",
       "/play?opponent=9",
     ]);
+    const standingsTrades = standings!.querySelectorAll(
+      'a[aria-label^="Offer trade with "][href^="/trades?with="]',
+    );
+    expect([...standingsTrades].map((a) => a.getAttribute("href"))).toEqual([
+      "/trades?with=7",
+      "/trades?with=9",
+    ]);
     expect(
       screen.queryByRole("link", { name: /Challenge Member to Top Trumps/i }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Offer trade with Member/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it("deep-links Challenge to Top Trumps from standings and cup for other members", async () => {
+  it("deep-links Challenge and Offer trade from standings and cup for other members", async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -193,6 +203,10 @@ describe("LeaderboardPage Midnight Garage UI", () => {
       "Challenge Bay Friend to Top Trumps",
     );
     expect(standingsChallenge).toHaveTextContent("Challenge to Top Trumps");
+    const standingsTrade = standings!.querySelector('a[href="/trades?with=7"]');
+    expect(standingsTrade).not.toBeNull();
+    expect(standingsTrade).toHaveAttribute("aria-label", "Offer trade with Bay Friend");
+    expect(standingsTrade).toHaveTextContent("Offer trade");
 
     const cupStandings = screen.getByLabelText("This week Top Trumps cup standings");
     const cupChallenge = cupStandings.querySelector('a[href="/play?opponent=7"]');
@@ -201,8 +215,13 @@ describe("LeaderboardPage Midnight Garage UI", () => {
       "aria-label",
       "Challenge Bay Friend to Top Trumps",
     );
+    const cupTrade = cupStandings.querySelector('a[href="/trades?with=7"]');
+    expect(cupTrade).not.toBeNull();
+    expect(cupTrade).toHaveAttribute("aria-label", "Offer trade with Bay Friend");
     expect(cupStandings.querySelector('a[href="/play?opponent=2"]')).toBeNull();
+    expect(cupStandings.querySelector('a[href="/trades?with=2"]')).toBeNull();
     expect(standings!.querySelector('a[href="/play?opponent=2"]')).toBeNull();
+    expect(standings!.querySelector('a[href="/trades?with=2"]')).toBeNull();
   });
 
   it("searches standings by display name and keeps the podium", async () => {

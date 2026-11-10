@@ -330,7 +330,7 @@ export function LeaderboardPage() {
           <ol className="flex flex-col gap-3">
             {visible.map((entry) => {
               const isYou = Boolean(user && entry.id === user.id);
-              const canChallenge = Boolean(user && !isYou);
+              const canAct = Boolean(user && !isYou);
               const snippet = bioSnippet(entry.bio);
               const car = entry.highlightCar;
               const carTitle = car
@@ -394,14 +394,23 @@ export function LeaderboardPage() {
                       </div>
                     </div>
                   </Link>
-                  {canChallenge ? (
-                    <Link
-                      to={`/play?opponent=${entry.id}`}
-                      className="shrink-0 rounded-md border border-lime/40 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10 sm:self-center"
-                      aria-label={`Challenge ${entry.displayName} to Top Trumps`}
-                    >
-                      Challenge to Top Trumps
-                    </Link>
+                  {canAct ? (
+                    <div className="flex shrink-0 flex-wrap gap-2 sm:self-center">
+                      <Link
+                        to={`/play?opponent=${entry.id}`}
+                        className="rounded-md border border-lime/40 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                        aria-label={`Challenge ${entry.displayName} to Top Trumps`}
+                      >
+                        Challenge to Top Trumps
+                      </Link>
+                      <Link
+                        to={`/trades?with=${entry.id}`}
+                        className="rounded-md border border-white/15 px-3 py-2 text-center font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                        aria-label={`Offer trade with ${entry.displayName}`}
+                      >
+                        Offer trade
+                      </Link>
+                    </div>
                   ) : null}
                 </li>
               );
