@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { MatchHistoryCar, MatchHistoryItem } from "../api";
 import { useAuth } from "../auth-context";
@@ -16,6 +16,12 @@ import {
   matchHistoryRematchHref,
   matchHistoryRematchLabel,
 } from "../match-history-rematch";
+import {
+  filterPlayHistoryByResult,
+  parsePlayHistoryResultGroup,
+  PLAY_HISTORY_RESULT_OPTIONS,
+  type PlayHistoryResultGroup,
+} from "../play-history-result-filter";
 
 /** History payload has make/model but not paint — Midnight Black keeps studio thumbs on-brand. */
 const HISTORY_STUDIO_COLOUR = "Midnight Black";
@@ -115,9 +121,17 @@ function MatchCarThumb({
 
 export function MatchHistoryPage() {
   const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const resultGroup = parsePlayHistoryResultGroup(searchParams.get("result"));
   const [matches, setMatches] = useState<MatchHistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const visible = useMemo(
+    () => filterPlayHistoryByResult(matches, resultGroup),
+    [matches, resultGroup],
+  );
+  const filtersOn = resultGroup !== "all";
 
   useEffect(() => {
     if (!user) return;
@@ -146,6 +160,16 @@ export function MatchHistoryPage() {
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
+  }
+
+  function setResultGroup(next: PlayHistoryResultGroup) {
+    const params = new URLSearchParams();
+    if (next !== "all") params.set("result", next);
+    setSearchParams(params, { replace: true });
+  }
+
+  function onClearFilters() {
+    setResultGroup("all");
   }
 
   const wins = matches.filter((m) => m.result === "win").length;
@@ -200,6 +224,67 @@ export function MatchHistoryPage() {
           </div>
         </header>
 
+        {matches.length > 0 || filtersOn ? (
+          <section
+            className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+            aria-labelledby="match-history-filter-heading"
+          >
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+              <h2
+                id="match-history-filter-heading"
+                className="font-display text-lg text-mist sm:text-xl"
+              >
+                Filter results
+              </h2>
+              <p className="text-xs text-steel">Stays in the URL</p>
+            </div>
+            <div className="mt-4">
+              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">Result</p>
+              <div
+                className="flex flex-wrap gap-2"
+                role="group"
+                aria-label="Filter matches by result"
+              >
+                {PLAY_HISTORY_RESULT_OPTIONS.map((option) => {
+                  const active = resultGroup === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setResultGroup(option.id)}
+                      className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                        active
+                          ? "border-lime/50 bg-lime/10 text-lime"
+                          : "border-white/15 text-mist hover:border-lime/35 hover:text-lime"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {filtersOn ? (
+              <p className="mt-4 text-sm text-steel">
+                Showing{" "}
+                {!loading ? (
+                  <>
+                    {visible.length} of {matches.length}{" "}
+                    {matches.length === 1 ? "match" : "matches"}
+                  </>
+                ) : (
+                  "…"
+                )}{" "}
+                ·{" "}
+                <span className="font-display text-lime">
+                  {PLAY_HISTORY_RESULT_OPTIONS.find((o) => o.id === resultGroup)?.label}
+                </span>
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
 
@@ -218,12 +303,33 @@ export function MatchHistoryPage() {
           </div>
         ) : null}
 
-        {matches.length > 0 ? (
+        {!loading && matches.length > 0 && visible.length === 0 ? (
+          <div
+            className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center"
+            role="status"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              No{" "}
+              {resultGroup === "wins" ? "wins" : resultGroup === "losses" ? "losses" : "matches"} in
+              this bay yet. Clear the filter to see the full reel.
+            </p>
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+            >
+              Clear filter
+            </button>
+          </div>
+        ) : null}
+
+        {visible.length > 0 ? (
           <ul
             className="bay-rise-delay mt-8 flex flex-col gap-3"
             aria-label="Top Trumps match history"
           >
-            {matches.map((match) => (
+            {visible.map((match) => (
               <li
                 key={match.id}
                 className={`play-panel rounded-md border p-4 text-sm sm:p-5 ${resultRowClass(match.result)}`}
