@@ -157,6 +157,10 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
     expect(await screen.findByRole("heading", { name: "Owned" })).toBeInTheDocument();
     expect(screen.getByText(/Garage value \d/i)).toBeInTheDocument();
+    expect(screen.getByText("Top Trumps peek")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Top Trumps peek under the studio photo \(Power \/ 0–60 \/ Top speed\)/i),
+    ).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Garage bay value" })).toBeInTheDocument();
     // Strip sums listing coin prices on held cars (420 + 520 + 400) — sold history excluded.
     expect(screen.getByRole("heading", { name: /Bay value 1,340 BC/i })).toBeInTheDocument();
@@ -181,6 +185,15 @@ describe("GaragePage Midnight Garage UI", () => {
       "href",
       "/cars/10",
     );
+    // Owned + for-sale media cards share the catalogue Top Trumps peek under the photo.
+    const peeks = screen.getAllByLabelText("Top Trumps peek");
+    expect(peeks.length).toBeGreaterThanOrEqual(3);
+    expect(peeks[0].textContent).toMatch(/Power/);
+    expect(peeks[0].textContent).toMatch(/0–60/);
+    expect(peeks[0].textContent).toMatch(/Top speed/);
+    expect(screen.getByText("502")).toBeInTheDocument();
+    expect(screen.getByText("3.2s")).toBeInTheDocument();
+    expect(screen.getByText("197 mph")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "List for sale" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Update price" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();

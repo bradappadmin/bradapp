@@ -425,9 +425,10 @@ export function GaragePage() {
             </h1>
             <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
             <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
-              Your bay — list owned cars for Brad Coins, change the price, or unlist. Pin one as the
-              public showcase hero. Garage value is the sum of each car’s list / fair price. No real
-              money leaves this bay.
+              Your bay — list owned cars for Brad Coins, change the price, or unlist. Owned and
+              for-sale cards keep a compact Top Trumps peek under the studio photo (Power / 0–60 /
+              Top speed), same as Cars and Favourites. Pin one as the public showcase hero. Garage
+              value is the sum of each car’s list / fair price. No real money leaves this bay.
             </p>
             {!loading ? (
               <div className="mt-4 flex flex-wrap gap-2" aria-label="Garage bay notes">
@@ -438,6 +439,9 @@ export function GaragePage() {
                 ) : null}
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   Garage value {formatCoins(garageValue)}
+                </span>
+                <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  Top Trumps peek
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {filtersOn
