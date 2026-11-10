@@ -6,6 +6,7 @@ import type { ListingDetail } from "../cars";
 import { formatCoins, listingTitle } from "../cars";
 import {
   clearCompareSelection,
+  compareHref,
   loadCompareSelection,
   type ComparePick,
 } from "../compare-selection";
@@ -120,48 +121,71 @@ export function ComparePage() {
         </header>
 
         {!hasPair ? (
-          <div className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5">
-            <p className="text-sm text-steel">
-              {picks.length === 0
-                ? "No cars selected yet."
+          <div
+            className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-12 text-center sm:py-14"
+            role="status"
+            aria-label="Empty compare bay"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">
+              {picks.length >= 2
+                ? "Ready to compare"
                 : picks.length === 1
-                  ? "One car selected — pick a second from Cars or Favourites."
-                  : "Two cars ready — open the side-by-side view from the tray on Cars or Favourites."}
+                  ? "Need one more car"
+                  : "Empty bay"}
             </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link
-                to="/cars"
-                className="rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
-              >
-                Pick from Cars
-              </Link>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              {picks.length >= 2
+                ? "Two cars are queued — open the side-by-side bay, or clear and pick again from Favourites or Cars."
+                : picks.length === 1
+                  ? "One car is queued. Tick a second from Favourites, or browse the catalogue and add another."
+                  : "Compare needs two cars. Save a few to Favourites and tick exactly two, or pick from the catalogue."}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              {picks.length >= 2 ? (
+                <Link
+                  to={compareHref(picks)}
+                  className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+                >
+                  Open side-by-side
+                </Link>
+              ) : null}
               {user ? (
                 <Link
                   to="/favourites"
-                  className="rounded-md border border-lime/40 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                  className={
+                    picks.length >= 2
+                      ? "inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                      : "bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+                  }
                 >
-                  Pick from Favourites
+                  Favourites
                 </Link>
               ) : (
                 <Link
                   to="/signin"
-                  className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                  className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
                 >
                   Sign in for Favourites
                 </Link>
               )}
+              <Link
+                to="/cars"
+                className="inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Browse cars
+              </Link>
               {picks.length > 0 ? (
                 <button
                   type="button"
                   onClick={onClearTray}
-                  className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist transition hover:border-rose hover:text-rose"
+                  className="inline-flex items-center justify-center rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist transition hover:border-rose hover:text-rose"
                 >
                   Clear picks
                 </button>
               ) : null}
             </div>
             {picks.length > 0 ? (
-              <ul className="mt-6 list-none space-y-2 border-t border-white/10 p-0 pt-4 text-sm text-mist">
+              <ul className="mx-auto mt-6 max-w-lg list-none space-y-2 border-t border-white/10 p-0 pt-4 text-left text-sm text-mist">
                 {picks.map((pick) => (
                   <li key={pick.id}>
                     {listingTitle(pick)} · {formatCoins(pick.coinPrice)} ·{" "}
