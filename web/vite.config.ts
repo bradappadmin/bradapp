@@ -8,7 +8,15 @@ const apiTarget = "http://127.0.0.1:5174";
 /** HTML navigations stay on the SPA; XHR/fetch still hit the API. */
 const spaBypass: NonNullable<ProxyOptions["bypass"]> = (req) => {
   const accept = req.headers.accept ?? "";
-  if (accept.includes("text/html")) {
+  const mode = String(req.headers["sec-fetch-mode"] ?? "");
+  const dest = String(req.headers["sec-fetch-dest"] ?? "");
+  // Browsers send text/html (and often sec-fetch-mode=navigate) for document loads.
+  // API clients send application/json or omit HTML — those stay proxied.
+  if (
+    accept.includes("text/html") ||
+    mode === "navigate" ||
+    dest === "document"
+  ) {
     return "/index.html";
   }
 };
