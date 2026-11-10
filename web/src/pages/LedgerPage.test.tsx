@@ -1,9 +1,14 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { LedgerPage } from "./LedgerPage";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="ledger-params">{params.toString()}</div>;
+}
 
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
@@ -79,7 +84,7 @@ describe("LedgerPage Midnight Garage UI", () => {
     });
   });
 
-  it("shows bay hierarchy, balance panel, filter chips, and labelled ledger rows", async () => {
+  it("shows bay hierarchy, balance panel, find search, filter chips, and labelled ledger rows", async () => {
     render(
       <MemoryRouter initialEntries={["/ledger"]}>
         <AuthProvider>
@@ -93,6 +98,7 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
     expect(await screen.findByLabelText("Ledger bay notes")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "History" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
     expect(screen.getByLabelText("Filter ledger by reason")).toBeInTheDocument();
     expect(screen.getByLabelText("Brad Coin ledger entries")).toBeInTheDocument();
 
@@ -177,5 +183,66 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
     expect(screen.queryByRole("heading", { name: "History" })).not.toBeInTheDocument();
+  });
+
+  it("searches ledger by reason/note and keeps group in the URL", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/ledger"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/ledger"
+              element={
+                <>
+                  <LedgerPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
+    const input = screen.getByRole("searchbox", {
+      name: /Search ledger by reason or note/i,
+    });
+    await user.clear(input);
+    await user.type(input, "streak");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("ledger-params").textContent).toContain("q=streak");
+    });
+    const entries = screen.getByLabelText("Brad Coin ledger entries");
+    expect(entries).toHaveTextContent("Win streak");
+    expect(entries).not.toHaveTextContent("Buy");
+    expect(entries).not.toHaveTextContent("Daily");
+
+    await user.click(screen.getByRole("button", { name: "Bonuses" }));
+    await waitFor(() => {
+      const text = screen.getByTestId("ledger-params").textContent ?? "";
+      expect(text).toContain("q=streak");
+      expect(text).toContain("group=bonuses");
+    });
+    expect(screen.getByLabelText("Brad Coin ledger entries")).toHaveTextContent("Win streak");
+  });
+
+  it("shows empty search state", async () => {
+    render(
+      <MemoryRouter initialEntries={["/ledger?q=zzzz"]}>
+        <AuthProvider>
+          <LedgerPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Filter ledger by reason")).toBeInTheDocument();
   });
 });

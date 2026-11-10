@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { LedgerEntry } from "../api";
@@ -6,6 +6,7 @@ import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { filterLedgerByEntryQuery } from "../ledger-entry-search";
 import { ledgerDirectionLabel, ledgerReasonLabel } from "../ledger-labels";
 import {
   filterLedgerByReasonGroup,
@@ -14,10 +15,15 @@ import {
   type LedgerReasonGroup,
 } from "../ledger-reason-filter";
 
+const fieldClass =
+  "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
+
 export function LedgerPage() {
   const { user, loading: authLoading, setUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const reasonGroup = parseLedgerReasonGroup(searchParams.get("group"));
+  const qFromUrl = (searchParams.get("q") ?? "").trim();
+  const [draft, setDraft] = useState(qFromUrl);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,25 +58,59 @@ export function LedgerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when signed-in user id changes
   }, [user?.id]);
 
-  const visibleLedger = useMemo(
+  useEffect(() => {
+    setDraft(qFromUrl);
+  }, [qFromUrl]);
+
+  // Filter-as-you-type: debounce URL updates (client filter over the loaded list).
+  useEffect(() => {
+    const next = draft.trim();
+    if (next === qFromUrl) return;
+    const timer = window.setTimeout(() => {
+      writeParams(next, reasonGroup);
+    }, 280);
+    return () => window.clearTimeout(timer);
+  }, [draft, qFromUrl, reasonGroup]);
+
+  const groupedLedger = useMemo(
     () => filterLedgerByReasonGroup(ledger, reasonGroup),
     [ledger, reasonGroup],
   );
+  const visibleLedger = useMemo(
+    () => filterLedgerByEntryQuery(groupedLedger, qFromUrl),
+    [groupedLedger, qFromUrl],
+  );
+  const filtersOn = Boolean(qFromUrl) || reasonGroup !== "all";
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
 
+  function writeParams(nextQ: string, nextGroup: LedgerReasonGroup) {
+    const params = new URLSearchParams();
+    const q = nextQ.trim();
+    if (q) params.set("q", q);
+    if (nextGroup !== "all") params.set("group", nextGroup);
+    setSearchParams(params, { replace: true });
+  }
+
   function setReasonGroup(next: LedgerReasonGroup) {
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        if (next === "all") params.delete("group");
-        else params.set("group", next);
-        return params;
-      },
-      { replace: true },
-    );
+    writeParams(qFromUrl, next);
+  }
+
+  function onSubmitSearch(event: FormEvent) {
+    event.preventDefault();
+    writeParams(draft, reasonGroup);
+  }
+
+  function onClearSearch() {
+    setDraft("");
+    writeParams("", reasonGroup);
+  }
+
+  function onClearFilters() {
+    setDraft("");
+    writeParams("", "all");
   }
 
   const emptyFiltered =
@@ -98,7 +138,9 @@ export function LedgerPage() {
                   {formatCoins(balance)}
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
-                  {ledger.length} {ledger.length === 1 ? "entry" : "entries"}
+                  {filtersOn
+                    ? `${visibleLedger.length} match${visibleLedger.length === 1 ? "" : "es"}`
+                    : `${ledger.length} ${ledger.length === 1 ? "entry" : "entries"}`}
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   Personal history
@@ -173,6 +215,60 @@ export function LedgerPage() {
               </p>
             </div>
 
+            <form
+              onSubmit={onSubmitSearch}
+              className="play-panel mb-4 rounded-md border p-4 sm:p-5"
+              role="search"
+              aria-label="Search ledger entries"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                <h3 className="font-display text-lg text-mist">Find an entry</h3>
+                <p className="text-xs text-steel">
+                  Reason or note · filter as you type · stays in the URL
+                </p>
+              </div>
+              <label className="mt-4 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+                Search
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <input
+                    className={fieldClass}
+                    type="search"
+                    name="q"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder="Reason or note…"
+                    aria-label="Search ledger by reason or note"
+                    autoComplete="off"
+                  />
+                  <div className="flex shrink-0 gap-2">
+                    <button
+                      type="submit"
+                      className="rounded-md bg-rose px-4 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                      Search
+                    </button>
+                    {qFromUrl ? (
+                      <button
+                        type="button"
+                        onClick={onClearSearch}
+                        className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
+                      >
+                        Clear
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </label>
+              {qFromUrl ? (
+                <p className="mt-4 text-sm text-steel">
+                  Showing {visibleLedger.length} of {groupedLedger.length}{" "}
+                  {groupedLedger.length === 1 ? "row" : "rows"}
+                  {reasonGroup !== "all" ? " in this group" : ""} for{" "}
+                  <span className="font-display text-lime">“{qFromUrl}”</span>
+                </p>
+              ) : null}
+            </form>
+
             <div
               className="mb-4 flex flex-wrap gap-2"
               role="group"
@@ -203,17 +299,24 @@ export function LedgerPage() {
                 className="play-panel rounded-md border px-5 py-10 text-center"
                 role="status"
               >
-                <p className="font-display text-lg text-mist">Nothing in this filter</p>
+                <p className="font-display text-lg text-mist">
+                  {qFromUrl ? "No matches" : "Nothing in this filter"}
+                </p>
                 <p className="mt-2 text-sm text-steel">
-                  Try All, or another group — this bay still has {ledger.length}{" "}
-                  {ledger.length === 1 ? "row" : "rows"} overall.
+                  {qFromUrl
+                    ? `No rows match “${qFromUrl}”${
+                        reasonGroup !== "all" ? " in this group" : ""
+                      }. Try another spelling or clear filters.`
+                    : `Try All, or another group — this bay still has ${ledger.length} ${
+                        ledger.length === 1 ? "row" : "rows"
+                      } overall.`}
                 </p>
                 <button
                   type="button"
-                  onClick={() => setReasonGroup("all")}
+                  onClick={onClearFilters}
                   className="mt-5 rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:bg-lime/10"
                 >
-                  Show all
+                  {qFromUrl ? "Clear search" : "Show all"}
                 </button>
               </div>
             ) : (
