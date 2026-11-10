@@ -173,11 +173,21 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(peeks[1]).toHaveTextContent("155 mph");
     expect(garageLink.querySelector('[aria-label="Top Trumps peek"]')).not.toBeNull();
 
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/42",
+    );
+    expect(screen.getByRole("link", { name: "Open car Ford Focus ST" })).toHaveAttribute(
+      "href",
+      "/cars/55",
+    );
+
     const selfLink = screen.getByRole("link", { name: /Member \(you\), rank 2, open garage/i });
     expect(selfLink).toHaveAttribute("href", "/members/2");
     expect(selfLink).toHaveTextContent("Empty bay");
     expect(selfLink.querySelector('[aria-label="Top Trumps peek"]')).toBeNull();
     expect(selfLink).toHaveTextContent("You");
+    expect(screen.queryByRole("link", { name: /Open car Member/i })).not.toBeInTheDocument();
     expect(screen.getByText("Your rank #2")).toBeInTheDocument();
     const yourRow = document.getElementById("leaderboard-your-rank");
     expect(yourRow).not.toBeNull();

@@ -14,6 +14,10 @@ import {
   filterLeaderboardMembers,
   matchesLeaderboardMemberQuery,
 } from "../leaderboard-member-filter";
+import {
+  leaderboardOpenCarAriaLabel,
+  leaderboardOpenCarHref,
+} from "../leaderboard-open-car";
 
 export const LEADERBOARD_YOUR_RANK_ID = "leaderboard-your-rank";
 
@@ -416,6 +420,7 @@ export function LeaderboardPage() {
               const carTitle = car
                 ? listingTitle({ make: car.make, model: car.model, trimName: car.trimName })
                 : null;
+              const openCarHref = car ? leaderboardOpenCarHref(car.id) : null;
               return (
                 <li
                   key={entry.id}
@@ -480,22 +485,35 @@ export function LeaderboardPage() {
                       </div>
                     </div>
                   </Link>
-                  {canAct ? (
+                  {openCarHref || canAct ? (
                     <div className="flex shrink-0 flex-wrap gap-2 sm:self-center">
-                      <Link
-                        to={`/play?opponent=${entry.id}`}
-                        className="rounded-md border border-lime/40 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
-                        aria-label={`Challenge ${entry.displayName} to Top Trumps`}
-                      >
-                        Challenge to Top Trumps
-                      </Link>
-                      <Link
-                        to={`/trades?with=${entry.id}`}
-                        className="rounded-md border border-white/15 px-3 py-2 text-center font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                        aria-label={`Offer trade with ${entry.displayName}`}
-                      >
-                        Offer trade
-                      </Link>
+                      {openCarHref && carTitle ? (
+                        <Link
+                          to={openCarHref}
+                          className="rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                          aria-label={leaderboardOpenCarAriaLabel(carTitle)}
+                        >
+                          Open car
+                        </Link>
+                      ) : null}
+                      {canAct ? (
+                        <>
+                          <Link
+                            to={`/play?opponent=${entry.id}`}
+                            className="rounded-md border border-lime/40 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10"
+                            aria-label={`Challenge ${entry.displayName} to Top Trumps`}
+                          >
+                            Challenge to Top Trumps
+                          </Link>
+                          <Link
+                            to={`/trades?with=${entry.id}`}
+                            className="rounded-md border border-white/15 px-3 py-2 text-center font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                            aria-label={`Offer trade with ${entry.displayName}`}
+                          >
+                            Offer trade
+                          </Link>
+                        </>
+                      ) : null}
                     </div>
                   ) : null}
                 </li>
