@@ -175,8 +175,83 @@ describe("TradesPage Midnight Garage UI", () => {
 
     expect(await screen.findByText(/wants a free swap/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open partner Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
     expect(screen.queryByText("Inbox is empty")).not.toBeInTheDocument();
     expect(screen.queryByRole("status", { name: /Empty trade inbox/i })).not.toBeInTheDocument();
+  });
+
+  it("links Open partner on outgoing offers and hides for self partner ids", async () => {
+    vi.mocked(api.fetchTrades).mockResolvedValue({
+      trades: [
+        {
+          id: 56,
+          status: "pending",
+          fromUserId: 2,
+          toUserId: 177,
+          fromDisplayName: "Member",
+          toDisplayName: "Sam Bay",
+          offerListingId: 9,
+          requestListingId: 12,
+          offerMake: "Porsche",
+          offerModel: "911",
+          offerTrimName: "GT3",
+          offerBodyType: "Coupe",
+          offerColour: "Racing Red",
+          offerYear: 2022,
+          requestMake: "Ford",
+          requestModel: "Focus",
+          requestTrimName: "ST",
+          requestBodyType: "Hatchback",
+          requestColour: "Blue",
+          requestYear: 2020,
+          createdAt: "2026-11-10T00:00:00.000Z",
+        },
+        {
+          id: 57,
+          status: "pending",
+          fromUserId: 2,
+          toUserId: 2,
+          fromDisplayName: "Member",
+          toDisplayName: "Member",
+          offerListingId: 9,
+          requestListingId: 10,
+          offerMake: "Porsche",
+          offerModel: "911",
+          offerTrimName: "GT3",
+          offerBodyType: "Coupe",
+          offerColour: "Racing Red",
+          offerYear: 2022,
+          requestMake: "BMW",
+          requestModel: "M3",
+          requestTrimName: "Competition",
+          requestBodyType: "Saloon",
+          requestColour: "Black",
+          requestYear: 2021,
+          createdAt: "2026-11-10T01:00:00.000Z",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/trades"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TradesPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("link", { name: "Open partner Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
+    expect(screen.queryByRole("link", { name: "Open partner Member" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Cancel" }).length).toBe(2);
+    expect(screen.getAllByText(/Waiting on/i).length).toBe(2);
   });
 
   it("refreshes the pending inbox count after accepting an offer", async () => {

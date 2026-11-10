@@ -15,6 +15,7 @@ import {
   tradeOfferCar,
   tradeRequestCar,
 } from "../trade-cars";
+import { openPartnerHref, openPartnerLabel } from "../trade-open-partner";
 
 const fieldClass =
   "rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
@@ -316,7 +317,9 @@ export function TradesPage() {
           </div>
           {loading ? <p className="text-sm text-steel">Loading…</p> : null}
           <ul className="flex flex-col gap-3">
-            {incoming.map((trade) => (
+            {incoming.map((trade) => {
+              const partnerHref = openPartnerHref(trade.fromUserId, user?.id ?? null);
+              return (
               <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-sm text-mist">
@@ -336,6 +339,15 @@ export function TradesPage() {
                   requestCar={tradeRequestCar(trade)}
                 />
                 <div className="flex flex-wrap gap-2">
+                  {partnerHref ? (
+                    <Link
+                      to={partnerHref}
+                      className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                      aria-label={`${openPartnerLabel()} ${trade.fromDisplayName}`}
+                    >
+                      {openPartnerLabel()}
+                    </Link>
+                  ) : null}
                   <button
                     type="button"
                     disabled={busy}
@@ -354,7 +366,8 @@ export function TradesPage() {
                   </button>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
           {!loading && incoming.length === 0 ? (
             <div
@@ -397,7 +410,9 @@ export function TradesPage() {
             Your outgoing offers
           </h2>
           <ul className="flex flex-col gap-3">
-            {outgoing.map((trade) => (
+            {outgoing.map((trade) => {
+              const partnerHref = openPartnerHref(trade.toUserId, user?.id ?? null);
+              return (
               <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-sm text-mist">
@@ -415,16 +430,28 @@ export function TradesPage() {
                   offerCar={tradeOfferCar(trade)}
                   requestCar={tradeRequestCar(trade)}
                 />
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void onCancel(trade.id)}
-                  className="w-fit rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-rose/40 hover:text-rose disabled:opacity-60"
-                >
-                  Cancel
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  {partnerHref ? (
+                    <Link
+                      to={partnerHref}
+                      className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                      aria-label={`${openPartnerLabel()} ${trade.toDisplayName}`}
+                    >
+                      {openPartnerLabel()}
+                    </Link>
+                  ) : null}
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void onCancel(trade.id)}
+                    className="w-fit rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-rose/40 hover:text-rose disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
           {!loading && outgoing.length === 0 ? (
             <div className="play-panel rounded-md border p-4 sm:p-5">

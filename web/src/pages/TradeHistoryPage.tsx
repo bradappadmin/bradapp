@@ -8,6 +8,7 @@ import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { offerAgainHref, offerAgainLabel } from "../trade-history-again";
+import { openPartnerHref, openPartnerLabel } from "../trade-open-partner";
 import {
   filterTradesHistoryByStatus,
   parseTradesHistoryStatusGroup,
@@ -353,6 +354,7 @@ export function TradeHistoryPage() {
             {visible.map((trade) => {
               const role = roleBadge(trade.youWere);
               const againHref = offerAgainHref(trade, user?.id ?? null);
+              const partnerHref = openPartnerHref(trade.counterpartyUserId, user?.id ?? null);
               return (
                 <li
                   key={trade.id}
@@ -390,15 +392,26 @@ export function TradeHistoryPage() {
                     </p>
                     <TradeCarThumb car={trade.youGot} side="got" />
                   </div>
-                  {againHref ? (
+                  {partnerHref || againHref ? (
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <Link
-                        to={againHref}
-                        className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
-                        aria-label={`Offer again with ${trade.counterpartyName}`}
-                      >
-                        {offerAgainLabel()}
-                      </Link>
+                      {partnerHref ? (
+                        <Link
+                          to={partnerHref}
+                          className="rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                          aria-label={`${openPartnerLabel()} ${trade.counterpartyName}`}
+                        >
+                          {openPartnerLabel()}
+                        </Link>
+                      ) : null}
+                      {againHref ? (
+                        <Link
+                          to={againHref}
+                          className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                          aria-label={`Offer again with ${trade.counterpartyName}`}
+                        >
+                          {offerAgainLabel()}
+                        </Link>
+                      ) : null}
                     </div>
                   ) : null}
                 </li>

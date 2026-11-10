@@ -149,6 +149,18 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
       "/cars/42",
     );
 
+    expect(screen.getByRole("link", { name: "Open partner Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
+    expect(screen.getByRole("link", { name: "Open partner Casey Apex" })).toHaveAttribute(
+      "href",
+      "/members/88",
+    );
+    expect(screen.getByRole("link", { name: "Open partner Bay Friend" })).toHaveAttribute(
+      "href",
+      "/members/55",
+    );
     expect(screen.getByRole("link", { name: "Offer again with Sam Bay" })).toHaveAttribute(
       "href",
       "/trades?with=177&theirCar=42",
@@ -202,6 +214,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
 
     expect(await screen.findByText(/with Member/i)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer again/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open partner/i })).not.toBeInTheDocument();
   });
 
   it("filters completed and declined with status chips in the URL", async () => {
@@ -235,6 +248,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     });
     expect(screen.getByText(/with Sam Bay/i)).toBeInTheDocument();
     expect(screen.queryByText(/with Bay Friend/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open partner Sam Bay" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Offer again with Sam Bay" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Declined" }));
@@ -245,6 +259,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     });
     expect(screen.getByText(/with Bay Friend/i)).toBeInTheDocument();
     expect(screen.queryByText(/with Sam Bay/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open partner Bay Friend" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Offer again with Bay Friend" })).toBeInTheDocument();
   });
 
