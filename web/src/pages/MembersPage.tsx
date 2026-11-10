@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { MemberSummary } from "../api";
@@ -6,6 +6,12 @@ import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import {
+  MEMBERS_CARS_GROUP_OPTIONS,
+  filterMembersByCarsGroup,
+  parseMembersCarsGroup,
+  type MembersCarsGroup,
+} from "../members-has-cars-filter";
 
 const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
@@ -14,10 +20,25 @@ export function MembersPage() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const qFromUrl = (searchParams.get("q") ?? "").trim();
+  const group = parseMembersCarsGroup(searchParams.get("group"));
   const [draft, setDraft] = useState(qFromUrl);
   const [members, setMembers] = useState<MemberSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const visible = useMemo(
+    () => filterMembersByCarsGroup(members, group),
+    [members, group],
+  );
+  const filtersOn = Boolean(qFromUrl) || group !== "all";
+
+  function writeParams(nextQ: string, nextGroup: MembersCarsGroup) {
+    const params = new URLSearchParams();
+    const q = nextQ.trim();
+    if (q) params.set("q", q);
+    if (nextGroup !== "all") params.set("group", nextGroup);
+    setSearchParams(params, { replace: true });
+  }
 
   useEffect(() => {
     setDraft(qFromUrl);
@@ -49,22 +70,31 @@ export function MembersPage() {
     const next = draft.trim();
     if (next === qFromUrl) return;
     const timer = window.setTimeout(() => {
-      if (next) setSearchParams({ q: next }, { replace: true });
-      else setSearchParams({}, { replace: true });
+      const params = new URLSearchParams();
+      if (next) params.set("q", next);
+      if (group !== "all") params.set("group", group);
+      setSearchParams(params, { replace: true });
     }, 280);
     return () => window.clearTimeout(timer);
-  }, [draft, qFromUrl, setSearchParams]);
+  }, [draft, qFromUrl, group, setSearchParams]);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    const next = draft.trim();
-    if (next) setSearchParams({ q: next }, { replace: true });
-    else setSearchParams({}, { replace: true });
+    writeParams(draft, group);
   }
 
-  function onClear() {
+  function onClearSearch() {
     setDraft("");
-    setSearchParams({}, { replace: true });
+    writeParams("", group);
+  }
+
+  function onClearFilters() {
+    setDraft("");
+    writeParams("", "all");
+  }
+
+  function setGroup(next: MembersCarsGroup) {
+    writeParams(qFromUrl, next);
   }
 
   return (
@@ -89,8 +119,8 @@ export function MembersPage() {
                   Name search
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
-                  {members.length} {members.length === 1 ? "member" : "members"}
-                  {qFromUrl ? " match" : " in the bay"}
+                  {visible.length} {visible.length === 1 ? "member" : "members"}
+                  {filtersOn ? " match" : " in the bay"}
                 </span>
               </div>
             ) : null}
@@ -144,7 +174,7 @@ export function MembersPage() {
                 {qFromUrl ? (
                   <button
                     type="button"
-                    onClick={onClear}
+                    onClick={onClearSearch}
                     className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
                   >
                     Clear
@@ -153,14 +183,59 @@ export function MembersPage() {
               </div>
             </div>
           </label>
-          {qFromUrl ? (
-            <p className="mt-3 text-sm text-steel">
-              Showing matches for{" "}
-              <span className="font-display text-lime">“{qFromUrl}”</span>
+
+          <div className="mt-5 border-t border-white/8 pt-4">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">Filter by garage</p>
+            <div
+              className="flex flex-wrap gap-2"
+              role="group"
+              aria-label="Filter members by garage cars"
+            >
+              {MEMBERS_CARS_GROUP_OPTIONS.map((option) => {
+                const active = group === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setGroup(option.id)}
+                    className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                      active
+                        ? "border-lime/50 bg-lime/10 text-lime"
+                        : "border-white/15 text-steel hover:border-lime/35 hover:text-lime"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {filtersOn ? (
+            <p className="mt-4 text-sm text-steel">
+              Showing{" "}
               {!loading ? (
                 <>
+                  {visible.length} of {members.length}{" "}
+                  {members.length === 1 ? "member" : "members"}
+                </>
+              ) : (
+                "…"
+              )}
+              {qFromUrl ? (
+                <>
                   {" "}
-                  · {members.length} {members.length === 1 ? "member" : "members"}
+                  for <span className="font-display text-lime">“{qFromUrl}”</span>
+                </>
+              ) : null}
+              {group !== "all" ? (
+                <>
+                  {" "}
+                  ·{" "}
+                  <span className="font-display text-lime">
+                    {MEMBERS_CARS_GROUP_OPTIONS.find((o) => o.id === group)?.label}
+                  </span>
                 </>
               ) : null}
             </p>
@@ -170,23 +245,25 @@ export function MembersPage() {
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
 
-        {!loading && members.length === 0 ? (
+        {!loading && visible.length === 0 ? (
           <div
             className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center"
             role="status"
           >
-            {qFromUrl ? (
+            {filtersOn ? (
               <>
                 <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
-                  Nobody in the bay matches “{qFromUrl}”. Try another spelling or clear the search.
+                  Nobody in the bay matches
+                  {qFromUrl ? ` “${qFromUrl}”` : " that garage filter"}. Try another spelling or
+                  clear the filters.
                 </p>
                 <button
                   type="button"
-                  onClick={onClear}
+                  onClick={onClearFilters}
                   className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
                 >
-                  Clear search
+                  Clear filters
                 </button>
               </>
             ) : (
@@ -200,18 +277,18 @@ export function MembersPage() {
           </div>
         ) : null}
 
-        {members.length > 0 ? (
+        {visible.length > 0 ? (
           <section className="bay-rise-delay mt-10" aria-labelledby="members-directory">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
               <h2 id="members-directory" className="font-display text-xl text-mist">
                 Directory
               </h2>
               <p className="text-sm text-steel">
-                {members.length} {members.length === 1 ? "member" : "members"}
+                {visible.length} {visible.length === 1 ? "member" : "members"}
               </p>
             </div>
             <ul className="flex flex-col gap-3">
-              {members.map((member) => {
+              {visible.map((member) => {
                 const isYou = Boolean(user && member.id === user.id);
                 const canAct = Boolean(user && !isYou && member.carCount > 0);
                 return (
