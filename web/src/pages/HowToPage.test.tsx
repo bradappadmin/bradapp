@@ -66,6 +66,8 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Offer again from Trade history" }),
     ).toBeInTheDocument();
     expect(document.getElementById("trades-offer-again")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Open car from Trades" })).toBeInTheDocument();
+    expect(document.getElementById("trades-open-car")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Open partner from Trades" })).toBeInTheDocument();
     expect(document.getElementById("trades-open-partner")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
@@ -380,6 +382,14 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Offer again hides when the other party is missing or is you/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open car from Trades is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open car takes you to the catalogue listing \(\/cars\/:id\) for offered and wanted cars when listing ids are known/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Open partner on inbox and history is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -394,6 +404,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Trade history Offer again \(\/trades\?with=\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Trades Open car \(\/cars\/:id on inbox and history when listing ids are known\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -628,12 +643,12 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/Completed\/Declined chips/i).length).toBeGreaterThanOrEqual(2);
     expect(
       screen.getByText(
-        /Open partner → \/members\/:id; Offer again deep-links the other party into Trades \(\/trades\?with=/i,
+        /Open car → \/cars\/:id when listing ids are known; Open partner → \/members\/:id; Offer again deep-links the other party into Trades \(\/trades\?with=/i,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Open partner → \/members\/:id on incoming and outgoing offers \(hidden for self\)/i,
+        /Open car → \/cars\/:id for offered and wanted cars when listing ids are known; Open partner → \/members\/:id on incoming and outgoing offers \(hidden for self\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -768,10 +783,14 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Trades" })
         .every((a) => a.getAttribute("href") === "/trades"),
     ).toBe(true);
-    expect(screen.getByRole("link", { name: "Open Trade history" })).toHaveAttribute(
-      "href",
-      "/trades/history",
+    expect(screen.getAllByRole("link", { name: "Open Trade history" }).length).toBeGreaterThanOrEqual(
+      2,
     );
+    expect(
+      screen
+        .getAllByRole("link", { name: "Open Trade history" })
+        .every((a) => a.getAttribute("href") === "/trades/history"),
+    ).toBe(true);
     expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByRole("link", { name: "Open Reviews" })[0]).toHaveAttribute(
       "href",
