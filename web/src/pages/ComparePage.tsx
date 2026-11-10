@@ -12,6 +12,7 @@ import {
 import { buildCompareRows, compareTitles, type CompareHighlight } from "../compare-specs";
 import { CompareCarPanel } from "../components/CompareCarPanel";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { compareSharePath } from "../share-link";
 
@@ -87,32 +88,39 @@ export function ComparePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-steel">Specs face-off</p>
-        <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
-          Compare
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-steel">
-          Pick two listings from{" "}
-          <Link to="/cars" className="text-lime no-underline hover:underline">
-            Cars
-          </Link>
-          {user ? (
-            <>
-              {" "}
-              or{" "}
-              <Link to="/favourites" className="text-lime no-underline hover:underline">
-                Favourites
-              </Link>
-            </>
-          ) : null}
-          , then open them side by side — studio photos first, Brad Coin price and key specs below.
-        </p>
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <header className="bay-rise">
+          <p className="text-xs uppercase tracking-[0.28em] text-steel">
+            Specs face-off · Midnight garage
+          </p>
+          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Compare
+          </h1>
+          <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
+          <p className="mt-4 max-w-2xl text-sm text-steel">
+            Pick two listings from{" "}
+            <Link to="/cars" className="text-lime no-underline hover:underline">
+              Cars
+            </Link>
+            {user ? (
+              <>
+                {" "}
+                or{" "}
+                <Link to="/favourites" className="text-lime no-underline hover:underline">
+                  Favourites
+                </Link>
+              </>
+            ) : null}
+            , then open them side by side — studio photos first, Brad Coin price and key specs
+            below.
+          </p>
+        </header>
 
         {!hasPair ? (
-          <div className="mt-8 border-t border-white/10 pt-6">
+          <div className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5">
             <p className="text-sm text-steel">
               {picks.length === 0
                 ? "No cars selected yet."
@@ -168,10 +176,14 @@ export function ComparePage() {
         ) : null}
 
         {loading && hasPair ? <p className="mt-8 text-steel">Loading…</p> : null}
-        {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
+        {error ? (
+          <p className="play-panel mt-6 rounded-md border border-rose/35 p-4 text-sm text-rose">
+            {error}
+          </p>
+        ) : null}
 
         {left && right && titles ? (
-          <div className="bay-rise mt-8">
+          <div className="bay-rise-delay mt-8">
             <div
               role="region"
               aria-label="Compare car photos"
@@ -207,8 +219,13 @@ export function ComparePage() {
               />
             </div>
 
-            <div className="mt-10 overflow-x-auto border-t border-white/10 pt-6">
-              <h2 className="font-display text-xl text-mist">Specs</h2>
+            <section
+              className="play-panel bay-rise-delay mt-8 overflow-x-auto rounded-md border p-4 sm:p-5"
+              aria-labelledby="compare-specs-heading"
+            >
+              <h2 id="compare-specs-heading" className="font-display text-xl text-mist">
+                Specs
+              </h2>
               <p className="mt-1 text-sm text-steel">
                 Lime highlights the stronger value (or lower Brad Coin price / mileage / 0–60).
               </p>
@@ -243,9 +260,13 @@ export function ComparePage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div
+              role="region"
+              className="play-panel mt-6 flex flex-wrap gap-3 rounded-md border p-4 sm:p-5"
+              aria-label="Compare actions"
+            >
               <CopyShareLinkButton
                 path={compareSharePath(left.id, right.id)}
                 label="Copy compare link"

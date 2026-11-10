@@ -56,7 +56,7 @@ const rightListing: ListingDetail = {
   seats: 5,
 };
 
-describe("ComparePage photos", () => {
+describe("ComparePage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -69,7 +69,7 @@ describe("ComparePage photos", () => {
     });
   });
 
-  it("shows studio heroes for both listings before the specs table", async () => {
+  it("shows bay hierarchy around studio heroes and the specs table", async () => {
     render(
       <MemoryRouter initialEntries={["/compare?a=9&b=11"]}>
         <AuthProvider>
@@ -82,13 +82,34 @@ describe("ComparePage photos", () => {
       </MemoryRouter>,
     );
 
+    expect(await screen.findByText(/Specs face-off · Midnight garage/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Compare" })).toBeInTheDocument();
     expect(await screen.findByRole("region", { name: "Compare car photos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Specs" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Compare actions" })).toBeInTheDocument();
     await waitFor(() => {
       const imgs = document.querySelectorAll("img");
       expect(imgs.length).toBeGreaterThanOrEqual(2);
       expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     });
     expect(screen.getByText("Brad Coin price")).toBeInTheDocument();
+  });
+
+  it("shows empty bay when no pair is selected", async () => {
+    render(
+      <MemoryRouter initialEntries={["/compare"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/compare" element={<ComparePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Specs face-off · Midnight garage/i)).toBeInTheDocument();
+    expect(screen.getByText(/No cars selected yet/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Pick from Cars/i })).toBeInTheDocument();
   });
 });

@@ -28,17 +28,19 @@ export function CompareCarPanel({
   detail,
 }: CompareCarPanelProps) {
   return (
-    <article className="overflow-hidden rounded-md border border-white/10 bg-bay-panel/50">
-      <CarVisual
-        colour={colour}
-        bodyType={bodyType}
-        make={make}
-        model={model}
-        size="hero"
-        title={title}
-        className="!mt-0 border-0"
-      />
-      <div className="space-y-1 border-t border-white/10 p-3 sm:p-4">
+    <article className="play-panel overflow-hidden rounded-md border">
+      <div className="p-2 sm:p-3">
+        <CarVisual
+          colour={colour}
+          bodyType={bodyType}
+          make={make}
+          model={model}
+          size="hero"
+          title={title}
+          className="!mt-0 border-0"
+        />
+      </div>
+      <div className="space-y-1 border-t border-white/10 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
         <Link
           to={`/cars/${listingId}`}
           className="font-display text-lg font-semibold text-mist no-underline hover:text-lime sm:text-xl"
