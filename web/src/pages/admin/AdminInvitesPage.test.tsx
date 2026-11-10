@@ -153,7 +153,7 @@ describe("AdminInvitesPage", () => {
     expect(screen.getByText("FAMILY-BAY-2026")).toBeInTheDocument();
     expect(screen.queryByText("USED-ONCE")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
     await waitFor(() => {
       expect(screen.getByTestId("admin-invites-params").textContent).not.toContain("q=");
     });
@@ -167,13 +167,22 @@ describe("AdminInvitesPage", () => {
     expect(screen.queryByText("FAMILY-BAY-2026")).not.toBeInTheDocument();
   });
 
-  it("shows empty filter state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/admin/invites?q=zzzz"]}>
         <AuthProvider>
           <ToastProvider>
             <Routes>
-              <Route path="/admin/invites" element={<AdminInvitesPage />} />
+              <Route
+                path="/admin/invites"
+                element={
+                  <>
+                    <AdminInvitesPage />
+                    <SearchParamsProbe />
+                  </>
+                }
+              />
             </Routes>
           </ToastProvider>
         </AuthProvider>
@@ -181,8 +190,28 @@ describe("AdminInvitesPage", () => {
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching invite codes")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a code" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Create invite code")).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: /Require invite code to sign up/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Copy invite code/i }),
+    ).not.toBeInTheDocument();
+
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(clearButtons[clearButtons.length - 1]!);
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-invites-params").textContent).toBe("");
+    });
+    expect(await screen.findByText("FAMILY-BAY-2026")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Copy invite code FAMILY-BAY-2026" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Create invite code")).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 
   it("copies an active invite code and toasts success", async () => {
