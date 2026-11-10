@@ -221,6 +221,39 @@ describe("AdminCoinHistoryPage member search", () => {
     });
   });
 
+  it("links Open member to the public garage from adjust rows and recent adjustments", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/coin-history"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(screen.getAllByText("Quick amount").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByRole("group", { name: /Coin adjust presets for Sam Bay/i }),
+    ).toBeInTheDocument();
+
+    const openSam = screen.getAllByRole("link", { name: "Open member Sam Bay" });
+    expect(openSam.length).toBeGreaterThanOrEqual(2);
+    expect(openSam.every((a) => a.getAttribute("href") === "/members/10")).toBe(true);
+    expect(openSam[0]).toHaveTextContent("Open member");
+
+    expect(screen.getByRole("link", { name: "Open member Brad" })).toHaveAttribute(
+      "href",
+      "/members/1",
+    );
+
+    // Find / chips stay while Open member is present.
+    expect(screen.getByRole("heading", { name: "Adjust balance" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recent adjustments" })).toBeInTheDocument();
+    expect(screen.getByText("Top-up")).toBeInTheDocument();
+  });
+
   it("shows No matches and Clear filters when Find yields none", async () => {
     const user = userEvent.setup();
     render(

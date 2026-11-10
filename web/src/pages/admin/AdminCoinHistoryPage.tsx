@@ -326,6 +326,15 @@ function AdminCoinHistoryInner() {
                   {row.role} · {row.accountStatus} ·{" "}
                   <span className="font-display text-lime">{formatCoins(row.coinBalance)}</span>
                 </p>
+                <div className="mt-3">
+                  <Link
+                    to={`/members/${row.id}`}
+                    className="inline-flex rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-2 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                    aria-label={`Open member ${row.displayName}`}
+                  >
+                    Open member
+                  </Link>
+                </div>
               </div>
               <div className="admin-panel flex flex-col gap-3 rounded-md border p-3">
                 <AdminCoinDeltaChips
@@ -409,6 +418,15 @@ function AdminCoinHistoryInner() {
                 By {row.createdByDisplayName ?? "Unknown admin"} · {formatWhen(row.createdAt)}
               </p>
               {row.note ? <p className="mt-2 text-sm text-mist">{row.note}</p> : null}
+              <div className="mt-3">
+                <Link
+                  to={`/members/${row.userId}`}
+                  className="inline-flex rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-2 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                  aria-label={`Open member ${row.userDisplayName}`}
+                >
+                  Open member
+                </Link>
+              </div>
             </div>
             <div className="sm:text-right">
               <p
