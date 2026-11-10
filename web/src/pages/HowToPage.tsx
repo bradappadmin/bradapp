@@ -107,7 +107,14 @@ const STEPS: Step[] = [
   {
     id: "play-rematch",
     title: "Rematch from Match history",
-    body: "Open Match history after a bout. Wins/Losses chips stay in the URL. On a Challenge row, Rematch deep-links Play with that opponent ready (/play?opponent=…, plus theirCar when known). House rows offer Rematch vs house straight back to Play. Rematch hides when the opponent is missing or is you — Clear filter and Play still cover empty bays. Open profile on a selected Play opponent is the next step.",
+    body: "Open Match history after a bout. Wins/Losses chips stay in the URL. On a Challenge row, Rematch deep-links Play with that opponent ready (/play?opponent=…, plus theirCar when known). House rows offer Rematch vs house straight back to Play. Rematch hides when the opponent is missing or is you — Clear filter and Play still cover empty bays. Open car from Match history is the next step.",
+    to: "/play/history",
+    cta: "Open Match history",
+  },
+  {
+    id: "play-history-open-car",
+    title: "Open car from Match history",
+    body: "On Match history rows, Open car takes you to the catalogue listing (/cars/:id) for your card when a listing id is known — and for theirs when known too (house cards often omit theirs). Rematch, Wins/Losses chips, and empty-bay CTAs stay. Open profile on a selected Play opponent is the next step.",
     to: "/play/history",
     cta: "Open Match history",
   },
@@ -311,13 +318,13 @@ export function HowToPage() {
             beside Copy code, admin inventory Open listing (/cars/:id), admin Accounts Open member
             (/members/:id), admin Coin adjustments Open member (/members/:id), Top Trumps streaks,
             Match history Rematch (PvP opponent deep-link or house
-            → Play), Play Open profile (/members/:id when a PvP opponent is selected; hidden for house
-            / self), this week’s cup standings with an Ends in countdown (Europe/London week end, +50
-            BC prize), free trades, Trade history Offer again (/trades?with=), Trades Open partner
-            (/members/:id on inbox and history; hidden for self), member gifts, drag
-            races with Sort reviews (Newest / Oldest, Title A–Z / Z–A) and Open car (/cars/:id) when a
-            listing exists, empty-bay next steps, and your bay showcase. Nothing here spends real
-            money.
+            → Play), Match history Open car (/cars/:id when listing ids are known), Play Open profile
+            (/members/:id when a PvP opponent is selected; hidden for house / self), this week’s cup
+            standings with an Ends in countdown (Europe/London week end, +50 BC prize), free trades,
+            Trade history Offer again (/trades?with=), Trades Open partner (/members/:id on inbox and
+            history; hidden for self), member gifts, drag races with Sort reviews (Newest / Oldest,
+            Title A–Z / Z–A) and Open car (/cars/:id) when a listing exists, empty-bay next steps, and
+            your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -384,8 +391,9 @@ export function HowToPage() {
               <Link to="/play/history" className="text-lime no-underline hover:underline">
                 Match history
               </Link>{" "}
-              — Wins/Losses chips; Rematch deep-links the same PvP opponent into Play, or Rematch vs
-              house → Play (hidden for missing or self).
+              — Wins/Losses chips; Open car → /cars/:id when listing ids are known; Rematch
+              deep-links the same PvP opponent into Play, or Rematch vs house → Play (hidden for
+              missing or self).
             </li>
             <li>
               <Link to="/play" className="text-lime no-underline hover:underline">
