@@ -44,7 +44,7 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars, Favourites, My cars, and home Recently viewed) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars and Quick price chips are later steps). Sort cars details follow Find, sort, and filter.",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars, Favourites, My cars, and home Recently viewed) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. View reviews (when films exist for that make/model) is a later step. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars and Quick price chips are later steps). Sort cars details follow Find, sort, and filter.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -156,9 +156,16 @@ const STEPS: Step[] = [
   {
     id: "reviews-open-car",
     title: "Open a car from a review",
-    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, empty-bay CTAs, and Copy link on a film stay.",
+    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, empty-bay CTAs, and Copy link on a film stay. View reviews from a listing is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
+  },
+  {
+    id: "listing-view-reviews",
+    title: "View reviews from a listing",
+    body: "On a catalogue listing (/cars/:id), View reviews deep-links into Video reviews Find for that make and model (/reviews?q=Make+Model) when matching films exist — the reverse of Open car from a review. The CTA hides when nothing in the reel matches. Compare, Copy link, and buy stay on the listing.",
+    to: "/cars",
+    cta: "Open Cars",
   },
   {
     id: "profile",
@@ -268,9 +275,9 @@ export function HowToPage() {
             bonuses, home login streak bay strip (+25 today, day 3 / day 7 progress), Brad Coins
             (tap the header balance for your ledger), home Recently viewed Compare into the shared
             tray with Cars / My cars, Favourites Compare into that same tray, photo-first cars with
-            Find, listing Compare and Copy link, Cars Sort the bay (Highest / Lowest price, Name
-            A–Z / Z–A), Favourites challenge and trade CTAs, Members directory Sort the bay (Name
-            A–Z /
+            Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
+            films exist), Cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), Favourites
+            challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, leaderboard You highlight and Jump to my rank, Copy link on member profiles
@@ -385,7 +392,9 @@ export function HowToPage() {
                 Cars
               </Link>{" "}
               — Find + filters; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
-              Favourites / My cars); Compare into the tray; Clear filters when nothing matches.
+              Favourites / My cars); Compare into the tray; on a listing, View reviews →
+              /reviews?q=Make+Model when films exist (hides when none); Clear filters when nothing
+              matches.
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">

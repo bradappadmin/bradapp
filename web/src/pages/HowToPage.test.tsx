@@ -65,6 +65,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(document.getElementById("reviews-sort")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Open a car from a review" })).toBeInTheDocument();
     expect(document.getElementById("reviews-open-car")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "View reviews from a listing" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("listing-view-reviews")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
@@ -197,7 +201,16 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/when two are ready you land side by side/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Copy link puts the absolute URL/i).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
-    expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /View reviews \(when films exist for that make\/model\) is a later step/i,
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/home Recently viewed Compare into the shared tray with Cars \/ My cars/i),
     ).toBeInTheDocument();
@@ -351,6 +364,20 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Drag races can show one Open car per lane when both listings are known/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/View reviews from a listing is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /View reviews deep-links into Video reviews Find for that make and model \(\/reviews\?q=Make\+Model\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The CTA hides when nothing in the reel matches/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compare, Copy link, and buy stay on the listing/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -602,8 +629,13 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
+    expect(
+      screen.getByText(
+        /on a listing, View reviews → \/reviews\?q=Make\+Model when films exist \(hides when none\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");
     expect(
       screen.getByText(
