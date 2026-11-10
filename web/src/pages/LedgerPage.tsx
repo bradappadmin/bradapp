@@ -9,11 +9,11 @@ import { SiteHeader } from "../components/SiteHeader";
 import { filterLedgerByEntryQuery } from "../ledger-entry-search";
 import { ledgerDirectionLabel, ledgerReasonLabel } from "../ledger-labels";
 import {
-  filterLedgerByReasonGroup,
-  LEDGER_REASON_GROUP_OPTIONS,
-  parseLedgerReasonGroup,
-  type LedgerReasonGroup,
-} from "../ledger-reason-filter";
+  filterLedgerByType,
+  LEDGER_TYPE_OPTIONS,
+  parseLedgerType,
+  type LedgerType,
+} from "../ledger-type-filter";
 
 const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
@@ -21,7 +21,7 @@ const fieldClass =
 export function LedgerPage() {
   const { user, loading: authLoading, setUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const reasonGroup = parseLedgerReasonGroup(searchParams.get("group"));
+  const ledgerType = parseLedgerType(searchParams.get("type"));
   const qFromUrl = (searchParams.get("q") ?? "").trim();
   const [draft, setDraft] = useState(qFromUrl);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
@@ -67,40 +67,40 @@ export function LedgerPage() {
     const next = draft.trim();
     if (next === qFromUrl) return;
     const timer = window.setTimeout(() => {
-      writeParams(next, reasonGroup);
+      writeParams(next, ledgerType);
     }, 280);
     return () => window.clearTimeout(timer);
-  }, [draft, qFromUrl, reasonGroup]);
+  }, [draft, qFromUrl, ledgerType]);
 
-  const groupedLedger = useMemo(
-    () => filterLedgerByReasonGroup(ledger, reasonGroup),
-    [ledger, reasonGroup],
+  const typedLedger = useMemo(
+    () => filterLedgerByType(ledger, ledgerType),
+    [ledger, ledgerType],
   );
   const visibleLedger = useMemo(
-    () => filterLedgerByEntryQuery(groupedLedger, qFromUrl),
-    [groupedLedger, qFromUrl],
+    () => filterLedgerByEntryQuery(typedLedger, qFromUrl),
+    [typedLedger, qFromUrl],
   );
-  const filtersOn = Boolean(qFromUrl) || reasonGroup !== "all";
+  const filtersOn = Boolean(qFromUrl) || ledgerType !== "all";
 
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
 
-  function writeParams(nextQ: string, nextGroup: LedgerReasonGroup) {
+  function writeParams(nextQ: string, nextType: LedgerType) {
     const params = new URLSearchParams();
     const q = nextQ.trim();
     if (q) params.set("q", q);
-    if (nextGroup !== "all") params.set("group", nextGroup);
+    if (nextType !== "all") params.set("type", nextType);
     setSearchParams(params, { replace: true });
   }
 
-  function setReasonGroup(next: LedgerReasonGroup) {
+  function setLedgerType(next: LedgerType) {
     writeParams(qFromUrl, next);
   }
 
   function onSubmitSearch(event: FormEvent) {
     event.preventDefault();
-    writeParams(draft, reasonGroup);
+    writeParams(draft, ledgerType);
   }
 
   function onClearFilters() {
@@ -254,11 +254,11 @@ export function LedgerPage() {
                   </div>
                 </div>
               </label>
-              {filtersOn ? (
+                  {filtersOn ? (
                 <p className="mt-4 text-sm text-steel">
                   Showing {visibleLedger.length} of {ledger.length}{" "}
                   {ledger.length === 1 ? "row" : "rows"}
-                  {reasonGroup !== "all" ? " in this group" : ""}
+                  {ledgerType !== "all" ? " in this type" : ""}
                   {qFromUrl ? (
                     <>
                       {" "}
@@ -272,16 +272,16 @@ export function LedgerPage() {
             <div
               className="mb-4 flex flex-wrap gap-2"
               role="group"
-              aria-label="Filter ledger by reason"
+              aria-label="Filter ledger by type"
             >
-              {LEDGER_REASON_GROUP_OPTIONS.map((option) => {
-                const active = reasonGroup === option.id;
+              {LEDGER_TYPE_OPTIONS.map((option) => {
+                const active = ledgerType === option.id;
                 return (
                   <button
                     key={option.id}
                     type="button"
                     aria-pressed={active}
-                    onClick={() => setReasonGroup(option.id)}
+                    onClick={() => setLedgerType(option.id)}
                     className={`rounded-md border px-3 py-1.5 font-display text-sm font-semibold transition ${
                       active
                         ? "border-lime/45 bg-lime/10 text-lime"
@@ -304,9 +304,9 @@ export function LedgerPage() {
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
                   {qFromUrl
                     ? `No rows match “${qFromUrl}”${
-                        reasonGroup !== "all" ? " in this group" : ""
+                        ledgerType !== "all" ? " in this type" : ""
                       }. Try another spelling or clear the filters.`
-                    : `No rows in this group. Try All, or clear the filters — this bay still has ${ledger.length} ${
+                    : `No rows in this type. Try All, or clear the filters — this bay still has ${ledger.length} ${
                         ledger.length === 1 ? "row" : "rows"
                       } overall.`}
                 </p>

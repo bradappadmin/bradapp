@@ -13,6 +13,7 @@ function SearchParamsProbe() {
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchLedger: vi.fn(),
 }));
 
@@ -45,9 +46,27 @@ describe("LedgerPage Midnight Garage UI", () => {
       balance: 540,
       ledger: [
         {
-          id: 4,
+          id: 6,
           delta: 25,
           balanceAfter: 540,
+          reason: "gift_received",
+          listingId: null,
+          note: "Gift from Sam",
+          createdAt: "2026-11-09T20:00:00.000Z",
+        },
+        {
+          id: 5,
+          delta: -10,
+          balanceAfter: 515,
+          reason: "gift_sent",
+          listingId: null,
+          note: "Gift to Sam",
+          createdAt: "2026-11-09T19:30:00.000Z",
+        },
+        {
+          id: 4,
+          delta: 25,
+          balanceAfter: 525,
           reason: "play_reward",
           listingId: null,
           note: "Top Trumps play",
@@ -56,7 +75,7 @@ describe("LedgerPage Midnight Garage UI", () => {
         {
           id: 3,
           delta: 15,
-          balanceAfter: 515,
+          balanceAfter: 500,
           reason: "tt_streak_bonus",
           listingId: null,
           note: "3-win streak bonus",
@@ -65,7 +84,7 @@ describe("LedgerPage Midnight Garage UI", () => {
         {
           id: 2,
           delta: 25,
-          balanceAfter: 500,
+          balanceAfter: 485,
           reason: "daily_login",
           listingId: null,
           note: "Daily login",
@@ -74,7 +93,7 @@ describe("LedgerPage Midnight Garage UI", () => {
         {
           id: 1,
           delta: -40,
-          balanceAfter: 475,
+          balanceAfter: 460,
           reason: "purchase",
           listingId: 9,
           note: "Bought listing #9",
@@ -84,7 +103,7 @@ describe("LedgerPage Midnight Garage UI", () => {
     });
   });
 
-  it("shows bay hierarchy, balance panel, find search, filter chips, and labelled ledger rows", async () => {
+  it("shows bay hierarchy, balance panel, find search, type chips, and labelled ledger rows", async () => {
     render(
       <MemoryRouter initialEntries={["/ledger"]}>
         <AuthProvider>
@@ -99,7 +118,12 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(await screen.findByLabelText("Ledger bay notes")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "History" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Filter ledger by reason")).toBeInTheDocument();
+    expect(screen.getByLabelText("Filter ledger by type")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Earn" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Spend" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Gift" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Admin" })).toBeInTheDocument();
     expect(screen.getByLabelText("Brad Coin ledger entries")).toBeInTheDocument();
 
     const entries = await screen.findByLabelText("Brad Coin ledger entries");
@@ -107,6 +131,8 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(entries).toHaveTextContent("Win streak");
     expect(entries).toHaveTextContent("Daily");
     expect(entries).toHaveTextContent("Buy");
+    expect(entries).toHaveTextContent("Gift sent");
+    expect(entries).toHaveTextContent("Gift received");
     expect(screen.getByRole("link", { name: "Listing #9" })).toHaveAttribute("href", "/cars/9");
     expect(
       screen.getAllByRole("link", { name: "Account" }).some((l) => l.getAttribute("href") === "/account"),
@@ -116,33 +142,52 @@ describe("LedgerPage Midnight Garage UI", () => {
     ).toBe(true);
   });
 
-  it("filters history by reason group via chips and URL", async () => {
+  it("filters history by type chips and URL", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/ledger"]}>
         <AuthProvider>
-          <LedgerPage />
+          <Routes>
+            <Route
+              path="/ledger"
+              element={
+                <>
+                  <LedgerPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
         </AuthProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByLabelText("Brad Coin ledger entries")).toHaveTextContent("Buy");
-    await user.click(screen.getByRole("button", { name: "Buys/Sells" }));
-    expect(screen.getByRole("button", { name: "Buys/Sells" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    const tradesOnly = screen.getByLabelText("Brad Coin ledger entries");
-    expect(tradesOnly).toHaveTextContent("Buy");
-    expect(tradesOnly).not.toHaveTextContent("Win streak");
-    expect(tradesOnly).not.toHaveTextContent("Daily");
-    expect(screen.getAllByText(/1 of 4 rows/i).length).toBeGreaterThanOrEqual(1);
+    await user.click(screen.getByRole("button", { name: "Spend" }));
+    expect(screen.getByRole("button", { name: "Spend" })).toHaveAttribute("aria-pressed", "true");
+    await waitFor(() => {
+      expect(screen.getByTestId("ledger-params").textContent).toContain("type=spend");
+    });
+    const spendOnly = screen.getByLabelText("Brad Coin ledger entries");
+    expect(spendOnly).toHaveTextContent("Buy");
+    expect(spendOnly).toHaveTextContent("Gift sent");
+    expect(spendOnly).not.toHaveTextContent("Win streak");
+    expect(spendOnly).not.toHaveTextContent("Daily");
+    expect(spendOnly).not.toHaveTextContent("Gift received");
 
-    await user.click(screen.getByRole("button", { name: "Bonuses" }));
-    const bonusesOnly = screen.getByLabelText("Brad Coin ledger entries");
-    expect(bonusesOnly).toHaveTextContent("Win streak");
-    expect(bonusesOnly).toHaveTextContent("Daily");
-    expect(bonusesOnly).not.toHaveTextContent("Buy");
+    await user.click(screen.getByRole("button", { name: "Earn" }));
+    const earnOnly = screen.getByLabelText("Brad Coin ledger entries");
+    expect(earnOnly).toHaveTextContent("Win streak");
+    expect(earnOnly).toHaveTextContent("Daily");
+    expect(earnOnly).toHaveTextContent("Gift received");
+    expect(earnOnly).not.toHaveTextContent("Buy");
+
+    await user.click(screen.getByRole("button", { name: "Gift" }));
+    const giftOnly = screen.getByLabelText("Brad Coin ledger entries");
+    expect(giftOnly).toHaveTextContent("Gift sent");
+    expect(giftOnly).toHaveTextContent("Gift received");
+    expect(giftOnly).not.toHaveTextContent("Buy");
+    expect(giftOnly).not.toHaveTextContent("Win streak");
 
     await user.click(screen.getByRole("button", { name: "Admin" }));
     expect(screen.getByText("No matches")).toBeInTheDocument();
@@ -152,16 +197,16 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(screen.getByLabelText("Brad Coin ledger entries")).toHaveTextContent("Buy");
   });
 
-  it("honours an initial group query param", async () => {
+  it("honours an initial type query param", async () => {
     render(
-      <MemoryRouter initialEntries={["/ledger?group=play"]}>
+      <MemoryRouter initialEntries={["/ledger?type=earn"]}>
         <AuthProvider>
           <LedgerPage />
         </AuthProvider>
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("button", { name: "Play" })).toHaveAttribute(
+    expect(await screen.findByRole("button", { name: "Earn" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -187,7 +232,7 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(screen.queryByRole("heading", { name: "History" })).not.toBeInTheDocument();
   });
 
-  it("searches ledger by reason/note and keeps group in the URL", async () => {
+  it("searches ledger by reason/note and keeps type in the URL", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/ledger"]}>
@@ -223,11 +268,11 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(entries).not.toHaveTextContent("Buy");
     expect(entries).not.toHaveTextContent("Daily");
 
-    await user.click(screen.getByRole("button", { name: "Bonuses" }));
+    await user.click(screen.getByRole("button", { name: "Earn" }));
     await waitFor(() => {
       const text = screen.getByTestId("ledger-params").textContent ?? "";
       expect(text).toContain("q=streak");
-      expect(text).toContain("group=bonuses");
+      expect(text).toContain("type=earn");
     });
     expect(screen.getByLabelText("Brad Coin ledger entries")).toHaveTextContent("Win streak");
   });
@@ -255,7 +300,7 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(await screen.findByText("No matches")).toBeInTheDocument();
     expect(screen.getByLabelText("No matching ledger entries")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Filter ledger by reason")).toBeInTheDocument();
+    expect(screen.getByLabelText("Filter ledger by type")).toBeInTheDocument();
     const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
     expect(clearButtons.length).toBeGreaterThanOrEqual(1);
     await user.click(clearButtons[clearButtons.length - 1]!);
