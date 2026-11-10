@@ -23,7 +23,7 @@ const STEPS: Step[] = [
   {
     id: "daily-login",
     title: "Daily login bonus",
-    body: "Once per Europe/London calendar day, signing in (or your first signed-in home load) credits +25 Brad Coins. A toast confirms it; the home wallet shows Daily login claimed with the London date. The coin ledger lists Daily login. Same day again? No second credit.",
+    body: "Once per Europe/London calendar day, signing in (or your first signed-in home load) credits +25 Brad Coins. Keep claiming on consecutive London days for login streak bonuses: day 3 +15 BC, day 7 +50 BC (the toast mentions the streak; a missed day resets it). The home wallet and Account show Login streak ×N; the coin ledger lists Daily login and Login streak. Same day again? No second credit.",
     to: "/",
     cta: "Open Home",
   },
@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
@@ -118,11 +118,11 @@ export function HowToPage() {
           </h1>
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
-            A short tour of the midnight garage: invites, the daily login bonus, Brad Coins (tap the
-            header balance for your ledger), photo-first cars with Find and Copy link, Favourites
-            challenge and trade CTAs, Top Trumps streaks and this week’s cup standings, free trades,
-            member gifts, drag races, empty-bay next steps, and your bay showcase. Nothing here
-            spends real money.
+            A short tour of the midnight garage: invites, the daily login bonus and login streak
+            bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find
+            and Copy link, Favourites challenge and trade CTAs, Top Trumps streaks and this week’s
+            cup standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
+            showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -228,7 +228,7 @@ export function HowToPage() {
                 Coin ledger
               </Link>{" "}
               — every in/out for your Brad Coins (also open from the header balance chip), with
-              reason chips including Daily login and Gifts (sign in).
+              reason chips including Daily login, Login streak, and Gifts (sign in).
             </li>
             <li>
               <Link to="/trades" className="text-lime no-underline hover:underline">

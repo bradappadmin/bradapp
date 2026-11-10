@@ -54,7 +54,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/daily login bonus/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/\+25 Brad Coins/i)).toBeInTheDocument();
     expect(screen.getByText(/Europe\/London calendar day/i)).toBeInTheDocument();
-    expect(screen.getByText(/Daily login claimed/i)).toBeInTheDocument();
+    expect(screen.getByText(/day 3 \+15 BC, day 7 \+50 BC/i)).toBeInTheDocument();
+    expect(screen.getByText(/missed day resets/i)).toBeInTheDocument();
+    expect(screen.getByText(/Login streak ×N/i)).toBeInTheDocument();
+    expect(screen.getByText(/home wallet and Account/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/login streak bonuses/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/No second credit/i)).toBeInTheDocument();
     expect(screen.getByText(/Find, filters, and price sort/i)).toBeInTheDocument();
     expect(screen.getByText(/Copy link puts the absolute URL/i)).toBeInTheDocument();
@@ -95,6 +99,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/nav badge = pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Find a car, Sort the bay/i)).toBeInTheDocument();
     expect(screen.getAllByText(/reason chips/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Login streak/i).length).toBeGreaterThan(0);
     expect(
       screen.getByText(/This week.?s cup standings beside the podium/i),
     ).toBeInTheDocument();
