@@ -8,6 +8,13 @@ import {
   parseAdminInventoryGroup,
   type AdminInventoryGroup,
 } from "../../admin-inventory-filter";
+import {
+  ADMIN_INVENTORY_SORT_OPTIONS,
+  DEFAULT_ADMIN_INVENTORY_SORT,
+  parseAdminInventorySort,
+  sortAdminInventoryListings,
+  type AdminInventorySort,
+} from "../../admin-inventory-sort";
 import { STUDIO_PAINT_COLOURS } from "../../car-image";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
@@ -32,6 +39,7 @@ function AdminInventoryInner() {
   const [searchParams, setSearchParams] = useSearchParams();
   const qFromUrl = (searchParams.get("q") ?? "").trim();
   const group = parseAdminInventoryGroup(searchParams.get("group"));
+  const sort = parseAdminInventorySort(searchParams.get("sort"));
   const [draft, setDraft] = useState(qFromUrl);
   const [tab, setTab] = useState<Tab>("listings");
   const [listings, setListings] = useState<AdminListing[]>([]);
@@ -42,17 +50,23 @@ function AdminInventoryInner() {
   const [loading, setLoading] = useState(true);
 
   const filtered = useMemo(
-    () => filterAdminInventory(listings, qFromUrl, group),
-    [listings, qFromUrl, group],
+    () =>
+      sortAdminInventoryListings(filterAdminInventory(listings, qFromUrl, group), sort),
+    [listings, qFromUrl, group, sort],
   );
   const filtersOn = Boolean(qFromUrl) || group !== "all";
   const visibleListings = filtersOn ? filtered : filtered.slice(0, LISTINGS_PREVIEW_LIMIT);
 
-  function writeParams(nextQ: string, nextGroup: AdminInventoryGroup) {
+  function writeParams(
+    nextQ: string,
+    nextGroup: AdminInventoryGroup,
+    nextSort: AdminInventorySort = sort,
+  ) {
     const params = new URLSearchParams();
     const q = nextQ.trim();
     if (q) params.set("q", q);
     if (nextGroup !== "all") params.set("group", nextGroup);
+    if (nextSort !== DEFAULT_ADMIN_INVENTORY_SORT) params.set("sort", nextSort);
     setSearchParams(params, { replace: true });
   }
 
@@ -96,26 +110,27 @@ function AdminInventoryInner() {
     const next = draft.trim();
     if (next === qFromUrl) return;
     const timer = window.setTimeout(() => {
-      const params = new URLSearchParams();
-      if (next) params.set("q", next);
-      if (group !== "all") params.set("group", group);
-      setSearchParams(params, { replace: true });
+      writeParams(next, group, sort);
     }, 280);
     return () => window.clearTimeout(timer);
-  }, [draft, qFromUrl, group, setSearchParams]);
+  }, [draft, qFromUrl, group, sort, setSearchParams]);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    writeParams(draft, group);
+    writeParams(draft, group, sort);
   }
 
   function onClearFilters() {
     setDraft("");
-    writeParams("", "all");
+    writeParams("", "all", DEFAULT_ADMIN_INVENTORY_SORT);
   }
 
   function setGroup(next: AdminInventoryGroup) {
-    writeParams(qFromUrl, next);
+    writeParams(qFromUrl, next, sort);
+  }
+
+  function setSort(next: AdminInventorySort) {
+    writeParams(qFromUrl, group, next);
   }
 
   async function saveListing(id: number, coinPrice: number, colour: string) {
@@ -305,6 +320,34 @@ function AdminInventoryInner() {
               </p>
             ) : null}
           </form>
+
+          <div
+            className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+            aria-label="Sort inventory listings"
+          >
+            <div className="min-w-0">
+              <p className="font-display text-lg text-mist">Sort the bay</p>
+              <p className="mt-1 text-sm text-steel">
+                Highest or lowest Brad Coin price, or name — same options as Cars / My cars.
+                Choice stays in the URL.
+              </p>
+            </div>
+            <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+              Sort by
+              <select
+                className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                value={sort}
+                onChange={(e) => setSort(parseAdminInventorySort(e.target.value))}
+                aria-label="Sort inventory listings"
+              >
+                {ADMIN_INVENTORY_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           <div className="mt-8 mb-2 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="font-display text-xl text-mist">Directory</h2>
