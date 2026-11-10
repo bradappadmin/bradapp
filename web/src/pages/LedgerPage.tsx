@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { LedgerEntry } from "../api";
 import { useAuth } from "../auth-context";
@@ -7,9 +7,17 @@ import { formatCoins } from "../cars";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { ledgerDirectionLabel, ledgerReasonLabel } from "../ledger-labels";
+import {
+  filterLedgerByReasonGroup,
+  LEDGER_REASON_GROUP_OPTIONS,
+  parseLedgerReasonGroup,
+  type LedgerReasonGroup,
+} from "../ledger-reason-filter";
 
 export function LedgerPage() {
   const { user, loading: authLoading, setUser } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const reasonGroup = parseLedgerReasonGroup(searchParams.get("group"));
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,9 +52,29 @@ export function LedgerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when signed-in user id changes
   }, [user?.id]);
 
+  const visibleLedger = useMemo(
+    () => filterLedgerByReasonGroup(ledger, reasonGroup),
+    [ledger, reasonGroup],
+  );
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
+
+  function setReasonGroup(next: LedgerReasonGroup) {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next === "all") params.delete("group");
+        else params.set("group", next);
+        return params;
+      },
+      { replace: true },
+    );
+  }
+
+  const emptyFiltered =
+    !loading && ledger.length > 0 && visibleLedger.length === 0;
 
   return (
     <div className="relative min-h-screen">
@@ -140,62 +168,109 @@ export function LedgerPage() {
                 History
               </h2>
               <p className="text-sm text-steel">
-                {ledger.length} {ledger.length === 1 ? "row" : "rows"}
+                {visibleLedger.length} of {ledger.length}{" "}
+                {ledger.length === 1 ? "row" : "rows"}
               </p>
             </div>
-            <ul
-              className="play-panel divide-y divide-white/10 overflow-hidden rounded-md border"
-              aria-label="Brad Coin ledger entries"
+
+            <div
+              className="mb-4 flex flex-wrap gap-2"
+              role="group"
+              aria-label="Filter ledger by reason"
             >
-              {ledger.map((entry) => {
-                const direction = ledgerDirectionLabel(entry.delta);
+              {LEDGER_REASON_GROUP_OPTIONS.map((option) => {
+                const active = reasonGroup === option.id;
                 return (
-                  <li
-                    key={entry.id}
-                    className="flex flex-wrap items-baseline justify-between gap-3 px-4 py-3.5 text-sm sm:px-5"
+                  <button
+                    key={option.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setReasonGroup(option.id)}
+                    className={`rounded-md border px-3 py-1.5 font-display text-sm font-semibold transition ${
+                      active
+                        ? "border-lime/45 bg-lime/10 text-lime"
+                        : "border-white/12 bg-bay-panel/50 text-steel hover:border-lime/35 hover:text-lime"
+                    }`}
                   >
-                    <div className="min-w-0">
-                      <p className="font-display text-mist">
-                        {ledgerReasonLabel(entry.reason)}
-                        <span className="ml-2 text-xs uppercase tracking-wide text-steel">
-                          {direction}
-                        </span>
-                      </p>
-                      <p className="mt-0.5 text-xs text-steel">
-                        {entry.note || "—"}
-                        {entry.listingId != null ? (
-                          <>
-                            {" · "}
-                            <Link
-                              to={`/cars/${entry.listingId}`}
-                              className="text-lime no-underline hover:underline"
-                            >
-                              Listing #{entry.listingId}
-                            </Link>
-                          </>
-                        ) : null}
-                      </p>
-                      <p className="mt-0.5 text-xs text-steel">
-                        {new Date(entry.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className={`font-display font-semibold ${
-                          entry.delta >= 0 ? "text-lime" : "text-rose"
-                        }`}
-                      >
-                        {entry.delta >= 0 ? "+" : ""}
-                        {entry.delta.toLocaleString()} BC
-                      </p>
-                      <p className="mt-0.5 text-xs text-steel">
-                        → {entry.balanceAfter.toLocaleString()} BC
-                      </p>
-                    </div>
-                  </li>
+                    {option.label}
+                  </button>
                 );
               })}
-            </ul>
+            </div>
+
+            {emptyFiltered ? (
+              <div
+                className="play-panel rounded-md border px-5 py-10 text-center"
+                role="status"
+              >
+                <p className="font-display text-lg text-mist">Nothing in this filter</p>
+                <p className="mt-2 text-sm text-steel">
+                  Try All, or another group — this bay still has {ledger.length}{" "}
+                  {ledger.length === 1 ? "row" : "rows"} overall.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setReasonGroup("all")}
+                  className="mt-5 rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:bg-lime/10"
+                >
+                  Show all
+                </button>
+              </div>
+            ) : (
+              <ul
+                className="play-panel divide-y divide-white/10 overflow-hidden rounded-md border"
+                aria-label="Brad Coin ledger entries"
+              >
+                {visibleLedger.map((entry) => {
+                  const direction = ledgerDirectionLabel(entry.delta);
+                  return (
+                    <li
+                      key={entry.id}
+                      className="flex flex-wrap items-baseline justify-between gap-3 px-4 py-3.5 text-sm sm:px-5"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-display text-mist">
+                          {ledgerReasonLabel(entry.reason)}
+                          <span className="ml-2 text-xs uppercase tracking-wide text-steel">
+                            {direction}
+                          </span>
+                        </p>
+                        <p className="mt-0.5 text-xs text-steel">
+                          {entry.note || "—"}
+                          {entry.listingId != null ? (
+                            <>
+                              {" · "}
+                              <Link
+                                to={`/cars/${entry.listingId}`}
+                                className="text-lime no-underline hover:underline"
+                              >
+                                Listing #{entry.listingId}
+                              </Link>
+                            </>
+                          ) : null}
+                        </p>
+                        <p className="mt-0.5 text-xs text-steel">
+                          {new Date(entry.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`font-display font-semibold ${
+                            entry.delta >= 0 ? "text-lime" : "text-rose"
+                          }`}
+                        >
+                          {entry.delta >= 0 ? "+" : ""}
+                          {entry.delta.toLocaleString()} BC
+                        </p>
+                        <p className="mt-0.5 text-xs text-steel">
+                          → {entry.balanceAfter.toLocaleString()} BC
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </section>
         ) : null}
 
