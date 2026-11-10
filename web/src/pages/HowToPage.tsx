@@ -30,7 +30,7 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Compare two listings, open studio shots and Brad Coin prices — never real money. On a listing, Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car + Sort the bay there too).",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car + Sort the bay there too).",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -72,7 +72,7 @@ const STEPS: Step[] = [
   {
     id: "reviews",
     title: "Reviews and drag races",
-    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand.",
+    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. On a review, Copy link puts the absolute URL on your clipboard with a toast — cue cards and playback stay. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -119,10 +119,10 @@ export function HowToPage() {
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
-            bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find
-            and Copy link, Favourites challenge and trade CTAs, Top Trumps streaks and this week’s
-            cup standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
-            showcase. Nothing here spends real money.
+            bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
+            listing Compare and Copy link, Favourites challenge and trade CTAs, Top Trumps streaks
+            and this week’s cup standings, free trades, member gifts, drag races, empty-bay next
+            steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -221,7 +221,8 @@ export function HowToPage() {
               <Link to="/compare" className="text-lime no-underline hover:underline">
                 Compare
               </Link>{" "}
-              — needs two cars; empty bay sends you to Favourites or Browse cars.
+              — start from a listing’s Compare CTA (tray picks, opens side by side when two are
+              ready), or Favourites / Cars; empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">

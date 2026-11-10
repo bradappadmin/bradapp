@@ -61,7 +61,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/login streak bonuses/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/No second credit/i)).toBeInTheDocument();
     expect(screen.getByText(/Find, filters, and price sort/i)).toBeInTheDocument();
-    expect(screen.getByText(/Copy link puts the absolute URL/i)).toBeInTheDocument();
+    expect(screen.getByText(/Compare queues that car into the compare tray/i)).toBeInTheDocument();
+    expect(screen.getByText(/when two are ready you land side by side/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Copy link puts the absolute URL/i).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
+    expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
     expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
@@ -92,6 +96,9 @@ describe("HowToPage Midnight Garage UI", () => {
     );
     expect(screen.getByText(/Wins\/Losses chips/i)).toBeInTheDocument();
     expect(screen.getByText(/Completed\/Declined chips/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/start from a listing.?s Compare CTA \(tray picks/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points to Members \/ Browse cars for sale/i)).toBeInTheDocument();
     expect(screen.getByText(/Offer trade or Challenge to Top Trumps/i)).toBeInTheDocument();
