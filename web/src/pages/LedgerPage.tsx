@@ -103,18 +103,13 @@ export function LedgerPage() {
     writeParams(draft, reasonGroup);
   }
 
-  function onClearSearch() {
-    setDraft("");
-    writeParams("", reasonGroup);
-  }
-
   function onClearFilters() {
     setDraft("");
     writeParams("", "all");
   }
 
   const emptyFiltered =
-    !loading && ledger.length > 0 && visibleLedger.length === 0;
+    !loading && ledger.length > 0 && filtersOn && visibleLedger.length === 0;
 
   return (
     <div className="relative min-h-screen">
@@ -247,24 +242,29 @@ export function LedgerPage() {
                     >
                       Search
                     </button>
-                    {qFromUrl ? (
+                    {filtersOn ? (
                       <button
                         type="button"
-                        onClick={onClearSearch}
+                        onClick={onClearFilters}
                         className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
                       >
-                        Clear
+                        Clear filters
                       </button>
                     ) : null}
                   </div>
                 </div>
               </label>
-              {qFromUrl ? (
+              {filtersOn ? (
                 <p className="mt-4 text-sm text-steel">
-                  Showing {visibleLedger.length} of {groupedLedger.length}{" "}
-                  {groupedLedger.length === 1 ? "row" : "rows"}
-                  {reasonGroup !== "all" ? " in this group" : ""} for{" "}
-                  <span className="font-display text-lime">“{qFromUrl}”</span>
+                  Showing {visibleLedger.length} of {ledger.length}{" "}
+                  {ledger.length === 1 ? "row" : "rows"}
+                  {reasonGroup !== "all" ? " in this group" : ""}
+                  {qFromUrl ? (
+                    <>
+                      {" "}
+                      for <span className="font-display text-lime">“{qFromUrl}”</span>
+                    </>
+                  ) : null}
                 </p>
               ) : null}
             </form>
@@ -296,28 +296,29 @@ export function LedgerPage() {
 
             {emptyFiltered ? (
               <div
-                className="play-panel rounded-md border px-5 py-10 text-center"
+                className="play-panel bay-rise-delay rounded-md border px-5 py-12 text-center sm:py-14"
                 role="status"
+                aria-label="No matching ledger entries"
               >
-                <p className="font-display text-lg text-mist">
-                  {qFromUrl ? "No matches" : "Nothing in this filter"}
-                </p>
-                <p className="mt-2 text-sm text-steel">
+                <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
                   {qFromUrl
                     ? `No rows match “${qFromUrl}”${
                         reasonGroup !== "all" ? " in this group" : ""
-                      }. Try another spelling or clear filters.`
-                    : `Try All, or another group — this bay still has ${ledger.length} ${
+                      }. Try another spelling or clear the filters.`
+                    : `No rows in this group. Try All, or clear the filters — this bay still has ${ledger.length} ${
                         ledger.length === 1 ? "row" : "rows"
                       } overall.`}
                 </p>
-                <button
-                  type="button"
-                  onClick={onClearFilters}
-                  className="mt-5 rounded-md border border-lime/40 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:bg-lime/10"
-                >
-                  {qFromUrl ? "Clear search" : "Show all"}
-                </button>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onClearFilters}
+                    className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                  >
+                    Clear filters
+                  </button>
+                </div>
               </div>
             ) : (
               <ul

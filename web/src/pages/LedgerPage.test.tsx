@@ -136,7 +136,7 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(tradesOnly).toHaveTextContent("Buy");
     expect(tradesOnly).not.toHaveTextContent("Win streak");
     expect(tradesOnly).not.toHaveTextContent("Daily");
-    expect(screen.getByText(/1 of 4 rows/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/1 of 4 rows/i).length).toBeGreaterThanOrEqual(1);
 
     await user.click(screen.getByRole("button", { name: "Bonuses" }));
     const bonusesOnly = screen.getByLabelText("Brad Coin ledger entries");
@@ -145,8 +145,10 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(bonusesOnly).not.toHaveTextContent("Buy");
 
     await user.click(screen.getByRole("button", { name: "Admin" }));
-    expect(screen.getByText(/Nothing in this filter/i)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Show all" }));
+    expect(screen.getByText("No matches")).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching ledger entries")).toBeInTheDocument();
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    await user.click(clearButtons[clearButtons.length - 1]!);
     expect(screen.getByLabelText("Brad Coin ledger entries")).toHaveTextContent("Buy");
   });
 
@@ -230,7 +232,43 @@ describe("LedgerPage Midnight Garage UI", () => {
     expect(screen.getByLabelText("Brad Coin ledger entries")).toHaveTextContent("Win streak");
   });
 
-  it("shows empty search state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/ledger?q=zzzz"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/ledger"
+              element={
+                <>
+                  <LedgerPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching ledger entries")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Filter ledger by reason")).toBeInTheDocument();
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(clearButtons[clearButtons.length - 1]!);
+    await waitFor(() => {
+      expect(screen.getByTestId("ledger-params").textContent).toBe("");
+    });
+    expect(screen.getByLabelText("Brad Coin ledger entries")).toHaveTextContent("Buy");
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+  });
+
+  it("keeps empty ledger Browse cars when truly empty even with Find", async () => {
+    vi.mocked(api.fetchLedger).mockResolvedValue({ balance: 100, ledger: [] });
+
     render(
       <MemoryRouter initialEntries={["/ledger?q=zzzz"]}>
         <AuthProvider>
@@ -239,10 +277,9 @@ describe("LedgerPage Midnight Garage UI", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Find an entry" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Filter ledger by reason")).toBeInTheDocument();
+    expect(await screen.findByText("No ledger rows yet")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 });
