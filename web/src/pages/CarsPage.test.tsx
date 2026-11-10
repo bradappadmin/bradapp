@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import { COMPARE_SELECTION_KEY, clearCompareSelection } from "../compare-selection";
 import { CarsPage } from "./CarsPage";
 
 function SearchParamsProbe() {
@@ -20,12 +21,60 @@ vi.mock("../api", () => ({
 
 import * as api from "../api";
 
+const macan = {
+  id: 9,
+  make: "Porsche",
+  model: "Macan",
+  trimName: "GTS",
+  bodyType: "SUV",
+  fuel: "Petrol",
+  drivetrain: "AWD",
+  bhp: 434,
+  topSpeedMph: 169,
+  zeroToSixtySecs: 4.3,
+  conditionType: "new" as const,
+  year: 2025,
+  colour: "Laser Blue",
+  mileage: 0,
+  coinPrice: 420,
+  status: "available" as const,
+  ownerLabel: "Bay One",
+  ownerUserId: null,
+  garageName: "Bay One",
+  garageCity: "London",
+};
+
+const focusSt = {
+  id: 11,
+  make: "Ford",
+  model: "Focus",
+  trimName: "ST",
+  bodyType: "Hatchback",
+  fuel: "Petrol",
+  drivetrain: "FWD",
+  bhp: 280,
+  topSpeedMph: 155,
+  zeroToSixtySecs: 5.7,
+  conditionType: "used" as const,
+  year: 2020,
+  colour: "Blue",
+  mileage: 18000,
+  coinPrice: 400,
+  status: "available" as const,
+  ownerLabel: "Bay One",
+  ownerUserId: null,
+  garageName: "Bay One",
+  garageCity: "London",
+};
+
 describe("CarsPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
+    clearCompareSelection();
   });
 
   beforeEach(() => {
+    clearCompareSelection();
     vi.mocked(api.fetchCarFilters).mockResolvedValue({
       filters: {
         makes: ["Porsche", "Ford"],
@@ -46,30 +95,7 @@ describe("CarsPage Midnight Garage UI", () => {
       total: 1,
       limit: 24,
       offset: 0,
-      listings: [
-        {
-          id: 9,
-          make: "Porsche",
-          model: "Macan",
-          trimName: "GTS",
-          bodyType: "SUV",
-          fuel: "Petrol",
-          drivetrain: "AWD",
-          bhp: 434,
-          topSpeedMph: 169,
-          zeroToSixtySecs: 4.3,
-          conditionType: "new",
-          year: 2025,
-          colour: "Laser Blue",
-          mileage: 0,
-          coinPrice: 420,
-          status: "available",
-          ownerLabel: "Bay One",
-          ownerUserId: null,
-          garageName: "Bay One",
-          garageCity: "London",
-        },
-      ],
+      listings: [macan],
     });
   });
 
@@ -254,5 +280,50 @@ describe("CarsPage Midnight Garage UI", () => {
     expect(screen.getByText("Nothing for sale")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Search the bay" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+  });
+
+  it("queues catalogue cards into the compare tray shared with listing detail", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.searchCars).mockResolvedValue({
+      total: 2,
+      limit: 24,
+      offset: 0,
+      listings: [macan, focusSt],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cars"]}>
+        <AuthProvider>
+          <CarsPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Porsche Macan GTS")).toBeInTheDocument();
+    expect(screen.getByText("Ford Focus ST")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
+
+    const addButtonsStart = screen.getAllByRole("button", { name: "Add to compare" });
+    expect(addButtonsStart).toHaveLength(2);
+    await user.click(addButtonsStart[0]!);
+    expect(screen.getByLabelText("Compare selection")).toBeInTheDocument();
+    expect(screen.getByText(/Compare \(1\/2\)/i)).toBeInTheDocument();
+    expect(sessionStorage.getItem(COMPARE_SELECTION_KEY)).toContain('"id":9');
+    expect(screen.getByRole("button", { name: "Remove from compare" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    const addButtons = screen.getAllByRole("button", { name: "Add to compare" });
+    expect(addButtons).toHaveLength(1);
+    await user.click(addButtons[0]!);
+    expect(screen.getByText(/Compare \(2\/2\)/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Side by side" })).toHaveAttribute(
+      "href",
+      "/compare?a=9&b=11",
+    );
+    // Search / sort stay while compare tray is active.
+    expect(screen.getByRole("heading", { name: "Search the bay" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
   });
 });

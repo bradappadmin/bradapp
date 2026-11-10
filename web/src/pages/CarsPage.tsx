@@ -14,6 +14,7 @@ import {
   type CarsSort,
 } from "../cars-sort";
 import {
+  ensureComparePick,
   loadCompareSelection,
   toComparePick,
   toggleComparePick,
@@ -120,8 +121,12 @@ export function CarsPage() {
     }
   }, [draft]);
 
-  function onToggleCompare(listing: ListingSummary) {
-    const { picks } = toggleComparePick(toComparePick(listing));
+  function onCompareCard(listing: ListingSummary) {
+    const pick = toComparePick(listing);
+    const already = comparePicks.some((p) => p.id === listing.id);
+    // Same session tray as listing detail: ensure adds without toggling off;
+    // a second click on an already-queued card removes it (catalogue UX).
+    const { picks } = already ? toggleComparePick(pick) : ensureComparePick(pick);
     setComparePicks(picks);
   }
 
@@ -625,11 +630,17 @@ export function CarsPage() {
                       <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
                         <button
                           type="button"
-                          onClick={() => onToggleCompare(listing)}
+                          aria-pressed={selected}
+                          aria-label={selected ? "Remove from compare" : "Add to compare"}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onCompareCard(listing);
+                          }}
                           className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold transition ${
                             selected
                               ? "border-lime/50 text-lime hover:bg-lime/10"
-                              : "border-white/15 text-mist hover:border-lime/40 hover:text-lime"
+                              : "border-white/15 text-steel hover:border-lime/40 hover:text-lime"
                           }`}
                         >
                           {selected ? "In compare" : "Compare"}
