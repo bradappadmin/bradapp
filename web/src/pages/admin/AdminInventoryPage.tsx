@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import * as api from "../../api";
 import type { AdminCarModel, AdminGarage, AdminListing } from "../../api";
 import {
@@ -559,6 +559,13 @@ function ListingPaintRow({
             onChange={(e) => setCoinPrice(e.target.value)}
           />
         </label>
+        <Link
+          to={`/cars/${listing.id}`}
+          className="shrink-0 rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+          aria-label={`Open listing ${listing.id}`}
+        >
+          Open listing
+        </Link>
         <button
           type="button"
           className="shrink-0 rounded-md border border-white/15 px-3 py-2 text-sm text-mist transition hover:border-lime/40 hover:text-lime"

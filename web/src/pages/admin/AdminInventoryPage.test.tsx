@@ -122,6 +122,10 @@ describe("AdminInventoryPage listing paint", () => {
     expect(thumb.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     expect(thumb.getAttribute("src") ?? "").toContain("paintDescription=Black");
 
+    const openListing = screen.getByRole("link", { name: "Open listing 42" });
+    expect(openListing).toHaveAttribute("href", "/cars/42");
+    expect(openListing).toHaveTextContent("Open listing");
+
     const paint = screen.getByLabelText(/Paint colour for listing 42/i);
     await user.selectOptions(paint, "Racing Red");
 
@@ -167,6 +171,28 @@ describe("AdminInventoryPage listings search", () => {
     });
     vi.mocked(api.fetchAdminCarModels).mockResolvedValue({ models: [] });
     vi.mocked(api.fetchAdminGarages).mockResolvedValue({ garages: [] });
+  });
+
+  it("links each listing row to the public catalogue with Open listing", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/inventory"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <AdminInventoryPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a listing" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Open listing 42" })).toHaveAttribute(
+      "href",
+      "/cars/42",
+    );
+    expect(screen.getByRole("link", { name: "Open listing 7" })).toHaveAttribute("href", "/cars/7");
+    expect(screen.getByRole("link", { name: "Open listing 9" })).toHaveAttribute("href", "/cars/9");
+    expect(screen.getByRole("searchbox", { name: /Search listings by make or model/i })).toBeInTheDocument();
   });
 
   it("searches by make/model and filters with status chips", async () => {
