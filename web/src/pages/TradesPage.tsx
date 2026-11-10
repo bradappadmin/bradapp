@@ -82,6 +82,28 @@ export function TradesPage() {
     [members, user],
   );
 
+  /** Keep ?with= selected even before members load, or if carCount filters them out. */
+  const composePartnerOptions = useMemo(() => {
+    const byId = new Map(tradePartners.map((member) => [member.id, member]));
+    if (partnerUserId === "" || byId.has(partnerUserId)) {
+      return [...byId.values()];
+    }
+    const fromDirectory = members.find((member) => member.id === partnerUserId);
+    if (fromDirectory) {
+      return [fromDirectory, ...byId.values()];
+    }
+    const pending: MemberSummary = {
+      id: partnerUserId,
+      displayName: "Selected member",
+      bio: null,
+      role: "member",
+      roleLabel: "Member",
+      carCount: 0,
+      coinBalance: 0,
+    };
+    return [pending, ...byId.values()];
+  }, [tradePartners, members, partnerUserId]);
+
   const incoming = useMemo(
     () => trades.filter((t) => user && t.toUserId === user.id && t.status === "pending"),
     [trades, user],
@@ -477,14 +499,14 @@ export function TradesPage() {
               Member
               <select
                 className={fieldClass}
-                value={partnerUserId}
+                value={partnerUserId === "" ? "" : String(partnerUserId)}
                 onChange={(e) =>
                   onPartnerChange(e.target.value === "" ? "" : Number(e.target.value))
                 }
               >
                 <option value="">Pick a member</option>
-                {tradePartners.map((member) => (
-                  <option key={member.id} value={member.id}>
+                {composePartnerOptions.map((member) => (
+                  <option key={member.id} value={String(member.id)}>
                     {member.displayName} · {member.carCount} cars
                   </option>
                 ))}
@@ -494,7 +516,7 @@ export function TradesPage() {
               You request (their car)
               <select
                 className={fieldClass}
-                value={requestListingId}
+                value={requestListingId === "" ? "" : String(requestListingId)}
                 onChange={(e) =>
                   onRequestCarChange(e.target.value === "" ? "" : Number(e.target.value))
                 }
@@ -504,7 +526,7 @@ export function TradesPage() {
                   {partnerUserId === "" ? "Pick a member first" : "Pick their car"}
                 </option>
                 {memberCards.map((card) => (
-                  <option key={card.id} value={card.id}>
+                  <option key={card.id} value={String(card.id)}>
                     {card.make} {card.model} · {card.year}
                   </option>
                 ))}

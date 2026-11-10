@@ -343,6 +343,9 @@ describe("TradesPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "Send a free trade" })).toBeInTheDocument();
     const memberSelect = await screen.findByLabelText(/^Member$/i);
     expect(memberSelect).toHaveValue("177");
-    expect(await screen.findByLabelText(/You request/i)).toHaveValue("143");
+    await waitFor(() => {
+      expect(screen.getByLabelText(/You request/i)).toHaveValue("143");
+    });
+    expect(api.fetchMemberCards).toHaveBeenCalledWith(177);
   });
 });
