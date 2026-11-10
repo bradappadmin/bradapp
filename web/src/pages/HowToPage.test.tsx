@@ -33,6 +33,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "How to" })).toBeInTheDocument();
     expect(screen.getByText(/Family walkthrough · Midnight garage/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Join the family bay" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Daily login bonus" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Buy and sell cars" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Find, sort, and filter" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
@@ -46,6 +47,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText(/invite codes are optional/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/daily login bonus/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/\+25 Brad Coins/i)).toBeInTheDocument();
+    expect(screen.getByText(/Europe\/London calendar day/i)).toBeInTheDocument();
+    expect(screen.getByText(/Daily login claimed/i)).toBeInTheDocument();
+    expect(screen.getByText(/No second credit/i)).toBeInTheDocument();
     expect(screen.getByText(/Find, filters, and price sort/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
     expect(screen.getByText(/Trades history: Completed\/Declined/i)).toBeInTheDocument();
@@ -54,11 +60,14 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/Find a review/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/3 wins \+15 BC, 5 wins \+40 BC/i)).toBeInTheDocument();
     expect(screen.getByText(/Europe\/London week/i)).toBeInTheDocument();
+    expect(screen.getByText(/This week.?s cup standings sit on Play/i)).toBeInTheDocument();
+    expect(screen.getByText(/beside the all-time podium on the leaderboard/i)).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
     expect(screen.getByText(/Gift coins: enter an amount and an optional note/i)).toBeInTheDocument();
     expect(screen.getByText(/Gift sent \/ Gift received/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Gifts/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/member gifts/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Daily login/i).length).toBeGreaterThan(0);
 
     expect(screen.getByRole("link", { name: "Match history" })).toHaveAttribute(
       "href",
@@ -75,12 +84,19 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Find a favourite, Sort the bay/i)).toBeInTheDocument();
     expect(screen.getByText(/Find a car, Sort the bay/i)).toBeInTheDocument();
     expect(screen.getAllByText(/reason chips/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/This week.?s cup standings beside the podium/i),
+    ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
+    expect(screen.getByRole("link", { name: "Open Home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Open Cars" })).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");
     expect(screen.getByRole("link", { name: "Open Play" })).toHaveAttribute("href", "/play");
-    expect(screen.getByRole("link", { name: "Open Play cup" })).toHaveAttribute("href", "/play");
+    expect(screen.getByRole("link", { name: "Open cup standings" })).toHaveAttribute(
+      "href",
+      "/leaderboard",
+    );
     expect(screen.getByRole("link", { name: "Open Trades" })).toHaveAttribute("href", "/trades");
     expect(screen.getByRole("link", { name: "Open Reviews" })).toHaveAttribute("href", "/reviews");
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
