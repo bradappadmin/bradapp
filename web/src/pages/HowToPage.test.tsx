@@ -95,6 +95,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Open a member from Accounts" }),
     ).toBeInTheDocument();
     expect(document.getElementById("admin-open-member")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Open a member from Coin adjustments" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("admin-coin-history-open-member")).not.toBeNull();
     expect(document.getElementById("members-sort")).not.toBeNull();
     expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
@@ -113,13 +117,21 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/admin Accounts Open member \(\/members\/:id\)/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/admin Coin adjustments Open member \(\/members\/:id\)/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Open listing on a row takes you to the public catalogue page for that car \(\/cars\/:id\)/i,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Open member on a row takes you to that member.?s public garage \(\/members\/:id\)/i,
+        /On Accounts, Open member on a row takes you to that member.?s public garage \(\/members\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On Coin adjustments, Open member on an Adjust balance row \(and on Recent adjustments\) takes you to that member.?s public garage \(\/members\/:id\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -127,6 +139,9 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Open member from Accounts is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open member from Coin adjustments is the next step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -141,6 +156,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Open member → \/members\/:id; Quick amount chips; Adjust coins/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open member → \/members\/:id on Adjust balance and Recent adjustments/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/daily login bonus/i).length).toBeGreaterThan(0);
@@ -421,7 +441,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory follows; Open member from Accounts is last/i,
+        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory follows; Open member from Accounts follows; Open member from Coin adjustments is last/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -431,7 +451,7 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Open listing to the catalogue is a later step/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Open member on Accounts is a later step/i),
+      screen.getByText(/Open member on Accounts and Coin adjustments are later steps/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -652,7 +672,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.queryByRole("link", { name: "Open Accounts" })).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        /Brad & Napwood: Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) or free-form Coin delta/i,
+        /Brad & Napwood: Find a member; balance chips; Clear filters; Open member → \/members\/:id on Adjust balance and Recent adjustments/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Coin adjustments" })).toHaveAttribute(

@@ -191,7 +191,7 @@ const STEPS: Step[] = [
   {
     id: "admin",
     title: "Admin for Brad and Napwood",
-    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory follows; Open member from Accounts is last in this admin walkthrough.",
+    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that; Open listing from inventory follows; Open member from Accounts follows; Open member from Coin adjustments is last in this admin walkthrough.",
     to: "/admin",
     cta: "Open Admin",
     adminOnly: true,
@@ -199,7 +199,7 @@ const STEPS: Step[] = [
   {
     id: "admin-coin-chips",
     title: "Quick amount on admin coin adjust",
-    body: "On Coin adjustments and Accounts, Brad and Napwood correct a member’s Brad Coin balance with Quick amount chips (+25 / +50 / +100 / +250 BC) — same chip pattern as gift Quick amount — or type any signed Coin delta, add a note on Coin adjustments, then Adjust coins. Free-form still covers debit corrections. Open member on Accounts is a later step. Sort inventory listings is the next step.",
+    body: "On Coin adjustments and Accounts, Brad and Napwood correct a member’s Brad Coin balance with Quick amount chips (+25 / +50 / +100 / +250 BC) — same chip pattern as gift Quick amount — or type any signed Coin delta, add a note on Coin adjustments, then Adjust coins. Free-form still covers debit corrections. Open member on Accounts and Coin adjustments are later steps. Sort inventory listings is the next step.",
     to: "/admin/coin-history",
     cta: "Open Coin adjustments",
     adminOnly: true,
@@ -231,9 +231,17 @@ const STEPS: Step[] = [
   {
     id: "admin-open-member",
     title: "Open a member from Accounts",
-    body: "On Accounts, Open member on a row takes you to that member’s public garage (/members/:id) — same in-app pattern as Open listing from inventory. Find an account, Clear filters, type chips, Quick amount chips, Adjust coins, Save name, and Freeze stay on the row.",
+    body: "On Accounts, Open member on a row takes you to that member’s public garage (/members/:id) — same in-app pattern as Open listing from inventory. Find an account, Clear filters, type chips, Quick amount chips, Adjust coins, Save name, and Freeze stay on the row. Open member from Coin adjustments is the next step.",
     to: "/admin/users",
     cta: "Open Accounts",
+    adminOnly: true,
+  },
+  {
+    id: "admin-coin-history-open-member",
+    title: "Open a member from Coin adjustments",
+    body: "On Coin adjustments, Open member on an Adjust balance row (and on Recent adjustments) takes you to that member’s public garage (/members/:id) — same in-app pattern as Open member on Accounts. Find a member, Clear filters, balance chips, Quick amount chips, Adjust coins, and the note field stay on the row.",
+    to: "/admin/coin-history",
+    cta: "Open Coin adjustments",
     adminOnly: true,
   },
 ];
@@ -272,7 +280,8 @@ export function HowToPage() {
             (+25 / +50 / +100 / +250 BC) for Brad and Napwood, admin inventory Sort the bay (Highest /
             Lowest price, Name A–Z / Z–A), admin Family invites Copy signup link (/signup?invite=)
             beside Copy code, admin inventory Open listing (/cars/:id), admin Accounts Open member
-            (/members/:id), Top Trumps streaks, Match history Rematch (PvP opponent deep-link or house
+            (/members/:id), admin Coin adjustments Open member (/members/:id), Top Trumps streaks,
+            Match history Rematch (PvP opponent deep-link or house
             → Play), this week’s cup standings with an Ends in countdown (Europe/London week end, +50
             BC prize), free trades, Trade history Offer again (/trades?with=), member gifts, drag
             races with Sort reviews (Newest / Oldest, Title A–Z / Z–A) and Open car (/cars/:id) when a
@@ -420,8 +429,9 @@ export function HowToPage() {
               <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">
                 Coin adjustments
               </Link>{" "}
-              — Brad & Napwood: Quick amount chips (+25 / +50 / +100 / +250 BC) or free-form Coin
-              delta on Coin adjustments and Accounts.
+              — Brad & Napwood: Find a member; balance chips; Clear filters; Open member →
+              /members/:id on Adjust balance and Recent adjustments; Quick amount chips (+25 / +50 /
+              +100 / +250 BC) or free-form Coin delta; Adjust coins.
             </li>
             <li>
               <Link to="/admin/users" className="text-lime no-underline hover:underline">
