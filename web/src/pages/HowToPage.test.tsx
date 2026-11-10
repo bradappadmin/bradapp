@@ -493,6 +493,21 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Challenge from Compare is the next step/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Challenge from Compare" })).toBeInTheDocument();
+    expect(document.getElementById("compare-challenge")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /Challenge under a studio hero deep-links Play with that member and car ready \(\/play\?opponent=/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /The CTA hides for bay stock, when the owner is missing, or when the owner is you/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Favourites Top Trumps peek \(same Power \/ 0–60 \/ Top speed\)/i,
       ),
@@ -500,6 +515,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Compare Top Trumps category winners \(Power \/ 0–60 \/ Top speed, Play rules\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare Challenge → Play \(\/play\?opponent=&theirCar=; hidden for self \/ house \/ missing\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -897,10 +917,9 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\)/i,
+        /Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Challenge → \/play\?opponent=&theirCar= on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(
       screen.getByText(
         /bay value strip \(favourite count \+ total BC when you have saves\); Find a favourite, Sort the bay; Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars\)/i,
@@ -1002,7 +1021,10 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Favourites" })
         .every((a) => a.getAttribute("href") === "/favourites"),
     ).toBe(true);
-    expect(screen.getByRole("link", { name: "Open Compare" })).toHaveAttribute("href", "/compare");
+    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getAllByRole("link", { name: "Open Compare" }).every((a) => a.getAttribute("href") === "/compare"),
+    ).toBe(true);
     expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByRole("link", { name: "Open My cars" })[0]).toHaveAttribute(
       "href",
