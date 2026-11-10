@@ -70,4 +70,29 @@ describe("CompareCarPanel", () => {
     expect(screen.getByText("Offer trade")).toBeInTheDocument();
     expect(screen.getByLabelText("Audi RS6 Avant play actions")).toBeInTheDocument();
   });
+
+  it("shows Open member when a member garage deep-link is provided", () => {
+    render(
+      <MemoryRouter>
+        <CompareCarPanel
+          listingId={11}
+          title="Audi RS6 Avant"
+          year={2019}
+          colour="Nardo Grey"
+          bodyType="Estate"
+          make="Audi"
+          model="RS6"
+          coinPrice={310}
+          ownerLabel="Sam Bay"
+          openMemberHref="/members/177"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Open member Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
+    expect(screen.getByText("Open member")).toBeInTheDocument();
+  });
 });

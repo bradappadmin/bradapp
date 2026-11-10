@@ -21,6 +21,7 @@ import { CompareTrumpWinnersStrip } from "../components/CompareTrumpWinnersStrip
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { compareOpenMemberHref } from "../compare-open-member";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { compareSharePath } from "../share-link";
@@ -248,6 +249,8 @@ export function ComparePage() {
                 model={left.model}
                 coinPrice={left.coinPrice}
                 detail={left.trimName ? left.trimName : undefined}
+                ownerLabel={left.ownerLabel}
+                openMemberHref={compareOpenMemberHref(left.ownerUserId, user?.id ?? null)}
                 challengeHref={
                   leftChallenge === "challenge" && left.ownerUserId != null
                     ? listingChallengeHref(left.ownerUserId, left.id)
@@ -278,6 +281,8 @@ export function ComparePage() {
                 model={right.model}
                 coinPrice={right.coinPrice}
                 detail={right.trimName ? right.trimName : undefined}
+                ownerLabel={right.ownerLabel}
+                openMemberHref={compareOpenMemberHref(right.ownerUserId, user?.id ?? null)}
                 challengeHref={
                   rightChallenge === "challenge" && right.ownerUserId != null
                     ? listingChallengeHref(right.ownerUserId, right.id)

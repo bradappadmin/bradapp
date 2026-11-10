@@ -223,12 +223,18 @@ describe("ComparePage Midnight Garage UI", () => {
       "href",
       "/trades?with=177&theirCar=9",
     );
+    expect(screen.getByRole("link", { name: "Open member Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
     expect(screen.queryByRole("link", { name: /Challenge to Top Trumps Audi/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer trade Audi/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open member/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open member Bay stock/i })).not.toBeInTheDocument();
     expect(await screen.findByLabelText("Top Trumps winners")).toBeInTheDocument();
   });
 
-  it("hides Challenge and Offer trade for self-owned and house stock heroes", async () => {
+  it("hides Challenge, Offer trade, and Open member for self-owned and house stock heroes", async () => {
     vi.mocked(api.fetchMe).mockResolvedValue(meResponse);
     vi.mocked(api.fetchListing).mockImplementation(async (id: number) => {
       if (id === 9) {
@@ -251,5 +257,6 @@ describe("ComparePage Midnight Garage UI", () => {
     expect(await screen.findByRole("region", { name: "Compare car photos" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Challenge/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer trade/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open member/i })).not.toBeInTheDocument();
   });
 });

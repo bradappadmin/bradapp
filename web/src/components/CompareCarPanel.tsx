@@ -17,6 +17,10 @@ type CompareCarPanelProps = {
   challengeHref?: string | null;
   /** Trades deep-link when this side’s owner is tradeable; omit to hide. */
   tradeHref?: string | null;
+  /** Public garage deep-link when this side’s owner is a known member; omit to hide. */
+  openMemberHref?: string | null;
+  /** Optional owner display name for Open member aria. */
+  ownerLabel?: string | null;
   /** Sign-in prompt when a member owns this side but the viewer is signed out. */
   signInHref?: string | null;
 };
@@ -34,11 +38,17 @@ export function CompareCarPanel({
   detail,
   challengeHref,
   tradeHref,
+  openMemberHref,
+  ownerLabel,
   signInHref,
 }: CompareCarPanelProps) {
   const showChallenge = Boolean(challengeHref);
   const showTrade = Boolean(tradeHref);
+  const showOpenMember = Boolean(openMemberHref);
   const showSignIn = !showChallenge && !showTrade && Boolean(signInHref);
+  const openMemberAria = ownerLabel
+    ? `Open member ${ownerLabel}`
+    : `Open member ${title}`;
 
   return (
     <article
@@ -70,8 +80,17 @@ export function CompareCarPanel({
         <p className="pt-0.5 font-display text-lg font-semibold text-lime sm:text-xl">
           {formatCoins(coinPrice)}
         </p>
-        {showChallenge || showTrade || showSignIn ? (
+        {showChallenge || showTrade || showOpenMember || showSignIn ? (
           <div className="flex flex-wrap gap-2 pt-2" aria-label={`${title} play actions`}>
+            {showOpenMember && openMemberHref ? (
+              <Link
+                to={openMemberHref}
+                aria-label={openMemberAria}
+                className="inline-flex rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Open member
+              </Link>
+            ) : null}
             {showChallenge && challengeHref ? (
               <Link
                 to={challengeHref}
