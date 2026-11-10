@@ -185,9 +185,9 @@ export function GaragePage() {
     writeParams(draft, sort);
   }
 
-  function onClearSearch() {
+  function onClearFilters() {
     setDraft("");
-    writeParams("", sort);
+    writeParams("", DEFAULT_GARAGE_SORT);
   }
 
   if (!authLoading && !user) {
@@ -466,13 +466,13 @@ export function GaragePage() {
                   >
                     Search
                   </button>
-                  {qFromUrl ? (
+                  {filtersOn ? (
                     <button
                       type="button"
-                      onClick={onClearSearch}
+                      onClick={onClearFilters}
                       className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
                     >
-                      Clear
+                      Clear filters
                     </button>
                   ) : null}
                 </div>
@@ -519,20 +519,24 @@ export function GaragePage() {
 
         {cars.length > 0 && filtersOn && managedMatchCount === 0 && !loading ? (
           <div
-            className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-14 text-center"
+            className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-12 text-center sm:py-14"
             role="status"
+            aria-label="No matching garage cars"
           >
             <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
-              No owned or for-sale cars match “{qFromUrl}”. Try another spelling or clear the search.
+              No owned or for-sale cars match “{qFromUrl}”. Try another spelling or clear the
+              filters.
             </p>
-            <button
-              type="button"
-              onClick={onClearSearch}
-              className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
-            >
-              Clear search
-            </button>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={onClearFilters}
+                className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+              >
+                Clear filters
+              </button>
+            </div>
           </div>
         ) : null}
 

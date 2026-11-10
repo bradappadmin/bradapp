@@ -330,7 +330,54 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Purchases" })).toBeInTheDocument();
   });
 
-  it("shows empty search state across owned and for-sale", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage?q=zzzz&sort=name_asc"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route
+                path="/garage"
+                element={
+                  <>
+                    <GaragePage />
+                    <SearchParamsProbe />
+                  </>
+                }
+              />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    const empty = screen.getByLabelText("No matching garage cars");
+    expect(empty).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a car" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Owned" })).not.toBeInTheDocument();
+    // Showcase / copy garage stay available in the header when cars exist.
+    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
+
+    const emptyClear = clearButtons.find((btn) => empty.contains(btn)) ?? clearButtons[0]!;
+    await user.click(emptyClear);
+    await waitFor(() => {
+      expect(screen.getByTestId("garage-params").textContent).toBe("");
+    });
+  });
+
+  it("keeps empty-bay Browse cars when the garage has no cars", async () => {
+    vi.mocked(api.fetchGarage).mockResolvedValue({
+      totalValue: 0,
+      showcaseListingId: null,
+      cars: [],
+    });
+
     render(
       <MemoryRouter initialEntries={["/garage?q=zzzz"]}>
         <AuthProvider>
@@ -343,11 +390,10 @@ describe("GaragePage Midnight Garage UI", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
-    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Find a car" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Owned" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("status", { name: /Empty garage bay/i })).toBeInTheDocument();
+    expect(screen.getByText("Empty bay")).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Find a car" })).not.toBeInTheDocument();
   });
 });
