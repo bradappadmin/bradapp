@@ -303,8 +303,48 @@ describe("FavouritesPage Midnight Garage UI", () => {
     });
   });
 
-  it("shows empty search state", async () => {
+  it("shows No matches and Clear filters when Find yields none", async () => {
+    const user = userEvent.setup();
     vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [audi, porsche] });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites?q=zzzz&sort=name_asc"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/favourites"
+              element={
+                <>
+                  <FavouritesPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    const empty = screen.getByLabelText("No matching favourites");
+    expect(empty).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    const clearButtons = screen.getAllByRole("button", { name: "Clear filters" });
+    expect(clearButtons.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("heading", { name: "Find a favourite" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Saved" })).not.toBeInTheDocument();
+
+    const emptyClear = clearButtons.find((btn) => empty.contains(btn)) ?? clearButtons[0]!;
+    await user.click(emptyClear);
+    await waitFor(() => {
+      expect(screen.getByTestId("favourites-params").textContent).toBe("");
+    });
+  });
+
+  it("keeps Browse cars empty bay when there are no favourites", async () => {
+    vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [] });
 
     render(
       <MemoryRouter initialEntries={["/favourites?q=zzzz"]}>
@@ -316,10 +356,12 @@ describe("FavouritesPage Midnight Garage UI", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
-    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(await screen.findByText("No favourites yet")).toBeInTheDocument();
+    const browse = screen.getAllByRole("link", { name: "Browse cars" });
+    expect(browse.some((link) => link.getAttribute("href") === "/cars")).toBe(true);
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Find a favourite" })).not.toBeInTheDocument();
   });
 
   it("offers trade on someone else’s favourite and hides it for own/stock cars", async () => {
