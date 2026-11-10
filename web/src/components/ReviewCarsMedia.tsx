@@ -20,12 +20,12 @@ type ReviewCarsMediaProps = {
   type: ReviewType;
   car: ReviewCar;
   carB: ReviewCar | null;
-  size?: "thumb" | "card";
+  size?: "thumb" | "card" | "hero";
   className?: string;
   showBadge?: boolean;
 };
 
-/** One studio thumb for a bay review, or two for a drag race. */
+/** One studio thumb for a bay review, or two for a drag race (hero for detail). */
 export function ReviewCarsMedia({
   type,
   car,
@@ -34,6 +34,9 @@ export function ReviewCarsMedia({
   className = "",
   showBadge = true,
 }: ReviewCarsMediaProps) {
+  const thumbClass =
+    size === "hero" ? "!mt-0 border-0 sm:rounded-md" : "rounded-md border border-white/10";
+
   if (type === "drag_race" && carB) {
     return (
       <div className={`relative ${className}`}>
@@ -42,17 +45,13 @@ export function ReviewCarsMedia({
             Drag race
           </span>
         ) : null}
-        <div className={`grid grid-cols-2 gap-1 ${size === "card" ? "gap-2" : ""}`}>
-          <ReviewCarThumb
-            car={toVisualCar(car)}
-            size={size}
-            className="rounded-md border border-white/10"
-          />
-          <ReviewCarThumb
-            car={toVisualCar(carB)}
-            size={size}
-            className="rounded-md border border-white/10"
-          />
+        <div
+          className={`grid grid-cols-2 ${
+            size === "hero" ? "gap-0 sm:gap-2" : size === "card" ? "gap-2" : "gap-1"
+          }`}
+        >
+          <ReviewCarThumb car={toVisualCar(car)} size={size} className={thumbClass} />
+          <ReviewCarThumb car={toVisualCar(carB)} size={size} className={thumbClass} />
         </div>
       </div>
     );
@@ -60,11 +59,7 @@ export function ReviewCarsMedia({
 
   return (
     <div className={`relative ${className}`}>
-      <ReviewCarThumb
-        car={toVisualCar(car)}
-        size={size}
-        className="rounded-md border border-white/10"
-      />
+      <ReviewCarThumb car={toVisualCar(car)} size={size} className={thumbClass} />
     </div>
   );
 }

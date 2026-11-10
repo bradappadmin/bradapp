@@ -139,7 +139,14 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "Bay burn — Focus ST" })).toBeInTheDocument();
     expect(screen.getByText(/Video review · Midnight garage/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Review status")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Bay car" })).toBeInTheDocument();
+    const hero = screen.getByLabelText("Bay car photo");
+    expect(hero.className).toMatch(/listing-hero-motion/);
+    expect(hero.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
+    const heroImg = hero.querySelector("img");
+    expect(heroImg).not.toBeNull();
+    expect(heroImg?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(heroImg?.getAttribute("src") ?? "").toContain("paintDescription=");
+    expect(heroImg?.getAttribute("src") ?? "").toContain("modelYear=2019");
     expect(screen.getByRole("heading", { name: "Cue cards" })).toBeInTheDocument();
     expect(screen.getByLabelText("Review actions")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
@@ -203,7 +210,9 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
       await screen.findByRole("heading", { name: "Bay drag — ST vs Type R" }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Drag race · Midnight garage/i)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Lane cars" })).toBeInTheDocument();
+    const hero = screen.getByLabelText("Lane cars bay photo");
+    expect(hero.className).toMatch(/listing-hero-motion/);
+    expect(hero.querySelectorAll('[data-bay-frame="hero"]').length).toBe(2);
     expect(screen.getByLabelText("Review status")).toHaveTextContent(/Drag race/i);
     expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toHaveAttribute(
       "href",

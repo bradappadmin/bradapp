@@ -172,6 +172,19 @@ export function ReviewDetailPage() {
               </div>
             </header>
 
+            <div
+              className="listing-hero-motion -mx-4 mt-6 overflow-hidden sm:mx-0 sm:rounded-md sm:border sm:border-white/10"
+              data-review-hero
+              aria-label={isDrag ? "Lane cars bay photo" : "Bay car photo"}
+            >
+              <ReviewCarsMedia
+                type={review.type ?? "review"}
+                car={review.car}
+                carB={review.carB ?? null}
+                size="hero"
+              />
+            </div>
+
             <div className="mt-5 flex flex-wrap items-center gap-3" aria-label="Review actions">
               {review.status === "published" ? (
                 <button
@@ -233,25 +246,6 @@ export function ReviewDetailPage() {
                 {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
               </p>
             </div>
-
-            <section
-              className="play-panel bay-rise-delay mt-8 rounded-md border p-3 sm:p-4"
-              aria-labelledby="review-cars-heading"
-            >
-              <h2
-                id="review-cars-heading"
-                className="font-display text-sm font-semibold uppercase tracking-wide text-steel"
-              >
-                {isDrag ? "Lane cars" : "Bay car"}
-              </h2>
-              <ReviewCarsMedia
-                type={review.type ?? "review"}
-                car={review.car}
-                carB={review.carB ?? null}
-                size="card"
-                className="mt-3"
-              />
-            </section>
 
             <section
               className="play-panel bay-rise-delay mt-6 overflow-hidden rounded-md border p-2 sm:p-3"
