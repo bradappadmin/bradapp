@@ -4,7 +4,15 @@ import * as api from "../api";
 import { useAuth } from "../auth-context";
 import type { ListingDetail } from "../cars";
 import { formatCoins, formatMileage, listingTitle } from "../cars";
+import {
+  compareHref,
+  ensureComparePick,
+  loadCompareSelection,
+  toComparePick,
+  type ComparePick,
+} from "../compare-selection";
 import { CarHeroVisual } from "../components/CarCard";
+import { CompareTray } from "../components/CompareTray";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
@@ -27,6 +35,11 @@ export function ListingPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [favBusy, setFavBusy] = useState(false);
+  const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
+
+  useEffect(() => {
+    setComparePicks(loadCompareSelection());
+  }, [listingId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +86,13 @@ export function ListingPage() {
       cancelled = true;
     };
   }, [listingId, user?.id]);
+
+  function onStartCompare() {
+    if (!listing) return;
+    const { picks } = ensureComparePick(toComparePick(listing));
+    setComparePicks(picks);
+    navigate(picks.length >= 2 ? compareHref(picks) : "/compare");
+  }
 
   async function onBuy() {
     if (!user) {
@@ -273,6 +293,17 @@ export function ListingPage() {
                       ? "Saved · Unfavourite"
                       : "Save to favourites"}
               </button>
+              <button
+                type="button"
+                onClick={onStartCompare}
+                className="rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
+              >
+                {comparePicks.some((p) => p.id === listing.id) && comparePicks.length >= 2
+                  ? "Side by side"
+                  : comparePicks.some((p) => p.id === listing.id)
+                    ? "Continue compare"
+                    : "Compare"}
+              </button>
               <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy link" />
             </div>
 
@@ -282,9 +313,21 @@ export function ListingPage() {
                 <Link to="/favourites" className="text-lime no-underline hover:underline">
                   Favourites
                 </Link>
-                .
+                — tick a second car there, or use Compare to queue this one.
               </p>
-            ) : null}
+            ) : (
+              <p className="mt-3 text-xs text-steel">
+                Compare queues this car, then open{" "}
+                <Link to="/favourites" className="text-lime no-underline hover:underline">
+                  Favourites
+                </Link>{" "}
+                or{" "}
+                <Link to="/cars" className="text-lime no-underline hover:underline">
+                  Cars
+                </Link>{" "}
+                for a second pick.
+              </p>
+            )}
 
             {ownsListing ? (
               <p className="play-panel mt-6 rounded-md border border-lime/30 p-4 text-sm text-lime">
@@ -367,6 +410,8 @@ export function ListingPage() {
             </section>
           </article>
         ) : null}
+
+        <CompareTray picks={comparePicks} onChange={setComparePicks} />
       </main>
     </div>
   );

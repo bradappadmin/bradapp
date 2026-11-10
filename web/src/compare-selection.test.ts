@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   COMPARE_SELECTION_LIMIT,
   compareHref,
+  ensureComparePick,
   parseCompareSelection,
   toggleComparePick,
 } from "./compare-selection";
@@ -66,5 +67,21 @@ describe("compare selection", () => {
     const removed = toggleComparePick(sample(1), storage);
     expect(removed.added).toBe(false);
     expect(removed.picks.map((p) => p.id)).toEqual([3]);
+  });
+
+  it("ensures a pick without toggling it off", () => {
+    const storage = memoryStorage();
+    const first = ensureComparePick(sample(9), storage);
+    expect(first.added).toBe(true);
+    expect(first.picks.map((p) => p.id)).toEqual([9]);
+
+    const again = ensureComparePick(sample(9), storage);
+    expect(again.added).toBe(false);
+    expect(again.picks.map((p) => p.id)).toEqual([9]);
+
+    ensureComparePick(sample(11), storage);
+    const third = ensureComparePick(sample(12), storage);
+    expect(third.picks.map((p) => p.id)).toEqual([9, 12]);
+    expect(compareHref(third.picks)).toBe("/compare?a=9&b=12");
   });
 });

@@ -82,6 +82,24 @@ export function toggleComparePick(
   return { picks: writeCompareSelection([current[0]!, pick], storage), added: true };
 }
 
+/**
+ * Ensure a listing is queued for compare without removing it if already selected.
+ * When the tray is full of other cars, keeps the first pick and replaces the second.
+ */
+export function ensureComparePick(
+  pick: ComparePick,
+  storage: Storage = sessionStorage,
+): { picks: ComparePick[]; added: boolean } {
+  const current = loadCompareSelection(storage);
+  if (current.some((c) => c.id === pick.id)) {
+    return { picks: current, added: false };
+  }
+  if (current.length < COMPARE_SELECTION_LIMIT) {
+    return { picks: writeCompareSelection([...current, pick], storage), added: true };
+  }
+  return { picks: writeCompareSelection([current[0]!, pick], storage), added: true };
+}
+
 export function isInCompareSelection(
   listingId: number,
   storage: Storage = sessionStorage,

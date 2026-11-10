@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import type { ListingDetail } from "../cars";
+import { COMPARE_SELECTION_KEY, clearCompareSelection } from "../compare-selection";
 import { ToastProvider } from "../toast-context";
 import { ListingPage } from "./ListingPage";
 
@@ -54,9 +55,11 @@ const memberOwnedListing: ListingDetail = {
 describe("ListingPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
+    clearCompareSelection();
   });
 
   beforeEach(() => {
+    clearCompareSelection();
     vi.mocked(api.fetchListing).mockResolvedValue({
       listing: memberOwnedListing,
       favourited: false,
@@ -111,7 +114,71 @@ describe("ListingPage Midnight Garage UI", () => {
     expect(trade).toHaveAttribute("href", "/trades?with=177&theirCar=143");
     expect(screen.getByRole("button", { name: /Buy for/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Save to favourites/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Compare" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
+
+  it("queues the listing for compare and opens the compare bay", async () => {
+    vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/cars/143"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+              <Route path="/compare" element={<div>Compare bay</div>} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Compare" }));
+    expect(await screen.findByText("Compare bay")).toBeInTheDocument();
+    const raw = sessionStorage.getItem(COMPARE_SELECTION_KEY);
+    expect(raw).toContain('"id":143');
+    // Buy / favourite / challenge-or-trade / copy stay on the listing route before navigate.
+  });
+
+  it("opens side-by-side when a second compare pick is already queued", async () => {
+    vi.mocked(api.fetchMe).mockRejectedValue(new Error("unauthenticated"));
+    sessionStorage.setItem(
+      COMPARE_SELECTION_KEY,
+      JSON.stringify([
+        {
+          id: 9,
+          make: "Porsche",
+          model: "911",
+          trimName: "GT3",
+          year: 2022,
+          coinPrice: 420,
+        },
+      ]),
+    );
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/cars/143"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/cars/:id" element={<ListingPage />} />
+              <Route path="/compare" element={<div data-testid="compare-route">Compare bay</div>} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Compare" }));
+    expect(await screen.findByTestId("compare-route")).toBeInTheDocument();
+    // MemoryRouter keeps path; assert queued pair via session storage href contract.
+    const picks = JSON.parse(sessionStorage.getItem(COMPARE_SELECTION_KEY) ?? "[]") as {
+      id: number;
+    }[];
+    expect(picks.map((p) => p.id)).toEqual([9, 143]);
   });
 
   it("copies the absolute listing URL with a success toast", async () => {
