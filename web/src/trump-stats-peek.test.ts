@@ -19,4 +19,14 @@ describe("trumpStatsPeek", () => {
     expect(trumpStatsPeek({})).toEqual([]);
     expect(trumpStatsPeek({ bhp: null, topSpeedMph: undefined })).toEqual([]);
   });
+
+  it("coerces MySQL DECIMAL strings so garage peeks keep 0–60", () => {
+    expect(
+      trumpStatsPeek({ bhp: 161, zeroToSixtySecs: "8.50", topSpeedMph: "112" }),
+    ).toEqual([
+      { id: "bhp", label: "Power", value: "161" },
+      { id: "zero_to_sixty_secs", label: "0–60", value: "8.5s" },
+      { id: "top_speed_mph", label: "Top speed", value: "112 mph" },
+    ]);
+  });
 });

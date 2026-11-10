@@ -65,8 +65,12 @@ describe.runIf(hasDb)("trade routes", () => {
     const owned = garage.body.cars.find((c: { id: number }) => c.id === cheapListingId);
     expect(owned).toBeTruthy();
     expect(owned.bhp).toBeGreaterThan(0);
+    expect(typeof owned.bhp).toBe("number");
     expect(owned.bodyType).toBeTruthy();
     expect(owned.topSpeedMph).toBeGreaterThan(0);
+    expect(typeof owned.topSpeedMph).toBe("number");
+    expect(owned.zeroToSixtySecs).toBeGreaterThan(0);
+    expect(typeof owned.zeroToSixtySecs).toBe("number");
     const expectedValue = (garage.body.cars as Array<{ coinPrice: number }>).reduce(
       (sum, car) => sum + Number(car.coinPrice),
       0,

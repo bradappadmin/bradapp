@@ -79,10 +79,21 @@ export function createTradeRouter(): Router {
       [user.id],
     );
     // Fair value = each listing's coin_price (asking price when listed, last price when owned).
-    const cars = rows as Array<{ coinPrice: number }>;
-    const totalValue = cars.reduce((sum, car) => sum + Number(car.coinPrice), 0);
+    // Coerce MySQL DECIMAL / BIGINT so Top Trumps peek and bay math see real numbers
+    // (same pattern as /cars and /favourites).
+    const cars = (rows as Array<Record<string, unknown>>).map((row) => ({
+      ...row,
+      id: Number(row.id),
+      bhp: Number(row.bhp),
+      topSpeedMph: Number(row.topSpeedMph),
+      zeroToSixtySecs: Number(row.zeroToSixtySecs),
+      year: Number(row.year),
+      mileage: Number(row.mileage),
+      coinPrice: Number(row.coinPrice),
+    }));
+    const totalValue = cars.reduce((sum, car) => sum + car.coinPrice, 0);
     const showcaseListingId = await readShowcaseListingId(pool, user.id);
-    res.json({ cars: rows, totalValue, showcaseListingId });
+    res.json({ cars, totalValue, showcaseListingId });
   });
 
   /**
