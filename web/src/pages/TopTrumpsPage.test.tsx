@@ -154,5 +154,33 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     expect(challenge).toHaveAttribute("aria-pressed", "true");
     expect(house).toHaveAttribute("aria-pressed", "false");
     expect(await screen.findByRole("status")).toHaveTextContent(/Challenge started/i);
+    expect(screen.queryByRole("status", { name: /Empty play bay/i })).not.toBeInTheDocument();
+  });
+
+  it("shows empty bay CTAs when the garage has no cars", async () => {
+    vi.mocked(api.fetchGarage).mockResolvedValue({
+      totalValue: 0,
+      showcaseListingId: null,
+      cars: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/play"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TopTrumpsPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Empty bay")).toBeInTheDocument();
+    const empty = screen.getByRole("status", { name: /Empty play bay/i });
+    expect(empty.querySelector('a[href="/cars"]')?.textContent).toMatch(/Browse cars/);
+    expect(empty.querySelector('a[href="/garage"]')?.textContent).toMatch(/My garage/);
+    expect(empty.querySelector('a[href="/members"]')?.textContent).toMatch(/Members/);
+    expect(screen.queryByRole("button", { name: /Vs house/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Top Trumps" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Match history/i }).length).toBeGreaterThan(0);
   });
 });

@@ -69,6 +69,7 @@ export function TopTrumpsPage() {
   const [awaitingRematchPick, setAwaitingRematchPick] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [bayReady, setBayReady] = useState(false);
 
   const challengeableMembers = useMemo(
     () => members.filter((m) => user && m.id !== user.id && m.carCount > 0),
@@ -100,25 +101,38 @@ export function TopTrumpsPage() {
 
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
+    setBayReady(false);
     void (async () => {
-      const [cats, garage, memberList, streak, cup] = await Promise.all([
-        api.fetchTopTrumpsCategories(),
-        api.fetchGarage(),
-        api.fetchMembers(),
-        api.fetchTopTrumpsStreak(),
-        api.fetchWeeklyCup(),
-      ]);
-      setCategories(cats.categories);
-      setRewards(cats.rewards);
-      if (cats.streakMilestones?.length) setStreakMilestones(cats.streakMilestones);
-      setWinStreak(streak.streak);
-      setWeeklyCup(cup);
-      setMyCars(garage.cars);
-      setMembers(memberList.members);
-      if (garage.cars[0]) setListingId(garage.cars[0].id);
-    })().catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : "Could not load play data");
-    });
+      try {
+        const [cats, garage, memberList, streak, cup] = await Promise.all([
+          api.fetchTopTrumpsCategories(),
+          api.fetchGarage(),
+          api.fetchMembers(),
+          api.fetchTopTrumpsStreak(),
+          api.fetchWeeklyCup(),
+        ]);
+        if (cancelled) return;
+        setCategories(cats.categories);
+        setRewards(cats.rewards);
+        if (cats.streakMilestones?.length) setStreakMilestones(cats.streakMilestones);
+        setWinStreak(streak.streak);
+        setWeeklyCup(cup);
+        setMyCars(garage.cars);
+        setMembers(memberList.members);
+        if (garage.cars[0]) setListingId(garage.cars[0].id);
+        setError(null);
+      } catch (err: unknown) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load play data");
+        }
+      } finally {
+        if (!cancelled) setBayReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [user?.id]);
 
   useEffect(() => {
@@ -377,18 +391,43 @@ export function TopTrumpsPage() {
           </div>
         ) : null}
 
-        {myCars.length === 0 ? (
-          <div className="play-panel bay-rise-delay mt-8 rounded-md border p-5 sm:p-6">
-            <p className="font-display text-lg text-mist">No car in the bay yet</p>
-            <p className="mt-2 text-sm text-steel">
-              You need a car in{" "}
-              <Link to="/cars" className="text-lime no-underline hover:underline">
-                the shop
-              </Link>{" "}
-              before you can play.
+        {!bayReady ? <p className="mt-8 text-steel">Loading…</p> : null}
+
+        {bayReady && myCars.length === 0 ? (
+          <div
+            className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-12 text-center sm:py-14"
+            role="status"
+            aria-label="Empty play bay"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">Empty bay</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              Top Trumps needs a car in your garage. Browse the catalogue for Brad Coins, check My
+              cars, or see who’s around on Members.
             </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <Link
+                to="/cars"
+                className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+              >
+                Browse cars
+              </Link>
+              <Link
+                to="/garage"
+                className="inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                My garage
+              </Link>
+              <Link
+                to="/members"
+                className="inline-flex items-center justify-center rounded-md border border-white/15 px-5 py-3 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+              >
+                Members
+              </Link>
+            </div>
           </div>
-        ) : (
+        ) : null}
+
+        {bayReady && myCars.length > 0 ? (
           <div className="bay-rise-delay mt-8 flex flex-col gap-5">
             <section className="play-panel rounded-md border p-4 sm:p-5" aria-labelledby="play-your-card">
               <h2
@@ -591,7 +630,7 @@ export function TopTrumpsPage() {
               </Link>
             </div>
           </div>
-        )}
+        ) : null}
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
 
