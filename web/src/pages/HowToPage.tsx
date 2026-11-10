@@ -149,7 +149,7 @@ const STEPS: Step[] = [
   {
     id: "compare-heroes-motion",
     title: "Compare studio heroes motion",
-    body: "On Compare with two cars side by side, the dual photo-first studio heroes soft-fade and rise in (right side a beat later), ease the studio photo a little larger on hover/focus, and drift a gentle bay light — presence and hierarchy, not noise. Prefers-reduced-motion keeps the heroes still (no entrance / no photo ease / no bay pulse). Category winners, Challenge, Offer trade, Open member, Specs, and empty-bay CTAs stay. Challenge from Compare is the next step.",
+    body: "On Compare with two cars side by side, the dual photo-first studio heroes soft-fade and rise in (right side a beat later), ease the studio photo a little larger on hover/focus, and drift a gentle bay light — presence and hierarchy, not noise. Prefers-reduced-motion keeps the heroes still (no entrance / no photo ease / no bay pulse). Category winners, Open car, Challenge, Offer trade, Open member, Specs, and empty-bay CTAs stay. Challenge from Compare is the next step.",
     to: "/compare",
     cta: "Open Compare",
   },
@@ -170,7 +170,14 @@ const STEPS: Step[] = [
   {
     id: "compare-open-member",
     title: "Open member from Compare",
-    body: "On Compare, Open member under a studio hero takes you to that owner’s public garage (/members/:id) when a member owns that side. The CTA hides for bay stock, when the owner is missing, or when the owner is you — Challenge and Offer trade stay on the same hero when those apply. Category winners, Specs, heroes motion, and empty-bay CTAs stay.",
+    body: "On Compare, Open member under a studio hero takes you to that owner’s public garage (/members/:id) when a member owns that side. The CTA hides for bay stock, when the owner is missing, or when the owner is you — Challenge and Offer trade stay on the same hero when those apply. Category winners, Specs, heroes motion, and empty-bay CTAs stay. Open car from Compare is the next step.",
+    to: "/compare",
+    cta: "Open Compare",
+  },
+  {
+    id: "compare-open-car",
+    title: "Open car from Compare",
+    body: "On Compare, Open car under a studio hero takes you to that catalogue listing (/cars/:id). Both sides get the CTA when a listing id is known — Open member, Challenge, and Offer trade stay on the same hero when those apply. Category winners, Specs, heroes motion, and empty-bay CTAs stay.",
     to: "/compare",
     cta: "Open Compare",
   },
@@ -469,7 +476,7 @@ export function HowToPage() {
             Compare Challenge → Play (/play?opponent=&theirCar=; hidden for self / house /
             missing), Compare Offer trade → Trades (/trades?with=&theirCar=; hidden for self /
             house / missing), Compare Open member → /members/:id (hidden for self / house /
-            missing),
+            missing), Compare Open car → /cars/:id (both heroes when listing ids are known),
             Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
             missing), Family activity Open member (/members/:id when an actor is known; hidden for
             self / missing / house), home Latest / Featured reviews Open car (/cars/:id when a
@@ -678,9 +685,10 @@ export function HowToPage() {
               ready), Compare on Favourites / Cars / My cars / Reviews, or Compare on home Recently
               viewed (shared tray); dual studio heroes motion (entrance fade/rise, photo ease;
               reduced-motion keeps still); Category winners under the studio heroes for Power / 0–60 /
-              Top speed (Play rules; ties neutral); Challenge → /play?opponent=&theirCar=, Offer
-              trade → /trades?with=&theirCar=, and Open member → /members/:id on a member-owned hero
-              (hidden for self / house / missing); empty bay sends you to Favourites or Browse cars.
+              Top speed (Play rules; ties neutral); Open car → /cars/:id on both heroes; Challenge →
+              /play?opponent=&theirCar=, Offer trade → /trades?with=&theirCar=, and Open member →
+              /members/:id on a member-owned hero (hidden for self / house / missing); empty bay
+              sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">

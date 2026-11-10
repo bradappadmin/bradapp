@@ -612,6 +612,21 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open car from Compare is the next step/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Open car from Compare" })).toBeInTheDocument();
+    expect(document.getElementById("compare-open-car")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /Open car under a studio hero takes you to that catalogue listing \(\/cars\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Both sides get the CTA when a listing id is known/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Favourites Top Trumps peek \(same Power \/ 0–60 \/ Top speed\)/i,
       ),
@@ -639,6 +654,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Compare Open member → \/members\/:id \(hidden for self \/ house \/ missing\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare Open car → \/cars\/:id \(both heroes when listing ids are known\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1103,7 +1123,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /dual studio heroes motion \(entrance fade\/rise, photo ease; reduced-motion keeps still\); Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Challenge → \/play\?opponent=&theirCar=, Offer trade → \/trades\?with=&theirCar=, and Open member → \/members\/:id on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
+        /dual studio heroes motion \(entrance fade\/rise, photo ease; reduced-motion keeps still\); Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Open car → \/cars\/:id on both heroes; Challenge → \/play\?opponent=&theirCar=, Offer trade → \/trades\?with=&theirCar=, and Open member → \/members\/:id on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1217,7 +1237,7 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Favourites" })
         .every((a) => a.getAttribute("href") === "/favourites"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(5);
+    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(6);
     expect(
       screen.getAllByRole("link", { name: "Open Compare" }).every((a) => a.getAttribute("href") === "/compare"),
     ).toBe(true);
