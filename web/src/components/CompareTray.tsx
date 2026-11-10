@@ -38,7 +38,9 @@ export function CompareTray({ picks, onChange }: CompareTrayProps) {
             ))}
           </ul>
           {picks.length === 1 ? (
-            <p className="mt-1 text-xs text-steel">Pick one more from Cars or Favourites.</p>
+            <p className="mt-1 text-xs text-steel">
+              Pick one more from Cars, Favourites, My cars, or Recently viewed.
+            </p>
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">

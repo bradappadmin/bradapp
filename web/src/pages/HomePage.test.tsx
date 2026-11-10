@@ -3,6 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import {
+  COMPARE_SELECTION_KEY,
+  clearCompareSelection,
+  loadCompareSelection,
+} from "../compare-selection";
 import { RECENTLY_VIEWED_KEY } from "../recently-viewed";
 import { ToastProvider } from "../toast-context";
 import { HomePage } from "./HomePage";
@@ -25,6 +30,7 @@ import * as api from "../api";
 describe("HomePage", () => {
   afterEach(() => {
     cleanup();
+    clearCompareSelection();
   });
 
   beforeEach(() => {
@@ -32,6 +38,7 @@ describe("HomePage", () => {
     vi.mocked(api.fetchReviews).mockResolvedValue({ reviews: [] });
     vi.mocked(api.fetchFeaturedReview).mockResolvedValue({ review: null });
     window.localStorage.clear();
+    clearCompareSelection();
   });
 
   it("shows latest published reviews with watch links on home", async () => {
@@ -167,6 +174,74 @@ describe("HomePage", () => {
     expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
     expect(screen.getByText(/Porsche 911 GT3/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to compare" })).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: "Compare" }).some((a) => a.getAttribute("href") === "/compare"),
+    ).toBe(true);
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
+  });
+
+  it("queues Recently viewed cars into the shared compare tray", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(
+      RECENTLY_VIEWED_KEY,
+      JSON.stringify([
+        {
+          id: 42,
+          make: "Porsche",
+          model: "911",
+          trimName: "GT3",
+          bodyType: "Coupe",
+          colour: "Racing Red",
+          year: 2022,
+          bhp: 502,
+          topSpeedMph: 197,
+          zeroToSixtySecs: 3.2,
+          coinPrice: 420,
+          status: "available",
+          viewedAt: Date.now(),
+        },
+        {
+          id: 7,
+          make: "Ford",
+          model: "Focus",
+          trimName: "ST",
+          bodyType: "Hatchback",
+          colour: "Blue",
+          year: 2019,
+          bhp: 280,
+          topSpeedMph: 155,
+          zeroToSixtySecs: 5.7,
+          coinPrice: 180,
+          status: "available",
+          viewedAt: Date.now() - 1000,
+        },
+      ]),
+    );
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Recently viewed cars" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Compare selection")).not.toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: "Add to compare" })[0]!);
+    expect(screen.getByLabelText("Compare selection")).toBeInTheDocument();
+    expect(screen.getByText(/Compare \(1\/2\)/i)).toBeInTheDocument();
+    expect(loadCompareSelection()).toHaveLength(1);
+    expect(loadCompareSelection()[0]?.id).toBe(42);
+
+    await user.click(screen.getAllByRole("button", { name: "Add to compare" })[0]!);
+    expect(screen.getByText(/Compare \(2\/2\)/i)).toBeInTheDocument();
+    expect(loadCompareSelection()).toHaveLength(2);
+    expect(sessionStorage.getItem(COMPARE_SELECTION_KEY)).toBeTruthy();
   });
 
   it("shows Empty bay and Browse cars when recently viewed is empty", async () => {
@@ -188,8 +263,12 @@ describe("HomePage", () => {
     expect(screen.getByText("Empty bay")).toBeInTheDocument();
     expect(screen.getByText(/No listings on this device yet/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add to compare" })).not.toBeInTheDocument();
     const browseLinks = screen.getAllByRole("link", { name: "Browse cars" });
     expect(browseLinks.some((a) => a.getAttribute("href") === "/cars")).toBe(true);
+    expect(
+      screen.getAllByRole("link", { name: "Compare" }).some((a) => a.getAttribute("href") === "/compare"),
+    ).toBe(true);
   });
 
   it("clears recently viewed from home and shows the empty bay", async () => {

@@ -2,25 +2,43 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { badgeForStatus } from "../car-visuals";
 import {
+  ensureComparePick,
+  loadCompareSelection,
+  toComparePick,
+  toggleComparePick,
+  type ComparePick,
+} from "../compare-selection";
+import {
   clearRecentlyViewed,
   loadRecentlyViewed,
   type RecentlyViewedCar,
 } from "../recently-viewed";
 import { useToast } from "../toast-context";
 import { CarCard } from "./CarCard";
+import { CompareTray } from "./CompareTray";
 
 export function RecentlyViewedCars() {
   const toast = useToast();
   const [cars, setCars] = useState<RecentlyViewedCar[] | null>(null);
+  const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
 
   useEffect(() => {
     setCars(loadRecentlyViewed());
+    setComparePicks(loadCompareSelection());
   }, []);
 
   function onClear() {
     clearRecentlyViewed();
     setCars([]);
     toast.success("Cleared recently viewed on this device.");
+  }
+
+  function onCompareCard(car: RecentlyViewedCar) {
+    const pick = toComparePick(car);
+    const already = comparePicks.some((p) => p.id === car.id);
+    // Same session tray as Cars / My cars / listing detail.
+    const { picks } = already ? toggleComparePick(pick) : ensureComparePick(pick);
+    setComparePicks(picks);
   }
 
   if (cars === null) return null;
@@ -36,7 +54,8 @@ export function RecentlyViewedCars() {
         <div>
           <h2 className="font-display text-xl text-mist sm:text-2xl">Recently viewed</h2>
           <p className="mt-1 text-sm text-steel">
-            Last few listings you opened on this device.
+            Last few listings you opened on this device. Compare queues into the same tray as Cars
+            and My cars.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -54,6 +73,12 @@ export function RecentlyViewedCars() {
             className="rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
           >
             Browse cars
+          </Link>
+          <Link
+            to="/compare"
+            className="rounded-md border border-white/12 px-3 py-1.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+          >
+            Compare
           </Link>
         </div>
       </div>
@@ -79,18 +104,44 @@ export function RecentlyViewedCars() {
         </div>
       ) : (
         <ul className="mt-5 grid gap-4 border-t border-white/10 pt-5 sm:grid-cols-2 xl:grid-cols-3">
-          {cars.map((car) => (
-            <li key={car.id} className="bay-rise">
-              <CarCard
-                car={car}
-                to={`/cars/${car.id}`}
-                badge={badgeForStatus(car.status, "price")}
-                layout="media"
-              />
-            </li>
-          ))}
+          {cars.map((car) => {
+            const selected = comparePicks.some((p) => p.id === car.id);
+            return (
+              <li key={car.id} className="bay-rise">
+                <CarCard
+                  car={car}
+                  to={`/cars/${car.id}`}
+                  badge={badgeForStatus(car.status, "price")}
+                  layout="media"
+                  footer={
+                    <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                      <button
+                        type="button"
+                        aria-pressed={selected}
+                        aria-label={selected ? "Remove from compare" : "Add to compare"}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          onCompareCard(car);
+                        }}
+                        className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold transition ${
+                          selected
+                            ? "border-lime/50 text-lime hover:bg-lime/10"
+                            : "border-white/15 text-steel hover:border-lime/40 hover:text-lime"
+                        }`}
+                      >
+                        {selected ? "In compare" : "Compare"}
+                      </button>
+                    </div>
+                  }
+                />
+              </li>
+            );
+          })}
         </ul>
       )}
+
+      <CompareTray picks={comparePicks} onChange={setComparePicks} />
     </section>
   );
 }
