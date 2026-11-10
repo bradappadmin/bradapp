@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import * as api from "../../api";
 import type { AdminCarModel, AdminGarage, AdminListing } from "../../api";
+import { carStudioImageUrl, STUDIO_PAINT_COLOURS } from "../../car-image";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
 
@@ -39,11 +40,11 @@ function AdminInventoryInner() {
     });
   }, []);
 
-  async function saveListing(id: number, coinPrice: number) {
+  async function saveListing(id: number, coinPrice: number, colour: string) {
     setError(null);
     try {
-      await api.patchAdminListing(id, { coinPrice });
-      setMessage(`Listing #${id} price updated.`);
+      await api.patchAdminListing(id, { coinPrice, colour });
+      setMessage(`Listing #${id} updated.`);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Listing update failed");
@@ -83,7 +84,7 @@ function AdminInventoryInner() {
     <AdminShell
       wide
       title="Cars & garages"
-      description="Correct listings, model specs, and garage copy."
+      description="Correct listings, paint for studio photos, model specs, and garage copy."
     >
       <div
         className="mt-6 flex gap-2 overflow-x-auto pb-1"
@@ -107,40 +108,13 @@ function AdminInventoryInner() {
       {tab === "listings" ? (
         <ul className="mt-6 divide-y divide-white/10 border-t border-white/10">
           {listings.slice(0, 40).map((listing) => (
-            <li
+            <ListingPaintRow
               key={listing.id}
-              className="admin-row flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="min-w-0">
-                <p className="text-mist break-words">
-                  #{listing.id} {listing.make} {listing.model} · {listing.year} · {listing.status}
-                </p>
-                <p className="text-xs text-steel">
-                  {listing.garageName} · {listing.ownerLabel}
-                </p>
-              </div>
-              <div className="admin-panel flex w-full items-end gap-2 rounded-md border p-2 sm:w-auto">
-                <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:flex-none">
-                  Coins
-                  <input
-                    id={`price-${listing.id}`}
-                    className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
-                    type="number"
-                    defaultValue={listing.coinPrice}
-                  />
-                </label>
-                <button
-                  type="button"
-                  className="shrink-0 rounded-md border border-white/15 px-3 py-2 text-sm text-mist transition hover:border-lime/40 hover:text-lime"
-                  onClick={() => {
-                    const el = document.getElementById(`price-${listing.id}`) as HTMLInputElement | null;
-                    void saveListing(listing.id, Number(el?.value || listing.coinPrice));
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            </li>
+              listing={listing}
+              onSave={(coinPrice, colour) => {
+                void saveListing(listing.id, coinPrice, colour);
+              }}
+            />
           ))}
         </ul>
       ) : null}
@@ -218,5 +192,94 @@ function AdminInventoryInner() {
         </ul>
       ) : null}
     </AdminShell>
+  );
+}
+
+function paintOptionsFor(current: string): string[] {
+  if (STUDIO_PAINT_COLOURS.includes(current)) {
+    return STUDIO_PAINT_COLOURS;
+  }
+  return [current, ...STUDIO_PAINT_COLOURS];
+}
+
+function ListingPaintRow({
+  listing,
+  onSave,
+}: {
+  listing: AdminListing;
+  onSave: (coinPrice: number, colour: string) => void;
+}) {
+  const [colour, setColour] = useState(listing.colour);
+  const [coinPrice, setCoinPrice] = useState(String(listing.coinPrice));
+
+  useEffect(() => {
+    setColour(listing.colour);
+    setCoinPrice(String(listing.coinPrice));
+  }, [listing.colour, listing.coinPrice, listing.id]);
+
+  const previewSrc = carStudioImageUrl({
+    make: listing.make,
+    model: listing.model,
+    colour,
+    width: 240,
+  });
+
+  return (
+    <li className="admin-row flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-center gap-3">
+        <img
+          src={previewSrc}
+          alt={`${listing.make} ${listing.model} in ${colour}`}
+          width={96}
+          height={64}
+          className="h-16 w-24 shrink-0 rounded-md border border-white/10 bg-bay-deep/60 object-contain object-bottom"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+        />
+        <div className="min-w-0">
+          <p className="text-mist break-words">
+            #{listing.id} {listing.make} {listing.model} · {listing.year} · {listing.status}
+          </p>
+          <p className="text-xs text-steel">
+            {listing.garageName} · {listing.ownerLabel} · {colour}
+          </p>
+        </div>
+      </div>
+      <div className="admin-panel flex w-full flex-col gap-2 rounded-md border p-2 sm:w-auto sm:flex-row sm:items-end">
+        <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:flex-none">
+          Paint
+          <select
+            aria-label={`Paint colour for listing ${listing.id}`}
+            className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-44"
+            value={colour}
+            onChange={(e) => setColour(e.target.value)}
+          >
+            {paintOptionsFor(listing.colour).map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:flex-none">
+          Coins
+          <input
+            aria-label={`Coin price for listing ${listing.id}`}
+            className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
+            type="number"
+            value={coinPrice}
+            onChange={(e) => setCoinPrice(e.target.value)}
+          />
+        </label>
+        <button
+          type="button"
+          className="shrink-0 rounded-md border border-white/15 px-3 py-2 text-sm text-mist transition hover:border-lime/40 hover:text-lime"
+          onClick={() => onSave(Number(coinPrice || listing.coinPrice), colour)}
+        >
+          Save
+        </button>
+      </div>
+    </li>
   );
 }

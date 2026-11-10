@@ -106,9 +106,18 @@ describe.runIf(hasDb)("admin routes", () => {
     expect(model.status).toBe(200);
     expect(Number(model.body.model.bhp)).toBe(999);
 
-    const listing = await admin.patch(`/admin/listings/${listingId}`).send({ coinPrice: 123 });
+    const listing = await admin.patch(`/admin/listings/${listingId}`).send({
+      coinPrice: 123,
+      colour: "Racing Red",
+    });
     expect(listing.status).toBe(200);
     expect(Number(listing.body.listing.coinPrice)).toBe(123);
+    expect(listing.body.listing.colour).toBe("Racing Red");
+
+    const badPaint = await admin.patch(`/admin/listings/${listingId}`).send({
+      colour: "Not A Studio Paint",
+    });
+    expect(badPaint.status).toBe(400);
   });
 
   it("prevents Brad from promoting a member to super_admin", async () => {

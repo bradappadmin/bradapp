@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { carStudioImageUrl } from "./car-image";
+import { carStudioImageUrl, STUDIO_PAINT_COLOURS } from "./car-image";
 
 describe("carStudioImageUrl", () => {
   it("builds a studio URL from make, model, and paint", () => {
@@ -21,5 +21,14 @@ describe("carStudioImageUrl", () => {
     const url = carStudioImageUrl({ make: "Vauxhall", model: "Corsa", colour: "Laser Blue" });
     expect(url).toContain("make=opel");
     expect(url).toContain("paintDescription=Blue");
+  });
+
+  it("exposes a curated paint list that the studio helper accepts", () => {
+    expect(STUDIO_PAINT_COLOURS).toContain("Racing Red");
+    expect(STUDIO_PAINT_COLOURS).toContain("Midnight Black");
+    for (const colour of STUDIO_PAINT_COLOURS) {
+      const url = carStudioImageUrl({ make: "BMW", model: "M3", colour });
+      expect(url).toContain("paintDescription=");
+    }
   });
 });

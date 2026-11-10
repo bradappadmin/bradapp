@@ -1,5 +1,6 @@
 /** Studio car renders for listing cards/heroes. Falls back to local SVG art if unloadable. */
 
+/** Listing paint names the studio helper maps to Imagin paintDescription. */
 const COLOUR_TO_PAINT: Record<string, string> = {
   "Arctic White": "White",
   "British Racing Green": "British Racing Green",
@@ -12,6 +13,11 @@ const COLOUR_TO_PAINT: Record<string, string> = {
   "Sunset Orange": "Orange",
   "Volcano Yellow": "Yellow",
 };
+
+/** Curated bay paints for admin listing forms (matches studio URL helper). */
+export const STUDIO_PAINT_COLOURS = Object.keys(COLOUR_TO_PAINT).sort((a, b) =>
+  a.localeCompare(b),
+);
 
 const MAKE_ALIASES: Record<string, string> = {
   "Mercedes-Benz": "mercedes",

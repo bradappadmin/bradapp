@@ -12,9 +12,11 @@ import {
   normalizeInviteCode,
   revokeInviteCode,
 } from "./invite-codes.js";
+import { LISTING_PAINT_COLOURS } from "./listing-colours.js";
 import { isAdminRole, isRole, type Role } from "./roles.js";
 
 const accountStatusSchema = z.enum(["active", "closed", "frozen"]);
+const listingPaintColourSchema = z.enum(LISTING_PAINT_COLOURS);
 
 const userPatchSchema = z.object({
   displayName: z.string().trim().min(1).max(120).optional(),
@@ -81,7 +83,7 @@ const carModelPatchSchema = z.object({
 const listingPatchSchema = z.object({
   conditionType: z.enum(["new", "used"]).optional(),
   year: z.number().int().min(1950).max(2100).optional(),
-  colour: z.string().trim().min(1).max(40).optional(),
+  colour: listingPaintColourSchema.optional(),
   mileage: z.number().int().min(0).max(5_000_000).optional(),
   coinPrice: z.number().int().min(1).max(1_000_000).optional(),
   ownerLabel: z.string().trim().min(1).max(120).optional(),
