@@ -15,6 +15,8 @@ export type FavouriteCar = {
   mileage: number;
   coinPrice: number;
   status: "available" | "owned" | "sold";
+  /** Member owner when the listing is owned/for sale by someone; null for bay stock. */
+  ownerUserId: number | null;
   ownerLabel: string;
   garageName: string;
   garageCity: string;
@@ -85,6 +87,7 @@ export async function listFavourites(userId: number): Promise<FavouriteCar[]> {
        l.mileage,
        l.coin_price AS coinPrice,
        l.status,
+       l.owner_user_id AS ownerUserId,
        l.owner_label AS ownerLabel,
        g.name AS garageName,
        g.city AS garageCity,
@@ -112,6 +115,10 @@ export async function listFavourites(userId: number): Promise<FavouriteCar[]> {
     mileage: Number(row.mileage),
     coinPrice: Number(row.coinPrice),
     status: row.status as "available" | "owned" | "sold",
+    ownerUserId:
+      row.ownerUserId == null || row.ownerUserId === ""
+        ? null
+        : Number(row.ownerUserId),
     ownerLabel: String(row.ownerLabel),
     garageName: String(row.garageName),
     garageCity: String(row.garageCity),

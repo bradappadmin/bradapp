@@ -17,6 +17,7 @@ function car(
     mileage: 10000,
     coinPrice: 100,
     status: "available",
+    ownerUserId: null,
     ownerLabel: "Bay",
     garageName: "Bay",
     garageCity: "London",

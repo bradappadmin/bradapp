@@ -71,6 +71,7 @@ describe.runIf(hasDb)("favourites routes", () => {
     expect(car.make).toBeTruthy();
     expect(car.model).toBeTruthy();
     expect(car.favouritedAt).toBeTruthy();
+    expect(car).toHaveProperty("ownerUserId");
 
     const status = await member.get(`/favourites/${listingId}`);
     expect(status.body.favourited).toBe(true);

@@ -17,6 +17,7 @@ import { CarCard } from "../components/CarCard";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { filterFavouritesByCarQuery } from "../favourites-car-filter";
+import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import {
   DEFAULT_FAVOURITES_SORT,
   FAVOURITES_SORT_OPTIONS,
@@ -403,6 +404,10 @@ export function FavouritesPage() {
                     const selected = comparePicks.some((p) => p.id === car.id);
                     const selectionFull = selectedCount >= 2 && !selected;
                     const checkboxId = `favourite-compare-${car.id}`;
+                    const tradeAction = garageTradeOfferAction({
+                      ownerUserId: car.ownerUserId,
+                      viewerId: user?.id,
+                    });
                     return (
                       <li key={car.id} className="bay-rise">
                         <CarCard
@@ -438,14 +443,32 @@ export function FavouritesPage() {
                                       : "Select for compare"}
                                 </span>
                               </label>
-                              <button
-                                type="button"
-                                disabled={busyId === car.id}
-                                onClick={() => void onRemove(car.id)}
-                                className="w-fit rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist transition hover:border-rose hover:text-rose disabled:opacity-60"
-                              >
-                                {busyId === car.id ? "Removing…" : "Remove"}
-                              </button>
+                              <div className="flex flex-wrap gap-2">
+                                {tradeAction === "offer" && car.ownerUserId != null ? (
+                                  <Link
+                                    to={garageTradeOfferHref(car.ownerUserId, car.id)}
+                                    className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-xs font-semibold text-lime no-underline transition hover:bg-lime/10"
+                                  >
+                                    Offer trade
+                                  </Link>
+                                ) : null}
+                                {tradeAction === "signin" ? (
+                                  <Link
+                                    to="/signin"
+                                    className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                                  >
+                                    Sign in to offer trade
+                                  </Link>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  disabled={busyId === car.id}
+                                  onClick={() => void onRemove(car.id)}
+                                  className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist transition hover:border-rose hover:text-rose disabled:opacity-60"
+                                >
+                                  {busyId === car.id ? "Removing…" : "Remove"}
+                                </button>
+                              </div>
                             </div>
                           }
                         />

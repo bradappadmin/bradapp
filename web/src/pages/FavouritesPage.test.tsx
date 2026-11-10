@@ -14,6 +14,7 @@ function SearchParamsProbe() {
 vi.mock("../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchFavourites: vi.fn(),
 }));
 
@@ -34,7 +35,8 @@ const audi = {
   mileage: 18000,
   coinPrice: 310,
   status: "available" as const,
-  ownerLabel: "Bay stock",
+  ownerUserId: 177,
+  ownerLabel: "Sam Bay",
   garageName: "Bay",
   garageCity: "London",
   favouritedAt: "2026-11-09T12:00:00.000Z",
@@ -49,7 +51,30 @@ const porsche = {
   bodyType: "Coupe",
   colour: "Racing Red",
   coinPrice: 420,
+  ownerUserId: 177,
   favouritedAt: "2026-11-09T12:05:00.000Z",
+};
+
+const ownCar = {
+  ...audi,
+  id: 22,
+  make: "Ford",
+  model: "Focus",
+  trimName: "ST",
+  ownerUserId: 2,
+  ownerLabel: "You",
+  favouritedAt: "2026-11-09T12:10:00.000Z",
+};
+
+const stockCar = {
+  ...audi,
+  id: 33,
+  make: "Toyota",
+  model: "GR Yaris",
+  trimName: "Circuit",
+  ownerUserId: null,
+  ownerLabel: "Bay stock",
+  favouritedAt: "2026-11-09T12:15:00.000Z",
 };
 
 describe("FavouritesPage Midnight Garage UI", () => {
@@ -295,5 +320,32 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
     expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+  });
+
+  it("offers trade on someone else’s favourite and hides it for own/stock cars", async () => {
+    vi.mocked(api.fetchFavourites).mockResolvedValue({
+      cars: [audi, ownCar, stockCar],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/favourites" element={<FavouritesPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Saved" })).toBeInTheDocument();
+    const offer = screen.getByRole("link", { name: "Offer trade" });
+    expect(offer).toHaveAttribute("href", "/trades?with=177&theirCar=11");
+    expect(screen.getByRole("link", { name: /Audi RS6/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ford Focus/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Toyota GR Yaris/i })).toBeInTheDocument();
+    // Only one Offer trade — own + bay stock stay hidden.
+    expect(screen.getAllByRole("link", { name: "Offer trade" })).toHaveLength(1);
+    expect(screen.getByText("Find a favourite")).toBeInTheDocument();
+    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
   });
 });

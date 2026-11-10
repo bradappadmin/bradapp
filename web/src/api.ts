@@ -235,6 +235,8 @@ export type FavouriteCar = {
   mileage: number;
   coinPrice: number;
   status: "available" | "owned" | "sold";
+  /** Member owner when the listing is owned/for sale by someone; null for bay stock. */
+  ownerUserId: number | null;
   ownerLabel: string;
   garageName: string;
   garageCity: string;
