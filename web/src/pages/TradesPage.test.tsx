@@ -175,6 +175,18 @@ describe("TradesPage Midnight Garage UI", () => {
 
     expect(await screen.findByText(/wants a free swap/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
+    const inbox = screen.getByRole("region", { name: /Inbox/i });
+    expect(inbox.querySelectorAll(".bay-rise").length).toBeGreaterThanOrEqual(1);
+    expect(inbox.querySelectorAll(".car-card-media").length).toBeGreaterThanOrEqual(2);
+    const studioImgs = [...inbox.querySelectorAll(".car-card-media img")];
+    expect(studioImgs.length).toBeGreaterThanOrEqual(2);
+    expect(
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+    ).toBe(true);
+    expect(
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=")),
+    ).toBe(true);
     expect(screen.getByRole("link", { name: "Open car Ford Focus ST" })).toHaveAttribute(
       "href",
       "/cars/12",

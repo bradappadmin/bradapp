@@ -347,7 +347,10 @@ export function TradesPage() {
               const openCarClass =
                 "rounded-md border border-white/15 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
               return (
-              <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
+              <li
+                key={trade.id}
+                className="bay-rise play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5"
+              >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-sm text-mist">
                     <span className="font-display text-lime">{trade.fromDisplayName}</span> wants a
@@ -470,7 +473,10 @@ export function TradesPage() {
               const openCarClass =
                 "rounded-md border border-white/15 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
               return (
-              <li key={trade.id} className="play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5">
+              <li
+                key={trade.id}
+                className="bay-rise play-panel flex flex-col gap-4 rounded-md border p-4 sm:p-5"
+              >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-sm text-mist">
                     Waiting on <span className="font-display text-lime">{trade.toDisplayName}</span>

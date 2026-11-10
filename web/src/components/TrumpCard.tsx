@@ -19,6 +19,11 @@ type TrumpCardProps = {
   label: string;
   /** Highlight the winning side after a match. */
   highlighted?: boolean;
+  /**
+   * Motion shell: Play uses trump entrance / pulse; trades / bay lists use CarCard
+   * lift + photo ease (`car-card-media`).
+   */
+  motion?: "trump" | "bay";
   /** Stat value shown under the photo when comparing. */
   statLabel?: string;
   statValue?: string | number;
@@ -30,6 +35,7 @@ export function TrumpCard({
   car,
   label,
   highlighted = false,
+  motion = "trump",
   statLabel,
   statValue,
   className = "",
@@ -39,12 +45,13 @@ export function TrumpCard({
     model: car.model,
     trimName: car.trimName ?? "",
   });
+  const motionClass = motion === "bay" ? "car-card-media" : "trump-card-motion";
 
   return (
     <article
       data-trump-card
       data-trump-highlighted={highlighted ? "true" : "false"}
-      className={`trump-card-motion overflow-hidden rounded-md border bg-bay-deep/40 ${
+      className={`${motionClass} overflow-hidden rounded-md border bg-bay-deep/40 ${
         highlighted ? "border-lime/50 shadow-[0_0_24px_rgba(163,230,53,0.12)]" : "border-white/10"
       } ${className}`}
     >

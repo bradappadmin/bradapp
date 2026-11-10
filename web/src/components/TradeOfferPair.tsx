@@ -21,14 +21,14 @@ export function TradeOfferPair({
 }: TradeOfferPairProps) {
   return (
     <div className={`grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center ${className}`}>
-      <TrumpCard label={offerLabel} car={offerCar} />
+      <TrumpCard label={offerLabel} car={offerCar} motion="bay" />
       <p
         className="hidden text-center font-display text-sm font-semibold text-steel sm:block"
         aria-hidden
       >
         ↔
       </p>
-      <TrumpCard label={requestLabel} car={requestCar} />
+      <TrumpCard label={requestLabel} car={requestCar} motion="bay" />
     </div>
   );
 }

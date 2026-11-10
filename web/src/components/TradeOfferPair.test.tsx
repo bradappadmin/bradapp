@@ -31,8 +31,12 @@ describe("TradeOfferPair", () => {
     expect(screen.getByText("You give")).toBeInTheDocument();
     expect(screen.getByText("Audi RS6 Avant")).toBeInTheDocument();
     expect(screen.getByText("Ford Focus ST")).toBeInTheDocument();
-    const imgs = document.querySelectorAll("img");
+    expect(document.querySelectorAll(".car-card-media").length).toBe(2);
+    const imgs = [...document.querySelectorAll(".car-card-media img")];
     expect(imgs.length).toBeGreaterThanOrEqual(2);
     expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(imgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription="))).toBe(
+      true,
+    );
   });
 });
