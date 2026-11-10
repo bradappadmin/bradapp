@@ -58,14 +58,14 @@ const STEPS: Step[] = [
   {
     id: "weekly-cup",
     title: "Weekly Top Trumps cup",
-    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — Challenge to Top Trumps deep-links into Play with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
+    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
     to: "/leaderboard",
     cta: "Open cup standings",
   },
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, or Offer trade from Favourites. An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, Offer trade from Favourites, or Offer trade on the leaderboard standings and cup (not yourself). An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
     to: "/trades",
     cta: "Open Trades",
   },
@@ -86,7 +86,7 @@ const STEPS: Step[] = [
   {
     id: "gift-coins",
     title: "Gift Brad Coins",
-    body: "Open another member’s public garage from Members — Copy garage link shares that bay. Use Gift coins: enter an amount and an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
+    body: "Open another member’s public garage from Members — Copy garage link shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
     to: "/members",
     cta: "Open Members",
   },
@@ -121,9 +121,9 @@ export function HowToPage() {
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
             listing Compare and Copy link, Favourites challenge and trade CTAs, leaderboard Challenge
-            to Top Trumps, Copy garage link on member profiles, Top Trumps streaks and this week’s
-            cup standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
-            showcase. Nothing here spends real money.
+            and Offer trade, Copy garage link on member profiles, gift Quick amount chips, Top Trumps
+            streaks and this week’s cup standings, free trades, member gifts, drag races, empty-bay
+            next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -203,7 +203,8 @@ export function HowToPage() {
                 Leaderboard
               </Link>{" "}
               — Find a member, Brad Coin ranks, highlight cars, This week’s cup standings beside the
-              podium, and Challenge to Top Trumps on other members’ standings and cup rows (sign in).
+              podium, and Challenge to Top Trumps or Offer trade on other members’ standings and cup
+              rows (sign in).
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">

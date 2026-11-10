@@ -80,19 +80,27 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/This week.?s cup standings sit on Play/i)).toBeInTheDocument();
     expect(screen.getByText(/beside the all-time podium on the leaderboard/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Challenge to Top Trumps deep-links into Play with that member ready/i),
+      screen.getByText(
+        /Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Challenge to Top Trumps on the leaderboard standings and cup/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/leaderboard Challenge to Top Trumps/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Offer trade on the leaderboard standings and cup/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/leaderboard Challenge and Offer trade/i)).toBeInTheDocument();
+    expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
     expect(screen.getByText(/Copy garage link on member profiles/i)).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Copy garage link \(Account, My cars, or any public garage\)/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/Copy garage link shares that bay/i)).toBeInTheDocument();
-    expect(screen.getByText(/Gift coins: enter an amount and an optional note/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Quick amount chip \(10 \/ 25 \/ 50 BC\)/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Gift sent \/ Gift received/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Gifts/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/member gifts/i)).toBeInTheDocument();
@@ -124,7 +132,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Challenge to Top Trumps on other members.? standings and cup rows/i,
+        /Challenge to Top Trumps or Offer trade on other members.? standings and cup/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/open a garage, Copy garage link, then challenge/i)).toBeInTheDocument();
