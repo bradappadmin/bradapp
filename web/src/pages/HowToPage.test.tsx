@@ -103,6 +103,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Top Trumps bay strip on a listing" }),
     ).toBeInTheDocument();
     expect(document.getElementById("listing-trump-stats")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Listing studio hero motion" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("listing-hero-motion")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
@@ -245,7 +249,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\), listing View seller \(\/members\/:id; hidden for self \/ house\), listing Top Trumps bay strip under the studio hero \(Power \/ 0–60 \/ Top speed\)/i,
+        /listing Compare and Copy link, listing View reviews \(\/reviews\?q=Make\+Model when films exist\), listing View seller \(\/members\/:id; hidden for self \/ house\), listing Top Trumps bay strip under the studio hero \(Power \/ 0–60 \/ Top speed\), listing studio hero motion \(entrance fade\/rise, photo ease, reduced-motion\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -779,6 +783,19 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Listing studio hero motion is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /the photo-first studio hero soft-fades and rises in, eases the studio photo a little larger on hover\/focus, and drifts a gentle bay light/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Prefers-reduced-motion keeps the hero still \(no entrance \/ no photo ease \/ no bay pulse\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\), Open car \(\/cars\/:id\) when a listing exists, and Reviews Compare into the shared tray when a listing is known/i,
       ),
@@ -1100,7 +1117,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
     expect(
       screen.getByText(
-        /on a listing, Top Trumps bay strip under the studio hero \(same Power \/ 0–60 \/ Top speed\); View reviews → \/reviews\?q=Make\+Model when films exist \(hides when none\); View seller → \/members\/:id when a member owns it \(hidden for self or house\)/i,
+        /on a listing, Top Trumps bay strip under the studio hero \(same Power \/ 0–60 \/ Top speed\); listing studio hero motion \(entrance fade\/rise, photo ease; reduced-motion keeps still\); View reviews → \/reviews\?q=Make\+Model when films exist \(hides when none\); View seller → \/members\/:id when a member owns it \(hidden for self or house\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Try Cars search" })).toHaveAttribute("href", "/cars");

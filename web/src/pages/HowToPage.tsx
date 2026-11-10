@@ -310,7 +310,14 @@ const STEPS: Step[] = [
   {
     id: "listing-trump-stats",
     title: "Top Trumps bay strip on a listing",
-    body: "On a catalogue listing (/cars/:id), one Midnight Garage bay strip sits under the studio hero: Power, 0–60, and Top speed — the same play stats as Cars / Favourites / My cars peeks. View reviews, View seller, Compare, Challenge, Offer trade, Copy link, and Favourites stay. Tight strip — not a stats dashboard.",
+    body: "On a catalogue listing (/cars/:id), one Midnight Garage bay strip sits under the studio hero: Power, 0–60, and Top speed — the same play stats as Cars / Favourites / My cars peeks. View reviews, View seller, Compare, Challenge, Offer trade, Copy link, and Favourites stay. Tight strip — not a stats dashboard. Listing studio hero motion is the next step.",
+    to: "/cars",
+    cta: "Open Cars",
+  },
+  {
+    id: "listing-hero-motion",
+    title: "Listing studio hero motion",
+    body: "On a catalogue listing (/cars/:id), the photo-first studio hero soft-fades and rises in, eases the studio photo a little larger on hover/focus, and drifts a gentle bay light — presence and hierarchy, not noise. Prefers-reduced-motion keeps the hero still (no entrance / no photo ease / no bay pulse). Top Trumps bay strip, View reviews, View seller, Compare, Challenge, Offer trade, Copy link, and Favourites stay.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -447,7 +454,8 @@ export function HowToPage() {
             strip (favourite count + total BC), photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
-            Trumps bay strip under the studio hero (Power / 0–60 / Top speed), Cars Sort the
+            Trumps bay strip under the studio hero (Power / 0–60 / Top speed), listing studio hero
+            motion (entrance fade/rise, photo ease, reduced-motion), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
             (Power / 0–60 / Top speed), studio card hover motion (bay lift, photo ease, reduced-motion),
             Favourites Top Trumps peek (same Power / 0–60 / Top speed),
@@ -596,7 +604,8 @@ export function HowToPage() {
               Favourites / My cars); Top Trumps peek under each studio photo (Power / 0–60 / Top
               speed); studio card hover motion (bay lift, photo ease, lime/rose edge; reduced-motion
               keeps still); Compare into the tray; on a listing, Top Trumps bay strip under the studio
-              hero (same Power / 0–60 / Top speed); View reviews → /reviews?q=Make+Model when films
+              hero (same Power / 0–60 / Top speed); listing studio hero motion (entrance fade/rise,
+              photo ease; reduced-motion keeps still); View reviews → /reviews?q=Make+Model when films
               exist (hides when none); View seller → /members/:id when a member owns it (hidden for
               self or house); Clear filters when nothing matches.
             </li>
