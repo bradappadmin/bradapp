@@ -156,6 +156,53 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     const selfLink = screen.getByRole("link", { name: /Member \(you\), rank 2, open garage/i });
     expect(selfLink).toHaveAttribute("href", "/members/2");
     expect(selfLink).toHaveTextContent("Empty bay");
+
+    const standings = screen.getByRole("heading", { name: "All-time standings" }).closest("section");
+    expect(standings).not.toBeNull();
+    const standingsChallenges = standings!.querySelectorAll(
+      'a[aria-label^="Challenge "][href^="/play?opponent="]',
+    );
+    expect([...standingsChallenges].map((a) => a.getAttribute("href"))).toEqual([
+      "/play?opponent=7",
+      "/play?opponent=9",
+    ]);
+    expect(
+      screen.queryByRole("link", { name: /Challenge Member to Top Trumps/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("deep-links Challenge to Top Trumps from standings and cup for other members", async () => {
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <LeaderboardPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("link", { name: /Bay Friend, rank 1, open garage/i }),
+    ).toBeInTheDocument();
+
+    const standings = screen.getByRole("heading", { name: "All-time standings" }).closest("section");
+    expect(standings).not.toBeNull();
+    const standingsChallenge = standings!.querySelector('a[href="/play?opponent=7"]');
+    expect(standingsChallenge).not.toBeNull();
+    expect(standingsChallenge).toHaveAttribute(
+      "aria-label",
+      "Challenge Bay Friend to Top Trumps",
+    );
+    expect(standingsChallenge).toHaveTextContent("Challenge to Top Trumps");
+
+    const cupStandings = screen.getByLabelText("This week Top Trumps cup standings");
+    const cupChallenge = cupStandings.querySelector('a[href="/play?opponent=7"]');
+    expect(cupChallenge).not.toBeNull();
+    expect(cupChallenge).toHaveAttribute(
+      "aria-label",
+      "Challenge Bay Friend to Top Trumps",
+    );
+    expect(cupStandings.querySelector('a[href="/play?opponent=2"]')).toBeNull();
+    expect(standings!.querySelector('a[href="/play?opponent=2"]')).toBeNull();
   });
 
   it("searches standings by display name and keeps the podium", async () => {

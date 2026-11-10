@@ -60,6 +60,7 @@ export function WeeklyCupPanel({
         <ol className="mt-4 flex flex-col gap-2" aria-label="This week Top Trumps cup standings">
           {top.map((row) => {
             const isYou = viewerId != null && row.userId === viewerId;
+            const canChallenge = viewerId != null && !isYou;
             return (
               <li
                 key={row.userId}
@@ -75,9 +76,20 @@ export function WeeklyCupPanel({
                     {isYou ? " (you)" : ""}
                   </Link>
                 </div>
-                <span className="font-display text-lime">
-                  {row.wins} {row.wins === 1 ? "win" : "wins"}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-display text-lime">
+                    {row.wins} {row.wins === 1 ? "win" : "wins"}
+                  </span>
+                  {canChallenge ? (
+                    <Link
+                      to={`/play?opponent=${row.userId}`}
+                      className="rounded-md border border-lime/40 px-2.5 py-1 font-display text-xs font-semibold text-lime no-underline transition hover:bg-lime/10"
+                      aria-label={`Challenge ${row.displayName} to Top Trumps`}
+                    >
+                      Challenge to Top Trumps
+                    </Link>
+                  ) : null}
+                </div>
               </li>
             );
           })}

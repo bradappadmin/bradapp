@@ -330,16 +330,20 @@ export function LeaderboardPage() {
           <ol className="flex flex-col gap-3">
             {visible.map((entry) => {
               const isYou = Boolean(user && entry.id === user.id);
+              const canChallenge = Boolean(user && !isYou);
               const snippet = bioSnippet(entry.bio);
               const car = entry.highlightCar;
               const carTitle = car
                 ? listingTitle({ make: car.make, model: car.model, trimName: car.trimName })
                 : null;
               return (
-                <li key={entry.id}>
+                <li
+                  key={entry.id}
+                  className={`play-panel flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4 ${rowPanelClass(entry.rank, isYou)}`}
+                >
                   <Link
                     to={`/members/${entry.id}`}
-                    className={`play-panel group flex items-center gap-3 rounded-md border p-3 no-underline transition hover:border-lime/35 sm:gap-4 sm:p-4 ${rowPanelClass(entry.rank, isYou)}`}
+                    className="group flex min-w-0 flex-1 items-center gap-3 no-underline sm:gap-4"
                     aria-label={`${entry.displayName}${isYou ? " (you)" : ""}, rank ${entry.rank}, open garage`}
                   >
                     <span
@@ -390,6 +394,15 @@ export function LeaderboardPage() {
                       </div>
                     </div>
                   </Link>
+                  {canChallenge ? (
+                    <Link
+                      to={`/play?opponent=${entry.id}`}
+                      className="shrink-0 rounded-md border border-lime/40 px-3 py-2 text-center font-display text-sm font-semibold text-lime no-underline transition hover:bg-lime/10 sm:self-center"
+                      aria-label={`Challenge ${entry.displayName} to Top Trumps`}
+                    >
+                      Challenge to Top Trumps
+                    </Link>
+                  ) : null}
                 </li>
               );
             })}

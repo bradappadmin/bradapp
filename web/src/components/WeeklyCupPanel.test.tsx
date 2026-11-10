@@ -41,6 +41,12 @@ describe("WeeklyCupPanel", () => {
       "href",
       "/members/2",
     );
+    expect(
+      screen.getByRole("link", { name: /Challenge Bay Friend to Top Trumps/i }),
+    ).toHaveAttribute("href", "/play?opponent=7");
+    expect(
+      screen.queryByRole("link", { name: /Challenge Member to Top Trumps/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps compact Top Trumps cup title for Play", () => {
