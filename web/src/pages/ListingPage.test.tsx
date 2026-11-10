@@ -40,7 +40,7 @@ const memberOwnedListing: ListingDetail = {
   garageTagline: "Commuters and hot hatches.",
 };
 
-describe("ListingPage challenge CTA", () => {
+describe("ListingPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -52,7 +52,7 @@ describe("ListingPage challenge CTA", () => {
     });
   });
 
-  it("shows Challenge to Top Trumps for another member’s listing when signed in", async () => {
+  it("shows bay hierarchy, hero, specs, and Challenge / trade CTAs when signed in", async () => {
     vi.mocked(api.fetchMe).mockResolvedValue({
       user: {
         id: 2,
@@ -83,10 +83,23 @@ describe("ListingPage challenge CTA", () => {
       </MemoryRouter>,
     );
 
-    const challenge = await screen.findByRole("link", { name: "Challenge to Top Trumps" });
+    expect(
+      await screen.findByRole("heading", { name: /Bugatti Chiron Sport/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Listing · Midnight garage/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Listing status")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Specs & bay" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Listing actions")).toBeInTheDocument();
+
+    const hero = screen.getByRole("img", { name: /Bugatti Chiron Sport/i });
+    expect(hero.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+
+    const challenge = screen.getByRole("link", { name: "Challenge to Top Trumps" });
     expect(challenge).toHaveAttribute("href", "/play?opponent=177&theirCar=143");
     const trade = screen.getByRole("link", { name: "Offer trade" });
     expect(trade).toHaveAttribute("href", "/trades?with=177&theirCar=143");
+    expect(screen.getByRole("button", { name: /Buy for/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Save to favourites/i })).toBeInTheDocument();
   });
 
   it("prompts sign-in to challenge or trade when signed out", async () => {

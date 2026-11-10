@@ -6,6 +6,7 @@ import type { ListingDetail } from "../cars";
 import { formatCoins, formatMileage, listingTitle } from "../cars";
 import { CarHeroVisual } from "../components/CarCard";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
 import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
@@ -135,10 +136,14 @@ export function ListingPage() {
     : "hidden";
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-        <Link to="/cars" className="text-sm text-lime no-underline hover:underline">
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+        <Link
+          to="/cars"
+          className="inline-flex rounded-md border border-white/12 px-3 py-1.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+        >
           ← Back to cars
         </Link>
 
@@ -147,27 +152,70 @@ export function ListingPage() {
 
         {listing ? (
           <article className="bay-rise mt-6">
-            <CarHeroVisual
-              colour={listing.colour}
-              bodyType={listing.bodyType}
-              make={listing.make}
-              model={listing.model}
-              title={listingTitle(listing)}
-            />
-            <p className="mt-6 text-xs uppercase tracking-[0.2em] text-steel">
-              {listing.conditionType} · {listing.year} · {listing.status}
-            </p>
-            <h1 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl">
-              {listingTitle(listing)}
-            </h1>
-            <p className="mt-4 font-display text-3xl font-semibold text-lime">
-              {formatCoins(listing.coinPrice)}
-            </p>
-            <p className="mt-2 text-sm text-steel">
-              Brad Coins only — no real money. Buy moves the car into your garage.
-            </p>
+            <header className="mb-5">
+              <p className="text-xs uppercase tracking-[0.28em] text-steel">
+                Listing · Midnight garage
+              </p>
+              <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                {listingTitle(listing)}
+              </h1>
+              <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
+              <div className="mt-4 flex flex-wrap gap-2" aria-label="Listing status">
+                <span className="rounded-md border border-white/12 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold capitalize text-mist">
+                  {listing.conditionType}
+                </span>
+                <span className="rounded-md border border-white/12 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  {listing.year}
+                </span>
+                <span
+                  className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold capitalize ${
+                    listing.status === "available"
+                      ? "border-lime/35 bg-lime/10 text-lime"
+                      : "border-white/12 bg-bay-panel/60 text-steel"
+                  }`}
+                >
+                  {listing.status}
+                </span>
+                <span className="rounded-md border border-white/12 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  {listing.colour}
+                </span>
+              </div>
+            </header>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="play-panel overflow-hidden rounded-md border p-2 sm:p-3">
+              <CarHeroVisual
+                colour={listing.colour}
+                bodyType={listing.bodyType}
+                make={listing.make}
+                model={listing.model}
+                title={listingTitle(listing)}
+                className="!mt-0"
+              />
+            </div>
+
+            <section
+              className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-6 sm:p-5"
+              aria-labelledby="listing-price-heading"
+            >
+              <div className="min-w-0">
+                <p id="listing-price-heading" className="text-xs uppercase tracking-wide text-steel">
+                  Brad Coin price
+                </p>
+                <p className="mt-2 font-display text-3xl font-semibold text-lime sm:text-4xl">
+                  {formatCoins(listing.coinPrice)}
+                </p>
+                <p className="mt-2 text-sm text-steel">
+                  Brad Coins only — no real money. Buy moves the car into your garage.
+                </p>
+                {canBuy && user ? (
+                  <p className="mt-2 text-xs text-steel">
+                    Your balance: {formatCoins(user.coinBalance)}
+                  </p>
+                ) : null}
+              </div>
+            </section>
+
+            <div className="mt-5 flex flex-wrap gap-3" aria-label="Listing actions">
               {canBuy ? (
                 <button
                   type="button"
@@ -175,7 +223,11 @@ export function ListingPage() {
                   onClick={() => void onBuy()}
                   className="bay-cta rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
                 >
-                  {busy ? "Buying…" : user ? `Buy for ${formatCoins(listing.coinPrice)}` : "Sign in to buy"}
+                  {busy
+                    ? "Buying…"
+                    : user
+                      ? `Buy for ${formatCoins(listing.coinPrice)}`
+                      : "Sign in to buy"}
                 </button>
               ) : null}
               {challengeAction === "challenge" && listing.ownerUserId != null ? (
@@ -222,11 +274,9 @@ export function ListingPage() {
               </button>
               <CopyShareLinkButton path={listingSharePath(listing.id)} label="Copy share link" />
             </div>
-            {canBuy && user ? (
-              <p className="mt-2 text-xs text-steel">Your balance: {formatCoins(user.coinBalance)}</p>
-            ) : null}
+
             {favourited ? (
-              <p className="mt-2 text-xs text-steel">
+              <p className="mt-3 text-xs text-steel">
                 In your{" "}
                 <Link to="/favourites" className="text-lime no-underline hover:underline">
                   Favourites
@@ -236,7 +286,7 @@ export function ListingPage() {
             ) : null}
 
             {ownsListing ? (
-              <p className="mt-6 text-sm text-lime">
+              <p className="play-panel mt-6 rounded-md border border-lime/30 p-4 text-sm text-lime">
                 You own this car. List it for sale, change the price, or unlist in{" "}
                 <Link to="/garage" className="underline">
                   My cars
@@ -247,62 +297,73 @@ export function ListingPage() {
 
             {actionError ? <p className="mt-3 text-sm text-rose">{actionError}</p> : null}
 
-            <dl className="mt-10 grid gap-4 border-t border-white/10 pt-8 sm:grid-cols-2">
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Colour</dt>
-                <dd className="mt-1 text-mist">{listing.colour}</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Mileage</dt>
-                <dd className="mt-1 text-mist">{formatMileage(listing.mileage)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Body / fuel</dt>
-                <dd className="mt-1 text-mist">
-                  {listing.bodyType} · {listing.fuel} · {listing.drivetrain}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Doors / seats</dt>
-                <dd className="mt-1 text-mist">
-                  {listing.doors} doors · {listing.seats} seats
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Power</dt>
-                <dd className="mt-1 text-mist">{listing.bhp} bhp</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Top speed</dt>
-                <dd className="mt-1 text-mist">{listing.topSpeedMph} mph</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">0–60</dt>
-                <dd className="mt-1 text-mist">{listing.zeroToSixtySecs}s</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-steel">Owner</dt>
-                <dd className="mt-1 text-mist">
-                  {listing.ownerUserId != null ? (
-                    <Link
-                      to={`/members/${listing.ownerUserId}`}
-                      className="text-mist no-underline hover:text-lime"
-                    >
-                      {listing.ownerLabel}
-                    </Link>
-                  ) : (
-                    listing.ownerLabel
-                  )}
-                </dd>
-              </div>
-              <div className="sm:col-span-2">
-                <dt className="text-xs uppercase tracking-wide text-steel">Garage</dt>
-                <dd className="mt-1 text-mist">
-                  {listing.garageName}, {listing.garageCity}
-                  <span className="mt-1 block text-sm text-steel">{listing.garageTagline}</span>
-                </dd>
-              </div>
-            </dl>
+            <section
+              className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+              aria-labelledby="listing-specs-heading"
+            >
+              <h2
+                id="listing-specs-heading"
+                className="font-display text-lg font-semibold text-mist sm:text-xl"
+              >
+                Specs & bay
+              </h2>
+              <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Colour</dt>
+                  <dd className="mt-1 text-mist">{listing.colour}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Mileage</dt>
+                  <dd className="mt-1 text-mist">{formatMileage(listing.mileage)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Body / fuel</dt>
+                  <dd className="mt-1 text-mist">
+                    {listing.bodyType} · {listing.fuel} · {listing.drivetrain}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Doors / seats</dt>
+                  <dd className="mt-1 text-mist">
+                    {listing.doors} doors · {listing.seats} seats
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Power</dt>
+                  <dd className="mt-1 text-mist">{listing.bhp} bhp</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Top speed</dt>
+                  <dd className="mt-1 text-mist">{listing.topSpeedMph} mph</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">0–60</dt>
+                  <dd className="mt-1 text-mist">{listing.zeroToSixtySecs}s</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-steel">Owner</dt>
+                  <dd className="mt-1 text-mist">
+                    {listing.ownerUserId != null ? (
+                      <Link
+                        to={`/members/${listing.ownerUserId}`}
+                        className="text-mist no-underline hover:text-lime"
+                      >
+                        {listing.ownerLabel}
+                      </Link>
+                    ) : (
+                      listing.ownerLabel
+                    )}
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-xs uppercase tracking-wide text-steel">Garage</dt>
+                  <dd className="mt-1 text-mist">
+                    {listing.garageName}, {listing.garageCity}
+                    <span className="mt-1 block text-sm text-steel">{listing.garageTagline}</span>
+                  </dd>
+                </div>
+              </dl>
+            </section>
           </article>
         ) : null}
       </main>
