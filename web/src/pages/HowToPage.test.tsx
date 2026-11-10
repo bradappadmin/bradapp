@@ -99,16 +99,18 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/leaderboard Challenge and Offer trade/i)).toBeInTheDocument();
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
-    expect(screen.getByText(/Copy garage link on member profiles/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/On a public garage \(\/members\/:id\), Copy link puts the absolute profile URL/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Copy garage link \(Account, My cars, or any public garage\)/i),
+      screen.getByText(/Account and My cars still offer Copy garage link/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Gift Brad Coins on someone else.?s card \(not yourself\) deep-links/i),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/#gift-coins/i).length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText(/Copy garage link shares that bay/i)).toBeInTheDocument();
+    expect(screen.getByText(/Copy link on their profile shares that bay/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Quick amount chip \(10 \/ 25 \/ 50 BC\)/i),
     ).toBeInTheDocument();

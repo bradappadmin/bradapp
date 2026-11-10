@@ -119,7 +119,7 @@ describe("MemberProfilePage showcase garage", () => {
       "href",
       "/cars/42",
     );
-    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Challenge" })).toHaveAttribute(
       "href",
       "/play?opponent=7",
@@ -134,7 +134,7 @@ describe("MemberProfilePage showcase garage", () => {
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
   });
 
-  it("copies that member's public garage link with a toast", async () => {
+  it("copies that member's profile link with a toast", async () => {
     vi.mocked(copyTextToClipboard).mockResolvedValue(true);
     const user = userEvent.setup();
     render(
@@ -151,7 +151,7 @@ describe("MemberProfilePage showcase garage", () => {
 
     expect(await screen.findByRole("heading", { name: "Bay Friend" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Challenge" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Copy garage link" }));
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
     expect(copyTextToClipboard).toHaveBeenCalled();
     const copied = vi.mocked(copyTextToClipboard).mock.calls[0]?.[0] ?? "";
     expect(copied).toMatch(/\/members\/7$/);
@@ -222,7 +222,7 @@ describe("MemberProfilePage showcase garage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: /Bay Friend \(you\)/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Copy garage link" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
     const pinButtons = screen.getAllByRole("button", { name: "Make showcase" });
     await user.click(pinButtons[0]!);
     await vi.waitFor(() => {

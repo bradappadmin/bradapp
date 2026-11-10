@@ -5,14 +5,16 @@ import {
   copyTextToClipboard,
   garageSharePath,
   listingSharePath,
+  memberProfileSharePath,
   reviewSharePath,
 } from "./share-link";
 
 describe("share link", () => {
-  it("builds listing, compare, review, and garage paths and absolute URLs", () => {
+  it("builds listing, compare, review, and member profile paths and absolute URLs", () => {
     expect(listingSharePath(42)).toBe("/cars/42");
     expect(compareSharePath(1, 2)).toBe("/compare?a=1&b=2");
     expect(reviewSharePath(9)).toBe("/reviews/9");
+    expect(memberProfileSharePath(7)).toBe("/members/7");
     expect(garageSharePath(7)).toBe("/members/7");
     expect(absoluteShareUrl("/cars/42", "https://bay.example")).toBe(
       "https://bay.example/cars/42",
@@ -23,7 +25,7 @@ describe("share link", () => {
     expect(absoluteShareUrl(reviewSharePath(9), "https://bay.example")).toBe(
       "https://bay.example/reviews/9",
     );
-    expect(absoluteShareUrl(garageSharePath(7), "https://bay.example")).toBe(
+    expect(absoluteShareUrl(memberProfileSharePath(7), "https://bay.example")).toBe(
       "https://bay.example/members/7",
     );
   });

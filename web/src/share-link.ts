@@ -13,9 +13,14 @@ export function reviewSharePath(reviewId: number): string {
   return `/reviews/${reviewId}`;
 }
 
-/** Public member garage path (`/members/:id`). */
-export function garageSharePath(memberUserId: number): string {
+/** Public member profile path (`/members/:id`). */
+export function memberProfileSharePath(memberUserId: number): string {
   return `/members/${memberUserId}`;
+}
+
+/** Public member garage path — same URL as the profile (`/members/:id`). */
+export function garageSharePath(memberUserId: number): string {
+  return memberProfileSharePath(memberUserId);
 }
 
 export function absoluteShareUrl(

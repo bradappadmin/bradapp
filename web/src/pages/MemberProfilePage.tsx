@@ -10,7 +10,7 @@ import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
-import { garageSharePath } from "../share-link";
+import { memberProfileSharePath } from "../share-link";
 import { useToast } from "../toast-context";
 
 const GIFT_AMOUNT_PRESETS = [10, 25, 50] as const;
@@ -217,8 +217,8 @@ export function MemberProfilePage() {
                 </>
               ) : null}
               <CopyShareLinkButton
-                path={garageSharePath(member.id)}
-                label="Copy garage link"
+                path={memberProfileSharePath(member.id)}
+                label="Copy link"
                 className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2.5 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/10"
               />
               {isSelf ? (

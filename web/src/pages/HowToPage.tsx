@@ -79,14 +79,14 @@ const STEPS: Step[] = [
   {
     id: "profile",
     title: "Your bay profile",
-    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. Copy garage link (Account, My cars, or any public garage) puts the absolute /members/:id URL on your clipboard with a toast. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password.",
+    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. On a public garage (/members/:id), Copy link puts the absolute profile URL on your clipboard with a toast — same pattern as listing and review Copy link. Account and My cars still offer Copy garage link for the same URL. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password.",
     to: "/account",
     cta: "Open Account",
   },
   {
     id: "gift-coins",
     title: "Gift Brad Coins",
-    body: "From the Members directory, Gift Brad Coins on someone else’s card (not yourself) deep-links into that member’s public garage gift form (#gift-coins). Or open the garage yourself — Copy garage link shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
+    body: "From the Members directory, Gift Brad Coins on someone else’s card (not yourself) deep-links into that member’s public garage gift form (#gift-coins). Or open the garage yourself — Copy link on their profile shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
     to: "/members",
     cta: "Open Members",
   },
@@ -122,9 +122,9 @@ export function HowToPage() {
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
             listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
             Challenge, Offer trade, and Gift Brad Coins, leaderboard Challenge and Offer trade, Copy
-            garage link on member profiles, gift Quick amount chips, Top Trumps streaks and this
-            week’s cup standings, free trades, member gifts, drag races, empty-bay next steps, and
-            your bay showcase. Nothing here spends real money.
+            link on member profiles, gift Quick amount chips, Top Trumps streaks and this week’s cup
+            standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
+            showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -198,7 +198,7 @@ export function HowToPage() {
               </Link>{" "}
               — Find a member + Has cars; Challenge to Top Trumps, Offer trade, or Gift Brad Coins on
               other directory cards (sign in; hidden on your own row — Gift opens #gift-coins on
-              their garage); open a garage or Copy garage link.
+              their garage); open a garage or Copy link on their profile.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
