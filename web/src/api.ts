@@ -411,6 +411,17 @@ export function unlistListing(id: number): Promise<{ ok: boolean; listingId: num
   return request(`/trade/listings/${id}/unlist`, { method: "POST" });
 }
 
+/** Update asking price on a for-sale listing without unlisting or changing paint. */
+export function updateListingPrice(
+  id: number,
+  coinPrice: number,
+): Promise<{ ok: boolean; listingId: number; coinPrice: number; status: "available" }> {
+  return request(`/trade/listings/${id}/price`, {
+    method: "POST",
+    body: JSON.stringify({ coinPrice }),
+  });
+}
+
 /** Update paint on a for-sale listing without unlisting or changing price. */
 export function updateListingPaint(
   id: number,

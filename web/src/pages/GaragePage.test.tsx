@@ -23,6 +23,7 @@ vi.mock("../api", () => ({
   setGarageShowcase: vi.fn(),
   sellListing: vi.fn(),
   unlistListing: vi.fn(),
+  updateListingPrice: vi.fn(),
   updateListingPaint: vi.fn(),
 }));
 
@@ -73,6 +74,12 @@ describe("GaragePage Midnight Garage UI", () => {
       ok: true,
       listingId: 9,
       coinPrice: 100,
+      status: "available",
+    });
+    vi.mocked(api.updateListingPrice).mockResolvedValue({
+      ok: true,
+      listingId: 10,
+      coinPrice: 250,
       status: "available",
     });
     vi.mocked(api.updateListingPaint).mockResolvedValue({
@@ -202,7 +209,7 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(screen.getByText("3.2s")).toBeInTheDocument();
     expect(screen.getByText("197 mph")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "List for sale" }).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Update price" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Update price for Ford Focus/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
     expect(screen.getAllByText("Quick price").length).toBeGreaterThan(0);
     expect(
@@ -497,6 +504,54 @@ describe("GaragePage Midnight Garage UI", () => {
     await waitFor(() => {
       expect(screen.getByTestId("garage-params").textContent).toBe("");
     });
+  });
+
+  it("updates price on a for-sale car without unlisting", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "For sale" })).toBeInTheDocument();
+    const presets = screen.getByRole("group", { name: /Sell price presets for Ford Focus/i });
+    const updatePrice = screen.getByRole("button", { name: /Update price for Ford Focus/i });
+    expect(updatePrice).toBeDisabled();
+
+    const chip250 = within(presets).getByRole("button", { name: "250 BC" });
+    await user.click(chip250);
+    const priceInput = screen.getByRole("spinbutton", {
+      name: /Brad Coin price for Ford Focus/i,
+    });
+    expect(priceInput).toHaveValue(250);
+    expect(updatePrice).toBeEnabled();
+
+    await user.clear(priceInput);
+    await user.type(priceInput, "175");
+    expect(priceInput).toHaveValue(175);
+    expect(chip250).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(updatePrice);
+    await waitFor(() => {
+      expect(api.updateListingPrice).toHaveBeenCalledWith(10, 175);
+    });
+    expect(api.unlistListing).not.toHaveBeenCalled();
+    expect(api.sellListing).not.toHaveBeenCalled();
+    expect(api.updateListingPaint).not.toHaveBeenCalled();
+    expect(
+      screen.getAllByText(/Updated asking price to 175 BC — still for sale/i).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Unlist" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Update paint for Ford Focus/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Garage bay value" })).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Top Trumps peek").length).toBeGreaterThanOrEqual(1);
   });
 
   it("updates paint on a for-sale car without unlisting", async () => {

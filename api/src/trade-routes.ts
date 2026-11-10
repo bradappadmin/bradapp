@@ -23,6 +23,10 @@ const paintSchema = z.object({
   colour: listingPaintColourSchema,
 });
 
+const priceSchema = z.object({
+  coinPrice: z.number().int().min(1).max(1_000_000),
+});
+
 const showcaseSchema = z.object({
   /** Listing id to pin, or null to unpin. */
   listingId: z.number().int().positive().nullable(),
@@ -335,6 +339,48 @@ export function createTradeRouter(): Router {
     } finally {
       connection.release();
     }
+  });
+
+  /**
+   * Update asking price on a car that is already for sale — stays listed (no unlist).
+   */
+  router.post("/listings/:id/price", requireAuth, async (req, res: Response) => {
+    const user = (req as AuthedRequest).user;
+    const listingId = Number(req.params.id);
+    if (!Number.isFinite(listingId) || listingId <= 0) {
+      res.status(400).json({ error: "validation_error", message: "Invalid listing id" });
+      return;
+    }
+    const parsed = priceSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "validation_error",
+        message: parsed.error.issues[0]?.message ?? "Invalid price",
+      });
+      return;
+    }
+
+    const pool = getPool();
+    const [result] = await pool.query(
+      `UPDATE listings
+       SET coin_price = ?
+       WHERE id = ? AND owner_user_id = ? AND status = 'available'`,
+      [parsed.data.coinPrice, listingId, user.id],
+    );
+    const affected = Number((result as { affectedRows?: number }).affectedRows ?? 0);
+    if (affected === 0) {
+      res.status(409).json({
+        error: "not_listed",
+        message: "Price can only be updated on a car you have listed for sale.",
+      });
+      return;
+    }
+    res.json({
+      ok: true,
+      listingId,
+      coinPrice: parsed.data.coinPrice,
+      status: "available" as const,
+    });
   });
 
   /**

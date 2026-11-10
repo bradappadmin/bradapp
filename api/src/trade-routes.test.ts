@@ -247,6 +247,18 @@ describe.runIf(hasDb)("trade routes", () => {
     expect(publicListing.body.listing.coinPrice).toBe(88);
     expect(publicListing.body.listing.colour).toBe("Laser Blue");
 
+    const priceOnly = await buyer
+      .post(`/trade/listings/${carId}/price`)
+      .send({ coinPrice: 125 });
+    expect(priceOnly.status).toBe(200);
+    expect(priceOnly.body.status).toBe("available");
+    expect(priceOnly.body.coinPrice).toBe(125);
+
+    const afterPrice = await request(app).get(`/cars/listings/${carId}`);
+    expect(afterPrice.body.listing.status).toBe("available");
+    expect(afterPrice.body.listing.coinPrice).toBe(125);
+    expect(afterPrice.body.listing.colour).toBe("Laser Blue");
+
     const paintOnly = await buyer
       .post(`/trade/listings/${carId}/paint`)
       .send({ colour: "Midnight Black" });
@@ -257,7 +269,7 @@ describe.runIf(hasDb)("trade routes", () => {
     const afterPaint = await request(app).get(`/cars/listings/${carId}`);
     expect(afterPaint.body.listing.status).toBe("available");
     expect(afterPaint.body.listing.colour).toBe("Midnight Black");
-    expect(afterPaint.body.listing.coinPrice).toBe(88);
+    expect(afterPaint.body.listing.coinPrice).toBe(125);
 
     const unlist = await buyer.post(`/trade/listings/${carId}/unlist`);
     expect(unlist.status).toBe(200);
@@ -265,6 +277,12 @@ describe.runIf(hasDb)("trade routes", () => {
 
     const after = await request(app).get(`/cars/listings/${carId}`);
     expect(after.body.listing.status).toBe("owned");
+
+    const priceWhileOwned = await buyer
+      .post(`/trade/listings/${carId}/price`)
+      .send({ coinPrice: 99 });
+    expect(priceWhileOwned.status).toBe(409);
+    expect(priceWhileOwned.body.error).toBe("not_listed");
 
     const paintWhileOwned = await buyer
       .post(`/trade/listings/${carId}/paint`)

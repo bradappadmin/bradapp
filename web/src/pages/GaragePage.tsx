@@ -230,18 +230,41 @@ export function GaragePage() {
       setError("Enter a Brad Coin price of at least 1");
       return;
     }
+    const nextPrice = Math.trunc(price);
+    if (car.status === "available") {
+      if (nextPrice === car.coinPrice) {
+        setNotice(`Asking price is already ${formatCoins(nextPrice)}.`);
+        return;
+      }
+      setBusyId(car.id);
+      setError(null);
+      setNotice(null);
+      try {
+        await api.updateListingPrice(car.id, nextPrice);
+        await reload();
+        await refresh();
+        const noticeText = `Updated asking price to ${formatCoins(nextPrice)} — still for sale.`;
+        setNotice(noticeText);
+        toast.success(noticeText);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Could not update price";
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        setBusyId(null);
+      }
+      return;
+    }
+
     const colour = sellColours[car.id] ?? car.colour;
     setBusyId(car.id);
     setError(null);
     setNotice(null);
     try {
-      await api.sellListing(car.id, Math.trunc(price), colour);
+      await api.sellListing(car.id, nextPrice, colour);
       await reload();
       await refresh();
-      const noticeText =
-        car.status === "available"
-          ? `Updated asking price to ${formatCoins(Math.trunc(price))} · ${colour}.`
-          : `Listed for sale at ${formatCoins(Math.trunc(price))} · ${colour}. Other members can buy it from Cars.`;
+      const noticeText = `Listed for sale at ${formatCoins(nextPrice)} · ${colour}. Other members can buy it from Cars.`;
       setNotice(noticeText);
       toast.success(noticeText);
     } catch (err) {
@@ -436,7 +459,16 @@ export function GaragePage() {
                     </label>
                     <button
                       type="submit"
-                      disabled={busyId === car.id}
+                      disabled={
+                        busyId === car.id ||
+                        (car.status === "available" &&
+                          Number(sellPrices[car.id] ?? car.coinPrice) === car.coinPrice)
+                      }
+                      aria-label={
+                        car.status === "available"
+                          ? `Update price for ${car.make} ${car.model}`
+                          : undefined
+                      }
                       className="w-full rounded-md bg-rose px-4 py-2 font-display text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto"
                     >
                       {car.status === "available" ? "Update price" : "List for sale"}
