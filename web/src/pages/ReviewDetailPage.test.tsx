@@ -46,7 +46,25 @@ const publishedReview = {
   featured: false,
 };
 
-describe("ReviewDetailPage likes", () => {
+const dragRaceReview = {
+  ...publishedReview,
+  id: 12,
+  type: "drag_race" as const,
+  title: "Bay drag — ST vs Type R",
+  carB: {
+    id: 4,
+    make: "Honda",
+    model: "Civic",
+    trimName: "Type R",
+    bodyType: "Hatchback",
+    colour: "Racing Red",
+    bhp: 315,
+    topSpeedMph: 169,
+    zeroToSixtySecs: 5.4,
+  },
+};
+
+describe("ReviewDetailPage Midnight Garage UI", () => {
   afterEach(() => {
     cleanup();
   });
@@ -82,7 +100,7 @@ describe("ReviewDetailPage likes", () => {
     });
   });
 
-  it("lets a member like a published review and shows the count", async () => {
+  it("shows bay hierarchy, car media, cue cards, and like controls", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/reviews/9"]}>
@@ -95,6 +113,10 @@ describe("ReviewDetailPage likes", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Bay burn — Focus ST" })).toBeInTheDocument();
+    expect(screen.getByText(/Video review · Midnight garage/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Review status")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Bay car" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Cue cards" })).toBeInTheDocument();
     expect(screen.getByText("0 likes")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Like" }));
@@ -103,6 +125,68 @@ describe("ReviewDetailPage likes", () => {
       expect(api.likeReview).toHaveBeenCalledWith(9);
       expect(screen.getByText("1 like")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Liked" })).toHaveAttribute("aria-pressed", "true");
+    });
+  });
+
+  it("shows dual lane cars for a drag race", async () => {
+    vi.mocked(api.fetchReview).mockResolvedValue({ review: { ...dragRaceReview } });
+    render(
+      <MemoryRouter initialEntries={["/reviews/12"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Bay drag — ST vs Type R" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Drag race · Midnight garage/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Lane cars" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Review status")).toHaveTextContent(/Drag race/i);
+  });
+
+  it("lets an admin pin and unpin a featured review", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 1,
+        email: "brad@example.com",
+        displayName: "Brad",
+        bio: null,
+        role: "admin",
+        coinBalance: 900,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 900,
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/reviews/9"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("Admin review controls")).toBeInTheDocument();
+    const pin = screen.getByRole("button", { name: "Pin as featured on home" });
+    await user.click(pin);
+    await waitFor(() => {
+      expect(api.featureReview).toHaveBeenCalledWith(9);
+      expect(screen.getByRole("button", { name: "Unpin from home" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
     });
   });
 });

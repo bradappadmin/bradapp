@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
+import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
 
@@ -96,11 +97,17 @@ export function ReviewDetailPage() {
     }
   }
 
+  const isDrag = review?.type === "drag_race";
+
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-        <Link to="/reviews" className="text-sm text-lime no-underline hover:underline">
+      <PlayBayAtmosphere />
+      <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <Link
+          to="/reviews"
+          className="inline-flex rounded-md border border-white/12 px-3 py-1.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
+        >
           ← All reviews
         </Link>
 
@@ -108,15 +115,40 @@ export function ReviewDetailPage() {
 
         {review ? (
           <article className="bay-rise mt-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-steel">
-              {review.type === "drag_race" ? "Drag race · " : ""}
-              {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)} ·{" "}
-              {review.status}
-            </p>
-            <h1 className="mt-3 font-display text-3xl font-semibold text-white">{review.title}</h1>
-            <p className="mt-2 text-sm text-steel">By {review.publisher.displayName}</p>
+            <header>
+              <p className="text-xs uppercase tracking-[0.28em] text-steel">
+                {isDrag ? "Drag race" : "Video review"} · Midnight garage
+              </p>
+              <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                {review.title}
+              </h1>
+              <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
+              <p className="mt-4 text-sm text-steel">
+                By {review.publisher.displayName} ·{" "}
+                {reviewCarsCaption(review.type ?? "review", review.car, review.carB ?? null)}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2" aria-label="Review status">
+                <span
+                  className={`rounded-md border px-3 py-1.5 font-display text-xs font-semibold capitalize ${
+                    review.status === "published"
+                      ? "border-lime/35 bg-lime/10 text-lime"
+                      : "border-white/12 bg-bay-panel/60 text-steel"
+                  }`}
+                >
+                  {review.status}
+                </span>
+                <span className="rounded-md border border-white/12 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                  {isDrag ? "Drag race" : "Cue-card review"}
+                </span>
+                {review.featured ? (
+                  <span className="rounded-md border border-lime/35 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
+                    Featured on home
+                  </span>
+                ) : null}
+              </div>
+            </header>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3" aria-label="Review likes">
               {review.status === "published" ? (
                 <button
                   type="button"
@@ -137,26 +169,56 @@ export function ReviewDetailPage() {
               </p>
             </div>
 
-            <ReviewCarsMedia
-              type={review.type ?? "review"}
-              car={review.car}
-              carB={review.carB ?? null}
-              size="card"
-              className="mt-8"
-            />
+            <section
+              className="play-panel bay-rise-delay mt-8 rounded-md border p-3 sm:p-4"
+              aria-labelledby="review-cars-heading"
+            >
+              <h2
+                id="review-cars-heading"
+                className="font-display text-sm font-semibold uppercase tracking-wide text-steel"
+              >
+                {isDrag ? "Lane cars" : "Bay car"}
+              </h2>
+              <ReviewCarsMedia
+                type={review.type ?? "review"}
+                car={review.car}
+                carB={review.carB ?? null}
+                size="card"
+                className="mt-3"
+              />
+            </section>
 
-            <video
-              className="mt-6 w-full rounded-md border border-white/10 bg-black"
-              controls
-              playsInline
-              src={api.reviewVideoSrc(review.videoUrl)}
-            />
+            <section
+              className="play-panel bay-rise-delay mt-6 overflow-hidden rounded-md border p-2 sm:p-3"
+              aria-labelledby="review-player-heading"
+            >
+              <h2 id="review-player-heading" className="sr-only">
+                Review video
+              </h2>
+              <video
+                className="w-full rounded-md border border-white/10 bg-black"
+                controls
+                playsInline
+                src={api.reviewVideoSrc(review.videoUrl)}
+              />
+            </section>
 
-            <section className="mt-10">
-              <h2 className="font-display text-xl text-mist">Cue cards</h2>
+            <section
+              className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+              aria-labelledby="review-cues-heading"
+            >
+              <h2
+                id="review-cues-heading"
+                className="font-display text-lg font-semibold text-mist sm:text-xl"
+              >
+                Cue cards
+              </h2>
               <ol className="mt-4 space-y-3">
                 {review.cueCards.map((card, index) => (
-                  <li key={card.id} className="border-l-2 border-rose/60 pl-4">
+                  <li
+                    key={card.id}
+                    className="rounded-md border border-white/10 bg-bay-deep/40 px-3 py-3 sm:border-l-2 sm:border-l-rose/60"
+                  >
                     <p className="text-xs uppercase tracking-wide text-steel">
                       {index + 1}. {card.title}
                     </p>
@@ -167,7 +229,11 @@ export function ReviewDetailPage() {
             </section>
 
             {user && isAdmin(user.role) && review.status === "published" ? (
-              <div className="mt-10 flex flex-wrap gap-3">
+              <div
+                className="play-panel mt-8 flex flex-wrap gap-3 rounded-md border p-4 sm:p-5"
+                aria-label="Admin review controls"
+              >
+                <p className="w-full text-xs uppercase tracking-wide text-steel">Admin bay</p>
                 <button
                   type="button"
                   disabled={featureBusy}
