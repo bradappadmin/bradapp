@@ -173,10 +173,48 @@ describe("MembersPage Midnight Garage UI", () => {
   });
 
   it("shows a clear no-results state with clear CTA", async () => {
+    const user = userEvent.setup();
     vi.mocked(api.fetchMembers).mockResolvedValue({ members: [], q: "zzzz" });
 
     render(
       <MemoryRouter initialEntries={["/members?q=zzzz"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/members"
+              element={
+                <>
+                  <MembersPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching members")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Filter members by garage cars")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Directory" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("members-params").textContent).toBe("");
+    });
+  });
+
+  it("shows empty bay CTA for an unmatched Has cars filter", async () => {
+    vi.mocked(api.fetchMembers).mockResolvedValue({
+      members: [empty],
+      q: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/members?group=has_cars"]}>
         <AuthProvider>
           <MembersPage />
         </AuthProvider>
@@ -184,8 +222,30 @@ describe("MembersPage Midnight Garage UI", () => {
     );
 
     expect(await screen.findByText("No matches")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByText(/Nobody with cars matches this filter/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Directory" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Has cars" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("hides Find when the directory is empty with no filters", async () => {
+    vi.mocked(api.fetchMembers).mockImplementation(async () => ({ members: [], q: null }));
+
+    render(
+      <MemoryRouter initialEntries={["/members"]}>
+        <AuthProvider>
+          <MembersPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("Empty members bay")).toBeInTheDocument();
+    expect(screen.getByText("Empty bay")).toBeInTheDocument();
+    expect(screen.getByText(/bay directory is empty/i)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Find a member" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 });
