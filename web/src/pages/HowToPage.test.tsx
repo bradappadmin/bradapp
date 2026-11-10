@@ -68,6 +68,8 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Gift Brad Coins" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Filter the coin ledger" })).toBeInTheDocument();
+    expect(document.getElementById("ledger-type")).not.toBeNull();
     expect(
       screen.getByRole("heading", { name: "Admin for Brad and Napwood" }),
     ).toBeInTheDocument();
@@ -240,7 +242,25 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
     expect(
       screen.getByText(
+        /Coin ledger Find entry plus type chips \(All \/ Earn \/ Spend \/ Gift \/ Admin\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
         /admin coin-adjust Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) for Brad and Napwood/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Type chips filter All \/ Earn \/ Spend \/ Gift \/ Admin — Earn and Spend follow the money/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/filter with the Gift type chip \(next step\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Ledger: Find an entry plus type chips \(All \/ Earn \/ Spend \/ Gift \/ Admin/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -277,7 +297,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/Quick amount chip \(10 \/ 25 \/ 50 BC\)/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Gift sent \/ Gift received/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Gift sent \/ Gift received/i).length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByText(/Gifts/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/member gifts/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Daily login/i).length).toBeGreaterThan(0);
@@ -316,7 +336,11 @@ describe("HowToPage Midnight Garage UI", () => {
         /Find a car; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Favourites\)/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.getAllByText(/reason chips/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(
+        /Find an entry; type chips All \/ Earn \/ Spend \/ Gift \/ Admin/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/Login streak/i).length).toBeGreaterThan(0);
     expect(
       screen.getByText(/This week.?s cup standings beside the podium/i),
@@ -398,6 +422,10 @@ describe("HowToPage Midnight Garage UI", () => {
         /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\)/i,
       ),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open Coin ledger" })).toHaveAttribute(
+      "href",
+      "/ledger",
+    );
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
     expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText(/gift Brad Coins/i).length).toBeGreaterThan(0);

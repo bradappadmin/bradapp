@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + Sort the bay (Sort cars details are the next step — Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step after Sort cars). Reviews: Find a review plus Sort the bay (Sort reviews details are a later step). Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + Sort the bay (Sort cars details are the next step — Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step after Sort cars). Reviews: Find a review plus Sort the bay (Sort reviews details are a later step). Leaderboard: Find a member. Ledger: Find an entry plus type chips (All / Earn / Spend / Gift / Admin — Filter the coin ledger covers the details). Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
@@ -142,9 +142,16 @@ const STEPS: Step[] = [
   {
     id: "gift-coins",
     title: "Gift Brad Coins",
-    body: "From the Members directory, Gift Brad Coins on someone else’s card (not yourself) deep-links into that member’s public garage gift form (#gift-coins). Or open the garage yourself — Copy link on their profile shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gifts chip.",
+    body: "From the Members directory, Gift Brad Coins on someone else’s card (not yourself) deep-links into that member’s public garage gift form (#gift-coins). Or open the garage yourself — Copy link on their profile shares that bay. Use Gift coins: tap a Quick amount chip (10 / 25 / 50 BC) or type a custom amount, add an optional note, then Send gift. Your wallet is debited and theirs credited — play money only. The coin ledger shows Gift sent / Gift received; filter with the Gift type chip (next step).",
     to: "/members",
     cta: "Open Members",
+  },
+  {
+    id: "ledger-type",
+    title: "Filter the coin ledger",
+    body: "Open Coin ledger from the header balance or Account. Find an entry searches by reason or note. Type chips filter All / Earn / Spend / Gift / Admin — Earn and Spend follow the money in or out; Gift covers Gift sent / Gift received; Admin covers admin adjusts. Choices stay in the URL; Clear filters resets Find and type back to All.",
+    to: "/ledger",
+    cta: "Open Coin ledger",
   },
   {
     id: "admin",
@@ -190,11 +197,12 @@ export function HowToPage() {
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
             My cars Quick price chips (50 / 100 / 250 / 500 BC) when listing or updating a sale, gift
-            Quick amount chips, admin coin-adjust Quick amount chips (+25 / +50 / +100 / +250 BC) for
-            Brad and Napwood, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or
-            house → Play), this week’s cup standings, free trades, Trade history Offer again
-            (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
-            Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real money.
+            Quick amount chips, Coin ledger Find entry plus type chips (All / Earn / Spend / Gift /
+            Admin), admin coin-adjust Quick amount chips (+25 / +50 / +100 / +250 BC) for Brad and
+            Napwood, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or house →
+            Play), this week’s cup standings, free trades, Trade history Offer again (/trades?with=),
+            member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay
+            next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -335,8 +343,8 @@ export function HowToPage() {
               <Link to="/ledger" className="text-lime no-underline hover:underline">
                 Coin ledger
               </Link>{" "}
-              — every in/out for your Brad Coins (also open from the header balance chip), with
-              reason chips including Daily login, Login streak, and Gifts (sign in).
+              — Find an entry; type chips All / Earn / Spend / Gift / Admin; also open from the
+              header balance chip (sign in).
             </li>
             <li>
               <Link to="/trades" className="text-lime no-underline hover:underline">
