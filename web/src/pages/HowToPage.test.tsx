@@ -238,6 +238,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Compare from Recently viewed" }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Open car from Family activity" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("home-activity-open-car")).not.toBeNull();
+    expect(
       screen.getByText(
         /Compare on a card queues into the shared tray with Cars \/ My cars \(and Favourites\)/i,
       ),
@@ -245,6 +249,22 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Empty bay keeps Browse cars/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Clear asks Confirm clear before wiping the device history/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open car from Family activity is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open car on a row takes you to the catalogue listing \(\/cars\/:id\) when that event already knows a listing id/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The CTA hides for gifts and any row without a listing/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Family activity Open car \(\/cars\/:id when a listing is known; hidden for gifts \/ missing\)/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
     expect(
@@ -658,6 +678,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /login streak bay strip: today.?s \+25 BC status and progress toward day 3 \(\+15\) \/ day 7 \(\+50\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");

@@ -37,7 +37,14 @@ const STEPS: Step[] = [
   {
     id: "home-recent-compare",
     title: "Compare from Recently viewed",
-    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. Empty bay keeps Browse cars; Clear asks Confirm clear before wiping the device history (Keep cancels).",
+    body: "On Home, Recently viewed lists cars you opened on this device. Compare on a card queues into the shared tray with Cars / My cars (and Favourites) — same sticky Compare (1/2) tray; when two are ready, Side by side. Empty bay keeps Browse cars; Clear asks Confirm clear before wiping the device history (Keep cancels). Open car from Family activity is the next step.",
+    to: "/",
+    cta: "Open Home",
+  },
+  {
+    id: "home-activity-open-car",
+    title: "Open car from Family activity",
+    body: "On Home, Family activity lists recent buys, sells, free trades, gifts, Top Trumps, and reviews — with studio thumbs and type chips. Open car on a row takes you to the catalogue listing (/cars/:id) when that event already knows a listing id. The CTA hides for gifts and any row without a listing. Empty bay Browse cars / Play / Members and No matches Clear filter stay.",
     to: "/",
     cta: "Open Home",
   },
@@ -323,7 +330,8 @@ export function HowToPage() {
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, home login streak bay strip (+25 today, day 3 / day 7 progress), Brad Coins
             (tap the header balance for your ledger), home Recently viewed Compare into the shared
-            tray with Cars / My cars, Favourites Compare into that same tray, photo-first cars with
+            tray with Cars / My cars, Family activity Open car (/cars/:id when a listing is known;
+            hidden for gifts / missing), Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), Cars Sort the
             bay (Highest / Lowest price, Name A–Z / Z–A), Favourites
@@ -409,7 +417,8 @@ export function HowToPage() {
                 Home
               </Link>{" "}
               — login streak bay strip: today’s +25 BC status and progress toward day 3 (+15) / day 7
-              (+50); Coin ledger and How to on the strip (sign in).
+              (+50); Coin ledger and How to on the strip; Family activity Open car → /cars/:id when a
+              listing is known (hidden for gifts / missing; sign in).
             </li>
             <li>
               <Link to="/play/history" className="text-lime no-underline hover:underline">
