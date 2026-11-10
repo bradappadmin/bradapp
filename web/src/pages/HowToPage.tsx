@@ -30,14 +30,14 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car + Sort the bay there too).",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and price sort — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars is a later step).",
     to: "/cars",
     cta: "Open Cars",
   },
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step). Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step). Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
@@ -51,9 +51,16 @@ const STEPS: Step[] = [
   {
     id: "favourites",
     title: "Favourites: challenge and trade",
-    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay, or pick two and compare. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved.",
+    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay, or pick two and compare. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved. My cars uses the same Sort the bay options — next step.",
     to: "/favourites",
     cta: "Open Favourites",
+  },
+  {
+    id: "garage-sort",
+    title: "Sort My cars in the bay",
+    body: "On My cars, Sort the bay orders Owned and For sale: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Favourites. The choice stays in the URL alongside Find a car. Clear filters resets search and sort back to Highest price. Compare on each card still feeds the shared tray; empty-bay and no-match CTAs stay.",
+    to: "/garage",
+    cta: "Open My cars",
   },
   {
     id: "play",
@@ -150,11 +157,12 @@ export function HowToPage() {
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
             listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
             Sort the bay (Name A–Z / Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad
-            Coins, leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage
-            link stays on Account / My cars), gift Quick amount chips, Top Trumps streaks, Match
-            history Rematch (PvP opponent deep-link or house → Play), this week’s cup standings, free
-            trades, Trade history Offer again (/trades?with=), member gifts, drag races, empty-bay
-            next steps, and your bay showcase. Nothing here spends real money.
+            Coins, Favourites and My cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A),
+            leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage link
+            stays on Account / My cars), gift Quick amount chips, Top Trumps streaks, Match history
+            Rematch (PvP opponent deep-link or house → Play), this week’s cup standings, free trades,
+            Trade history Offer again (/trades?with=), member gifts, drag races, empty-bay next
+            steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -244,9 +252,10 @@ export function HowToPage() {
               <Link to="/garage" className="text-lime no-underline hover:underline">
                 My cars
               </Link>{" "}
-              — Find a car, Sort the bay, Compare garage cards into the same tray as Cars /
-              Favourites, garage value, list prices, pin your showcase, and Copy garage link (same
-              URL as profile Copy link).
+              — Find a car; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
+              Favourites); Compare garage cards into the same tray as Cars / Favourites; garage
+              value, list prices, pin your showcase, and Copy garage link (same URL as profile Copy
+              link).
             </li>
             <li>
               <Link to="/account" className="text-lime no-underline hover:underline">

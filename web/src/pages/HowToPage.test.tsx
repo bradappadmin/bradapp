@@ -41,6 +41,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sort My cars in the bay" })).toBeInTheDocument();
+    expect(document.getElementById("garage-sort")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Rematch from Match history" }),
@@ -86,6 +88,11 @@ describe("HowToPage Midnight Garage UI", () => {
         /Members directory Sort the bay \(Name A–Z \/ Z–A, Most \/ Least cars\)/i,
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Favourites and My cars Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -95,6 +102,16 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/Clear filters resets search, garage chips, and sort back to Name A–Z/i),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On My cars, Sort the bay orders Owned and For sale: Highest price, Lowest price, Name A–Z, or Name Z–A/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/same options as Favourites/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Clear filters resets search and sort back to Highest price/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/My cars uses the same Sort the bay options — next step/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
@@ -207,7 +224,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Offer trade or Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance chip/i)).toBeInTheDocument();
     expect(screen.getByText(/nav badge = pending offers/i)).toBeInTheDocument();
-    expect(screen.getByText(/Find a car, Sort the bay/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Find a car; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Favourites\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/reason chips/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Login streak/i).length).toBeGreaterThan(0);
     expect(
@@ -247,6 +268,7 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/favourites",
     );
+    expect(screen.getByRole("link", { name: "Open My cars" })).toHaveAttribute("href", "/garage");
     expect(screen.getByRole("link", { name: "Open Play" })).toHaveAttribute("href", "/play");
     expect(screen.getByRole("link", { name: "Open Match history" })).toHaveAttribute(
       "href",
