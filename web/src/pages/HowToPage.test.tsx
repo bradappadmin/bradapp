@@ -63,6 +63,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sort reviews in the bay" })).toBeInTheDocument();
     expect(document.getElementById("reviews-sort")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Open a car from a review" })).toBeInTheDocument();
+    expect(document.getElementById("reviews-open-car")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
@@ -308,7 +310,9 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/empty bay with Browse cars \/ My garage \/ Members/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points you to Members or Cars/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Find a review/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Sort reviews is the next step/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sort reviews is the next step; Open car to the catalogue follows after that/i),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         /On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A/i,
@@ -318,8 +322,19 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Clear filters resets search, type, and sort back to Newest/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open car to a related listing is the next step/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
-        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\)/i,
+        /Open car on a film card \(or on the review itself\) takes you to the related catalogue listing \(\/cars\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Drag races can show one Open car per lane when both listings are known/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\) and Open car \(\/cars\/:id\) when a listing exists/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -607,14 +622,14 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/trades/history",
     );
-    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByRole("link", { name: "Open Reviews" })[0]).toHaveAttribute(
       "href",
       "/reviews",
     );
     expect(
       screen.getByText(
-        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\)/i,
+        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); Open car → \/cars\/:id when a listing exists; Copy link on a film/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open Coin ledger" })).toHaveAttribute(

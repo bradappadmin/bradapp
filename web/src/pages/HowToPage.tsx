@@ -142,14 +142,21 @@ const STEPS: Step[] = [
   {
     id: "reviews",
     title: "Reviews and drag races",
-    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. On a review, Copy link puts the absolute URL on your clipboard with a toast — cue cards and playback stay. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand. Sort reviews is the next step.",
+    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. On a review, Copy link puts the absolute URL on your clipboard with a toast — cue cards and playback stay. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand. Sort reviews is the next step; Open car to the catalogue follows after that.",
     to: "/reviews",
     cta: "Open Reviews",
   },
   {
     id: "reviews-sort",
     title: "Sort reviews in the bay",
-    body: "On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A. The choice stays in the URL alongside Find a review and Cue card / Drag race type chips. Clear filters resets search, type, and sort back to Newest. Empty-bay and no-match CTAs stay.",
+    body: "On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A. The choice stays in the URL alongside Find a review and Cue card / Drag race type chips. Clear filters resets search, type, and sort back to Newest. Empty-bay and no-match CTAs stay; Open car to a related listing is the next step.",
+    to: "/reviews",
+    cta: "Open Reviews",
+  },
+  {
+    id: "reviews-open-car",
+    title: "Open a car from a review",
+    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, empty-bay CTAs, and Copy link on a film stay.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -268,8 +275,9 @@ export function HowToPage() {
             (/members/:id), Top Trumps streaks, Match history Rematch (PvP opponent deep-link or house
             → Play), this week’s cup standings with an Ends in countdown (Europe/London week end, +50
             BC prize), free trades, Trade history Offer again (/trades?with=), member gifts, drag
-            races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay next steps, and your
-            bay showcase. Nothing here spends real money.
+            races with Sort reviews (Newest / Oldest, Title A–Z / Z–A) and Open car (/cars/:id) when a
+            listing exists, empty-bay next steps, and your bay showcase. Nothing here spends real
+            money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -398,7 +406,7 @@ export function HowToPage() {
                 Reviews
               </Link>{" "}
               — Find a review; Cue card / Drag race chips; Sort the bay (Newest / Oldest, Title A–Z /
-              Z–A); Copy link on a film.
+              Z–A); Open car → /cars/:id when a listing exists; Copy link on a film.
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
