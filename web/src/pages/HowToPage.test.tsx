@@ -184,8 +184,22 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/Sort My cars and Quick price chips are later steps/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/My cars uses the same Sort the bay options — next step/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compare from Favourites \(shared tray\) is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/My cars uses the same Sort the bay options after that/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Compare from Favourites" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare on a saved card queues into the shared tray with Cars \/ My cars \/ Recently viewed/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Favourites Compare into that same tray/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history: Wins\/Losses/i)).toBeInTheDocument();
     expect(screen.getByText(/Match history Rematch is the next step/i)).toBeInTheDocument();
@@ -353,9 +367,14 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/start from a listing.?s Compare CTA \(tray picks/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Compare on My cars, or Compare on home Recently viewed/i),
+      screen.getByText(
+        /Compare on Favourites \/ Cars \/ My cars, or Compare on home Recently viewed/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Find a favourite, Sort the bay, Compare into the shared tray with Cars \/ My cars/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points to Members \/ Browse cars for sale/i)).toBeInTheDocument();
     expect(screen.getByText(/Offer trade or Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance chip/i)).toBeInTheDocument();
@@ -426,10 +445,12 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Cars" }).some((el) => el.getAttribute("href") === "/cars"),
     ).toBe(true);
-    expect(screen.getByRole("link", { name: "Open Favourites" })).toHaveAttribute(
-      "href",
-      "/favourites",
-    );
+    expect(screen.getAllByRole("link", { name: "Open Favourites" }).length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen
+        .getAllByRole("link", { name: "Open Favourites" })
+        .every((a) => a.getAttribute("href") === "/favourites"),
+    ).toBe(true);
     expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByRole("link", { name: "Open My cars" })[0]).toHaveAttribute(
       "href",

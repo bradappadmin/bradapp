@@ -65,7 +65,14 @@ const STEPS: Step[] = [
   {
     id: "favourites",
     title: "Favourites: challenge and trade",
-    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay, or pick two and compare. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved. My cars uses the same Sort the bay options — next step.",
+    body: "Save cars from a listing, then open Favourites. Find a favourite and Sort the bay. On someone else’s car, Offer trade and Challenge to Top Trumps deep-link into Trades and Play with that member and car ready. Your own cars and bay stock hide those CTAs. The nav Favourites badge shows how many you’ve saved. Compare from Favourites (shared tray) is the next step; My cars uses the same Sort the bay options after that.",
+    to: "/favourites",
+    cta: "Open Favourites",
+  },
+  {
+    id: "favourites-compare",
+    title: "Compare from Favourites",
+    body: "On Favourites, Compare on a saved card queues into the shared tray with Cars / My cars / Recently viewed — same sticky Compare (1/2) tray; when two are ready, Side by side. Offer trade and Challenge stay on someone else’s cars; Find, Sort the bay, and empty-bay CTAs stay.",
     to: "/favourites",
     cta: "Open Favourites",
   },
@@ -198,9 +205,10 @@ export function HowToPage() {
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), home Recently viewed
-            Compare into the shared tray with Cars / My cars, photo-first cars with Find,
-            listing Compare and Copy link, Cars Sort the bay (Highest / Lowest price, Name A–Z /
-            Z–A), Favourites challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
+            Compare into the shared tray with Cars / My cars, Favourites Compare into that same
+            tray, photo-first cars with Find, listing Compare and Copy link, Cars Sort the bay
+            (Highest / Lowest price, Name A–Z / Z–A), Favourites challenge and trade CTAs, Members
+            directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
@@ -323,8 +331,9 @@ export function HowToPage() {
               <Link to="/favourites" className="text-lime no-underline hover:underline">
                 Favourites
               </Link>{" "}
-              — Find a favourite, Sort the bay, compare two, then Offer trade or Challenge to Top
-              Trumps on someone else’s car (sign in). Nav badge = saved count.
+              — Find a favourite, Sort the bay, Compare into the shared tray with Cars / My cars,
+              then Offer trade or Challenge to Top Trumps on someone else’s car (sign in). Nav badge
+              = saved count.
             </li>
             <li>
               <Link to="/reviews" className="text-lime no-underline hover:underline">
@@ -338,7 +347,7 @@ export function HowToPage() {
                 Compare
               </Link>{" "}
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
-              ready), Favourites / Cars, Compare on My cars, or Compare on home Recently viewed
+              ready), Compare on Favourites / Cars / My cars, or Compare on home Recently viewed
               (shared tray); empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
