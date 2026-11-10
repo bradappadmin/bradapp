@@ -2,9 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   ADMIN_STARTING_COINS,
   DAILY_LOGIN_BONUS,
+  DAILY_LOGIN_TIMEZONE,
   DEFAULT_MEMBER_STARTING_COINS,
+  londonClaimDate,
   memberStartingCoins,
-  utcClaimDate,
 } from "./coins.js";
 
 describe("coin constants", () => {
@@ -27,8 +28,12 @@ describe("coin constants", () => {
     expect(memberStartingCoins()).toBe(DEFAULT_MEMBER_STARTING_COINS);
   });
 
-  it("defines a positive daily login bonus and UTC claim date", () => {
+  it("defines a positive daily login bonus on the Europe/London calendar day", () => {
     expect(DAILY_LOGIN_BONUS).toBeGreaterThan(0);
-    expect(utcClaimDate(new Date("2026-11-09T23:30:00.000Z"))).toBe("2026-11-09");
+    expect(DAILY_LOGIN_TIMEZONE).toBe("Europe/London");
+    // Winter (GMT): UTC evening is still the same London calendar day.
+    expect(londonClaimDate(new Date("2026-11-09T23:30:00.000Z"))).toBe("2026-11-09");
+    // Summer (BST): 23:30 UTC is already the next London calendar morning.
+    expect(londonClaimDate(new Date("2026-06-15T23:30:00.000Z"))).toBe("2026-06-16");
   });
 });

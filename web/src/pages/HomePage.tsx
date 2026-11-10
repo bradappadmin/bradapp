@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
 import { useAuth } from "../auth-context";
@@ -10,6 +10,7 @@ import { HomeBayAtmosphere } from "../components/HomeBayAtmosphere";
 import { LatestReviews } from "../components/LatestReviews";
 import { RecentlyViewedCars } from "../components/RecentlyViewedCars";
 import { SiteHeader } from "../components/SiteHeader";
+import { useToast } from "../toast-context";
 import { roleLabel } from "../types";
 
 const secondaryLinkClass =
@@ -17,8 +18,20 @@ const secondaryLinkClass =
 
 export function HomePage() {
   const { user, loading, setUser, dailyLogin, refresh } = useAuth();
+  const toast = useToast();
   const [claimBusy, setClaimBusy] = useState(false);
   const [claimNote, setClaimNote] = useState<string | null>(null);
+  const toastedClaimDate = useRef<string | null>(null);
+
+  // Auto-claim lands via /auth/me on first signed-in load; toast once per London day.
+  useEffect(() => {
+    if (!dailyLogin?.claimedJustNow) return;
+    if (toastedClaimDate.current === dailyLogin.claimDate) return;
+    toastedClaimDate.current = dailyLogin.claimDate;
+    toast.success(
+      `Daily login +${dailyLogin.amount} BC · ${dailyLogin.claimDate} (Europe/London).`,
+    );
+  }, [dailyLogin, toast]);
 
   async function onSignOut() {
     await api.signOut();
@@ -32,13 +45,23 @@ export function HomePage() {
       const res = await api.claimDailyBonus();
       setUser(res.user);
       await refresh();
-      setClaimNote(
-        res.dailyLogin.claimedJustNow
-          ? `Claimed +${res.dailyLogin.amount} BC for ${res.dailyLogin.claimDate} (UTC).`
-          : `Already claimed today’s +${res.dailyLogin.amount} BC (${res.dailyLogin.claimDate} UTC).`,
-      );
+      if (res.dailyLogin.claimedJustNow) {
+        toastedClaimDate.current = res.dailyLogin.claimDate;
+        toast.success(
+          `Daily login +${res.dailyLogin.amount} BC · ${res.dailyLogin.claimDate} (Europe/London).`,
+        );
+        setClaimNote(
+          `Claimed +${res.dailyLogin.amount} BC for ${res.dailyLogin.claimDate} (Europe/London).`,
+        );
+      } else {
+        setClaimNote(
+          `Already claimed today’s +${res.dailyLogin.amount} BC (${res.dailyLogin.claimDate} Europe/London).`,
+        );
+      }
     } catch (err) {
-      setClaimNote(err instanceof Error ? err.message : "Could not claim daily bonus");
+      const msg = err instanceof Error ? err.message : "Could not claim daily bonus";
+      setClaimNote(msg);
+      toast.error(msg);
     } finally {
       setClaimBusy(false);
     }
@@ -155,12 +178,15 @@ export function HomePage() {
                 <div className="mt-2 text-xs text-steel">
                   {dailyLogin.claimedToday ? (
                     <p className="text-lime">
-                      Daily bonus claimed
+                      Daily login claimed
                       {dailyLogin.claimedJustNow ? ` · +${dailyLogin.amount} BC` : ""}
+                      <span className="block text-steel">
+                        {dailyLogin.claimDate} · Europe/London
+                      </span>
                     </p>
                   ) : (
                     <p>
-                      +{dailyLogin.amount} BC available ·{" "}
+                      +{dailyLogin.amount} BC available (London day) ·{" "}
                       <button
                         type="button"
                         disabled={claimBusy}

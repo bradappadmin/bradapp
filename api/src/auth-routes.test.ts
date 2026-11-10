@@ -96,7 +96,7 @@ describe.runIf(hasDb)("auth routes", () => {
     expect(res.body.error).toBe("invalid_credentials");
   });
 
-  it("auto-claims a once-per-day login bonus on /me with a ledger row", async () => {
+  it("auto-claims a once-per-London-day login bonus on /me with a ledger row", async () => {
     const email = `daily-${Date.now()}@example.com`;
     const agent = request.agent(app);
     const signup = await agent.post("/auth/signup").send({
@@ -110,13 +110,16 @@ describe.runIf(hasDb)("auth routes", () => {
     const me = await agent.get("/auth/me");
     expect(me.status).toBe(200);
     expect(me.body.dailyLogin.claimedToday).toBe(true);
+    expect(me.body.dailyLogin.claimedJustNow).toBe(true);
     expect(me.body.dailyLogin.amount).toBe(DAILY_LOGIN_BONUS);
+    expect(me.body.dailyLogin.claimDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(me.body.user.coinBalance).toBe(starting + DAILY_LOGIN_BONUS);
 
     const again = await agent.get("/auth/me");
     expect(again.status).toBe(200);
     expect(again.body.dailyLogin.claimedToday).toBe(true);
     expect(again.body.dailyLogin.claimedJustNow).toBe(false);
+    expect(again.body.dailyLogin.claimDate).toBe(me.body.dailyLogin.claimDate);
     expect(again.body.user.coinBalance).toBe(starting + DAILY_LOGIN_BONUS);
 
     const status = await agent.get("/auth/daily-bonus");
@@ -126,8 +129,10 @@ describe.runIf(hasDb)("auth routes", () => {
     const wallet = await agent.get("/trade/wallet");
     expect(
       wallet.body.ledger.some(
-        (e: { reason: string; delta: number }) =>
-          e.reason === "daily_login" && e.delta === DAILY_LOGIN_BONUS,
+        (e: { reason: string; delta: number; note: string }) =>
+          e.reason === "daily_login" &&
+          e.delta === DAILY_LOGIN_BONUS &&
+          e.note === `Daily login ${me.body.dailyLogin.claimDate}`,
       ),
     ).toBe(true);
 

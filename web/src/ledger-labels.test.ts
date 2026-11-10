@@ -6,7 +6,7 @@ describe("ledger labels", () => {
     expect(ledgerReasonLabel("seed")).toBe("Starter");
     expect(ledgerReasonLabel("purchase")).toBe("Buy");
     expect(ledgerReasonLabel("sale")).toBe("Sell");
-    expect(ledgerReasonLabel("daily_login")).toBe("Daily");
+    expect(ledgerReasonLabel("daily_login")).toBe("Daily login");
     expect(ledgerReasonLabel("play_reward")).toBe("Play");
     expect(ledgerReasonLabel("tt_streak_bonus")).toBe("Win streak");
     expect(ledgerReasonLabel("weekly_cup")).toBe("Weekly cup");

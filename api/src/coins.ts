@@ -20,8 +20,11 @@ export function memberStartingCoins(): number {
 /** @deprecated Prefer `memberStartingCoins()` so env overrides apply after loadEnv. */
 export const MEMBER_STARTING_COINS = DEFAULT_MEMBER_STARTING_COINS;
 
-/** Brad Coins credited once per UTC calendar day when signed in. */
+/** Brad Coins credited once per Europe/London calendar day when signed in. */
 export const DAILY_LOGIN_BONUS = 25;
+
+/** Daily login bonus follows the Napwood bay clock (same as the weekly cup). */
+export const DAILY_LOGIN_TIMEZONE = "Europe/London";
 
 export type LedgerReason =
   | "seed"
@@ -139,20 +142,34 @@ export async function creditSeedIfNeeded(
   }
 }
 
-/** UTC calendar date YYYY-MM-DD for daily bonus uniqueness. */
+/**
+ * Europe/London calendar date YYYY-MM-DD for daily bonus uniqueness.
+ * Uses the bay clock so late-evening UTC still counts as the London day.
+ */
+export function londonClaimDate(now = new Date()): string {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DAILY_LOGIN_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return fmt.format(now);
+}
+
+/** @deprecated Prefer `londonClaimDate` — daily bonus is London-local. */
 export function utcClaimDate(now = new Date()): string {
-  return now.toISOString().slice(0, 10);
+  return londonClaimDate(now);
 }
 
 /**
- * Credits the daily login bonus at most once per UTC day.
+ * Credits the daily login bonus at most once per Europe/London calendar day.
  * Idempotent: safe to call on every /me or sign-in.
  */
 export async function claimDailyLoginBonus(
   userId: number,
   now = new Date(),
 ): Promise<DailyLoginStatus> {
-  const claimDate = utcClaimDate(now);
+  const claimDate = londonClaimDate(now);
   const pool = getPool();
   const connection = await pool.getConnection();
   try {
@@ -207,7 +224,7 @@ export async function getDailyLoginStatus(
   userId: number,
   now = new Date(),
 ): Promise<DailyLoginStatus> {
-  const claimDate = utcClaimDate(now);
+  const claimDate = londonClaimDate(now);
   const pool = getPool();
   const [existing] = await pool.query<(RowDataPacket & { id: number })[]>(
     `SELECT id FROM coin_ledger

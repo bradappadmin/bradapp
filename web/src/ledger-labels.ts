@@ -21,7 +21,7 @@ export function ledgerReasonLabel(reason: LedgerReasonLabel): string {
     case "sale":
       return "Sell";
     case "daily_login":
-      return "Daily";
+      return "Daily login";
     case "play_reward":
       return "Play";
     case "tt_streak_bonus":

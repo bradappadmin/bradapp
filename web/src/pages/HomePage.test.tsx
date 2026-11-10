@@ -229,6 +229,42 @@ describe("HomePage", () => {
     expect(screen.queryByRole("region", { name: "First visit tips" })).not.toBeInTheDocument();
   });
 
+  it("toasts when the daily login bonus was just claimed on load", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 4,
+        email: "member@example.com",
+        displayName: "Member",
+        bio: null,
+        role: "member",
+        coinBalance: 125,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-10",
+        claimedToday: true,
+        claimedJustNow: true,
+        balance: 125,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <HomePage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Daily login claimed/i)).toBeInTheDocument();
+    expect(screen.getByText(/2026-11-10 · Europe\/London/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Daily login \+25 BC · 2026-11-10 \(Europe\/London\)/i),
+    ).toBeInTheDocument();
+  });
+
   it("shows dismissible first-visit tips after sign-in, including Admin for admins", async () => {
     vi.mocked(api.fetchMe).mockResolvedValue({
       user: {
