@@ -1,6 +1,6 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../../auth-context";
 import { ToastProvider } from "../../toast-context";
@@ -18,6 +18,59 @@ vi.mock("../../api", () => ({
 }));
 
 import * as api from "../../api";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="admin-inventory-params">{params.toString()}</div>;
+}
+
+const audi = {
+  id: 42,
+  conditionType: "used" as const,
+  year: 2021,
+  colour: "Midnight Black",
+  mileage: 12000,
+  coinPrice: 500,
+  ownerLabel: "Garage stock",
+  status: "available" as const,
+  garageId: 1,
+  make: "Audi",
+  model: "RS6",
+  trimName: "Avant",
+  garageName: "Brad's Bay",
+};
+
+const ford = {
+  id: 7,
+  conditionType: "used" as const,
+  year: 2019,
+  colour: "Arctic White",
+  mileage: 22000,
+  coinPrice: 80,
+  ownerLabel: "Sam Bay",
+  status: "owned" as const,
+  garageId: 2,
+  make: "Ford",
+  model: "Focus",
+  trimName: "ST",
+  garageName: "Member bay",
+};
+
+const porsche = {
+  id: 9,
+  conditionType: "used" as const,
+  year: 2020,
+  colour: "Racing Red",
+  mileage: 8000,
+  coinPrice: 900,
+  ownerLabel: "Bay stock",
+  status: "sold" as const,
+  garageId: 1,
+  make: "Porsche",
+  model: "911",
+  trimName: "GT3",
+  garageName: "Brad's Bay",
+};
 
 describe("AdminInventoryPage listing paint", () => {
   afterEach(() => {
@@ -43,42 +96,12 @@ describe("AdminInventoryPage listing paint", () => {
       },
     });
     vi.mocked(api.fetchAdminListings).mockResolvedValue({
-      listings: [
-        {
-          id: 42,
-          conditionType: "used",
-          year: 2021,
-          colour: "Midnight Black",
-          mileage: 12000,
-          coinPrice: 500,
-          ownerLabel: "Garage stock",
-          status: "available",
-          garageId: 1,
-          make: "Audi",
-          model: "RS6",
-          trimName: "Avant",
-          garageName: "Brad's Bay",
-        },
-      ],
+      listings: [audi],
     });
     vi.mocked(api.fetchAdminCarModels).mockResolvedValue({ models: [] });
     vi.mocked(api.fetchAdminGarages).mockResolvedValue({ garages: [] });
     vi.mocked(api.patchAdminListing).mockResolvedValue({
-      listing: {
-        id: 42,
-        conditionType: "used",
-        year: 2021,
-        colour: "Racing Red",
-        mileage: 12000,
-        coinPrice: 500,
-        ownerLabel: "Garage stock",
-        status: "available",
-        garageId: 1,
-        make: "Audi",
-        model: "RS6",
-        trimName: "Avant",
-        garageName: "Brad's Bay",
-      },
+      listing: { ...audi, colour: "Racing Red" },
     });
   });
 
@@ -113,5 +136,138 @@ describe("AdminInventoryPage listing paint", () => {
       colour: "Racing Red",
     });
     expect(await screen.findByText(/Listing #42 updated/i)).toBeInTheDocument();
+  });
+});
+
+describe("AdminInventoryPage listings search", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  beforeEach(() => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 1,
+        email: "admin@example.com",
+        displayName: "Bay Admin",
+        bio: null,
+        role: "admin",
+        coinBalance: 100,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 100,
+      },
+    });
+    vi.mocked(api.fetchAdminListings).mockResolvedValue({
+      listings: [audi, ford, porsche],
+    });
+    vi.mocked(api.fetchAdminCarModels).mockResolvedValue({ models: [] });
+    vi.mocked(api.fetchAdminGarages).mockResolvedValue({ garages: [] });
+  });
+
+  it("searches by make/model and filters with status chips", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/admin/inventory"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route
+                path="/admin/inventory"
+                element={
+                  <>
+                    <AdminInventoryPage />
+                    <SearchParamsProbe />
+                  </>
+                }
+              />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a listing" })).toBeInTheDocument();
+    expect(await screen.findByText(/#42 Audi RS6/i)).toBeInTheDocument();
+    expect(screen.getByText(/#7 Ford Focus/i)).toBeInTheDocument();
+
+    const input = screen.getByRole("searchbox", {
+      name: /Search listings by make or model/i,
+    });
+    await user.clear(input);
+    await user.type(input, "Audi");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-inventory-params").textContent).toContain("q=Audi");
+    });
+    expect(await screen.findByText(/#42 Audi RS6/i)).toBeInTheDocument();
+    expect(screen.queryByText(/#7 Ford Focus/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-inventory-params").textContent).not.toContain("q=");
+    });
+
+    await user.click(screen.getByRole("button", { name: "For sale" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-inventory-params").textContent).toContain(
+        "group=for_sale",
+      );
+    });
+    expect(await screen.findByText(/#42 Audi RS6/i)).toBeInTheDocument();
+    expect(screen.queryByText(/#7 Ford Focus/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/#9 Porsche 911/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Sold/owned" }));
+    expect(await screen.findByText(/#7 Ford Focus/i)).toBeInTheDocument();
+    expect(screen.getByText(/#9 Porsche 911/i)).toBeInTheDocument();
+    expect(screen.queryByText(/#42 Audi RS6/i)).not.toBeInTheDocument();
+  });
+
+  it("honours q and group from the URL on load", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/inventory?q=Ford&group=sold_owned"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/#7 Ford Focus/i)).toBeInTheDocument();
+    expect(screen.queryByText(/#42 Audi RS6/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sold/owned" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(
+      screen.getByRole("searchbox", { name: /Search listings by make or model/i }),
+    ).toHaveValue("Ford");
+  });
+
+  it("shows empty filter state", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/inventory?q=zzzz"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
   });
 });
