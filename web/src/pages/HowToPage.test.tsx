@@ -45,10 +45,14 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Free card trades" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Copy link on member profiles" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Gift Brad Coins" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Admin for Brad and Napwood" }),
     ).toBeInTheDocument();
+    expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
     expect(screen.getByText(/invite codes are optional/i)).toBeInTheDocument();
     expect(screen.getAllByText(/daily login bonus/i).length).toBeGreaterThan(0);
@@ -99,12 +103,20 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/leaderboard Challenge and Offer trade/i)).toBeInTheDocument();
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/On a public garage \(\/members\/:id\), Copy link puts the absolute profile URL/i),
-    ).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Account and My cars still offer Copy garage link/i),
+      screen.getByText(/Share the bay with Copy link on any public garage/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open any public garage \(\/members\/:id\) and tap Copy link — the absolute profile URL/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Account and My cars still offer Copy garage link for that same/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Copy garage link stays on Account \/ My cars/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Gift Brad Coins on someone else.?s card \(not yourself\) deep-links/i),
@@ -158,7 +170,12 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/Compare garage cards into the same tray as Cars/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/pin your showcase, and Copy garage link/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/pin your showcase, and Copy garage link \(same URL as profile Copy link\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/display name, bio, and Copy garage link for your public/i),
+    ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
     expect(screen.getByRole("link", { name: "Open Home" })).toHaveAttribute("href", "/");
@@ -176,7 +193,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Open Trades" })).toHaveAttribute("href", "/trades");
     expect(screen.getByRole("link", { name: "Open Reviews" })).toHaveAttribute("href", "/reviews");
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
-    expect(screen.getByRole("link", { name: "Open Members" })).toHaveAttribute("href", "/members");
+    expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByText(/gift Brad Coins/i).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: "Open Admin" })).not.toBeInTheDocument();
   });

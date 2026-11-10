@@ -79,9 +79,16 @@ const STEPS: Step[] = [
   {
     id: "profile",
     title: "Your bay profile",
-    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. On a public garage (/members/:id), Copy link puts the absolute profile URL on your clipboard with a toast — same pattern as listing and review Copy link. Account and My cars still offer Copy garage link for the same URL. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password.",
+    body: "Set a display name and short garage bio in Account. On My cars, pin one showcase car as the hero on your public garage. Friends see name, bio, and that pin on Members and the leaderboard — never your email or password. Share the bay with Copy link on any public garage (next step).",
     to: "/account",
     cta: "Open Account",
+  },
+  {
+    id: "copy-profile-link",
+    title: "Copy link on member profiles",
+    body: "Open any public garage (/members/:id) and tap Copy link — the absolute profile URL lands on your clipboard with a Link copied toast, same pattern as listing and review Copy link. Account and My cars still offer Copy garage link for that same /members/:id URL when you’re sharing your own bay from those screens.",
+    to: "/members",
+    cta: "Open Members",
   },
   {
     id: "gift-coins",
@@ -122,9 +129,9 @@ export function HowToPage() {
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
             listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
             Challenge, Offer trade, and Gift Brad Coins, leaderboard Challenge and Offer trade, Copy
-            link on member profiles, gift Quick amount chips, Top Trumps streaks and this week’s cup
-            standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
-            showcase. Nothing here spends real money.
+            link on member profiles (Copy garage link stays on Account / My cars), gift Quick amount
+            chips, Top Trumps streaks and this week’s cup standings, free trades, member gifts, drag
+            races, empty-bay next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -213,7 +220,14 @@ export function HowToPage() {
                 My cars
               </Link>{" "}
               — Find a car, Sort the bay, Compare garage cards into the same tray as Cars /
-              Favourites, garage value, list prices, pin your showcase, and Copy garage link.
+              Favourites, garage value, list prices, pin your showcase, and Copy garage link (same
+              URL as profile Copy link).
+            </li>
+            <li>
+              <Link to="/account" className="text-lime no-underline hover:underline">
+                Account
+              </Link>{" "}
+              — display name, bio, and Copy garage link for your public /members/:id bay.
             </li>
             <li>
               <Link to="/favourites" className="text-lime no-underline hover:underline">
