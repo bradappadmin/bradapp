@@ -338,21 +338,28 @@ const STEPS: Step[] = [
   {
     id: "reviews-sort",
     title: "Sort reviews in the bay",
-    body: "On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A. The choice stays in the URL alongside Find a review and Cue card / Drag race type chips. Clear filters resets search, type, and sort back to Newest. Empty-bay and no-match CTAs stay; Open car to a related listing is the next step.",
+    body: "On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A. The choice stays in the URL alongside Find a review and Cue card / Drag race type chips. Clear filters resets search, type, and sort back to Newest. Empty-bay and no-match CTAs stay; Reviews reel studio hover is the next step.",
+    to: "/reviews",
+    cta: "Open Reviews",
+  },
+  {
+    id: "reviews-studio-hover",
+    title: "Reviews reel studio hover",
+    body: "On Video reviews, each reel card shows a realistic studio car thumb — linked listing make/model/paint (and year) when known — then soft-lifts the bay shell and eases the photo a little larger on hover/focus, same presence as Cars media cards. Prefers-reduced-motion keeps the card still (no lift / no photo zoom). Open car, Compare, Find, Sort the bay, type chips, and empty-bay CTAs stay. Open car from a review is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
   },
   {
     id: "reviews-open-car",
     title: "Open a car from a review",
-    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, empty-bay CTAs, and Copy link on a film stay. Compare from a review is the next step.",
+    body: "On Video reviews, Open car on a film card (or on the review itself) takes you to the related catalogue listing (/cars/:id) when one exists for that bay car — same in-app pattern as Open listing elsewhere. Drag races can show one Open car per lane when both listings are known. Find a review, Sort the bay, type chips, studio hover, empty-bay CTAs, and Copy link on a film stay. Compare from a review is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
   },
   {
     id: "reviews-compare",
     title: "Compare from a review",
-    body: "On Video reviews (list or detail), Compare on a related car queues into the shared tray with Cars / Favourites / My cars / Recently viewed when a listing id is known — same sticky Compare (1/2) tray; when two are ready, Side by side. Drag races can show one Compare per lane. Open car, Copy link, Find, Sort, type chips, and empty-bay CTAs stay. View reviews from a listing is the next step.",
+    body: "On Video reviews (list or detail), Compare on a related car queues into the shared tray with Cars / Favourites / My cars / Recently viewed when a listing id is known — same sticky Compare (1/2) tray; when two are ready, Side by side. Drag races can show one Compare per lane. Open car, Copy link, Find, Sort, studio hover, type chips, and empty-bay CTAs stay. View reviews from a listing is the next step.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -554,7 +561,8 @@ export function HowToPage() {
             Trade history Offer again (/trades?with=), Trades Open car (/cars/:id on inbox and history
             when listing ids are known), Trades Open partner (/members/:id on inbox and history;
             hidden for self), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
-            Z–A), Open car (/cars/:id) when a listing exists, and Reviews Compare into the shared tray
+            Z–A), Reviews reel studio hover (realistic thumbs, bay lift / photo ease, reduced-motion),
+            Open car (/cars/:id) when a listing exists, and Reviews Compare into the shared tray
             when a listing is known, empty-bay next steps, and your bay showcase. Nothing here spends
             real money.
           </p>
@@ -720,8 +728,9 @@ export function HowToPage() {
                 Reviews
               </Link>{" "}
               — Find a review; Cue card / Drag race chips; Sort the bay (Newest / Oldest, Title A–Z /
-              Z–A); Open car → /cars/:id when a listing exists; Compare into the shared tray when a
-              listing is known; Copy link on a film.
+              Z–A); reel studio thumbs (listing paint when known) with bay lift / photo ease on hover
+              (reduced-motion keeps still); Open car → /cars/:id when a listing exists; Compare into
+              the shared tray when a listing is known; Copy link on a film.
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">

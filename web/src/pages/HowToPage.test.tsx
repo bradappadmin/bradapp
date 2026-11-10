@@ -115,6 +115,10 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sort reviews in the bay" })).toBeInTheDocument();
     expect(document.getElementById("reviews-sort")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Reviews reel studio hover" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("reviews-studio-hover")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Open a car from a review" })).toBeInTheDocument();
     expect(document.getElementById("reviews-open-car")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Compare from a review" })).toBeInTheDocument();
@@ -434,10 +438,10 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      screen.getAllByText(
         /Prefers-reduced-motion keeps the card still \(no lift \/ no photo zoom\)/i,
-      ),
-    ).toBeInTheDocument();
+      ).length,
+    ).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByText(
         /Cars Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i,
@@ -883,7 +887,24 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Clear filters resets search, type, and sort back to Newest/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Open car to a related listing is the next step/i),
+      screen.getByText(/Reviews reel studio hover is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Reviews reel studio hover" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("reviews-studio-hover")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /each reel card shows a realistic studio car thumb — linked listing make\/model\/paint \(and year\) when known — then soft-lifts the bay shell and eases the photo a little larger on hover\/focus/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        /Prefers-reduced-motion keeps the card still \(no lift \/ no photo zoom\)/i,
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getByText(/Open car from a review is the next step/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -906,6 +927,16 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(/View reviews from a listing is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Reviews reel studio hover \(realistic thumbs, bay lift \/ photo ease, reduced-motion\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /reel studio thumbs \(listing paint when known\) with bay lift \/ photo ease on hover \(reduced-motion keeps still\)/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -959,7 +990,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\), Open car \(\/cars\/:id\) when a listing exists, and Reviews Compare into the shared tray when a listing is known/i,
+        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\), Reviews reel studio hover \(realistic thumbs, bay lift \/ photo ease, reduced-motion\), Open car \(\/cars\/:id\) when a listing exists, and Reviews Compare into the shared tray when a listing is known/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1416,7 +1447,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBe(true);
     expect(
       screen.getByText(
-        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); Open car → \/cars\/:id when a listing exists; Compare into the shared tray when a listing is known; Copy link on a film/i,
+        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\); reel studio thumbs \(listing paint when known\) with bay lift \/ photo ease on hover \(reduced-motion keeps still\); Open car → \/cars\/:id when a listing exists; Compare into the shared tray when a listing is known; Copy link on a film/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open Coin ledger" })).toHaveAttribute(
