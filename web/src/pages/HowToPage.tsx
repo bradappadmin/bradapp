@@ -268,7 +268,14 @@ const STEPS: Step[] = [
   {
     id: "leaderboard-trump-stats",
     title: "Top Trumps peek on leaderboard cars",
-    body: "On the Brad Coin leaderboard All-time standings, each photo-first highlight garage car shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars / Favourites / My cars. Empty-bay rows stay without a peek. Challenge, Offer trade, You / Jump to my rank, cup countdown, and Find a member stay. Tight Midnight Garage strip — not a stats dashboard.",
+    body: "On the Brad Coin leaderboard All-time standings, each photo-first highlight garage car shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars / Favourites / My cars. Empty-bay rows stay without a peek. Challenge, Offer trade, You / Jump to my rank, cup countdown, and Find a member stay. Tight Midnight Garage strip — not a stats dashboard. Open car from a highlight car is the next step.",
+    to: "/leaderboard",
+    cta: "Open Leaderboard",
+  },
+  {
+    id: "leaderboard-open-car",
+    title: "Open car from leaderboard highlights",
+    body: "On the Brad Coin leaderboard All-time standings, Open car beside a highlight garage car takes you to that catalogue listing (/cars/:id). The CTA hides on empty-bay rows with no highlight listing. Top Trumps peek, Challenge, Offer trade, You / Jump to my rank, cup countdown, and Find a member stay.",
     to: "/leaderboard",
     cta: "Open Leaderboard",
   },
@@ -501,7 +508,8 @@ export function HowToPage() {
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, leaderboard You highlight and Jump to my rank, leaderboard highlight Top
-            Trumps peek under each studio photo (Power / 0–60 / Top speed), Copy link on member profiles
+            Trumps peek under each studio photo (Power / 0–60 / Top speed), leaderboard Open car
+            (/cars/:id when a highlight listing is known; hidden on empty bay), Copy link on member profiles
             (Copy garage link stays on Account / My cars), public garage Top Trumps peek under each
             studio photo (Power / 0–60 / Top speed, same as Cars / Favourites / My cars), public
             garage bay value strip (car count + total BC; hides when empty), My cars
@@ -631,7 +639,8 @@ export function HowToPage() {
                 Leaderboard
               </Link>{" "}
               — Find a member, Brad Coin ranks, highlight cars with Top Trumps peek under each studio
-              photo (Power / 0–60 / Top speed, same as Cars / Favourites / My cars), This week’s cup
+              photo (Power / 0–60 / Top speed, same as Cars / Favourites / My cars), Open car →
+              /cars/:id when a highlight listing is known (hidden on empty bay), This week’s cup
               standings beside the podium (Ends in countdown to Europe/London week end · +50 BC
               prize), You badge on your standings / cup / podium row with Jump to my rank when
               scrolled away, and Challenge to Top Trumps or Offer trade on other members’ standings

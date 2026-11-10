@@ -77,6 +77,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Top Trumps peek on leaderboard cars" }),
     ).toBeInTheDocument();
     expect(document.getElementById("leaderboard-trump-stats")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Open car from leaderboard highlights" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("leaderboard-open-car")).not.toBeNull();
     expect(document.getElementById("play-rematch")).not.toBeNull();
     expect(
       screen.getByRole("heading", { name: "Open car from Match history" }),
@@ -931,6 +935,11 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(
+        /leaderboard Open car \(\/cars\/:id when a highlight listing is known; hidden on empty bay\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("heading", { name: "Find your rank on the leaderboard" }),
     ).toBeInTheDocument();
     expect(
@@ -957,13 +966,27 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Empty-bay rows stay without a peek/i)).toBeInTheDocument();
     expect(
+      screen.getByText(/Open car from a highlight car is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Open car from leaderboard highlights" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Open car beside a highlight garage car takes you to that catalogue listing \(\/cars\/:id\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The CTA hides on empty-bay rows with no highlight listing/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /You badge on your standings \/ cup \/ podium row with Jump to my rank when scrolled away/i,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /highlight cars with Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\)/i,
+        /highlight cars with Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed, same as Cars \/ Favourites \/ My cars\), Open car → \/cars\/:id when a highlight listing is known \(hidden on empty bay\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
@@ -1292,7 +1315,7 @@ describe("HowToPage Midnight Garage UI", () => {
       "/leaderboard",
     );
     expect(screen.getAllByRole("link", { name: "Open Leaderboard" }).length).toBeGreaterThanOrEqual(
-      2,
+      3,
     );
     expect(
       screen
