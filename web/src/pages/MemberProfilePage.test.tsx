@@ -123,6 +123,11 @@ describe("MemberProfilePage showcase garage", () => {
       screen.getByText(/Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i),
     ).toBeInTheDocument();
     expect(screen.getByText("Top Trumps peek")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Member garage bay value" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Bay value/i })).toBeInTheDocument();
+    expect(screen.getByText("2 cars in this bay")).toBeInTheDocument();
+    // 420 + 520 from fixtures
+    expect(screen.getByText(/940/)).toBeInTheDocument();
     // Media cards reuse the catalogue Top Trumps peek under the studio photo.
     const peeks = screen.getAllByLabelText("Top Trumps peek");
     expect(peeks.length).toBe(2);
@@ -384,4 +389,40 @@ describe("MemberProfilePage showcase garage", () => {
     expect(await screen.findByRole("heading", { name: /Bay Friend \(you\)/i })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: /Gift coins/i })).not.toBeInTheDocument();
   });
+
+  it("hides the bay value strip on an empty garage", async () => {
+    vi.mocked(api.fetchMemberProfile).mockResolvedValue({
+      member: {
+        id: 7,
+        displayName: "Bay Friend",
+        bio: "Collects pace in the family bay.",
+        role: "member",
+        roleLabel: "Member",
+        coinBalance: 880,
+        carCount: 0,
+      },
+      cars: [],
+      showcase: null,
+      showcaseSource: null,
+      showcaseListingId: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/members/7"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/members/:id" element={<MemberProfilePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Bay Friend" })).toBeInTheDocument();
+    expect(screen.getByText(/Empty garage/i)).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Member garage bay value" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
+  });
 });
+

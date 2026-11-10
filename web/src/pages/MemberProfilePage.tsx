@@ -7,6 +7,7 @@ import { formatCoins, listingTitle } from "../cars";
 import { badgeForStatus } from "../car-visuals";
 import { CarCard, CarHeroVisual } from "../components/CarCard";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
+import { MemberGarageBayValueStrip } from "../components/MemberGarageBayValueStrip";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
@@ -200,9 +201,10 @@ export function MemberProfilePage() {
                 ) : null}
               </div>
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-steel">
-                Public bay — studio hero for the showcase car, then photo-first garage cards with a
-                compact Top Trumps peek under each studio photo (Power / 0–60 / Top speed), same as
-                Cars and Favourites. No account secrets.
+                Public bay — a bay strip shows car count and total Brad Coin value when the garage
+                isn’t empty, then a studio hero for the showcase car and photo-first garage cards
+                with a compact Top Trumps peek under each studio photo (Power / 0–60 / Top speed),
+                same as Cars and Favourites. No account secrets.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
@@ -255,6 +257,8 @@ export function MemberProfilePage() {
             to challenge, offer a free trade, or gift Brad Coins.
           </p>
         ) : null}
+
+        {!loading && cars.length > 0 ? <MemberGarageBayValueStrip cars={cars} /> : null}
 
         {canGift && member && user ? (
           <section
