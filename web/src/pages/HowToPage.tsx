@@ -177,7 +177,7 @@ const STEPS: Step[] = [
   {
     id: "admin",
     title: "Admin for Brad and Napwood",
-    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust are the next step.",
+    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows after that.",
     to: "/admin",
     cta: "Open Admin",
     adminOnly: true,
@@ -185,9 +185,17 @@ const STEPS: Step[] = [
   {
     id: "admin-coin-chips",
     title: "Quick amount on admin coin adjust",
-    body: "On Coin adjustments and Accounts, Brad and Napwood correct a member’s Brad Coin balance with Quick amount chips (+25 / +50 / +100 / +250 BC) — same chip pattern as gift Quick amount — or type any signed Coin delta, add a note on Coin adjustments, then Adjust coins. Free-form still covers debit corrections.",
+    body: "On Coin adjustments and Accounts, Brad and Napwood correct a member’s Brad Coin balance with Quick amount chips (+25 / +50 / +100 / +250 BC) — same chip pattern as gift Quick amount — or type any signed Coin delta, add a note on Coin adjustments, then Adjust coins. Free-form still covers debit corrections. Sort inventory listings is the next step.",
     to: "/admin/coin-history",
     cta: "Open Coin adjustments",
+    adminOnly: true,
+  },
+  {
+    id: "admin-inventory-sort",
+    title: "Sort inventory listings in the bay",
+    body: "On Cars & garages (Listings), Sort the bay orders the directory: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Cars / My cars / Favourites. The choice stays in the URL alongside Find a listing and status chips. Clear filters resets search, group, and sort back to Highest price. Paint and Save stay on each row.",
+    to: "/admin/inventory",
+    cta: "Open Cars & garages",
     adminOnly: true,
   },
 ];
@@ -223,7 +231,8 @@ export function HowToPage() {
             My cars Quick price chips (50 / 100 / 250 / 500 BC) when listing or updating a sale, gift
             Quick amount chips, Coin ledger Find entry plus type chips (All / Earn / Spend / Gift /
             Admin), admin coin-adjust Quick amount chips (+25 / +50 / +100 / +250 BC) for Brad and
-            Napwood, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or house →
+            Napwood, admin inventory Sort the bay (Highest / Lowest price, Name A–Z / Z–A), Top
+            Trumps streaks, Match history Rematch (PvP opponent deep-link or house →
             Play), this week’s cup standings with an Ends in countdown (Europe/London week end, +50 BC
             prize), free trades, Trade history Offer again (/trades?with=),
             member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay
@@ -371,6 +380,13 @@ export function HowToPage() {
               </Link>{" "}
               — Brad & Napwood: Quick amount chips (+25 / +50 / +100 / +250 BC) or free-form Coin
               delta on Coin adjustments and Accounts.
+            </li>
+            <li>
+              <Link to="/admin/inventory" className="text-lime no-underline hover:underline">
+                Cars & garages
+              </Link>{" "}
+              — Brad & Napwood: Find a listing; Sort the bay (Highest / Lowest price, Name A–Z /
+              Z–A, same as Cars / My cars); status chips; Clear filters.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">

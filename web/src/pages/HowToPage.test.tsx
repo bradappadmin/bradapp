@@ -77,6 +77,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Quick amount on admin coin adjust" }),
     ).toBeInTheDocument();
     expect(document.getElementById("admin-coin-chips")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Sort inventory listings in the bay" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("admin-inventory-sort")).not.toBeNull();
     expect(document.getElementById("members-sort")).not.toBeNull();
     expect(document.getElementById("copy-profile-link")).not.toBeNull();
 
@@ -305,6 +309,11 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
+        /admin inventory Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
         /Type chips filter All \/ Earn \/ Spend \/ Gift \/ Admin — Earn and Spend follow the money/i,
       ),
     ).toBeInTheDocument();
@@ -317,7 +326,9 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Quick amount chips on coin adjust are the next step/i),
+      screen.getByText(
+        /Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows after that/i,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -325,7 +336,23 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Sort inventory listings is the next step/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Free-form still covers debit corrections/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On Cars & garages \(Listings\), Sort the bay orders the directory: Highest price, Lowest price, Name A–Z, or Name Z–A/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/same options as Cars \/ My cars \/ Favourites/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Clear filters resets search, group, and sort back to Highest price/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/pin one showcase car/i)).toBeInTheDocument();
     expect(
@@ -510,6 +537,9 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.queryByRole("link", { name: "Open Coin adjustments" }),
     ).not.toBeInTheDocument();
     expect(
+      screen.queryByRole("link", { name: "Open Cars & garages" }),
+    ).not.toBeInTheDocument();
+    expect(
       screen.getByText(
         /Brad & Napwood: Quick amount chips \(\+25 \/ \+50 \/ \+100 \/ \+250 BC\) or free-form Coin delta/i,
       ),
@@ -517,6 +547,15 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Coin adjustments" })).toHaveAttribute(
       "href",
       "/admin/coin-history",
+    );
+    expect(
+      screen.getByText(
+        /Brad & Napwood: Find a listing; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Cars \/ My cars\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cars & garages" })).toHaveAttribute(
+      "href",
+      "/admin/inventory",
     );
   });
 });
