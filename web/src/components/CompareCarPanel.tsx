@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { formatCoins } from "../cars";
+import { compareOpenCarAriaLabel, compareOpenCarHref } from "../compare-open-car";
 import { CarVisual } from "./CarVisual";
 
 type CompareCarPanelProps = {
@@ -42,6 +43,8 @@ export function CompareCarPanel({
   ownerLabel,
   signInHref,
 }: CompareCarPanelProps) {
+  const openCarHref = compareOpenCarHref(listingId);
+  const showOpenCar = Boolean(openCarHref);
   const showChallenge = Boolean(challengeHref);
   const showTrade = Boolean(tradeHref);
   const showOpenMember = Boolean(openMemberHref);
@@ -80,8 +83,17 @@ export function CompareCarPanel({
         <p className="pt-0.5 font-display text-lg font-semibold text-lime sm:text-xl">
           {formatCoins(coinPrice)}
         </p>
-        {showChallenge || showTrade || showOpenMember || showSignIn ? (
+        {showOpenCar || showChallenge || showTrade || showOpenMember || showSignIn ? (
           <div className="flex flex-wrap gap-2 pt-2" aria-label={`${title} play actions`}>
+            {showOpenCar && openCarHref ? (
+              <Link
+                to={openCarHref}
+                aria-label={compareOpenCarAriaLabel(title)}
+                className="inline-flex rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Open car
+              </Link>
+            ) : null}
             {showOpenMember && openMemberHref ? (
               <Link
                 to={openMemberHref}

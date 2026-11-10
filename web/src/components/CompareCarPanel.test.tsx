@@ -24,7 +24,7 @@ describe("CompareCarPanel", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("link", { name: /Porsche 911 GT3/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Porsche 911 GT3" })).toHaveAttribute(
       "href",
       "/cars/9",
     );
@@ -36,6 +36,11 @@ describe("CompareCarPanel", () => {
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+    expect(screen.getByText("Open car")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Challenge/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer trade/i })).not.toBeInTheDocument();
   });
@@ -68,6 +73,10 @@ describe("CompareCarPanel", () => {
     );
     expect(screen.getByText("Challenge")).toBeInTheDocument();
     expect(screen.getByText("Offer trade")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/11",
+    );
     expect(screen.getByLabelText("Audi RS6 Avant play actions")).toBeInTheDocument();
   });
 
@@ -94,5 +103,9 @@ describe("CompareCarPanel", () => {
       "/members/177",
     );
     expect(screen.getByText("Open member")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/11",
+    );
   });
 });

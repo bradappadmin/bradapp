@@ -153,6 +153,14 @@ describe("ComparePage Midnight Garage UI", () => {
     expect(screen.getByLabelText(/Top speed Porsche 911 GT3 · Wins/i)).toBeInTheDocument();
     expect(screen.getByText("Brad Coin price")).toBeInTheDocument();
     expect(screen.getAllByText("Power").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/11",
+    );
     expect(screen.queryByRole("status", { name: /Empty compare bay/i })).not.toBeInTheDocument();
   });
 
@@ -227,6 +235,14 @@ describe("ComparePage Midnight Garage UI", () => {
       "href",
       "/members/177",
     );
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/11",
+    );
     expect(screen.queryByRole("link", { name: /Challenge to Top Trumps Audi/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer trade Audi/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Open member/i })).toBeInTheDocument();
@@ -258,5 +274,13 @@ describe("ComparePage Midnight Garage UI", () => {
     expect(screen.queryByRole("link", { name: /Challenge/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Offer trade/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Open member/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/9",
+    );
+    expect(screen.getByRole("link", { name: "Open car Audi RS6 Avant" })).toHaveAttribute(
+      "href",
+      "/cars/11",
+    );
   });
 });
