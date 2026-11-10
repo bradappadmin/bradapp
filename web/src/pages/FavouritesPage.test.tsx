@@ -229,4 +229,71 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(links[0]?.textContent).toMatch(/Audi RS6/i);
     expect(links[1]?.textContent).toMatch(/Porsche 911/i);
   });
+
+  it("searches favourites by make/model and keeps sort in the URL", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [audi, porsche] });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/favourites"
+              element={
+                <>
+                  <FavouritesPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a favourite" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+
+    const input = screen.getByRole("searchbox", {
+      name: /Search favourites by make or model/i,
+    });
+    await user.clear(input);
+    await user.type(input, "porsche");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("favourites-params").textContent).toContain("q=porsche");
+    });
+    expect(screen.getByRole("link", { name: /Porsche 911/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Audi RS6/i })).not.toBeInTheDocument();
+
+    const sort = screen.getByRole("combobox", { name: /Sort saved favourite cars/i });
+    await user.selectOptions(sort, "name_asc");
+    await waitFor(() => {
+      const text = screen.getByTestId("favourites-params").textContent ?? "";
+      expect(text).toContain("q=porsche");
+      expect(text).toContain("sort=name_asc");
+    });
+  });
+
+  it("shows empty search state", async () => {
+    vi.mocked(api.fetchFavourites).mockResolvedValue({ cars: [audi, porsche] });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites?q=zzzz"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/favourites" element={<FavouritesPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+  });
 });
