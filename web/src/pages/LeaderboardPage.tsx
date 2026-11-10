@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { LeaderboardEntry, WeeklyCupSnapshot } from "../api";
 import { useAuth } from "../auth-context";
@@ -9,6 +9,13 @@ import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { WeeklyCupPanel } from "../components/WeeklyCupPanel";
+import {
+  filterLeaderboardMembers,
+  matchesLeaderboardMemberQuery,
+} from "../leaderboard-member-filter";
+
+const fieldClass =
+  "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
 function podiumRankClass(rank: number): string {
   switch (rank) {
@@ -41,10 +48,23 @@ function rowPanelClass(rank: number, isYou: boolean): string {
 
 export function LeaderboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const qFromUrl = (searchParams.get("q") ?? "").trim();
+  const [draft, setDraft] = useState(qFromUrl);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [weeklyCup, setWeeklyCup] = useState<WeeklyCupSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const visible = useMemo(
+    () => filterLeaderboardMembers(entries, qFromUrl),
+    [entries, qFromUrl],
+  );
+  const filtersOn = Boolean(qFromUrl);
+
+  useEffect(() => {
+    setDraft(qFromUrl);
+  }, [qFromUrl]);
 
   useEffect(() => {
     if (!user) return;
@@ -69,8 +89,37 @@ export function LeaderboardPage() {
     };
   }, [user?.id]);
 
+  // Filter-as-you-type: debounce URL updates (client filter over the loaded list).
+  useEffect(() => {
+    const next = draft.trim();
+    if (next === qFromUrl) return;
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams();
+      if (next) params.set("q", next);
+      setSearchParams(params, { replace: true });
+    }, 280);
+    return () => window.clearTimeout(timer);
+  }, [draft, qFromUrl, setSearchParams]);
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
+  }
+
+  function writeParams(nextQ: string) {
+    const params = new URLSearchParams();
+    const q = nextQ.trim();
+    if (q) params.set("q", q);
+    setSearchParams(params, { replace: true });
+  }
+
+  function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    writeParams(draft);
+  }
+
+  function onClearSearch() {
+    setDraft("");
+    writeParams("");
   }
 
   const topThree = entries.slice(0, 3);
@@ -97,7 +146,9 @@ export function LeaderboardPage() {
                   Ranked by coins
                 </span>
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
-                  {entries.length} {entries.length === 1 ? "member" : "members"}
+                  {filtersOn ? visible.length : entries.length}{" "}
+                  {(filtersOn ? visible.length : entries.length) === 1 ? "member" : "members"}
+                  {filtersOn ? " match" : ""}
                 </span>
                 {weeklyCup ? (
                   <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
@@ -132,6 +183,65 @@ export function LeaderboardPage() {
           </div>
         ) : null}
 
+        <form
+          onSubmit={onSubmit}
+          className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+          role="search"
+          aria-label="Search leaderboard members"
+        >
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <h2 className="font-display text-lg text-mist sm:text-xl">Find a member</h2>
+            <p className="text-xs text-steel">Display name · filter as you type · stays in the URL</p>
+          </div>
+          <label className="mt-4 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+            Search
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                className={fieldClass}
+                type="search"
+                name="q"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Display name…"
+                aria-label="Search leaderboard by display name"
+                autoComplete="off"
+              />
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="submit"
+                  className="rounded-md bg-rose px-4 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Search
+                </button>
+                {qFromUrl ? (
+                  <button
+                    type="button"
+                    onClick={onClearSearch}
+                    className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </label>
+          {filtersOn ? (
+            <p className="mt-4 text-sm text-steel">
+              Showing{" "}
+              {!loading ? (
+                <>
+                  {visible.length} of {entries.length}{" "}
+                  {entries.length === 1 ? "member" : "members"}
+                </>
+              ) : (
+                "…"
+              )}{" "}
+              for <span className="font-display text-lime">“{qFromUrl}”</span>
+              <span className="text-steel"> · podium stays on the full bay</span>
+            </p>
+          ) : null}
+        </form>
+
         {!loading && topThree.length > 0 ? (
           <section
             className="bay-rise-delay mt-8"
@@ -141,11 +251,15 @@ export function LeaderboardPage() {
             <ul className="mt-3 grid gap-3 sm:grid-cols-3">
               {topThree.map((entry) => {
                 const isYou = Boolean(user && entry.id === user.id);
+                const isMatch = filtersOn && matchesLeaderboardMemberQuery(entry, qFromUrl);
                 return (
                   <li key={`podium-${entry.id}`}>
                     <Link
                       to={`/members/${entry.id}`}
-                      className={`play-panel flex flex-col rounded-md border p-4 no-underline transition hover:border-lime/35 ${rowPanelClass(entry.rank, isYou)}`}
+                      className={`play-panel flex flex-col rounded-md border p-4 no-underline transition hover:border-lime/35 ${rowPanelClass(entry.rank, isYou)} ${
+                        isMatch ? "ring-2 ring-lime/45" : filtersOn ? "opacity-55" : ""
+                      }`}
+                      aria-current={isMatch ? "true" : undefined}
                     >
                       <span
                         className={`inline-flex w-fit rounded-md border px-2.5 py-1 font-display text-xs font-semibold ${podiumRankClass(entry.rank)}`}
@@ -159,6 +273,9 @@ export function LeaderboardPage() {
                       <p className="mt-1 font-display text-sm text-lime">
                         {formatCoins(entry.coinBalance)}
                       </p>
+                      {isMatch ? (
+                        <p className="mt-2 text-[10px] uppercase tracking-wide text-lime">Match</p>
+                      ) : null}
                     </Link>
                   </li>
                 );
@@ -174,13 +291,35 @@ export function LeaderboardPage() {
             </h2>
             {!loading ? (
               <p className="text-sm text-steel">
-                {entries.length} {entries.length === 1 ? "row" : "rows"}
+                {visible.length} {visible.length === 1 ? "row" : "rows"}
               </p>
             ) : null}
           </div>
 
+          {!loading && visible.length === 0 ? (
+            <div className="play-panel rounded-md border px-5 py-12 text-center" role="status">
+              {filtersOn ? (
+                <>
+                  <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+                    No standings match “{qFromUrl}”. Try another spelling or clear the search.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onClearSearch}
+                    className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                  >
+                    Clear search
+                  </button>
+                </>
+              ) : (
+                <p className="text-sm text-steel">No members yet.</p>
+              )}
+            </div>
+          ) : null}
+
           <ol className="flex flex-col gap-3">
-            {entries.map((entry) => {
+            {visible.map((entry) => {
               const isYou = Boolean(user && entry.id === user.id);
               const snippet = bioSnippet(entry.bio);
               const car = entry.highlightCar;
@@ -247,12 +386,6 @@ export function LeaderboardPage() {
             })}
           </ol>
         </section>
-
-        {!loading && entries.length === 0 ? (
-          <div className="play-panel mt-4 rounded-md border px-4 py-5 text-sm text-steel">
-            No members yet.
-          </div>
-        ) : null}
       </main>
     </div>
   );

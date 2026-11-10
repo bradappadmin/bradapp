@@ -1,5 +1,6 @@
-import { cleanup, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { LeaderboardPage } from "./LeaderboardPage";
@@ -11,6 +12,11 @@ vi.mock("../api", () => ({
 }));
 
 import * as api from "../api";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="leaderboard-params">{params.toString()}</div>;
+}
 
 describe("LeaderboardPage Midnight Garage UI", () => {
   afterEach(() => {
@@ -125,6 +131,7 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Top Trumps cup" })).toBeInTheDocument();
     expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Standings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
 
     const garageLink = await screen.findByRole("link", {
       name: /Bay Friend, rank 1, open garage/i,
@@ -141,5 +148,75 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     const selfLink = screen.getByRole("link", { name: /Member \(you\), rank 2, open garage/i });
     expect(selfLink).toHaveAttribute("href", "/members/2");
     expect(selfLink).toHaveTextContent("Empty bay");
+  });
+
+  it("searches standings by display name and keeps the podium", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/leaderboard"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/leaderboard"
+              element={
+                <>
+                  <LeaderboardPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: /Casey Apex, rank 3, open garage/i }),
+    ).toBeInTheDocument();
+
+    const input = screen.getByRole("searchbox", {
+      name: /Search leaderboard by display name/i,
+    });
+    await user.clear(input);
+    await user.type(input, "casey");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("leaderboard-params").textContent).toContain("q=casey");
+    });
+    expect(
+      screen.getByRole("link", { name: /Casey Apex, rank 3, open garage/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Bay Friend, rank 1, open garage/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Top three on the podium")).toBeInTheDocument();
+    expect(screen.getByText("Match")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("leaderboard-params").textContent).not.toContain("q=");
+    });
+    expect(
+      await screen.findByRole("link", { name: /Bay Friend, rank 1, open garage/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows empty search state", async () => {
+    render(
+      <MemoryRouter initialEntries={["/leaderboard?q=zzzz"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Top three on the podium")).toBeInTheDocument();
   });
 });
