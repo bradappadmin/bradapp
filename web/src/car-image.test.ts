@@ -100,4 +100,10 @@ describe("carStudioImageUrl", () => {
       expect(url).toContain("modelRange=m3");
     }
   });
+
+  it("skips the free demo studio URL for Ferrari (covered-car stub)", () => {
+    expect(
+      carStudioImageUrl({ make: "Ferrari", model: "SF90 Stradale", colour: "Racing Red" }),
+    ).toBeNull();
+  });
 });

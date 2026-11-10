@@ -8,9 +8,10 @@ import {
   parseAdminInventoryGroup,
   type AdminInventoryGroup,
 } from "../../admin-inventory-filter";
-import { carStudioImageUrl, STUDIO_PAINT_COLOURS } from "../../car-image";
+import { STUDIO_PAINT_COLOURS } from "../../car-image";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
+import { CarVisual } from "../../components/CarVisual";
 
 type Tab = "listings" | "models" | "garages";
 
@@ -468,26 +469,17 @@ function ListingPaintRow({
     setCoinPrice(String(listing.coinPrice));
   }, [listing.colour, listing.coinPrice, listing.id]);
 
-  const previewSrc = carStudioImageUrl({
-    make: listing.make,
-    model: listing.model,
-    colour,
-    year: listing.year,
-    width: 240,
-  });
-
   return (
     <li className="admin-row flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-3">
-        <img
-          src={previewSrc}
-          alt={`${listing.make} ${listing.model} in ${colour}`}
-          width={96}
-          height={64}
-          className="h-16 w-24 shrink-0 rounded-md border border-white/10 bg-bay-deep/60 object-contain object-bottom"
-          loading="lazy"
-          decoding="async"
-          referrerPolicy="no-referrer"
+        <CarVisual
+          colour={colour}
+          make={listing.make}
+          model={listing.model}
+          year={listing.year}
+          size="thumb"
+          title={`${listing.make} ${listing.model}`}
+          className="h-16 w-24"
         />
         <div className="min-w-0">
           <p className="text-mist break-words">

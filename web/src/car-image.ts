@@ -193,13 +193,24 @@ export type CarImageInput = {
 };
 
 /**
+ * Free `customer=img` returns a covered-car stub for these makes.
+ * Skip the studio URL so UI falls back to Midnight Garage SVG art unless a
+ * licensed `VITE_CAR_IMAGE_CUSTOMER` is configured.
+ */
+const DEMO_UNSUPPORTED_MAKES = new Set(["ferrari"]);
+
+/**
  * Builds a studio image URL for a real make/model.
  * Uses the public Imagin CDN customer; override with VITE_CAR_IMAGE_CUSTOMER if needed
  * (licensed keys drop the demo watermark / plate branding).
+ * Returns null when the free demo customer cannot render the make.
  */
-export function carStudioImageUrl(input: CarImageInput): string {
+export function carStudioImageUrl(input: CarImageInput): string | null {
   const customer = (import.meta.env.VITE_CAR_IMAGE_CUSTOMER as string | undefined)?.trim() || "img";
   const tokens = resolveStudioCarTokens(input);
+  if (customer === "img" && DEMO_UNSUPPORTED_MAKES.has(tokens.make)) {
+    return null;
+  }
   const params = new URLSearchParams({
     customer,
     make: tokens.make,
