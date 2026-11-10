@@ -40,7 +40,7 @@ describe("CarCard", () => {
     expect(document.querySelector("img")).not.toBeNull();
   });
 
-  it("renders a photo-first media card for the catalogue", () => {
+  it("renders a photo-first media card with Top Trumps peek under the studio photo", () => {
     render(
       <MemoryRouter>
         <CarCard
@@ -56,6 +56,8 @@ describe("CarCard", () => {
             colour: "Racing Red",
             year: 2019,
             bhp: 591,
+            topSpeedMph: 155,
+            zeroToSixtySecs: 3.6,
             coinPrice: 100,
             status: "available",
           }}
@@ -71,7 +73,16 @@ describe("CarCard", () => {
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     expect(document.querySelector('[data-bay-frame="card"]')).not.toBeNull();
-    expect(screen.getByLabelText("Key specs")).toBeInTheDocument();
+    const peek = screen.getByLabelText("Top Trumps peek");
+    expect(peek).toBeInTheDocument();
+    expect(peek.textContent).toMatch(/Power/);
+    expect(peek.textContent).toMatch(/0–60/);
+    expect(peek.textContent).toMatch(/Top speed/);
+    expect(screen.getByText("591")).toBeInTheDocument();
+    expect(screen.getByText("3.6s")).toBeInTheDocument();
+    expect(screen.getByText("155 mph")).toBeInTheDocument();
+    // Media peek replaces the denser SpecPills row under the title.
+    expect(screen.queryByLabelText("Key specs")).not.toBeInTheDocument();
   });
 
   it("renders a hero visual with bay framing and an accessible paint label", () => {

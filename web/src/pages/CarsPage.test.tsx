@@ -124,6 +124,15 @@ describe("CarsPage Midnight Garage UI", () => {
 
     expect(await screen.findByText("Porsche Macan GTS")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Listings" })).toBeInTheDocument();
+    const peek = screen.getByLabelText("Top Trumps peek");
+    expect(peek).toBeInTheDocument();
+    expect(peek.textContent).toMatch(/Power/);
+    expect(peek.textContent).toMatch(/0–60/);
+    expect(peek.textContent).toMatch(/Top speed/);
+    expect(screen.getByText("434")).toBeInTheDocument();
+    expect(screen.getByText("4.3s")).toBeInTheDocument();
+    expect(screen.getByText("169 mph")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to compare" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /^More filters$/i }));
     expect(screen.getByLabelText(/^Colour$/i)).toBeInTheDocument();

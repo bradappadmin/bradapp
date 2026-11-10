@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { carBadgeLabel, type CarBadgeKind } from "../car-visuals";
 import { formatCoins, listingTitle } from "../cars";
+import { trumpStatsPeek } from "../trump-stats-peek";
 import { CarVisual } from "./CarVisual";
 
 export type CarCardData = {
@@ -38,7 +39,7 @@ type CarCardProps = {
   className?: string;
 };
 
-function SpecPills({ car, compact }: { car: CarCardData; compact?: boolean }) {
+function SpecPills({ car }: { car: CarCardData }) {
   const pills: Array<{ label: string; value: string }> = [];
   if (car.bhp != null) pills.push({ label: "BHP", value: String(car.bhp) });
   if (car.zeroToSixtySecs != null) {
@@ -48,19 +49,6 @@ function SpecPills({ car, compact }: { car: CarCardData; compact?: boolean }) {
     pills.push({ label: "Top", value: `${car.topSpeedMph} mph` });
   }
   if (pills.length === 0) return null;
-  if (compact) {
-    return (
-      <p className="mt-1.5 text-xs text-steel" aria-label="Key specs">
-        {pills.map((pill, i) => (
-          <span key={pill.label}>
-            {i > 0 ? <span className="text-white/20"> · </span> : null}
-            <span className="font-display font-semibold text-mist">{pill.value}</span>
-            <span className="ml-1 uppercase tracking-wide text-steel/80">{pill.label}</span>
-          </span>
-        ))}
-      </p>
-    );
-  }
   return (
     <dl className="mt-2 flex flex-wrap gap-2">
       {pills.map((pill) => (
@@ -70,6 +58,29 @@ function SpecPills({ car, compact }: { car: CarCardData; compact?: boolean }) {
         >
           <dt className="text-[10px] uppercase tracking-wide text-steel">{pill.label}</dt>
           <dd className="font-display text-sm font-semibold text-mist">{pill.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** Tight Top Trumps peek under the studio photo on catalogue media cards. */
+function TrumpStatsPeek({ car }: { car: CarCardData }) {
+  const stats = trumpStatsPeek(car);
+  if (stats.length === 0) return null;
+  const cols =
+    stats.length === 1 ? "grid-cols-1" : stats.length === 2 ? "grid-cols-2" : "grid-cols-3";
+  return (
+    <dl
+      className={`grid ${cols} gap-px border-t border-white/8 bg-white/[0.04]`}
+      aria-label="Top Trumps peek"
+    >
+      {stats.map((stat) => (
+        <div key={stat.id} className="bg-bay-deep/70 px-2 py-1.5 text-center sm:px-2.5 sm:py-2">
+          <dt className="text-[10px] uppercase tracking-wide text-steel">{stat.label}</dt>
+          <dd className="mt-0.5 font-display text-xs font-semibold text-mist sm:text-sm">
+            {stat.value}
+          </dd>
         </div>
       ))}
     </dl>
@@ -132,7 +143,7 @@ export function CarCard({
         </div>
         {badge && !useMedia ? <Badge kind={badge} coinPrice={car.coinPrice} /> : null}
       </div>
-      {!dense ? <SpecPills car={car} compact={useMedia} /> : null}
+      {!dense && !useMedia ? <SpecPills car={car} /> : null}
       {dense && (car.bhp != null || car.zeroToSixtySecs != null) ? (
         <p className="mt-1 text-xs text-steel">
           {car.bhp != null ? `${car.bhp} bhp` : null}
@@ -164,6 +175,7 @@ export function CarCard({
           </div>
         ) : null}
       </div>
+      <TrumpStatsPeek car={car} />
       <div className="border-t border-white/8 px-3 py-2.5 sm:px-3.5 sm:py-3">{meta}</div>
     </div>
   ) : (
