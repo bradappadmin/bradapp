@@ -107,6 +107,8 @@ describe("ListingPage Midnight Garage UI", () => {
 
     const hero = screen.getByRole("img", { name: /Bugatti Chiron Sport/i });
     expect(hero.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(screen.getByLabelText("Listing bay photo")).toBeInTheDocument();
+    expect(document.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
 
     const challenge = screen.getByRole("link", { name: "Challenge to Top Trumps" });
     expect(challenge).toHaveAttribute("href", "/play?opponent=177&theirCar=143");

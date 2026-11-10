@@ -38,7 +38,7 @@ type CarCardProps = {
   className?: string;
 };
 
-function SpecPills({ car }: { car: CarCardData }) {
+function SpecPills({ car, compact }: { car: CarCardData; compact?: boolean }) {
   const pills: Array<{ label: string; value: string }> = [];
   if (car.bhp != null) pills.push({ label: "BHP", value: String(car.bhp) });
   if (car.zeroToSixtySecs != null) {
@@ -48,6 +48,19 @@ function SpecPills({ car }: { car: CarCardData }) {
     pills.push({ label: "Top", value: `${car.topSpeedMph} mph` });
   }
   if (pills.length === 0) return null;
+  if (compact) {
+    return (
+      <p className="mt-1.5 text-xs text-steel" aria-label="Key specs">
+        {pills.map((pill, i) => (
+          <span key={pill.label}>
+            {i > 0 ? <span className="text-white/20"> · </span> : null}
+            <span className="font-display font-semibold text-mist">{pill.value}</span>
+            <span className="ml-1 uppercase tracking-wide text-steel/80">{pill.label}</span>
+          </span>
+        ))}
+      </p>
+    );
+  }
   return (
     <dl className="mt-2 flex flex-wrap gap-2">
       {pills.map((pill) => (
@@ -103,19 +116,23 @@ export function CarCard({
         <div className="min-w-0">
           <p
             className={`font-display font-semibold text-mist ${
-              dense ? "text-base" : useMedia ? "text-lg sm:text-xl group-hover:text-white" : "text-lg group-hover:text-white"
+              dense
+                ? "text-base"
+                : useMedia
+                  ? "text-base sm:text-lg group-hover:text-white"
+                  : "text-lg group-hover:text-white"
             }`}
           >
             {title}
           </p>
-          <p className="mt-0.5 text-sm text-steel">
+          <p className={`mt-0.5 text-steel ${useMedia ? "text-xs sm:text-sm" : "text-sm"}`}>
             {car.year}
             {car.bodyType ? ` · ${car.bodyType}` : ""} · {car.colour}
           </p>
         </div>
         {badge && !useMedia ? <Badge kind={badge} coinPrice={car.coinPrice} /> : null}
       </div>
-      {!dense ? <SpecPills car={car} /> : null}
+      {!dense ? <SpecPills car={car} compact={useMedia} /> : null}
       {dense && (car.bhp != null || car.zeroToSixtySecs != null) ? (
         <p className="mt-1 text-xs text-steel">
           {car.bhp != null ? `${car.bhp} bhp` : null}
@@ -139,15 +156,15 @@ export function CarCard({
           fuel={car.fuel}
           size="card"
           title={title}
-          className="aspect-[16/10] w-full"
+          className="aspect-[3/2] w-full sm:aspect-[16/10]"
         />
         {badge ? (
-          <div className="absolute right-3 top-3 z-10">
+          <div className="absolute right-2.5 top-2.5 z-10 sm:right-3 sm:top-3">
             <Badge kind={badge} coinPrice={car.coinPrice} />
           </div>
         ) : null}
       </div>
-      <div className="p-3 sm:p-4">{meta}</div>
+      <div className="border-t border-white/8 px-3 py-2.5 sm:px-3.5 sm:py-3">{meta}</div>
     </div>
   ) : (
     <div className={`flex gap-3 ${dense ? "items-center" : "items-start"}`}>
@@ -166,7 +183,7 @@ export function CarCard({
   );
 
   const shellClass = useMedia
-    ? `overflow-hidden rounded-md border border-white/10 bg-bay-panel/50 ${className}`
+    ? `overflow-hidden rounded-md border border-white/10 bg-bay-deep/40 ${className}`
     : `rounded-md border border-white/10 bg-bay-panel/40 p-3 sm:p-4 ${className}`;
 
   if (to && !footer) {

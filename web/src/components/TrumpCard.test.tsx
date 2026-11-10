@@ -30,5 +30,6 @@ describe("TrumpCard", () => {
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
     expect(img?.getAttribute("src") ?? "").toContain("make=audi");
+    expect(document.querySelector('[data-bay-frame="card"]')).not.toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { carStudioImageUrl } from "../car-image";
-import { carBodyArt, carPaint } from "../car-visuals";
+import { carBodyArt, carPaint, type CarPaint } from "../car-visuals";
 
 type CarVisualProps = {
   colour: string;
@@ -82,8 +82,8 @@ function FallbackSvg({
 }) {
   const uid = useId().replace(/:/g, "");
   const paint = carPaint(colour);
-  const art = carBodyArt(bodyType);
   const isHero = size === "hero";
+  const art = carBodyArt(bodyType);
   const bodyGrad = `paint-${uid}`;
   const glassGrad = `glass-${uid}`;
   const bayGrad = `bay-${uid}`;
@@ -93,7 +93,7 @@ function FallbackSvg({
   return (
     <svg
       viewBox="0 0 200 120"
-      className={isHero ? "h-36 w-full max-w-3xl sm:h-48" : "h-full w-full"}
+      className={isHero ? "h-full w-full max-w-5xl" : "h-full w-full"}
       aria-hidden={isHero || !title ? true : undefined}
       role={!isHero && title ? "img" : undefined}
       aria-label={!isHero && title ? `${title} in ${colour}` : undefined}
@@ -203,6 +203,59 @@ function photoWidth(size: "thumb" | "card" | "hero"): number {
   }
 }
 
+/** Midnight Garage bay plane — slate/navy with paint-tinted floor wash (no purple). */
+function bayAtmosphere(paint: CarPaint, size: "thumb" | "card" | "hero"): string {
+  switch (size) {
+    case "hero":
+      return `
+        radial-gradient(ellipse 95% 55% at 50% 108%, ${paint.glow}, transparent 62%),
+        radial-gradient(ellipse 70% 40% at 50% -10%, rgba(18, 32, 56, 0.85), transparent 70%),
+        linear-gradient(180deg, #101828 0%, #0b1220 42%, #070b14 100%)
+      `;
+    case "card":
+      return `
+        radial-gradient(ellipse 90% 58% at 50% 105%, ${paint.glow}, transparent 60%),
+        radial-gradient(ellipse 55% 35% at 18% 12%, rgba(163, 230, 53, 0.06), transparent 55%),
+        linear-gradient(168deg, #121a2b 0%, #0b1220 48%, #070b14 100%)
+      `;
+    case "thumb":
+      return `
+        radial-gradient(ellipse 85% 60% at 50% 110%, ${paint.glow}, transparent 58%),
+        linear-gradient(155deg, #121a2b 0%, #0b1220 55%, #070b14 100%)
+      `;
+    default: {
+      const _exhaustive: never = size;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Soft overhead bay rails + floor wash — photo sits in a lit garage, not a flat card. */
+function BayLighting({ paint, size }: { paint: CarPaint; size: "thumb" | "card" | "hero" }) {
+  const isHero = size === "hero";
+  return (
+    <>
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 ${isHero ? "h-16 sm:h-20" : "h-10"} bg-gradient-to-b from-white/[0.07] to-transparent`}
+        aria-hidden
+      />
+      <div
+        className={`pointer-events-none absolute left-[8%] right-[8%] top-0 ${isHero ? "h-[2px]" : "h-px"} bg-gradient-to-r from-transparent via-lime/25 to-transparent`}
+        aria-hidden
+      />
+      <div
+        className={`pointer-events-none absolute inset-x-0 bottom-0 ${isHero ? "h-2/5" : "h-1/3"} bg-gradient-to-t from-bay-deep via-bay-deep/70 to-transparent`}
+        aria-hidden
+      />
+      <div
+        className={`pointer-events-none absolute left-1/2 ${isHero ? "bottom-[6%] h-6 w-[72%] sm:h-8" : "bottom-[4%] h-3 w-[70%]"} -translate-x-1/2 rounded-[100%] blur-md`}
+        style={{ background: paint.glow }}
+        aria-hidden
+      />
+    </>
+  );
+}
+
 /** Realistic studio photo when make/model known; layered SVG fallback otherwise. */
 export function CarVisual({
   colour,
@@ -235,7 +288,7 @@ export function CarVisual({
   const showPhoto = Boolean(studioUrl) && !photoFailed;
 
   const frameClass = isHero
-    ? `relative mt-6 overflow-hidden rounded-md border border-white/10 ${className}`
+    ? `relative overflow-hidden border-y border-white/10 sm:border sm:rounded-md ${className}`
     : isCard
       ? `relative overflow-hidden ${className}`
       : `relative shrink-0 overflow-hidden rounded-md border border-white/10 ${className}`;
@@ -246,10 +299,10 @@ export function CarVisual({
       alt={title ? `${title} in ${colour}` : `${make} ${model}`}
       className={
         isHero
-          ? "h-auto w-full max-w-4xl object-contain object-bottom drop-shadow-[0_18px_40px_rgba(0,0,0,0.55)]"
+          ? "relative z-[1] h-auto w-full max-w-5xl object-contain object-bottom drop-shadow-[0_22px_48px_rgba(0,0,0,0.65)]"
           : isCard
-            ? "h-full w-full object-contain object-bottom scale-[1.08] transition duration-500 group-hover:scale-[1.12]"
-            : "h-full w-full object-contain object-bottom scale-[1.06]"
+            ? "relative z-[1] h-full w-full object-contain object-bottom scale-[1.1] transition duration-500 group-hover:scale-[1.14]"
+            : "relative z-[1] h-full w-full object-contain object-bottom scale-[1.08]"
       }
       loading={isHero ? "eager" : "lazy"}
       decoding="async"
@@ -264,22 +317,22 @@ export function CarVisual({
     return (
       <div
         className={frameClass}
-        style={{
-          background: `
-            radial-gradient(ellipse 70% 55% at 50% 70%, ${paint.glow}, transparent 70%),
-            linear-gradient(180deg, #121a2b 0%, #070b14 100%)
-          `,
-        }}
+        data-bay-frame="hero"
+        style={{ background: bayAtmosphere(paint, "hero") }}
         role={title && !showPhoto ? "img" : undefined}
         aria-label={title && !showPhoto ? `${title} in ${colour}` : undefined}
       >
         <span
-          className="absolute inset-y-0 left-0 w-2 sm:w-3"
+          className="absolute inset-y-0 left-0 z-[2] w-1.5 sm:w-2.5"
           style={{ backgroundColor: paint.base }}
           aria-hidden
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-bay-deep/80 to-transparent" />
-        <div className="relative flex min-h-[12rem] items-end justify-center px-2 pb-1 pt-6 sm:min-h-[16rem] sm:px-4 sm:pt-8">
+        <span
+          className="absolute inset-y-0 right-0 z-[2] w-px bg-gradient-to-b from-transparent via-rose/30 to-transparent sm:w-[2px]"
+          aria-hidden
+        />
+        <BayLighting paint={paint} size="hero" />
+        <div className="relative flex min-h-[16rem] items-end justify-center px-1 pb-0 pt-8 sm:min-h-[22rem] sm:px-3 sm:pt-12 lg:min-h-[26rem]">
           {media}
         </div>
       </div>
@@ -290,15 +343,12 @@ export function CarVisual({
     return (
       <div
         className={frameClass}
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 70% at 50% 80%, ${paint.glow}, transparent 65%),
-            linear-gradient(165deg, #152038 0%, #0b1220 55%, #070b14 100%)
-          `,
-        }}
+        data-bay-frame="card"
+        style={{ background: bayAtmosphere(paint, "card") }}
         aria-hidden={showPhoto ? undefined : true}
       >
-        <div className="absolute inset-0 flex items-end justify-center px-2 pb-1 pt-3">{media}</div>
+        <BayLighting paint={paint} size="card" />
+        <div className="absolute inset-0 flex items-end justify-center px-1 pb-0 pt-2">{media}</div>
       </div>
     );
   }
@@ -306,16 +356,17 @@ export function CarVisual({
   return (
     <div
       className={frameClass}
-      style={{
-        background: `linear-gradient(145deg, ${paint.glow}, transparent 50%), #0b1220`,
-      }}
+      data-bay-frame="thumb"
+      style={{ background: bayAtmosphere(paint, "thumb") }}
       aria-hidden={showPhoto ? undefined : true}
     >
       <span
-        className="absolute inset-y-0 left-0 w-1.5"
+        className="absolute inset-y-0 left-0 z-[2] w-1.5"
         style={{ backgroundColor: paint.base }}
+        aria-hidden
       />
-      <div className="absolute inset-0 flex items-end justify-center p-1">{media}</div>
+      <BayLighting paint={paint} size="thumb" />
+      <div className="absolute inset-0 flex items-end justify-center p-0.5">{media}</div>
     </div>
   );
 }

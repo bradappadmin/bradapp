@@ -70,9 +70,11 @@ describe("CarCard", () => {
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(document.querySelector('[data-bay-frame="card"]')).not.toBeNull();
+    expect(screen.getByLabelText("Key specs")).toBeInTheDocument();
   });
 
-  it("renders a hero visual with an accessible paint label", () => {
+  it("renders a hero visual with bay framing and an accessible paint label", () => {
     render(
       <CarHeroVisual
         colour="Laser Blue"
@@ -83,6 +85,7 @@ describe("CarCard", () => {
       />,
     );
     expect(screen.getByRole("img", { name: /Range Rover Sport in Laser Blue/i })).toBeInTheDocument();
+    expect(document.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
   });
 
   it("shows an owned badge for garage cars", () => {

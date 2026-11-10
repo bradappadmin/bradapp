@@ -42,7 +42,7 @@ export function TrumpCard({
 
   return (
     <article
-      className={`overflow-hidden rounded-md border bg-bay-panel/50 ${
+      className={`overflow-hidden rounded-md border bg-bay-deep/40 ${
         highlighted ? "border-lime/50 shadow-[0_0_24px_rgba(163,230,53,0.12)]" : "border-white/10"
       } ${className}`}
     >
@@ -55,14 +55,14 @@ export function TrumpCard({
           year={car.year ?? undefined}
           size="card"
           title={title}
-          className="aspect-[16/10] w-full"
+          className="aspect-[3/2] w-full"
         />
-        <p className="absolute left-2 top-2 rounded-md border border-white/15 bg-bay-deep/80 px-2 py-1 font-display text-[11px] font-semibold uppercase tracking-wide text-mist backdrop-blur-sm">
+        <p className="absolute left-2 top-2 rounded-md border border-white/15 bg-bay-deep/85 px-2 py-1 font-display text-[11px] font-semibold uppercase tracking-wide text-mist backdrop-blur-sm">
           {label}
         </p>
       </div>
-      <div className="space-y-1 p-3">
-        <p className="font-display text-base font-semibold text-mist">{title}</p>
+      <div className="space-y-0.5 border-t border-white/8 px-3 py-2.5">
+        <p className="font-display text-sm font-semibold text-mist sm:text-base">{title}</p>
         <p className="text-xs text-steel">
           {car.year != null ? `${car.year} · ` : ""}
           {car.bodyType ? `${car.bodyType} · ` : ""}

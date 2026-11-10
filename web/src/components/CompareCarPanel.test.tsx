@@ -25,8 +25,7 @@ describe("CompareCarPanel", () => {
       "/cars/9",
     );
     expect(screen.getByText("420 BC")).toBeInTheDocument();
-    const panel = document.querySelector("article.play-panel");
-    expect(panel).not.toBeNull();
+    expect(document.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");

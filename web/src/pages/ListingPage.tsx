@@ -203,7 +203,11 @@ export function ListingPage() {
               </div>
             </header>
 
-            <div className="play-panel overflow-hidden rounded-md border p-2 sm:p-3">
+            <div
+              className="-mx-4 overflow-hidden sm:mx-0 sm:rounded-md sm:border sm:border-white/10"
+              data-listing-hero
+              aria-label="Listing bay photo"
+            >
               <CarHeroVisual
                 colour={listing.colour}
                 bodyType={listing.bodyType}
@@ -212,7 +216,7 @@ export function ListingPage() {
                 year={listing.year}
                 fuel={listing.fuel}
                 title={listingTitle(listing)}
-                className="!mt-0"
+                className="!mt-0 border-0 sm:rounded-md"
               />
             </div>
 
