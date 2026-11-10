@@ -13,6 +13,7 @@ import { ComparePage } from "./ComparePage";
 vi.mock("../api", () => ({
   fetchMe: vi.fn().mockRejectedValue(new Error("unauthenticated")),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchListing: vi.fn(),
 }));
 
@@ -190,5 +191,56 @@ describe("ComparePage Midnight Garage UI", () => {
     const empty = screen.getByRole("status", { name: /Empty compare bay/i });
     expect(empty.querySelector('a[href="/favourites"]')).toBeTruthy();
     expect(empty.querySelector('a[href="/cars"]')).toBeTruthy();
+  });
+
+  it("shows Challenge under a hero when the owner is another member", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(meResponse);
+    vi.mocked(api.fetchListing).mockImplementation(async (id: number) => {
+      if (id === 9) {
+        return {
+          listing: { ...leftListing, ownerUserId: 177, ownerLabel: "Sam Bay", status: "owned" },
+          favourited: false,
+        };
+      }
+      if (id === 11) {
+        return {
+          listing: { ...rightListing, ownerUserId: null, ownerLabel: "Bay stock" },
+          favourited: false,
+        };
+      }
+      throw new Error("missing");
+    });
+
+    renderCompare("/compare?a=9&b=11");
+
+    expect(
+      await screen.findByRole("link", { name: "Challenge to Top Trumps Porsche 911 GT3" }),
+    ).toHaveAttribute("href", "/play?opponent=177&theirCar=9");
+    expect(screen.queryByRole("link", { name: /Challenge to Top Trumps Audi/i })).not.toBeInTheDocument();
+    expect(await screen.findByLabelText("Top Trumps winners")).toBeInTheDocument();
+  });
+
+  it("hides Challenge for self-owned and house stock heroes", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(meResponse);
+    vi.mocked(api.fetchListing).mockImplementation(async (id: number) => {
+      if (id === 9) {
+        return {
+          listing: { ...leftListing, ownerUserId: 2, ownerLabel: "You", status: "owned" },
+          favourited: false,
+        };
+      }
+      if (id === 11) {
+        return {
+          listing: { ...rightListing, ownerUserId: null, ownerLabel: "Bay stock" },
+          favourited: false,
+        };
+      }
+      throw new Error("missing");
+    });
+
+    renderCompare("/compare?a=9&b=11");
+
+    expect(await screen.findByRole("region", { name: "Compare car photos" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Challenge/i })).not.toBeInTheDocument();
   });
 });

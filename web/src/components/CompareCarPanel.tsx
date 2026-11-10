@@ -13,6 +13,10 @@ type CompareCarPanelProps = {
   coinPrice: number;
   /** Optional short caption under the photo (trim / colour). */
   detail?: string;
+  /** Play deep-link when this side’s owner is challengeable; omit to hide. */
+  challengeHref?: string | null;
+  /** Sign-in prompt when a member owns this side but the viewer is signed out. */
+  challengeSignInHref?: string | null;
 };
 
 /** Large photo-first panel for one side of a listing compare. */
@@ -26,7 +30,12 @@ export function CompareCarPanel({
   model,
   coinPrice,
   detail,
+  challengeHref,
+  challengeSignInHref,
 }: CompareCarPanelProps) {
+  const showChallenge = Boolean(challengeHref);
+  const showSignIn = !showChallenge && Boolean(challengeSignInHref);
+
   return (
     <article className="overflow-hidden rounded-md border border-white/10 bg-bay-deep/40">
       <CarVisual
@@ -54,6 +63,28 @@ export function CompareCarPanel({
         <p className="pt-0.5 font-display text-lg font-semibold text-lime sm:text-xl">
           {formatCoins(coinPrice)}
         </p>
+        {showChallenge || showSignIn ? (
+          <div className="flex flex-wrap gap-2 pt-2" aria-label={`${title} play actions`}>
+            {showChallenge && challengeHref ? (
+              <Link
+                to={challengeHref}
+                aria-label={`Challenge to Top Trumps ${title}`}
+                className="inline-flex rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Challenge
+              </Link>
+            ) : null}
+            {showSignIn && challengeSignInHref ? (
+              <Link
+                to={challengeSignInHref}
+                aria-label={`Sign in to challenge ${title}`}
+                className="inline-flex rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Sign in to challenge
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );

@@ -21,6 +21,7 @@ import { CompareTrumpWinnersStrip } from "../components/CompareTrumpWinnersStrip
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import { compareSharePath } from "../share-link";
 
 function cellClass(side: "left" | "right", highlight: CompareHighlight): string {
@@ -92,6 +93,12 @@ export function ComparePage() {
     [left, right],
   );
   const titles = left && right ? compareTitles(left, right) : null;
+  const leftChallenge = left
+    ? listingChallengeAction({ ownerUserId: left.ownerUserId, viewerId: user?.id })
+    : "hidden";
+  const rightChallenge = right
+    ? listingChallengeAction({ ownerUserId: right.ownerUserId, viewerId: user?.id })
+    : "hidden";
 
   function onClearTray() {
     clearCompareSelection();
@@ -234,6 +241,12 @@ export function ComparePage() {
                 model={left.model}
                 coinPrice={left.coinPrice}
                 detail={left.trimName ? left.trimName : undefined}
+                challengeHref={
+                  leftChallenge === "challenge" && left.ownerUserId != null
+                    ? listingChallengeHref(left.ownerUserId, left.id)
+                    : null
+                }
+                challengeSignInHref={leftChallenge === "signin" ? "/signin" : null}
               />
               <p
                 className="hidden self-center text-center font-display text-sm font-semibold uppercase tracking-[0.2em] text-steel sm:block"
@@ -251,6 +264,12 @@ export function ComparePage() {
                 model={right.model}
                 coinPrice={right.coinPrice}
                 detail={right.trimName ? right.trimName : undefined}
+                challengeHref={
+                  rightChallenge === "challenge" && right.ownerUserId != null
+                    ? listingChallengeHref(right.ownerUserId, right.id)
+                    : null
+                }
+                challengeSignInHref={rightChallenge === "signin" ? "/signin" : null}
               />
             </div>
 
