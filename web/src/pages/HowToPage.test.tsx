@@ -284,6 +284,10 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(document.getElementById("home-activity-open-car")).not.toBeNull();
     expect(
+      screen.getByRole("heading", { name: "Open car from Latest reviews" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("home-reviews-open-car")).not.toBeNull();
+    expect(
       screen.getByRole("heading", { name: "Open member from Family activity" }),
     ).toBeInTheDocument();
     expect(document.getElementById("home-activity-open-member")).not.toBeNull();
@@ -324,8 +328,27 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Open car from Latest reviews is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Latest reviews \(and Featured when pinned\) show Open car → \/cars\/:id when a related listing is known — drag races can show one Open car per lane/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Watch \/ Watch featured still open the film; studio thumbs stay/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The CTA hides when no listing is known/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Family activity Open car \(\/cars\/:id when a listing is known; hidden for gifts \/ missing\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /home Latest \/ Featured reviews Open car \(\/cars\/:id when a listing is known; hidden when missing\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -952,7 +975,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\); Family activity Open member → \/members\/:id when an actor is known \(hidden for self \/ missing \/ house; sign in\)/i,
+        /Family activity Open car → \/cars\/:id when a listing is known \(hidden for gifts \/ missing; sign in\); Family activity Open member → \/members\/:id when an actor is known \(hidden for self \/ missing \/ house; sign in\); Latest \/ Featured reviews Open car → \/cars\/:id when a listing is known \(hidden when missing; Watch stays\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
