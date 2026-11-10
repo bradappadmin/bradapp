@@ -42,7 +42,9 @@ export function TrumpCard({
 
   return (
     <article
-      className={`overflow-hidden rounded-md border bg-bay-deep/40 ${
+      data-trump-card
+      data-trump-highlighted={highlighted ? "true" : "false"}
+      className={`trump-card-motion overflow-hidden rounded-md border bg-bay-deep/40 ${
         highlighted ? "border-lime/50 shadow-[0_0_24px_rgba(163,230,53,0.12)]" : "border-white/10"
       } ${className}`}
     >
@@ -77,7 +79,7 @@ export function TrumpCard({
           </p>
         ) : null}
         {statLabel != null && statValue != null ? (
-          <p className="pt-1 font-display text-sm font-semibold text-lime">
+          <p data-trump-stat className="pt-1 font-display text-sm font-semibold text-lime">
             {statLabel}: {statValue}
           </p>
         ) : null}

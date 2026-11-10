@@ -452,7 +452,7 @@ export function TopTrumpsPage() {
                 </select>
               </label>
               {selectedMyCar ? (
-                <div className="mt-4 max-w-sm">
+                <div className="mt-4 max-w-sm" data-play-trump-pick>
                   <TrumpCard label="You" car={selectedMyCar} />
                 </div>
               ) : null}
@@ -570,7 +570,7 @@ export function TopTrumpsPage() {
                     </label>
                   ) : null}
                   {selectedOpponentCard ? (
-                    <div className="mt-2 max-w-sm">
+                    <div className="mt-2 max-w-sm" data-play-trump-pick>
                       <TrumpCard
                         label={selectedOpponent?.displayName ?? "Opponent"}
                         car={selectedOpponentCard}
@@ -660,7 +660,7 @@ export function TopTrumpsPage() {
                 <span className="text-lime"> · streak bonus +{lastStreakBonus} BC</span>
               ) : null}
             </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="play-trump-cards mt-5 grid gap-4 sm:grid-cols-2">
               <TrumpCard
                 label="You"
                 car={faceOff.yourCar}
