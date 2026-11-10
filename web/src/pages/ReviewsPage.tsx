@@ -1,37 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
-import type { ReviewSummary, ReviewType } from "../api";
+import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
 import { FeaturedReview } from "../components/FeaturedReview";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
+import {
+  filterReviewsByCarQuery,
+  parseReviewsTypeFilter,
+  REVIEWS_TYPE_FILTERS,
+  type ReviewsTypeFilter,
+} from "../reviews-car-filter";
+
+const fieldClass =
+  "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
 
 function isAdmin(role: string): boolean {
   return role === "admin" || role === "super_admin";
 }
 
-type ReviewTypeFilter = "all" | ReviewType;
-
-const FILTERS: Array<{ id: ReviewTypeFilter; label: string }> = [
-  { id: "all", label: "All" },
-  { id: "review", label: "Cue card" },
-  { id: "drag_race", label: "Drag race" },
-];
-
-function parseTypeFilter(raw: string | null): ReviewTypeFilter {
-  if (raw === "review" || raw === "drag_race") return raw;
-  return "all";
-}
-
 export function ReviewsPage() {
   const { user, loading: authLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const typeFilter = parseTypeFilter(searchParams.get("type"));
+  const typeFilter = parseReviewsTypeFilter(searchParams.get("type"));
+  const qFromUrl = (searchParams.get("q") ?? "").trim();
+  const [draft, setDraft] = useState(qFromUrl);
   const [reviews, setReviews] = useState<ReviewSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const visible = useMemo(
+    () => filterReviewsByCarQuery(reviews, qFromUrl),
+    [reviews, qFromUrl],
+  );
+  const filtersOn = Boolean(qFromUrl) || typeFilter !== "all";
+
+  function writeParams(nextQ: string, nextType: ReviewsTypeFilter) {
+    const params = new URLSearchParams();
+    const q = nextQ.trim();
+    if (q) params.set("q", q);
+    if (nextType !== "all") params.set("type", nextType);
+    setSearchParams(params, { replace: true });
+  }
+
+  useEffect(() => {
+    setDraft(qFromUrl);
+  }, [qFromUrl]);
 
   useEffect(() => {
     if (!user) return;
@@ -59,24 +75,45 @@ export function ReviewsPage() {
     };
   }, [user?.id, user?.role, typeFilter]);
 
+  // Filter-as-you-type: debounce URL updates (client filter over the loaded list).
+  useEffect(() => {
+    const next = draft.trim();
+    if (next === qFromUrl) return;
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams();
+      if (next) params.set("q", next);
+      if (typeFilter !== "all") params.set("type", typeFilter);
+      setSearchParams(params, { replace: true });
+    }, 280);
+    return () => window.clearTimeout(timer);
+  }, [draft, qFromUrl, typeFilter, setSearchParams]);
+
   if (!authLoading && !user) {
     return <Navigate to="/signin" replace />;
   }
 
-  function setTypeFilter(next: ReviewTypeFilter) {
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        if (next === "all") params.delete("type");
-        else params.set("type", next);
-        return params;
-      },
-      { replace: true },
-    );
+  function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    writeParams(draft, typeFilter);
   }
 
-  const emptyMessage =
-    typeFilter === "drag_race"
+  function onClearSearch() {
+    setDraft("");
+    writeParams("", typeFilter);
+  }
+
+  function onClearFilters() {
+    setDraft("");
+    writeParams("", "all");
+  }
+
+  function setTypeFilter(next: ReviewsTypeFilter) {
+    writeParams(qFromUrl, next);
+  }
+
+  const emptyMessage = qFromUrl
+    ? null
+    : typeFilter === "drag_race"
       ? "No drag races published yet."
       : typeFilter === "review"
         ? "No cue-card reviews published yet."
@@ -109,7 +146,8 @@ export function ReviewsPage() {
               </span>
               {!loading ? (
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
-                  {reviews.length} {reviews.length === 1 ? "film" : "films"}
+                  {visible.length} {visible.length === 1 ? "film" : "films"}
+                  {filtersOn ? " match" : ""}
                 </span>
               ) : null}
             </div>
@@ -131,22 +169,55 @@ export function ReviewsPage() {
 
         <FeaturedReview />
 
-        <section
+        <form
+          onSubmit={onSubmit}
           className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
-          aria-labelledby="reviews-filter-heading"
+          role="search"
+          aria-label="Search reviews"
         >
           <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-            <h2 id="reviews-filter-heading" className="font-display text-lg text-mist sm:text-xl">
-              Browse the reel
-            </h2>
-            <p className="text-xs text-steel">Filter stays in the URL</p>
+            <h2 className="font-display text-lg text-mist sm:text-xl">Find a review</h2>
+            <p className="text-xs text-steel">
+              Make, model, or title · filter as you type · stays in the URL
+            </p>
           </div>
-          <fieldset className="mt-4">
-            <legend className="font-display text-xs uppercase tracking-wide text-steel">
-              Filter by type
-            </legend>
-            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Review type">
-              {FILTERS.map((filter) => {
+          <label className="mt-4 flex flex-col gap-1.5 text-xs uppercase tracking-wide text-steel">
+            Search
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                className={fieldClass}
+                type="search"
+                name="q"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Make, model, or title…"
+                aria-label="Search reviews by make, model, or title"
+                autoComplete="off"
+              />
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="submit"
+                  className="rounded-md bg-rose px-4 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Search
+                </button>
+                {qFromUrl ? (
+                  <button
+                    type="button"
+                    onClick={onClearSearch}
+                    className="rounded-md border border-white/15 px-4 py-2.5 font-display text-sm text-mist transition hover:border-lime/40 hover:text-lime"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </label>
+
+          <div className="mt-5 border-t border-white/8 pt-4">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">Filter by type</p>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Review type">
+              {REVIEWS_TYPE_FILTERS.map((filter) => {
                 const active = typeFilter === filter.id;
                 return (
                   <button
@@ -165,8 +236,37 @@ export function ReviewsPage() {
                 );
               })}
             </div>
-          </fieldset>
-        </section>
+          </div>
+
+          {filtersOn ? (
+            <p className="mt-4 text-sm text-steel">
+              Showing{" "}
+              {!loading ? (
+                <>
+                  {visible.length} of {reviews.length}{" "}
+                  {reviews.length === 1 ? "film" : "films"}
+                </>
+              ) : (
+                "…"
+              )}
+              {qFromUrl ? (
+                <>
+                  {" "}
+                  for <span className="font-display text-lime">“{qFromUrl}”</span>
+                </>
+              ) : null}
+              {typeFilter !== "all" ? (
+                <>
+                  {" "}
+                  ·{" "}
+                  <span className="font-display text-lime">
+                    {REVIEWS_TYPE_FILTERS.find((f) => f.id === typeFilter)?.label}
+                  </span>
+                </>
+              ) : null}
+            </p>
+          ) : null}
+        </form>
 
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-8 text-sm text-rose">{error}</p> : null}
@@ -175,13 +275,37 @@ export function ReviewsPage() {
           <h2 className="font-display text-xl text-mist">All reviews</h2>
           {!loading ? (
             <p className="text-sm text-steel">
-              {reviews.length} {reviews.length === 1 ? "result" : "results"}
+              {visible.length} {visible.length === 1 ? "result" : "results"}
             </p>
           ) : null}
         </div>
 
+        {!loading && visible.length === 0 ? (
+          <div className="play-panel rounded-md border px-5 py-12 text-center" role="status">
+            {qFromUrl || (typeFilter !== "all" && reviews.length > 0) ? (
+              <>
+                <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+                  No reviews match
+                  {qFromUrl ? ` “${qFromUrl}”` : " that type filter"}. Try another spelling or clear
+                  the filters.
+                </p>
+                <button
+                  type="button"
+                  onClick={onClearFilters}
+                  className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Clear filters
+                </button>
+              </>
+            ) : (
+              <p className="text-sm text-steel">{emptyMessage}</p>
+            )}
+          </div>
+        ) : null}
+
         <ul className="flex flex-col gap-3">
-          {reviews.map((review) => (
+          {visible.map((review) => (
             <li key={review.id}>
               <Link
                 to={`/reviews/${review.id}`}
@@ -223,11 +347,6 @@ export function ReviewsPage() {
             </li>
           ))}
         </ul>
-        {!loading && reviews.length === 0 ? (
-          <div className="play-panel mt-2 rounded-md border px-4 py-5 text-sm text-steel">
-            {emptyMessage}
-          </div>
-        ) : null}
       </main>
     </div>
   );

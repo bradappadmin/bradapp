@@ -1,6 +1,6 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { ReviewsPage } from "./ReviewsPage";
@@ -13,6 +13,11 @@ vi.mock("../api", () => ({
 }));
 
 import * as api from "../api";
+
+function SearchParamsProbe() {
+  const [params] = useSearchParams();
+  return <div data-testid="reviews-params">{params.toString()}</div>;
+}
 
 const cueCard = {
   id: 1,
@@ -118,7 +123,7 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "Video reviews" })).toBeInTheDocument();
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
-    expect(screen.getByRole("heading", { name: "Browse the reel" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find a review" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Record a review" })).not.toBeInTheDocument();
 
     expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
@@ -138,6 +143,78 @@ describe("ReviewsPage Midnight Garage UI", () => {
     expect(api.fetchReviews).toHaveBeenCalledWith(false, undefined, "review");
     expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
     expect(screen.queryByText("Bay drag")).not.toBeInTheDocument();
+  });
+
+  it("searches by make/model/title and keeps type in the URL", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/reviews"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/reviews"
+              element={
+                <>
+                  <ReviewsPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
+
+    const input = screen.getByRole("searchbox", {
+      name: /Search reviews by make, model, or title/i,
+    });
+    await user.clear(input);
+    await user.type(input, "mustang");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("reviews-params").textContent).toContain("q=mustang");
+    });
+    expect(screen.getByText("Bay drag")).toBeInTheDocument();
+    expect(screen.queryByText("Bay cue card")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("reviews-params").textContent).not.toContain("q=");
+    });
+    expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
+
+    await user.type(input, "porsche");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("reviews-params").textContent).toContain("q=porsche");
+    });
+    await user.click(screen.getByRole("button", { name: "Cue card" }));
+    await waitFor(() => {
+      const text = screen.getByTestId("reviews-params").textContent ?? "";
+      expect(text).toContain("q=porsche");
+      expect(text).toContain("type=review");
+    });
+    expect(await screen.findByText("Bay cue card")).toBeInTheDocument();
+    expect(screen.queryByText("Bay drag")).not.toBeInTheDocument();
+  });
+
+  it("shows empty filter state for unmatched search", async () => {
+    render(
+      <MemoryRouter initialEntries={["/reviews?q=zzzz"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/reviews" element={<ReviewsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("No matches")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
   });
 
   it("shows a clearer Record CTA for admins", async () => {
