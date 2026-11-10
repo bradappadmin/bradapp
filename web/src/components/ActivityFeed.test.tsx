@@ -171,4 +171,51 @@ describe("ActivityFeed car thumbs", () => {
       "/members/12",
     );
   });
+
+  it("shows Empty bay Browse cars / Play / Members when the feed is empty", async () => {
+    vi.mocked(api.fetchActivity).mockResolvedValue({ items: [] });
+
+    render(
+      <MemoryRouter>
+        <ActivityFeed />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Empty bay")).toBeInTheDocument();
+    expect(screen.getByLabelText("Empty activity bay")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
+    expect(screen.getByRole("link", { name: "Play" })).toHaveAttribute("href", "/play");
+    expect(screen.getByRole("link", { name: "Members" })).toHaveAttribute("href", "/members");
+    expect(screen.queryByLabelText("Activity type")).not.toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+  });
+
+  it("shows No matches and Clear filter when a type chip yields none", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.fetchActivity).mockResolvedValue({
+      items: SAMPLE.filter((item) => item.kind !== "gift"),
+    });
+
+    render(
+      <MemoryRouter>
+        <ActivityFeed />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("button", { name: "All" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Gifts" }));
+
+    expect(screen.getByText("No matches")).toBeInTheDocument();
+    expect(screen.getByLabelText("No matching activity")).toBeInTheDocument();
+    expect(screen.getByLabelText("Activity type")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear filter" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse cars" })).toHaveAttribute("href", "/cars");
+    expect(screen.getByRole("link", { name: "Play" })).toHaveAttribute("href", "/play");
+    expect(screen.getByRole("link", { name: "Members" })).toHaveAttribute("href", "/members");
+
+    await user.click(screen.getByRole("button", { name: "Clear filter" }));
+    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(screen.getByText("Casey Apex")).toBeInTheDocument();
+  });
 });
