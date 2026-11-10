@@ -348,4 +348,34 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(screen.getByText("Find a favourite")).toBeInTheDocument();
     expect(screen.getByText("Compare favourites")).toBeInTheDocument();
   });
+
+  it("challenges Top Trumps on someone else’s favourite and hides it for own/stock cars", async () => {
+    vi.mocked(api.fetchFavourites).mockResolvedValue({
+      cars: [audi, ownCar, stockCar],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/favourites"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/favourites" element={<FavouritesPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Saved" })).toBeInTheDocument();
+    const challenge = screen.getByRole("link", { name: "Challenge to Top Trumps" });
+    expect(challenge).toHaveAttribute("href", "/play?opponent=177&theirCar=11");
+    expect(screen.getByRole("link", { name: "Offer trade" })).toHaveAttribute(
+      "href",
+      "/trades?with=177&theirCar=11",
+    );
+    // Own + bay stock hide both product CTAs.
+    expect(screen.getAllByRole("link", { name: "Challenge to Top Trumps" })).toHaveLength(1);
+    expect(screen.getAllByRole("link", { name: "Offer trade" })).toHaveLength(1);
+    expect(screen.getByText("Find a favourite")).toBeInTheDocument();
+    expect(screen.getByText("Sort the bay")).toBeInTheDocument();
+    expect(screen.getByText("Compare favourites")).toBeInTheDocument();
+  });
 });

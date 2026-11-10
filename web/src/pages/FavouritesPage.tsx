@@ -18,6 +18,7 @@ import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { filterFavouritesByCarQuery } from "../favourites-car-filter";
 import { garageTradeOfferAction, garageTradeOfferHref } from "../garage-trade-offer";
+import { listingChallengeAction, listingChallengeHref } from "../listing-challenge";
 import {
   DEFAULT_FAVOURITES_SORT,
   FAVOURITES_SORT_OPTIONS,
@@ -404,6 +405,10 @@ export function FavouritesPage() {
                     const selected = comparePicks.some((p) => p.id === car.id);
                     const selectionFull = selectedCount >= 2 && !selected;
                     const checkboxId = `favourite-compare-${car.id}`;
+                    const challengeAction = listingChallengeAction({
+                      ownerUserId: car.ownerUserId,
+                      viewerId: user?.id,
+                    });
                     const tradeAction = garageTradeOfferAction({
                       ownerUserId: car.ownerUserId,
                       viewerId: user?.id,
@@ -444,20 +449,28 @@ export function FavouritesPage() {
                                 </span>
                               </label>
                               <div className="flex flex-wrap gap-2">
+                                {challengeAction === "challenge" && car.ownerUserId != null ? (
+                                  <Link
+                                    to={listingChallengeHref(car.ownerUserId, car.id)}
+                                    className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-xs font-semibold text-lime no-underline transition hover:bg-lime/10"
+                                  >
+                                    Challenge to Top Trumps
+                                  </Link>
+                                ) : null}
                                 {tradeAction === "offer" && car.ownerUserId != null ? (
                                   <Link
                                     to={garageTradeOfferHref(car.ownerUserId, car.id)}
-                                    className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-xs font-semibold text-lime no-underline transition hover:bg-lime/10"
+                                    className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
                                   >
                                     Offer trade
                                   </Link>
                                 ) : null}
-                                {tradeAction === "signin" ? (
+                                {challengeAction === "signin" || tradeAction === "signin" ? (
                                   <Link
                                     to="/signin"
-                                    className="rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                                    className="rounded-md border border-lime/40 px-3 py-1.5 font-display text-xs font-semibold text-lime no-underline transition hover:bg-lime/10"
                                   >
-                                    Sign in to offer trade
+                                    Sign in to challenge or trade
                                   </Link>
                                 ) : null}
                                 <button
