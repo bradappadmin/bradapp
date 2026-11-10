@@ -405,6 +405,34 @@ export function GaragePage() {
         {notice ? <p className="mt-4 text-sm text-lime">{notice}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
 
+        {!loading && cars.length === 0 ? (
+          <div
+            className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-12 text-center sm:py-14"
+            role="status"
+            aria-label="Empty garage bay"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">Empty bay</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              No cars in your garage yet. Browse the catalogue for Brad Coins, or check Favourites
+              for cars you’ve saved.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <Link
+                to="/cars"
+                className="bay-cta inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white no-underline transition hover:brightness-110"
+              >
+                Browse cars
+              </Link>
+              <Link
+                to="/favourites"
+                className="inline-flex items-center justify-center rounded-md border border-lime/35 bg-bay-panel/70 px-5 py-3 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+              >
+                Favourites
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
         {cars.length > 0 ? (
           <form
             onSubmit={onSubmitSearch}
@@ -460,36 +488,36 @@ export function GaragePage() {
           </form>
         ) : null}
 
-        <div
-          className={`play-panel bay-rise-delay rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5 ${
-            cars.length > 0 ? "mt-6" : "mt-8"
-          }`}
-          aria-label="Sort garage cars"
-        >
-          <div className="min-w-0">
-            <p className="font-display text-lg text-mist">Sort the bay</p>
-            <p className="mt-1 text-sm text-steel">
-              Applies to Owned and For sale. Choice stays in the URL.
-            </p>
+        {cars.length > 0 ? (
+          <div
+            className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+            aria-label="Sort garage cars"
+          >
+            <div className="min-w-0">
+              <p className="font-display text-lg text-mist">Sort the bay</p>
+              <p className="mt-1 text-sm text-steel">
+                Applies to Owned and For sale. Choice stays in the URL.
+              </p>
+            </div>
+            <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+              Sort by
+              <select
+                className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                value={sort}
+                onChange={(e) => setSort(parseGarageSort(e.target.value))}
+                aria-label="Sort Owned and For sale cars"
+              >
+                {GARAGE_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
-          <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
-            Sort by
-            <select
-              className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
-              value={sort}
-              onChange={(e) => setSort(parseGarageSort(e.target.value))}
-              aria-label="Sort Owned and For sale cars"
-            >
-              {GARAGE_SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        ) : null}
 
-        {filtersOn && managedMatchCount === 0 && !loading ? (
+        {cars.length > 0 && filtersOn && managedMatchCount === 0 && !loading ? (
           <div
             className="play-panel bay-rise-delay mt-10 rounded-md border px-5 py-14 text-center"
             role="status"
@@ -508,7 +536,7 @@ export function GaragePage() {
           </div>
         ) : null}
 
-        {!(filtersOn && managedMatchCount === 0) ? (
+        {cars.length > 0 && !(filtersOn && managedMatchCount === 0) ? (
           <>
             <SectionShell
               id="garage-owned"
@@ -520,14 +548,6 @@ export function GaragePage() {
                 <EmptyBay>
                   {filtersOn ? (
                     <>No owned cars match “{qFromUrl}”.</>
-                  ) : cars.length === 0 ? (
-                    <>
-                      Empty bay.{" "}
-                      <Link to="/cars" className="text-lime no-underline hover:underline">
-                        Search cars
-                      </Link>{" "}
-                      to buy one with Brad Coins.
-                    </>
                   ) : ownedTotal === 0 ? (
                     "Every car you own is listed for sale right now."
                   ) : (

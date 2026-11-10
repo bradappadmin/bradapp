@@ -143,8 +143,8 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "My cars" })).toBeInTheDocument();
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
-    expect(await screen.findByText(/Garage value/i)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Owned" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Owned" })).toBeInTheDocument();
+    expect(screen.getByText(/Garage value \d/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "For sale" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Purchases" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sold" })).toBeInTheDocument();
@@ -298,6 +298,36 @@ describe("GaragePage Midnight Garage UI", () => {
       expect(text).toContain("q=ford");
       expect(text).toContain("sort=name_asc");
     });
+  });
+
+  it("shows empty bay CTAs when the garage has no cars", async () => {
+    vi.mocked(api.fetchGarage).mockResolvedValue({
+      totalValue: 0,
+      showcaseListingId: null,
+      cars: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const empty = await screen.findByRole("status", { name: /Empty garage bay/i });
+    expect(empty).toBeInTheDocument();
+    expect(empty.querySelector('a[href="/cars"]')?.textContent).toMatch(/Browse cars/);
+    expect(empty.querySelector('a[href="/favourites"]')?.textContent).toMatch(/Favourites/);
+    expect(screen.queryByRole("heading", { name: "Find a car" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Sort the bay")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Owned" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "For sale" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Purchases" })).toBeInTheDocument();
   });
 
   it("shows empty search state across owned and for-sale", async () => {
