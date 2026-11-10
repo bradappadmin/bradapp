@@ -57,6 +57,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Paint colour when you list a car" }),
     ).toBeInTheDocument();
     expect(document.getElementById("garage-sell-paint")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Update paint on a for-sale car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-forsale-paint-edit")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "My cars bay value strip" })).toBeInTheDocument();
     expect(document.getElementById("garage-bay-value")).not.toBeNull();
     expect(
@@ -489,6 +493,18 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Update paint on a for-sale car is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Update paint on a for-sale car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-forsale-paint-edit")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /change Paint \(same curated studio colours as when you list — live studio thumb and card photo\) and tap Update paint — the car stays listed; no need to unlist/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/My cars bay value strip is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -515,6 +531,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /My cars Paint colour \(same curated studio paints as admin, live thumb\) when listing or updating a sale/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /My cars For sale Update paint \(change colour without unlisting, live thumb\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1260,6 +1281,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) or free-form when listing \/ updating a sale; Paint colour \(same curated studio paints as admin\) with a live studio thumb/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /on For sale, Update paint changes colour without unlisting \(same live thumb\)/i,
       ),
     ).toBeInTheDocument();
     expect(
