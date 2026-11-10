@@ -129,6 +129,8 @@ export type ActivityItem = {
   summary: string;
   /** Member display name for the primary actor. */
   actorName: string;
+  /** Actor user id for Open member → /members/:id when known. */
+  actorUserId: number | null;
   href: string | null;
   car: ActivityCarVisual | null;
   /** Catalogue listing for Open car → /cars/:id when known. */

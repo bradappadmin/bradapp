@@ -9,6 +9,7 @@ describe("activity item shape", () => {
       createdAt: "2026-11-09T12:00:00.000Z",
       summary: "Alex bought a Ford Focus for 80 BC",
       actorName: "Alex",
+      actorUserId: 3,
       href: "/cars/1",
       car: {
         make: "Ford",
@@ -23,6 +24,7 @@ describe("activity item shape", () => {
     expect(sample.id.startsWith("purchase-")).toBe(true);
     expect(sample.car?.make).toBe("Ford");
     expect(sample.listingId).toBe(1);
+    expect(sample.actorUserId).toBe(3);
   });
 
   it("supports gift kind without a car visual", () => {
@@ -32,6 +34,7 @@ describe("activity item shape", () => {
       createdAt: "2026-11-10T01:00:00.000Z",
       summary: "Alex gifted 15 BC to Sam",
       actorName: "Alex",
+      actorUserId: 3,
       href: "/members/4",
       car: null,
       listingId: null,
@@ -39,5 +42,6 @@ describe("activity item shape", () => {
     expect(gift.kind).toBe("gift");
     expect(gift.car).toBeNull();
     expect(gift.listingId).toBeNull();
+    expect(gift.actorUserId).toBe(3);
   });
 });

@@ -70,7 +70,9 @@ describe.runIf(hasDb)("activity routes", () => {
         createdAt: expect.any(String),
         summary: expect.any(String),
         actorName: expect.any(String),
+        actorUserId: expect.any(Number),
       });
+      expect(item.actorUserId).toBeGreaterThan(0);
       expect(item.car === null || typeof item.car === "object").toBe(true);
       if (item.car) {
         expect(item.car).toMatchObject({

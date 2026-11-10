@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { activityOpenCarHref, activityOpenCarLabel } from "../activity-open-car";
+import {
+  activityOpenMemberHref,
+  activityOpenMemberLabel,
+} from "../activity-open-member";
 import * as api from "../api";
 import type { ActivityItem, ActivityKind } from "../api";
+import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
 import { CarVisual } from "./CarVisual";
 
@@ -100,6 +105,7 @@ function formatWhen(iso: string): string {
 }
 
 export function ActivityFeed() {
+  const { user } = useAuth();
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [filter, setFilter] = useState<ActivityFilterId>("all");
   const [error, setError] = useState<string | null>(null);
@@ -187,6 +193,8 @@ export function ActivityFeed() {
               car && carTitle
                 ? `${activityOpenCarLabel()} ${carTitle}`
                 : activityOpenCarLabel();
+            const openMemberHref = activityOpenMemberHref(item.actorUserId, user?.id ?? null);
+            const openMemberAria = `${activityOpenMemberLabel()} ${item.actorName}`;
             const body = (
               <>
                 <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -240,18 +248,29 @@ export function ActivityFeed() {
                       {body}
                     </div>
                   )}
-                  {openCarHref ? (
+                  {openCarHref || openMemberHref ? (
                     <div
                       className="flex flex-wrap gap-2 border-t border-white/8 px-4 pb-3"
-                      aria-label="Related car actions"
+                      aria-label="Related activity actions"
                     >
-                      <Link
-                        to={openCarHref}
-                        aria-label={openCarAria}
-                        className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
-                      >
-                        {activityOpenCarLabel()}
-                      </Link>
+                      {openMemberHref ? (
+                        <Link
+                          to={openMemberHref}
+                          aria-label={openMemberAria}
+                          className="rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                        >
+                          {activityOpenMemberLabel()}
+                        </Link>
+                      ) : null}
+                      {openCarHref ? (
+                        <Link
+                          to={openCarHref}
+                          aria-label={openCarAria}
+                          className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                        >
+                          {activityOpenCarLabel()}
+                        </Link>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

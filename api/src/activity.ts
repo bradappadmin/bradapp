@@ -18,6 +18,8 @@ export type ActivityItem = {
   summary: string;
   /** Member display name for the primary actor. */
   actorName: string;
+  /** Actor user id for Open member → /members/:id when known. */
+  actorUserId: number | null;
   href: string | null;
   /** Primary car involved in the event, when known. */
   car: ActivityCarVisual | null;
@@ -33,6 +35,7 @@ type LedgerRow = RowDataPacket & {
   reason: "purchase" | "sale";
   delta: number;
   created_at: Date;
+  user_id: number;
   display_name: string;
   make: string | null;
   model: string | null;
@@ -45,6 +48,7 @@ type LedgerRow = RowDataPacket & {
 type TradeRow = RowDataPacket & {
   id: number;
   resolved_at: Date;
+  from_user_id: number;
   from_name: string;
   to_name: string;
   offer_listing_id: number;
@@ -63,6 +67,7 @@ type MatchRow = RowDataPacket & {
   mode: "house" | "pvp";
   winner: "challenger" | "opponent" | "draw";
   category: string;
+  challenger_user_id: number;
   challenger_name: string;
   opponent_name: string | null;
   opponent_make: string;
@@ -79,6 +84,7 @@ type ReviewRow = RowDataPacket & {
   id: number;
   created_at: Date;
   title: string;
+  publisher_user_id: number;
   display_name: string;
   review_type: "review" | "drag_race";
   make: string;
@@ -105,6 +111,7 @@ type GiftRow = RowDataPacket & {
   id: number;
   delta: number;
   created_at: Date;
+  sender_id: number;
   sender_name: string;
   receiver_name: string;
   receiver_id: number;
@@ -164,7 +171,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   const take = Math.min(Math.max(limit, 1), 50);
 
   const [ledgerRows] = await pool.query<LedgerRow[]>(
-    `SELECT cl.id, cl.reason, cl.delta, cl.created_at, cl.listing_id,
+    `SELECT cl.id, cl.reason, cl.delta, cl.created_at, cl.listing_id, cl.user_id,
             u.display_name, cm.make, cm.model, cm.trim_name, cm.body_type, l.colour
      FROM coin_ledger cl
      INNER JOIN users u ON u.id = cl.user_id
@@ -177,7 +184,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   );
 
   const [tradeRows] = await pool.query<TradeRow[]>(
-    `SELECT t.id, t.resolved_at, t.offer_listing_id,
+    `SELECT t.id, t.resolved_at, t.offer_listing_id, t.from_user_id,
             fu.display_name AS from_name, tu.display_name AS to_name,
             ocm.make AS offer_make, ocm.model AS offer_model,
             ocm.trim_name AS offer_trim_name, ocm.body_type AS offer_body_type,
@@ -199,6 +206,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   const [matchRows] = await pool.query<MatchRow[]>(
     `SELECT m.id, m.created_at, m.mode, m.winner, m.category,
             m.opponent_make, m.opponent_model, m.challenger_listing_id,
+            m.challenger_user_id,
             cu.display_name AS challenger_name,
             ou.display_name AS opponent_name,
             ccm.make AS challenger_make, ccm.model AS challenger_model,
@@ -215,7 +223,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   );
 
   const [reviewRows] = await pool.query<ReviewRow[]>(
-    `SELECT r.id, r.created_at, r.title, r.review_type, u.display_name,
+    `SELECT r.id, r.created_at, r.title, r.review_type, r.publisher_user_id, u.display_name,
             cm.make, cm.model, cm.trim_name, cm.body_type,
             ${listingIdForCarModelSql("cm")} AS listing_id,
             cmb.make AS b_make, cmb.model AS b_model
@@ -232,7 +240,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   // One feed row per gift_sent; pair with the matching gift_received for the receiver name.
   const [giftRows] = await pool.query<GiftRow[]>(
     `SELECT sent.id, sent.delta, sent.created_at,
-            su.display_name AS sender_name,
+            su.id AS sender_id, su.display_name AS sender_name,
             ru.display_name AS receiver_name,
             ru.id AS receiver_id
      FROM coin_ledger sent
@@ -272,6 +280,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       createdAt: new Date(row.created_at).toISOString(),
       summary,
       actorName: row.display_name,
+      actorUserId: Number(row.user_id),
       href: row.listing_id != null ? `/cars/${row.listing_id}` : null,
       car: carVisual(row.make, row.model, row.trim_name, row.body_type, row.colour),
       listingId: row.listing_id == null ? null : Number(row.listing_id),
@@ -285,6 +294,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       createdAt: new Date(row.resolved_at).toISOString(),
       summary: `${row.from_name} and ${row.to_name} swapped ${row.offer_make} ${row.offer_model} for ${row.request_make} ${row.request_model}`,
       actorName: row.from_name,
+      actorUserId: Number(row.from_user_id),
       href: "/trades",
       car: carVisual(
         row.offer_make,
@@ -312,6 +322,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       createdAt: new Date(row.created_at).toISOString(),
       summary: `${winnerPhrase(row.winner, row.challenger_name, opponentLabel)}${carBit} on ${categoryLabel(row.category)}`,
       actorName: row.challenger_name,
+      actorUserId: Number(row.challenger_user_id),
       href: "/play",
       car: carVisual(
         row.challenger_make,
@@ -336,6 +347,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       createdAt: new Date(row.created_at).toISOString(),
       summary: `${row.display_name} published “${row.title}” (${cars})`,
       actorName: row.display_name,
+      actorUserId: Number(row.publisher_user_id),
       href: `/reviews/${row.id}`,
       car: carVisual(row.make, row.model, row.trim_name, row.body_type, REVIEW_STUDIO_COLOUR),
       listingId: row.listing_id == null ? null : Number(row.listing_id),
@@ -350,6 +362,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       createdAt: new Date(row.created_at).toISOString(),
       summary: `${row.sender_name} gifted ${amount} BC to ${row.receiver_name}`,
       actorName: row.sender_name,
+      actorUserId: Number(row.sender_id),
       href: `/members/${row.receiver_id}`,
       car: null,
       listingId: null,
