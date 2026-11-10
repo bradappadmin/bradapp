@@ -17,6 +17,10 @@ import {
   matchHistoryOpenCarLabel,
 } from "../match-history-open-car";
 import {
+  matchHistoryOpenOpponentHref,
+  matchHistoryOpenOpponentLabel,
+} from "../match-history-open-opponent";
+import {
   matchHistoryRematchHref,
   matchHistoryRematchLabel,
 } from "../match-history-rematch";
@@ -132,8 +136,9 @@ function MatchHistoryRowActions({
 }) {
   const yourCarHref = matchHistoryOpenCarHref(match.yourCar);
   const theirCarHref = matchHistoryOpenCarHref(match.theirCar);
+  const opponentHref = matchHistoryOpenOpponentHref(match, viewerUserId);
   const rematchHref = matchHistoryRematchHref(match, viewerUserId);
-  if (!yourCarHref && !theirCarHref && !rematchHref) return null;
+  if (!yourCarHref && !theirCarHref && !opponentHref && !rematchHref) return null;
 
   const openCarClass =
     "rounded-md border border-white/15 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-mist no-underline transition hover:border-lime/40 hover:text-lime";
@@ -156,6 +161,15 @@ function MatchHistoryRowActions({
           aria-label={`Open car ${formatMatchCarTitle(match.theirCar)}`}
         >
           {matchHistoryOpenCarLabel()}
+        </Link>
+      ) : null}
+      {opponentHref ? (
+        <Link
+          to={opponentHref}
+          className="rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+          aria-label={`${matchHistoryOpenOpponentLabel()} ${match.opponentName}`}
+        >
+          {matchHistoryOpenOpponentLabel()}
         </Link>
       ) : null}
       {rematchHref ? (

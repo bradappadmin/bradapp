@@ -142,6 +142,12 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
       "/cars/9",
     );
 
+    expect(screen.queryByRole("link", { name: /Open opponent House/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open opponent Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/177",
+    );
+
     expect(screen.getByRole("link", { name: "Rematch vs house" })).toHaveAttribute(
       "href",
       "/play",
@@ -241,7 +247,7 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     expect(screen.getByRole("link", { name: "Rematch Sam Bay" })).toBeInTheDocument();
   });
 
-  it("hides Rematch when the opponent is missing or is the viewer", async () => {
+  it("hides Rematch and Open opponent when the opponent is missing or is the viewer", async () => {
     vi.mocked(api.fetchTopTrumpsHistory).mockResolvedValue({
       matches: [
         {
@@ -335,6 +341,7 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     expect(screen.getByText("vs House")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Rematch Ghost/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Rematch Member/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open opponent/i })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Rematch vs house" })).toHaveAttribute(
       "href",
       "/play",
