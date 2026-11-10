@@ -157,6 +157,11 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
     expect(await screen.findByRole("heading", { name: "Owned" })).toBeInTheDocument();
     expect(screen.getByText(/Garage value \d/i)).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Garage bay value" })).toBeInTheDocument();
+    // Strip sums listing coin prices on held cars (420 + 520 + 400) — sold history excluded.
+    expect(screen.getByRole("heading", { name: /Bay value 1,340 BC/i })).toBeInTheDocument();
+    expect(screen.getByText("3 cars in your bay")).toBeInTheDocument();
+    expect(screen.getByText(/sold history stays out of the total/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "For sale" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Purchases" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sold" })).toBeInTheDocument();
@@ -372,6 +377,29 @@ describe("GaragePage Midnight Garage UI", () => {
       expect(text).toContain("q=ford");
       expect(text).toContain("sort=name_asc");
     });
+  });
+
+  it("hides the bay value strip when the garage is empty", async () => {
+    vi.mocked(api.fetchGarage).mockResolvedValue({
+      totalValue: 0,
+      showcaseListingId: null,
+      cars: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/garage"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/garage" element={<GaragePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("status", { name: /Empty garage bay/i })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Garage bay value" })).not.toBeInTheDocument();
   });
 
   it("shows empty bay CTAs when the garage has no cars", async () => {

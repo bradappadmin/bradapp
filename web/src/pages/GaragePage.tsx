@@ -15,6 +15,7 @@ import {
 import { CarCard } from "../components/CarCard";
 import { CompareTray } from "../components/CompareTray";
 import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
+import { GarageBayValueStrip } from "../components/GarageBayValueStrip";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { filterGarageCarsByQuery } from "../garage-car-filter";
@@ -489,6 +490,8 @@ export function GaragePage() {
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {notice ? <p className="mt-4 text-sm text-lime">{notice}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
+
+        {!loading && cars.length > 0 ? <GarageBayValueStrip cars={cars} /> : null}
 
         {!loading && cars.length === 0 ? (
           <div
