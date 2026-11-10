@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
 import { ToastProvider } from "../toast-context";
@@ -160,6 +160,75 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     expect(house).toHaveAttribute("aria-pressed", "false");
     expect(await screen.findByRole("status")).toHaveTextContent(/Challenge started/i);
     expect(screen.queryByRole("status", { name: /Empty play bay/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open profile/i })).not.toBeInTheDocument();
+  });
+
+  it("links Open profile to the PvP opponent garage from ?opponent=, hides for house", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.fetchMemberCards).mockResolvedValue({
+      cards: [
+        {
+          id: 42,
+          ownerUserId: 177,
+          ownerDisplayName: "Sam Bay",
+          make: "Ford",
+          model: "Focus",
+          trimName: "ST",
+          bodyType: "Hatchback",
+          bhp: 280,
+          topSpeedMph: 155,
+          zeroToSixtySecs: 5.7,
+          colour: "Blue",
+          year: 2019,
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/play?opponent=177"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/play" element={<TopTrumpsPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+    const openProfile = await screen.findByRole("link", { name: "Open profile Sam Bay" });
+    expect(openProfile).toHaveAttribute("href", "/members/177");
+    expect(openProfile).toHaveTextContent("Open profile");
+    expect(screen.getByRole("button", { name: /Challenge a member/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: /Vs house/i }));
+    expect(screen.queryByRole("link", { name: /Open profile/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+  });
+
+  it("hides Open profile when the opponent query is yourself", async () => {
+    render(
+      <MemoryRouter initialEntries={["/play?opponent=2"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/play" element={<TopTrumpsPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Challenge a member/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.queryByRole("link", { name: /Open profile/i })).not.toBeInTheDocument();
   });
 
   it("shows empty bay CTAs when the garage has no cars", async () => {

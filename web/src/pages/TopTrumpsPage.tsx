@@ -524,6 +524,17 @@ export function TopTrumpsPage() {
                       ))}
                     </select>
                   </label>
+                  {opponentUserId !== "" && opponentUserId !== user?.id ? (
+                    <div>
+                      <Link
+                        to={`/members/${opponentUserId}`}
+                        className="inline-flex rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-2 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                        aria-label={`Open profile ${selectedOpponent?.displayName ?? "opponent"}`}
+                      >
+                        Open profile
+                      </Link>
+                    </div>
+                  ) : null}
                   {challengeableMembers.length === 0 ? (
                     <p className="text-sm text-steel">
                       Nobody else has cars yet. Browse{" "}
