@@ -187,6 +187,34 @@ describe("AdminUsersPage accounts search", () => {
     });
   });
 
+  it("links each account row to the public member garage with Open member", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/users"]}>
+        <AuthProvider>
+          <AdminUsersPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Find an account" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Open member Sam Bay" })).toHaveAttribute(
+      "href",
+      "/members/10",
+    );
+    expect(screen.getByRole("link", { name: "Open member Brad" })).toHaveAttribute(
+      "href",
+      "/members/1",
+    );
+    expect(screen.getByRole("link", { name: "Open member Frozen Friend" })).toHaveAttribute(
+      "href",
+      "/members/11",
+    );
+    expect(screen.getByRole("group", { name: /Coin adjust presets for Sam Bay/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("searchbox", { name: /Search accounts by display name or email/i }),
+    ).toBeInTheDocument();
+  });
+
   it("shows No matches and Clear filters when Find yields none", async () => {
     const user = userEvent.setup();
     render(

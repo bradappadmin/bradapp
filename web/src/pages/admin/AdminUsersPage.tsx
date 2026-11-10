@@ -341,6 +341,13 @@ function AdminUsersInner() {
                     id={`name-${row.id}`}
                   />
                   <div className="flex flex-wrap gap-2">
+                    <Link
+                      to={`/members/${row.id}`}
+                      className="rounded-md border border-lime/35 bg-bay-panel/70 px-3 py-2 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                      aria-label={`Open member ${row.displayName}`}
+                    >
+                      Open member
+                    </Link>
                     <button
                       type="button"
                       disabled={busyId === row.id}
