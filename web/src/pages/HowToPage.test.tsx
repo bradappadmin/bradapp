@@ -45,6 +45,10 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sort My cars in the bay" })).toBeInTheDocument();
     expect(document.getElementById("garage-sort")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Quick price when you list a car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("sell-price-chips")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Play Top Trumps" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Rematch from Match history" }),
@@ -138,6 +142,24 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getAllByText(/same options as Favourites/i).length).toBeGreaterThanOrEqual(2);
     expect(
       screen.getByText(/Clear filters resets search and sort back to Highest price/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Quick price chips when you list or update a sale are the next step/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /tap a Quick price chip \(50 \/ 100 \/ 250 \/ 500 BC\) — same chip pattern as gift Quick amount/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /My cars Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) when listing or updating a sale/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sort My cars and Quick price chips are later steps/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/My cars uses the same Sort the bay options — next step/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
@@ -299,6 +321,11 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Compare garage cards into the same tray as Cars/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(
+        /Quick price chips \(50 \/ 100 \/ 250 \/ 500 BC\) or free-form when listing \/ updating a sale/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/pin your showcase, and Copy garage link \(same URL as profile Copy link\)/i),
     ).toBeInTheDocument();
     expect(
@@ -322,7 +349,11 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/favourites",
     );
-    expect(screen.getByRole("link", { name: "Open My cars" })).toHaveAttribute("href", "/garage");
+    expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open My cars" })[0]).toHaveAttribute(
+      "href",
+      "/garage",
+    );
     expect(screen.getByRole("link", { name: "Open Play" })).toHaveAttribute("href", "/play");
     expect(screen.getByRole("link", { name: "Open Match history" })).toHaveAttribute(
       "href",

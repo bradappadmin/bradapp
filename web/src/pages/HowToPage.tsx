@@ -30,7 +30,7 @@ const STEPS: Step[] = [
   {
     id: "buy-sell",
     title: "Buy and sell cars",
-    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars is a later step). Sort cars details follow Find, sort, and filter.",
+    body: "Browse a photo-first catalogue of real makes and models. Use Find, filters, and Sort the bay — choices stay in the URL. Open studio shots and Brad Coin prices — never real money. On a listing, Compare queues that car into the compare tray (same picks as Cars and Favourites) and opens Compare — when two are ready you land side by side; Copy link puts the absolute URL on your clipboard with a toast. Save favourites, buy from Cars, then list or unlist from My cars (Find a car there too — Sort My cars and Quick price chips are later steps). Sort cars details follow Find, sort, and filter.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -65,7 +65,14 @@ const STEPS: Step[] = [
   {
     id: "garage-sort",
     title: "Sort My cars in the bay",
-    body: "On My cars, Sort the bay orders Owned and For sale: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Favourites. The choice stays in the URL alongside Find a car. Clear filters resets search and sort back to Highest price. Compare on each card still feeds the shared tray; empty-bay and no-match CTAs stay.",
+    body: "On My cars, Sort the bay orders Owned and For sale: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Favourites. The choice stays in the URL alongside Find a car. Clear filters resets search and sort back to Highest price. Compare on each card still feeds the shared tray; empty-bay and no-match CTAs stay. Quick price chips when you list or update a sale are the next step.",
+    to: "/garage",
+    cta: "Open My cars",
+  },
+  {
+    id: "sell-price-chips",
+    title: "Quick price when you list a car",
+    body: "On My cars, when you list an owned car or update a for-sale asking price, tap a Quick price chip (50 / 100 / 250 / 500 BC) — same chip pattern as gift Quick amount — or type any Brad Coin price, then List for sale or Update price. Unlist, showcase, Compare, Find, and Sort the bay stay on the card.",
     to: "/garage",
     cta: "Open My cars",
   },
@@ -174,11 +181,11 @@ export function HowToPage() {
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
-            gift Quick amount chips, Top Trumps streaks, Match history Rematch (PvP opponent
-            deep-link or house → Play), this week’s cup standings, free trades, Trade history Offer
-            again (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest,
-            Title A–Z / Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real
-            money.
+            My cars Quick price chips (50 / 100 / 250 / 500 BC) when listing or updating a sale, gift
+            Quick amount chips, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or
+            house → Play), this week’s cup standings, free trades, Trade history Offer again
+            (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
+            Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -276,9 +283,9 @@ export function HowToPage() {
                 My cars
               </Link>{" "}
               — Find a car; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
-              Favourites); Compare garage cards into the same tray as Cars / Favourites; garage
-              value, list prices, pin your showcase, and Copy garage link (same URL as profile Copy
-              link).
+              Favourites); Quick price chips (50 / 100 / 250 / 500 BC) or free-form when listing /
+              updating a sale; Compare garage cards into the same tray as Cars / Favourites; garage
+              value, pin your showcase, and Copy garage link (same URL as profile Copy link).
             </li>
             <li>
               <Link to="/account" className="text-lime no-underline hover:underline">
