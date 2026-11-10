@@ -55,6 +55,8 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(document.getElementById("trades-offer-again")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Reviews and drag races" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sort reviews in the bay" })).toBeInTheDocument();
+    expect(document.getElementById("reviews-sort")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Your bay profile" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Copy link on member profiles" }),
@@ -146,6 +148,23 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/empty bay with Browse cars \/ My garage \/ Members/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points you to Members or Cars/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Find a review/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Sort reviews is the next step/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Clear filters resets search, type, and sort back to Newest/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /drag races with Sort reviews \(Newest \/ Oldest, Title A–Z \/ Z–A\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Reviews: Find a review plus Sort the bay/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/3 wins \+15 BC, 5 wins \+40 BC/i)).toBeInTheDocument();
     expect(screen.getByText(/Europe\/London week/i)).toBeInTheDocument();
     expect(screen.getByText(/This week.?s cup standings sit on Play/i)).toBeInTheDocument();
@@ -283,7 +302,16 @@ describe("HowToPage Midnight Garage UI", () => {
       "href",
       "/trades/history",
     );
-    expect(screen.getByRole("link", { name: "Open Reviews" })).toHaveAttribute("href", "/reviews");
+    expect(screen.getAllByRole("link", { name: "Open Reviews" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Reviews" })[0]).toHaveAttribute(
+      "href",
+      "/reviews",
+    );
+    expect(
+      screen.getByText(
+        /Find a review; Cue card \/ Drag race chips; Sort the bay \(Newest \/ Oldest, Title A–Z \/ Z–A\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open Account" })).toHaveAttribute("href", "/account");
     expect(screen.getAllByRole("link", { name: "Open Members" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText(/gift Brad Coins/i).length).toBeGreaterThan(0);

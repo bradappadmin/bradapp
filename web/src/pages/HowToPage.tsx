@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step). Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay (My cars Sort details are a later step). Members: name search and Has cars / Empty bay — plus Sort the bay on that directory (next step). Reviews: Find a review plus Sort the bay (Sort reviews details are a later step). Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
@@ -100,7 +100,14 @@ const STEPS: Step[] = [
   {
     id: "reviews",
     title: "Reviews and drag races",
-    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. On a review, Copy link puts the absolute URL on your clipboard with a toast — cue cards and playback stay. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand.",
+    body: "Watch bay reviews and head-to-head drag races Brad records in the app. Use Find a review to search by car make or model. On a review, Copy link puts the absolute URL on your clipboard with a toast — cue cards and playback stay. Pick the cars, film, publish — everyone else can watch what’s up. Studio thumbs keep the grid on-brand. Sort reviews is the next step.",
+    to: "/reviews",
+    cta: "Open Reviews",
+  },
+  {
+    id: "reviews-sort",
+    title: "Sort reviews in the bay",
+    body: "On Video reviews, Sort the bay orders the reel: Newest, Oldest, Title A–Z, or Title Z–A. The choice stays in the URL alongside Find a review and Cue card / Drag race type chips. Clear filters resets search, type, and sort back to Newest. Empty-bay and no-match CTAs stay.",
     to: "/reviews",
     cta: "Open Reviews",
   },
@@ -161,8 +168,9 @@ export function HowToPage() {
             leaderboard Challenge and Offer trade, Copy link on member profiles (Copy garage link
             stays on Account / My cars), gift Quick amount chips, Top Trumps streaks, Match history
             Rematch (PvP opponent deep-link or house → Play), this week’s cup standings, free trades,
-            Trade history Offer again (/trades?with=), member gifts, drag races, empty-bay next
-            steps, and your bay showcase. Nothing here spends real money.
+            Trade history Offer again (/trades?with=), member gifts, drag races with Sort reviews
+            (Newest / Oldest, Title A–Z / Z–A), empty-bay next steps, and your bay showcase. Nothing
+            here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -269,6 +277,13 @@ export function HowToPage() {
               </Link>{" "}
               — Find a favourite, Sort the bay, compare two, then Offer trade or Challenge to Top
               Trumps on someone else’s car (sign in). Nav badge = saved count.
+            </li>
+            <li>
+              <Link to="/reviews" className="text-lime no-underline hover:underline">
+                Reviews
+              </Link>{" "}
+              — Find a review; Cue card / Drag race chips; Sort the bay (Newest / Oldest, Title A–Z /
+              Z–A); Copy link on a film.
             </li>
             <li>
               <Link to="/compare" className="text-lime no-underline hover:underline">
