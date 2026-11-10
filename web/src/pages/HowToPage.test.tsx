@@ -442,8 +442,30 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Offer trade, Challenge, and the Top Trumps peek stay on the card/i),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Top Trumps winners on Compare is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Top Trumps winners on Compare" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("compare-trump-winners")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /Category winners under the studio heroes marks Power, 0–60, and Top speed/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /higher Power and Top speed win; lower 0–60 wins; ties stay neutral/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(
         /Favourites Top Trumps peek \(same Power \/ 0–60 \/ Top speed\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare Top Trumps category winners \(Power \/ 0–60 \/ Top speed, Play rules\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -836,6 +858,11 @@ describe("HowToPage Midnight Garage UI", () => {
         /Compare on Favourites \/ Cars \/ My cars \/ Reviews, or Compare on home Recently viewed/i,
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\)/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -938,6 +965,7 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Favourites" })
         .every((a) => a.getAttribute("href") === "/favourites"),
     ).toBe(true);
+    expect(screen.getByRole("link", { name: "Open Compare" })).toHaveAttribute("href", "/compare");
     expect(screen.getAllByRole("link", { name: "Open My cars" }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByRole("link", { name: "Open My cars" })[0]).toHaveAttribute(
       "href",

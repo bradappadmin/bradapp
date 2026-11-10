@@ -107,9 +107,16 @@ const STEPS: Step[] = [
   {
     id: "favourites-compare",
     title: "Compare from Favourites",
-    body: "On Favourites, Compare on a saved card queues into the shared tray with Cars / My cars / Recently viewed — same sticky Compare (1/2) tray; when two are ready, Side by side. Offer trade, Challenge, and the Top Trumps peek stay on the card; Find, Sort the bay, and empty-bay CTAs stay.",
+    body: "On Favourites, Compare on a saved card queues into the shared tray with Cars / My cars / Recently viewed — same sticky Compare (1/2) tray; when two are ready, Side by side. Offer trade, Challenge, and the Top Trumps peek stay on the card; Find, Sort the bay, and empty-bay CTAs stay. Top Trumps winners on Compare is the next step.",
     to: "/favourites",
     cta: "Open Favourites",
+  },
+  {
+    id: "compare-trump-winners",
+    title: "Top Trumps winners on Compare",
+    body: "On Compare with two cars side by side, Category winners under the studio heroes marks Power, 0–60, and Top speed — same Play rules: higher Power and Top speed win; lower 0–60 wins; ties stay neutral. Specs table lime highlights stay below; empty-bay CTAs stay. Tight Midnight Garage strip — not a stats dashboard.",
+    to: "/compare",
+    cta: "Open Compare",
   },
   {
     id: "garage-sort",
@@ -373,7 +380,8 @@ export function HowToPage() {
             bonuses, home login streak bay strip (+25 today, day 3 / day 7 progress), Brad Coins
             (tap the header balance for your ledger), home Recently viewed Top Trumps peek (same
             Power / 0–60 / Top speed), home Recently viewed Compare into the shared tray with Cars /
-            My cars, Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
+            My cars, Compare Top Trumps category winners (Power / 0–60 / Top speed, Play rules),
+            Family activity Open car (/cars/:id when a listing is known; hidden for gifts /
             missing), Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), listing Top
@@ -561,7 +569,8 @@ export function HowToPage() {
               </Link>{" "}
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
               ready), Compare on Favourites / Cars / My cars / Reviews, or Compare on home Recently
-              viewed (shared tray); empty bay sends you to Favourites or Browse cars.
+              viewed (shared tray); Category winners under the studio heroes for Power / 0–60 / Top
+              speed (Play rules; ties neutral); empty bay sends you to Favourites or Browse cars.
             </li>
             <li>
               <Link to="/admin/coin-history" className="text-lime no-underline hover:underline">
