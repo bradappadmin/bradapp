@@ -23,7 +23,14 @@ const STEPS: Step[] = [
   {
     id: "daily-login",
     title: "Daily login bonus",
-    body: "Once per Europe/London calendar day, signing in (or your first signed-in home load) credits +25 Brad Coins. Keep claiming on consecutive London days for login streak bonuses: day 3 +15 BC, day 7 +50 BC (the toast mentions the streak; a missed day resets it). The home wallet and Account show Login streak ×N; the coin ledger lists Daily login and Login streak. Same day again? No second credit.",
+    body: "Once per Europe/London calendar day, signing in (or your first signed-in home load) credits +25 Brad Coins. Keep claiming on consecutive London days for login streak bonuses: day 3 +15 BC, day 7 +50 BC (the toast mentions the streak; a missed day resets it). The home wallet and Account show Login streak ×N; the coin ledger lists Daily login and Login streak. Home’s login streak bay strip is the next step. Same day again? No second credit.",
+    to: "/",
+    cta: "Open Home",
+  },
+  {
+    id: "home-streak-banner",
+    title: "Home login streak bay strip",
+    body: "On Home when you’re signed in, one Midnight Garage bay strip under the hero shows today’s daily bonus (+25 BC claimed or ready to claim) and login streak progress toward day 3 (+15 BC) and day 7 (+50 BC). Coin ledger and How to links sit on the strip; Claim appears when today’s +25 is still available. The wallet chip still echoes Login streak ×N — this strip is the clear progress view.",
     to: "/",
     cta: "Open Home",
   },
@@ -204,11 +211,12 @@ export function HowToPage() {
           <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
-            bonuses, Brad Coins (tap the header balance for your ledger), home Recently viewed
-            Compare into the shared tray with Cars / My cars, Favourites Compare into that same
-            tray, photo-first cars with Find, listing Compare and Copy link, Cars Sort the bay
-            (Highest / Lowest price, Name A–Z / Z–A), Favourites challenge and trade CTAs, Members
-            directory Sort the bay (Name A–Z /
+            bonuses, home login streak bay strip (+25 today, day 3 / day 7 progress), Brad Coins
+            (tap the header balance for your ledger), home Recently viewed Compare into the shared
+            tray with Cars / My cars, Favourites Compare into that same tray, photo-first cars with
+            Find, listing Compare and Copy link, Cars Sort the bay (Highest / Lowest price, Name
+            A–Z / Z–A), Favourites challenge and trade CTAs, Members directory Sort the bay (Name
+            A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
             Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
@@ -275,6 +283,13 @@ export function HowToPage() {
             Also handy
           </h2>
           <ul className="mt-4 list-none space-y-3 border-t border-white/10 p-0 pt-4 text-sm text-steel">
+            <li>
+              <Link to="/" className="text-lime no-underline hover:underline">
+                Home
+              </Link>{" "}
+              — login streak bay strip: today’s +25 BC status and progress toward day 3 (+15) / day 7
+              (+50); Coin ledger and How to on the strip (sign in).
+            </li>
             <li>
               <Link to="/play/history" className="text-lime no-underline hover:underline">
                 Match history

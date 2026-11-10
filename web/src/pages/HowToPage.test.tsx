@@ -86,9 +86,21 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/Europe\/London calendar day/i)).toBeInTheDocument();
     expect(screen.getByText(/day 3 \+15 BC, day 7 \+50 BC/i)).toBeInTheDocument();
     expect(screen.getByText(/missed day resets/i)).toBeInTheDocument();
-    expect(screen.getByText(/Login streak ×N/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Login streak ×N/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/home wallet and Account/i)).toBeInTheDocument();
     expect(screen.getAllByText(/login streak bonuses/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/Home.?s login streak bay strip is the next step/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Home login streak bay strip" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /today.?s daily bonus \(\+25 BC claimed or ready to claim\) and login streak progress toward day 3 \(\+15 BC\) and day 7 \(\+50 BC\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/home login streak bay strip \(\+25 today, day 3 \/ day 7 progress\)/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/No second credit/i)).toBeInTheDocument();
     expect(screen.getByText(/Find, filters, and Sort the bay/i)).toBeInTheDocument();
     expect(
@@ -343,6 +355,12 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/member gifts/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Daily login/i).length).toBeGreaterThan(0);
 
+    expect(
+      screen.getByText(
+        /login streak bay strip: today.?s \+25 BC status and progress toward day 3 \(\+15\) \/ day 7 \(\+50\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Match history" })).toHaveAttribute(
       "href",
       "/play/history",
@@ -430,7 +448,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
-    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("link", { name: "Open Home" }).length).toBeGreaterThanOrEqual(3);
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
