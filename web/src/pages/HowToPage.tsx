@@ -16,7 +16,7 @@ const STEPS: Step[] = [
   {
     id: "join",
     title: "Join the family bay",
-    body: "Sign up with email and a password. Invite codes are optional — use one if Brad or Napwood shared it, or join without. New members get starter Brad Coins. Admins can create invite codes from Admin when they want a private door.",
+    body: "Sign up with email and a password. Invite codes are optional — use one if Brad or Napwood shared it (or open a Copy signup link that lands on /signup?invite=… with the code filled in), or join without. New members get starter Brad Coins. Admins can create invite codes from Admin when they want a private door — Copy code and Copy signup link are later admin steps.",
     to: "/signup",
     cta: "Open Sign up",
   },
@@ -184,7 +184,7 @@ const STEPS: Step[] = [
   {
     id: "admin",
     title: "Admin for Brad and Napwood",
-    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows after that.",
+    body: "Day-to-day admins correct accounts, freeze or unfreeze members, mint family invite codes, adjust Brad Coin balances, and edit cars, garages, and listings. Napwood can do everything Brad can — and can freeze Brad if needed. Brad cannot freeze Napwood. Quick amount chips on coin adjust come next; Sort the bay on inventory listings follows; Copy signup link on Family invites is after that.",
     to: "/admin",
     cta: "Open Admin",
     adminOnly: true,
@@ -200,9 +200,17 @@ const STEPS: Step[] = [
   {
     id: "admin-inventory-sort",
     title: "Sort inventory listings in the bay",
-    body: "On Cars & garages (Listings), Sort the bay orders the directory: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Cars / My cars / Favourites. The choice stays in the URL alongside Find a listing and status chips. Clear filters resets search, group, and sort back to Highest price. Paint and Save stay on each row.",
+    body: "On Cars & garages (Listings), Sort the bay orders the directory: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Cars / My cars / Favourites. The choice stays in the URL alongside Find a listing and status chips. Clear filters resets search, group, and sort back to Highest price. Paint and Save stay on each row. Copy signup link on Family invites is the next step.",
     to: "/admin/inventory",
     cta: "Open Cars & garages",
+    adminOnly: true,
+  },
+  {
+    id: "admin-invite-signup-link",
+    title: "Copy signup link for invites",
+    body: "On Family invites, active codes offer Copy (bare code) and Copy signup link — the absolute /signup?invite=… URL with a toast. Opening that link prefills the invite field on Sign up. Used, expired, and revoked codes hide both copy actions. Require-invite, Find a code, and Revoke stay.",
+    to: "/admin/invites",
+    cta: "Open Family invites",
     adminOnly: true,
   },
 ];
@@ -239,11 +247,12 @@ export function HowToPage() {
             500 BC) when listing or updating a sale, gift Quick amount chips, Coin ledger Find entry
             plus type chips (All / Earn / Spend / Gift / Admin), admin coin-adjust Quick amount chips
             (+25 / +50 / +100 / +250 BC) for Brad and Napwood, admin inventory Sort the bay (Highest /
-            Lowest price, Name A–Z / Z–A), Top Trumps streaks, Match history Rematch (PvP opponent
-            deep-link or house → Play), this week’s cup standings with an Ends in countdown
-            (Europe/London week end, +50 BC prize), free trades, Trade history Offer again
-            (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
-            Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real money.
+            Lowest price, Name A–Z / Z–A), admin Family invites Copy signup link (/signup?invite=)
+            beside Copy code, Top Trumps streaks, Match history Rematch (PvP opponent deep-link or
+            house → Play), this week’s cup standings with an Ends in countdown (Europe/London week
+            end, +50 BC prize), free trades, Trade history Offer again (/trades?with=), member gifts,
+            drag races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay next steps, and
+            your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -395,6 +404,13 @@ export function HowToPage() {
               </Link>{" "}
               — Brad & Napwood: Find a listing; Sort the bay (Highest / Lowest price, Name A–Z /
               Z–A, same as Cars / My cars); status chips; Clear filters.
+            </li>
+            <li>
+              <Link to="/admin/invites" className="text-lime no-underline hover:underline">
+                Family invites
+              </Link>{" "}
+              — Brad & Napwood: Create codes; Copy the bare code or Copy signup link
+              (/signup?invite=…, prefills Sign up); Require invite; Find a code; Revoke.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">
