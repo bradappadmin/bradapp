@@ -53,7 +53,8 @@ export function WeeklyCupPanel({
       >
         {countdown}
         <span className="ml-2 text-xs font-normal uppercase tracking-[0.18em] text-steel">
-          Europe/London
+          {" "}
+          · Europe/London
         </span>
       </p>
       <p className="mt-2 text-sm leading-relaxed text-steel">
