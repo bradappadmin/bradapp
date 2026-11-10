@@ -114,9 +114,16 @@ const STEPS: Step[] = [
   {
     id: "weekly-cup",
     title: "Weekly Top Trumps cup",
-    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — an Ends in countdown ticks to London week end beside the +50 BC prize callout — Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie.",
+    body: "House and PvP wins count for the Europe/London week. This week’s cup standings sit on Play and beside the all-time podium on the leaderboard — an Ends in countdown ticks to London week end beside the +50 BC prize callout — Challenge to Top Trumps and Offer trade deep-link into Play and Trades with that member ready (hidden on your own row). When a new week starts, last week’s top scorer gets +50 Brad Coins once — lowest member id wins a tie. Your rank You highlight and Jump to my rank are the next step.",
     to: "/leaderboard",
     cta: "Open cup standings",
+  },
+  {
+    id: "leaderboard-your-rank",
+    title: "Find your rank on the leaderboard",
+    body: "On the Brad Coin leaderboard when you’re signed in, your standings row (and cup / podium when you’re there) shows a You badge with a lime ring — Challenge and Offer trade stay hidden on yourself. A Your rank chip sits in the bay notes. When your standings row is off-screen or hidden by Find a member, Jump to my rank scrolls you back (and clears the filter if needed). Find, cup countdown, and empty / no-match CTAs stay.",
+    to: "/leaderboard",
+    cta: "Open Leaderboard",
   },
   {
     id: "trades",
@@ -227,16 +234,16 @@ export function HowToPage() {
             A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
-            Offer trade, Copy link on member profiles (Copy garage link stays on Account / My cars),
-            My cars Quick price chips (50 / 100 / 250 / 500 BC) when listing or updating a sale, gift
-            Quick amount chips, Coin ledger Find entry plus type chips (All / Earn / Spend / Gift /
-            Admin), admin coin-adjust Quick amount chips (+25 / +50 / +100 / +250 BC) for Brad and
-            Napwood, admin inventory Sort the bay (Highest / Lowest price, Name A–Z / Z–A), Top
-            Trumps streaks, Match history Rematch (PvP opponent deep-link or house →
-            Play), this week’s cup standings with an Ends in countdown (Europe/London week end, +50 BC
-            prize), free trades, Trade history Offer again (/trades?with=),
-            member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z / Z–A), empty-bay
-            next steps, and your bay showcase. Nothing here spends real money.
+            Offer trade, leaderboard You highlight and Jump to my rank, Copy link on member profiles
+            (Copy garage link stays on Account / My cars), My cars Quick price chips (50 / 100 / 250 /
+            500 BC) when listing or updating a sale, gift Quick amount chips, Coin ledger Find entry
+            plus type chips (All / Earn / Spend / Gift / Admin), admin coin-adjust Quick amount chips
+            (+25 / +50 / +100 / +250 BC) for Brad and Napwood, admin inventory Sort the bay (Highest /
+            Lowest price, Name A–Z / Z–A), Top Trumps streaks, Match history Rematch (PvP opponent
+            deep-link or house → Play), this week’s cup standings with an Ends in countdown
+            (Europe/London week end, +50 BC prize), free trades, Trade history Offer again
+            (/trades?with=), member gifts, drag races with Sort reviews (Newest / Oldest, Title A–Z /
+            Z–A), empty-bay next steps, and your bay showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -326,7 +333,8 @@ export function HowToPage() {
                 Leaderboard
               </Link>{" "}
               — Find a member, Brad Coin ranks, highlight cars, This week’s cup standings beside the
-              podium (Ends in countdown to Europe/London week end · +50 BC prize), and Challenge to
+              podium (Ends in countdown to Europe/London week end · +50 BC prize), You badge on your
+              standings / cup / podium row with Jump to my rank when scrolled away, and Challenge to
               Top Trumps or Offer trade on other members’ standings and cup rows (sign in).
             </li>
             <li>

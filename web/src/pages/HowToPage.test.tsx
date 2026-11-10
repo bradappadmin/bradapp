@@ -299,6 +299,26 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByText(/Offer trade on the leaderboard standings and cup/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/leaderboard Challenge and Offer trade/i)).toBeInTheDocument();
+    expect(screen.getByText(/leaderboard You highlight and Jump to my rank/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Find your rank on the leaderboard" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /your standings row \(and cup \/ podium when you’re there\) shows a You badge/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Jump to my rank scrolls you back \(and clears the filter if needed\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Your rank You highlight and Jump to my rank are the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /You badge on your standings \/ cup \/ podium row with Jump to my rank when scrolled away/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText(/gift Quick amount chips/i)).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -510,6 +530,10 @@ describe("HowToPage Midnight Garage UI", () => {
       "/play/history",
     );
     expect(screen.getByRole("link", { name: "Open cup standings" })).toHaveAttribute(
+      "href",
+      "/leaderboard",
+    );
+    expect(screen.getByRole("link", { name: "Open Leaderboard" })).toHaveAttribute(
       "href",
       "/leaderboard",
     );
