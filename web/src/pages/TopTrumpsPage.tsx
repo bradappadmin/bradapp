@@ -8,12 +8,14 @@ import type {
   StreakMilestone,
   TopTrumpsCardVisual,
   TopTrumpsCategory,
+  WeeklyCupSnapshot,
 } from "../api";
 import { useAuth } from "../auth-context";
 import { listingTitle } from "../cars";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { TrumpCard } from "../components/TrumpCard";
+import { WeeklyCupPanel } from "../components/WeeklyCupPanel";
 import { useToast } from "../toast-context";
 import { prepareRematch, rematchPrompt } from "../top-trumps-rematch";
 
@@ -50,6 +52,7 @@ export function TopTrumpsPage() {
   ]);
   const [winStreak, setWinStreak] = useState(0);
   const [lastStreakBonus, setLastStreakBonus] = useState(0);
+  const [weeklyCup, setWeeklyCup] = useState<WeeklyCupSnapshot | null>(null);
   const [myCars, setMyCars] = useState<GarageCar[]>([]);
   const [members, setMembers] = useState<MemberSummary[]>([]);
   const [opponentCards, setOpponentCards] = useState<MemberCard[]>([]);
@@ -98,16 +101,18 @@ export function TopTrumpsPage() {
   useEffect(() => {
     if (!user) return;
     void (async () => {
-      const [cats, garage, memberList, streak] = await Promise.all([
+      const [cats, garage, memberList, streak, cup] = await Promise.all([
         api.fetchTopTrumpsCategories(),
         api.fetchGarage(),
         api.fetchMembers(),
         api.fetchTopTrumpsStreak(),
+        api.fetchWeeklyCup(),
       ]);
       setCategories(cats.categories);
       setRewards(cats.rewards);
       if (cats.streakMilestones?.length) setStreakMilestones(cats.streakMilestones);
       setWinStreak(streak.streak);
+      setWeeklyCup(cup);
       setMyCars(garage.cars);
       setMembers(memberList.members);
       if (garage.cars[0]) setListingId(garage.cars[0].id);
@@ -358,13 +363,19 @@ export function TopTrumpsPage() {
               Match history
             </Link>
             <Link
-              to="/members"
+              to="/leaderboard"
               className="rounded-md border border-white/12 px-4 py-2.5 font-display text-sm text-steel no-underline transition hover:border-lime/35 hover:text-lime"
             >
-              Members
+              Leaderboard
             </Link>
           </div>
         </header>
+
+        {weeklyCup ? (
+          <div className="bay-rise-delay mt-8">
+            <WeeklyCupPanel cup={weeklyCup} compact viewerId={user?.id} />
+          </div>
+        ) : null}
 
         {myCars.length === 0 ? (
           <div className="play-panel bay-rise-delay mt-8 rounded-md border p-5 sm:p-6">

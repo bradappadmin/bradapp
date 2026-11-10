@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as api from "../api";
-import type { LeaderboardEntry } from "../api";
+import type { LeaderboardEntry, WeeklyCupSnapshot } from "../api";
 import { useAuth } from "../auth-context";
 import { bioSnippet } from "../bio-snippet";
 import { formatCoins, listingTitle } from "../cars";
 import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
+import { WeeklyCupPanel } from "../components/WeeklyCupPanel";
 
 function podiumRankClass(rank: number): string {
   switch (rank) {
@@ -41,6 +42,7 @@ function rowPanelClass(rank: number, isYou: boolean): string {
 export function LeaderboardPage() {
   const { user, loading: authLoading } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [weeklyCup, setWeeklyCup] = useState<WeeklyCupSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,6 +55,7 @@ export function LeaderboardPage() {
         const res = await api.fetchLeaderboard();
         if (!cancelled) {
           setEntries(res.entries);
+          setWeeklyCup(res.weeklyCup ?? null);
           setError(null);
         }
       } catch (err) {
@@ -96,6 +99,11 @@ export function LeaderboardPage() {
                 <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                   {entries.length} {entries.length === 1 ? "member" : "members"}
                 </span>
+                {weeklyCup ? (
+                  <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
+                    Cup {weeklyCup.weekKey}
+                  </span>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -117,6 +125,12 @@ export function LeaderboardPage() {
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
+
+        {!loading && weeklyCup ? (
+          <div className="bay-rise-delay mt-8">
+            <WeeklyCupPanel cup={weeklyCup} viewerId={user?.id} />
+          </div>
+        ) : null}
 
         {!loading && topThree.length > 0 ? (
           <section

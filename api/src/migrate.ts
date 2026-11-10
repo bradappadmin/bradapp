@@ -36,6 +36,7 @@ export async function runMigrations(): Promise<void> {
     "015_app_settings.sql",
     "016_top_trumps_win_streak.sql",
     "017_showcase_listing.sql",
+    "018_weekly_top_trumps_cup.sql",
   ];
 
 

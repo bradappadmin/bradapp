@@ -14,6 +14,7 @@ import {
   type TopTrumpsCategory,
 } from "./top-trumps.js";
 import { clearShowcaseForListings } from "./showcase.js";
+import { getWeeklyCupSnapshot } from "./weekly-cup.js";
 import {
   STREAK_MILESTONES,
   applyWinStreakUpdate,
@@ -141,6 +142,15 @@ export function createPlayRouter(): Router {
       streak,
       milestones: STREAK_MILESTONES.map((m) => ({ streak: m.streak, coins: m.coins })),
     });
+  });
+
+  /**
+   * This week’s Top Trumps family cup standings (Europe/London week).
+   * Also settles last week’s prize once if due.
+   */
+  router.get("/top-trumps/weekly-cup", requireAuth, async (_req, res: Response) => {
+    const snapshot = await getWeeklyCupSnapshot();
+    res.json(snapshot);
   });
 
   router.get("/top-trumps/history", requireAuth, async (req, res: Response) => {

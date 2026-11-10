@@ -9,6 +9,7 @@ describe("ledger labels", () => {
     expect(ledgerReasonLabel("daily_login")).toBe("Daily");
     expect(ledgerReasonLabel("play_reward")).toBe("Play");
     expect(ledgerReasonLabel("tt_streak_bonus")).toBe("Win streak");
+    expect(ledgerReasonLabel("weekly_cup")).toBe("Weekly cup");
     expect(ledgerReasonLabel("admin_adjust")).toBe("Admin adjust");
   });
 

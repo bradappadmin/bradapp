@@ -11,6 +11,7 @@ vi.mock("../api", () => ({
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
   fetchTopTrumpsCategories: vi.fn(),
   fetchTopTrumpsStreak: vi.fn(),
+  fetchWeeklyCup: vi.fn(),
   fetchGarage: vi.fn(),
   fetchMembers: vi.fn(),
   fetchMemberCards: vi.fn(),
@@ -59,6 +60,22 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
         { streak: 3, coins: 15 },
         { streak: 5, coins: 40 },
       ],
+    });
+    vi.mocked(api.fetchWeeklyCup).mockResolvedValue({
+      timezone: "Europe/London",
+      weekKey: "2026-W46",
+      weekStart: "2026-11-09T00:00:00.000Z",
+      weekEnd: "2026-11-16T00:00:00.000Z",
+      prizeAmount: 50,
+      standings: [{ userId: 2, displayName: "Member", wins: 2, rank: 1 }],
+      previousAward: {
+        weekKey: "2026-W45",
+        winnerUserId: 7,
+        displayName: "Bay Friend",
+        wins: 4,
+        prizeAmount: 50,
+        alreadyAwarded: true,
+      },
     });
     vi.mocked(api.fetchGarage).mockResolvedValue({
       totalValue: 420,
@@ -118,6 +135,8 @@ describe("TopTrumpsPage Midnight Garage UI", () => {
     expect(screen.getByText(/Win \+25 BC/i)).toBeInTheDocument();
     expect(await screen.findByText(/Win streak ×2/i)).toBeInTheDocument();
     expect(screen.getByText(/3 wins \+15 BC/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Top Trumps cup" })).toBeInTheDocument();
+    expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
 
     const historyLinks = screen.getAllByRole("link", { name: /Match history/i });
     expect(historyLinks.some((link) => link.getAttribute("href") === "/play/history")).toBe(true);

@@ -154,8 +154,39 @@ export type LeaderboardEntry = {
   highlightCar: LeaderboardHighlightCar | null;
 };
 
-export function fetchLeaderboard(): Promise<{ entries: LeaderboardEntry[] }> {
+export type WeeklyCupStanding = {
+  userId: number;
+  displayName: string;
+  wins: number;
+  rank: number;
+};
+
+export type WeeklyCupSnapshot = {
+  timezone: string;
+  weekKey: string;
+  weekStart: string;
+  weekEnd: string;
+  prizeAmount: number;
+  standings: WeeklyCupStanding[];
+  previousAward: {
+    weekKey: string;
+    winnerUserId: number | null;
+    displayName: string | null;
+    wins: number;
+    prizeAmount: number;
+    alreadyAwarded: boolean;
+  };
+};
+
+export function fetchLeaderboard(): Promise<{
+  entries: LeaderboardEntry[];
+  weeklyCup: WeeklyCupSnapshot;
+}> {
   return request("/leaderboard");
+}
+
+export function fetchWeeklyCup(): Promise<WeeklyCupSnapshot> {
+  return request("/play/top-trumps/weekly-cup");
 }
 
 export function claimDailyBonus(): Promise<{
@@ -241,7 +272,8 @@ export type LedgerEntry = {
     | "admin_adjust"
     | "play_reward"
     | "daily_login"
-    | "tt_streak_bonus";
+    | "tt_streak_bonus"
+    | "weekly_cup";
   listingId: number | null;
   note: string;
   createdAt: string;

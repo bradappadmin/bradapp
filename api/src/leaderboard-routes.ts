@@ -2,6 +2,7 @@ import { Router, type Response } from "express";
 import { requireAuth } from "./auth-middleware.js";
 import { getPool, type RowDataPacket } from "./db.js";
 import { isRole, roleLabel, type Role } from "./roles.js";
+import { getWeeklyCupSnapshot } from "./weekly-cup.js";
 
 type LeaderboardRow = RowDataPacket & {
   id: number;
@@ -90,7 +91,8 @@ export function createLeaderboardRouter(): Router {
       };
     });
 
-    res.json({ entries });
+    const weeklyCup = await getWeeklyCupSnapshot();
+    res.json({ entries, weeklyCup });
   });
 
   return router;

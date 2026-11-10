@@ -36,6 +36,25 @@ describe("LeaderboardPage Midnight Garage UI", () => {
       },
     });
     vi.mocked(api.fetchLeaderboard).mockResolvedValue({
+      weeklyCup: {
+        timezone: "Europe/London",
+        weekKey: "2026-W46",
+        weekStart: "2026-11-09T00:00:00.000Z",
+        weekEnd: "2026-11-16T00:00:00.000Z",
+        prizeAmount: 50,
+        standings: [
+          { userId: 7, displayName: "Bay Friend", wins: 3, rank: 1 },
+          { userId: 2, displayName: "Member", wins: 1, rank: 2 },
+        ],
+        previousAward: {
+          weekKey: "2026-W45",
+          winnerUserId: 7,
+          displayName: "Bay Friend",
+          wins: 4,
+          prizeAmount: 50,
+          alreadyAwarded: true,
+        },
+      },
       entries: [
         {
           rank: 1,
@@ -103,6 +122,8 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
     expect(await screen.findByLabelText("Top three on the podium")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Top Trumps cup" })).toBeInTheDocument();
+    expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Standings" })).toBeInTheDocument();
 
     const garageLink = await screen.findByRole("link", {
