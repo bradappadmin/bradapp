@@ -69,7 +69,7 @@ export function LatestReviews() {
             const relatedCars = reviewRelatedListingCars(review);
             return (
               <li key={review.id} className="bay-rise">
-                <div className="overflow-hidden rounded-md border border-white/10 bg-bay-panel/50 transition hover:border-lime/35 hover:bg-bay-panel/80">
+                <div className="car-card-media overflow-hidden rounded-md border border-white/10 bg-bay-deep/40">
                   <Link
                     to={`/reviews/${review.id}`}
                     className="group block no-underline"

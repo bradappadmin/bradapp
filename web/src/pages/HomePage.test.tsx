@@ -92,6 +92,17 @@ describe("HomePage", () => {
     expect(watch).toHaveAttribute("href", "/reviews/9");
     expect(screen.getByText("Watch →")).toBeInTheDocument();
     expect(screen.getByText(/3 likes/)).toBeInTheDocument();
+    const latestRegion = screen.getByRole("region", { name: "Latest bay reviews" });
+    expect(latestRegion.querySelectorAll(".car-card-media").length).toBeGreaterThanOrEqual(1);
+    expect(latestRegion.querySelectorAll(".bay-rise").length).toBeGreaterThanOrEqual(1);
+    const studioImgs = [...latestRegion.querySelectorAll(".car-card-media img")];
+    expect(studioImgs.length).toBeGreaterThanOrEqual(1);
+    expect(
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+    ).toBe(true);
+    expect(
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=")),
+    ).toBe(true);
     expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toHaveAttribute(
       "href",
       "/cars/55",
@@ -209,6 +220,13 @@ describe("HomePage", () => {
     const featured = screen.getByRole("link", { name: /Pinned drag — GT-R/i });
     expect(featured).toHaveAttribute("href", "/reviews/11");
     expect(screen.getByText("Watch featured →")).toBeInTheDocument();
+    const featuredRegion = screen.getByRole("region", { name: "Featured bay review" });
+    expect(featuredRegion.querySelectorAll(".car-card-media").length).toBeGreaterThanOrEqual(1);
+    const featuredImgs = [...featuredRegion.querySelectorAll(".car-card-media img")];
+    expect(featuredImgs.length).toBeGreaterThanOrEqual(2);
+    expect(
+      featuredImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+    ).toBe(true);
     expect(screen.getByRole("link", { name: "Open car Nissan GT-R" })).toHaveAttribute(
       "href",
       "/cars/88",
