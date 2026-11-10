@@ -131,6 +131,8 @@ export type ActivityItem = {
   actorName: string;
   href: string | null;
   car: ActivityCarVisual | null;
+  /** Catalogue listing for Open car → /cars/:id when known. */
+  listingId: number | null;
 };
 
 export function fetchActivity(limit = 30): Promise<{ items: ActivityItem[] }> {

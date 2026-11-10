@@ -21,6 +21,8 @@ export type ActivityItem = {
   href: string | null;
   /** Primary car involved in the event, when known. */
   car: ActivityCarVisual | null;
+  /** Catalogue listing for Open car → /cars/:id when known. */
+  listingId: number | null;
 };
 
 /** Reviews have no listing paint — Midnight Black keeps studio photos on-brand. */
@@ -45,6 +47,7 @@ type TradeRow = RowDataPacket & {
   resolved_at: Date;
   from_name: string;
   to_name: string;
+  offer_listing_id: number;
   offer_make: string;
   offer_model: string;
   offer_trim_name: string;
@@ -64,6 +67,7 @@ type MatchRow = RowDataPacket & {
   opponent_name: string | null;
   opponent_make: string;
   opponent_model: string;
+  challenger_listing_id: number | null;
   challenger_make: string | null;
   challenger_model: string | null;
   challenger_trim_name: string | null;
@@ -81,9 +85,21 @@ type ReviewRow = RowDataPacket & {
   model: string;
   trim_name: string;
   body_type: string;
+  listing_id: number | null;
   b_make: string | null;
   b_model: string | null;
 };
+
+/** Prefer an available bay listing for Open car; fall back to owned/sold when needed. */
+function listingIdForCarModelSql(carModelAlias: string): string {
+  return `(SELECT l.id FROM listings l
+     WHERE l.car_model_id = ${carModelAlias}.id
+     ORDER BY CASE l.status
+       WHEN 'available' THEN 0
+       WHEN 'owned' THEN 1
+       ELSE 2 END, l.id ASC
+     LIMIT 1)`;
+}
 
 type GiftRow = RowDataPacket & {
   id: number;
@@ -161,7 +177,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   );
 
   const [tradeRows] = await pool.query<TradeRow[]>(
-    `SELECT t.id, t.resolved_at,
+    `SELECT t.id, t.resolved_at, t.offer_listing_id,
             fu.display_name AS from_name, tu.display_name AS to_name,
             ocm.make AS offer_make, ocm.model AS offer_model,
             ocm.trim_name AS offer_trim_name, ocm.body_type AS offer_body_type,
@@ -182,7 +198,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
 
   const [matchRows] = await pool.query<MatchRow[]>(
     `SELECT m.id, m.created_at, m.mode, m.winner, m.category,
-            m.opponent_make, m.opponent_model,
+            m.opponent_make, m.opponent_model, m.challenger_listing_id,
             cu.display_name AS challenger_name,
             ou.display_name AS opponent_name,
             ccm.make AS challenger_make, ccm.model AS challenger_model,
@@ -201,6 +217,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
   const [reviewRows] = await pool.query<ReviewRow[]>(
     `SELECT r.id, r.created_at, r.title, r.review_type, u.display_name,
             cm.make, cm.model, cm.trim_name, cm.body_type,
+            ${listingIdForCarModelSql("cm")} AS listing_id,
             cmb.make AS b_make, cmb.model AS b_model
      FROM video_reviews r
      INNER JOIN users u ON u.id = r.publisher_user_id
@@ -257,6 +274,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       actorName: row.display_name,
       href: row.listing_id != null ? `/cars/${row.listing_id}` : null,
       car: carVisual(row.make, row.model, row.trim_name, row.body_type, row.colour),
+      listingId: row.listing_id == null ? null : Number(row.listing_id),
     });
   }
 
@@ -275,6 +293,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
         row.offer_body_type,
         row.offer_colour,
       ),
+      listingId: Number(row.offer_listing_id),
     });
   }
 
@@ -301,6 +320,8 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
         row.challenger_body_type,
         row.challenger_colour,
       ),
+      listingId:
+        row.challenger_listing_id == null ? null : Number(row.challenger_listing_id),
     });
   }
 
@@ -317,6 +338,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       actorName: row.display_name,
       href: `/reviews/${row.id}`,
       car: carVisual(row.make, row.model, row.trim_name, row.body_type, REVIEW_STUDIO_COLOUR),
+      listingId: row.listing_id == null ? null : Number(row.listing_id),
     });
   }
 
@@ -330,6 +352,7 @@ export async function listFamilyActivity(limit = 30): Promise<ActivityItem[]> {
       actorName: row.sender_name,
       href: `/members/${row.receiver_id}`,
       car: null,
+      listingId: null,
     });
   }
 

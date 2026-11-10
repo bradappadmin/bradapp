@@ -17,10 +17,12 @@ describe("activity item shape", () => {
         bodyType: "Hatchback",
         colour: "Racing Red",
       },
+      listingId: 1,
     };
     expect(sample.kind).toBe("purchase");
     expect(sample.id.startsWith("purchase-")).toBe(true);
     expect(sample.car?.make).toBe("Ford");
+    expect(sample.listingId).toBe(1);
   });
 
   it("supports gift kind without a car visual", () => {
@@ -32,8 +34,10 @@ describe("activity item shape", () => {
       actorName: "Alex",
       href: "/members/4",
       car: null,
+      listingId: null,
     };
     expect(gift.kind).toBe("gift");
     expect(gift.car).toBeNull();
+    expect(gift.listingId).toBeNull();
   });
 });

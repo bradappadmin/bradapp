@@ -23,6 +23,7 @@ const SAMPLE: ActivityItem[] = [
     summary: "Bay Friend bought Porsche 911 for 420 BC",
     actorName: "Bay Friend",
     href: "/cars/42",
+    listingId: 42,
     car: {
       make: "Porsche",
       model: "911",
@@ -38,6 +39,7 @@ const SAMPLE: ActivityItem[] = [
     summary: "Sam traded with Jordan",
     actorName: "Sam Bay",
     href: "/trades",
+    listingId: 7,
     car: {
       make: "BMW",
       model: "M3",
@@ -53,6 +55,7 @@ const SAMPLE: ActivityItem[] = [
     summary: "Casey beat the house on power",
     actorName: "Casey Apex",
     href: "/play/history",
+    listingId: 11,
     car: {
       make: "Audi",
       model: "RS6",
@@ -68,6 +71,7 @@ const SAMPLE: ActivityItem[] = [
     summary: "Brad published “Bay blitz” (Audi RS6)",
     actorName: "Brad",
     href: "/reviews/3",
+    listingId: 88,
     car: {
       make: "Audi",
       model: "RS6",
@@ -83,6 +87,7 @@ const SAMPLE: ActivityItem[] = [
     summary: "Bay Friend gifted 25 BC to Sam Bay",
     actorName: "Bay Friend",
     href: "/members/12",
+    listingId: null,
     car: null,
   },
 ];
@@ -217,5 +222,58 @@ describe("ActivityFeed car thumbs", () => {
     expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.queryByText("No matches")).not.toBeInTheDocument();
     expect(screen.getByText("Casey Apex")).toBeInTheDocument();
+  });
+
+  it("shows Open car to the catalogue when listingId is known", async () => {
+    render(
+      <MemoryRouter>
+        <ActivityFeed />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Family activity" })).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
+      "href",
+      "/cars/42",
+    );
+    expect(screen.getByRole("link", { name: "Open car BMW M3 Competition" })).toHaveAttribute(
+      "href",
+      "/cars/7",
+    );
+    // Play + review share the Audi title; both Open car links target their listing ids.
+    const openAudis = screen.getAllByRole("link", { name: "Open car Audi RS6 Avant" });
+    expect(openAudis.map((a) => a.getAttribute("href")).sort()).toEqual(["/cars/11", "/cars/88"]);
+
+    // Gift rows have no listing — Open car must stay hidden there.
+    expect(screen.queryByRole("link", { name: /^Open car$/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /gifted 25 BC to Sam Bay/i })).toHaveAttribute(
+      "href",
+      "/members/12",
+    );
+  });
+
+  it("hides Open car when listingId is missing on a car row", async () => {
+    vi.mocked(api.fetchActivity).mockResolvedValue({
+      items: [
+        {
+          ...SAMPLE[2],
+          listingId: null,
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter>
+        <ActivityFeed />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Casey Apex")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open car/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Casey Apex/i })).toHaveAttribute(
+      "href",
+      "/play/history",
+    );
   });
 });

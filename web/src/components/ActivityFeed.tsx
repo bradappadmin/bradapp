@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { activityOpenCarHref, activityOpenCarLabel } from "../activity-open-car";
 import * as api from "../api";
 import type { ActivityItem, ActivityKind } from "../api";
 import { listingTitle } from "../cars";
@@ -181,6 +182,11 @@ export function ActivityFeed() {
             const carTitle = car
               ? listingTitle({ make: car.make, model: car.model, trimName: car.trimName })
               : null;
+            const openCarHref = activityOpenCarHref(item.listingId);
+            const openCarAria =
+              car && carTitle
+                ? `${activityOpenCarLabel()} ${carTitle}`
+                : activityOpenCarLabel();
             const body = (
               <>
                 <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -221,18 +227,34 @@ export function ActivityFeed() {
 
             return (
               <li key={item.id}>
-                {item.href ? (
-                  <Link
-                    to={item.href}
-                    className="group flex flex-col gap-2 rounded-md border border-white/10 bg-bay-panel/45 px-4 py-3 no-underline transition hover:border-white/20 hover:bg-bay-panel/70 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
-                  >
-                    {body}
-                  </Link>
-                ) : (
-                  <div className="flex flex-col gap-2 rounded-md border border-white/10 bg-bay-panel/45 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-                    {body}
-                  </div>
-                )}
+                <div className="overflow-hidden rounded-md border border-white/10 bg-bay-panel/45 transition hover:border-white/20 hover:bg-bay-panel/70">
+                  {item.href ? (
+                    <Link
+                      to={item.href}
+                      className="group flex flex-col gap-2 px-4 py-3 no-underline sm:flex-row sm:items-start sm:justify-between sm:gap-6"
+                    >
+                      {body}
+                    </Link>
+                  ) : (
+                    <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                      {body}
+                    </div>
+                  )}
+                  {openCarHref ? (
+                    <div
+                      className="flex flex-wrap gap-2 border-t border-white/8 px-4 pb-3"
+                      aria-label="Related car actions"
+                    >
+                      <Link
+                        to={openCarHref}
+                        aria-label={openCarAria}
+                        className="rounded-md border border-white/15 px-3 py-1.5 font-display text-sm text-mist no-underline transition hover:border-lime/40 hover:text-lime"
+                      >
+                        {activityOpenCarLabel()}
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
               </li>
             );
           })}
