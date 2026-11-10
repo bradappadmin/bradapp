@@ -3,9 +3,11 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import * as api from "../api";
 import type { ReviewSummary } from "../api";
 import { useAuth } from "../auth-context";
+import { CopyShareLinkButton } from "../components/CopyShareLinkButton";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { ReviewCarsMedia, reviewCarsCaption } from "../components/ReviewCarsMedia";
 import { SiteHeader } from "../components/SiteHeader";
+import { reviewSharePath } from "../share-link";
 
 function isAdmin(role: string): boolean {
   return role === "admin" || role === "super_admin";
@@ -148,7 +150,7 @@ export function ReviewDetailPage() {
               </div>
             </header>
 
-            <div className="mt-5 flex flex-wrap items-center gap-3" aria-label="Review likes">
+            <div className="mt-5 flex flex-wrap items-center gap-3" aria-label="Review actions">
               {review.status === "published" ? (
                 <button
                   type="button"
@@ -164,6 +166,11 @@ export function ReviewDetailPage() {
                   {likeBusy ? "Updating…" : review.likedByMe ? "Liked" : "Like"}
                 </button>
               ) : null}
+              <CopyShareLinkButton
+                path={reviewSharePath(review.id)}
+                label="Copy link"
+                className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
+              />
               <p className="text-sm text-steel" aria-live="polite">
                 {review.likeCount === 1 ? "1 like" : `${review.likeCount} likes`}
               </p>

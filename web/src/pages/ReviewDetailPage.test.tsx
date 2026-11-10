@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth-context";
+import { ToastProvider } from "../toast-context";
 import { ReviewDetailPage } from "./ReviewDetailPage";
 
 vi.mock("../api", () => ({
@@ -17,7 +18,16 @@ vi.mock("../api", () => ({
   reviewVideoSrc: (url: string) => url,
 }));
 
+vi.mock("../share-link", async () => {
+  const actual = await vi.importActual<typeof import("../share-link")>("../share-link");
+  return {
+    ...actual,
+    copyTextToClipboard: vi.fn(),
+  };
+});
+
 import * as api from "../api";
+import { copyTextToClipboard } from "../share-link";
 
 const publishedReview = {
   id: 9,
@@ -105,9 +115,11 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     render(
       <MemoryRouter initialEntries={["/reviews/9"]}>
         <AuthProvider>
-          <Routes>
-            <Route path="/reviews/:id" element={<ReviewDetailPage />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -117,6 +129,8 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     expect(screen.getByLabelText("Review status")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Bay car" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Cue cards" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Review actions")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();
     expect(screen.getByText("0 likes")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Like" }));
@@ -128,14 +142,42 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     });
   });
 
+  it("copies the absolute review URL with a success toast", async () => {
+    vi.mocked(copyTextToClipboard).mockResolvedValue(true);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/reviews/9"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Copy link" }));
+    expect(copyTextToClipboard).toHaveBeenCalled();
+    const copied = vi.mocked(copyTextToClipboard).mock.calls[0]?.[0] ?? "";
+    expect(copied).toMatch(/\/reviews\/9$/);
+    expect(await screen.findByRole("status")).toHaveTextContent("Link copied.");
+    // Cue cards / playback stay available beside Copy link.
+    expect(screen.getByRole("heading", { name: "Cue cards" })).toBeInTheDocument();
+    expect(document.querySelector("video")).not.toBeNull();
+  });
+
   it("shows dual lane cars for a drag race", async () => {
     vi.mocked(api.fetchReview).mockResolvedValue({ review: { ...dragRaceReview } });
     render(
       <MemoryRouter initialEntries={["/reviews/12"]}>
         <AuthProvider>
-          <Routes>
-            <Route path="/reviews/:id" element={<ReviewDetailPage />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
@@ -171,9 +213,11 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     render(
       <MemoryRouter initialEntries={["/reviews/9"]}>
         <AuthProvider>
-          <Routes>
-            <Route path="/reviews/:id" element={<ReviewDetailPage />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>,
     );
