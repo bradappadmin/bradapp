@@ -39,6 +39,8 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByRole("heading", { name: "Find, sort, and filter" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sort cars in the bay" })).toBeInTheDocument();
     expect(document.getElementById("cars-sort")).not.toBeNull();
+    expect(screen.getByRole("heading", { name: "Top Trumps peek on Cars" })).toBeInTheDocument();
+    expect(document.getElementById("cars-catalogue-trump-stats")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Sort Members in the bay" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Favourites: challenge and trade" }),
@@ -295,6 +297,22 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Clear filters resets search, filters, and sort back to Lowest price/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Catalogue Top Trumps peek is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/the same stats Play uses/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Cars Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -805,7 +823,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getAllByRole("link", { name: "Open Home" }).every((a) => a.getAttribute("href") === "/"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(4);
+    expect(screen.getAllByRole("link", { name: "Open Cars" }).length).toBeGreaterThanOrEqual(5);
     expect(screen.getAllByRole("link", { name: "Open Cars" })[0]).toHaveAttribute("href", "/cars");
     expect(
       screen.getByText(
@@ -818,6 +836,11 @@ describe("HowToPage Midnight Garage UI", () => {
         /Find \+ filters; Sort the bay \(Highest \/ Lowest price, Name A–Z \/ Z–A, same as Favourites \/ My cars\)/i,
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        /Top Trumps peek under each studio photo \(Power \/ 0–60 \/ Top speed\)/i,
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
     expect(
       screen.getAllByRole("link", { name: "Cars" }).some((el) => el.getAttribute("href") === "/cars"),
     ).toBe(true);

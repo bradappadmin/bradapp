@@ -65,7 +65,14 @@ const STEPS: Step[] = [
   {
     id: "cars-sort",
     title: "Sort cars in the bay",
-    body: "On Cars, Sort the bay orders the catalogue: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Favourites and My cars. The choice stays in the URL alongside Find and the make/body/price filters. Clear filters resets search, filters, and sort back to Lowest price. Compare on each card still feeds the shared tray; empty-bay and no-match CTAs stay.",
+    body: "On Cars, Sort the bay orders the catalogue: Highest price, Lowest price, Name A–Z, or Name Z–A — same options as Favourites and My cars. The choice stays in the URL alongside Find and the make/body/price filters. Clear filters resets search, filters, and sort back to Lowest price. Compare on each card still feeds the shared tray; empty-bay and no-match CTAs stay. Catalogue Top Trumps peek is the next step.",
+    to: "/cars",
+    cta: "Open Cars",
+  },
+  {
+    id: "cars-catalogue-trump-stats",
+    title: "Top Trumps peek on Cars",
+    body: "On the Cars catalogue, each photo-first media card shows a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same stats Play uses. Find, Sort the bay, Compare, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard.",
     to: "/cars",
     cta: "Open Cars",
   },
@@ -341,7 +348,8 @@ export function HowToPage() {
             hidden for gifts / missing), Favourites Compare into that same tray, photo-first cars with
             Find, listing Compare and Copy link, listing View reviews (/reviews?q=Make+Model when
             films exist), listing View seller (/members/:id; hidden for self / house), Cars Sort the
-            bay (Highest / Lowest price, Name A–Z / Z–A), Favourites
+            bay (Highest / Lowest price, Name A–Z / Z–A), Cars Top Trumps peek under each studio photo
+            (Power / 0–60 / Top speed), Favourites
             challenge and trade CTAs, Members directory Sort the bay (Name A–Z /
             Z–A, Most / Least cars), Challenge, Offer trade, and Gift Brad Coins, Favourites and My
             cars Sort the bay (Highest / Lowest price, Name A–Z / Z–A), leaderboard Challenge and
@@ -474,9 +482,10 @@ export function HowToPage() {
                 Cars
               </Link>{" "}
               — Find + filters; Sort the bay (Highest / Lowest price, Name A–Z / Z–A, same as
-              Favourites / My cars); Compare into the tray; on a listing, View reviews →
-              /reviews?q=Make+Model when films exist (hides when none); View seller → /members/:id
-              when a member owns it (hidden for self or house); Clear filters when nothing matches.
+              Favourites / My cars); Top Trumps peek under each studio photo (Power / 0–60 / Top
+              speed); Compare into the tray; on a listing, View reviews → /reviews?q=Make+Model when
+              films exist (hides when none); View seller → /members/:id when a member owns it (hidden
+              for self or house); Clear filters when nothing matches.
             </li>
             <li>
               <Link to="/garage" className="text-lime no-underline hover:underline">
