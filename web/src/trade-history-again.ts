@@ -28,6 +28,8 @@ export function tradeAgainHref(trade: CompletedTrade): string | null {
  * - hidden — missing partner id
  */
 export function tradeAgainAction(trade: CompletedTrade): TradeAgainAction {
+  // Only accepted swaps transferred cars — Trade again is for those rows.
+  if (trade.status !== "accepted") return "hidden";
   const partnerId = trade.counterpartyUserId;
   if (!Number.isFinite(partnerId) || partnerId <= 0) return "hidden";
   if (!trade.theirCarAvailable) return "disabled";

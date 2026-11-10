@@ -5,6 +5,7 @@ describe("completed trade history shape", () => {
   it("describes an accepted swap from the offerer view", () => {
     const row: CompletedTrade = {
       id: 1,
+      status: "accepted",
       resolvedAt: "2026-11-09T12:00:00.000Z",
       counterpartyName: "Player B",
       counterpartyUserId: 22,
@@ -14,6 +15,7 @@ describe("completed trade history shape", () => {
       youGot: { listingId: 11, make: "BMW", model: "M2", trimName: "" },
       youWere: "offerer",
     };
+    expect(row.status).toBe("accepted");
     expect(row.counterpartyName).toBe("Player B");
     expect(row.counterpartyUserId).toBe(22);
     expect(row.theirCarAvailable).toBe(true);

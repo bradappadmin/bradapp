@@ -587,8 +587,11 @@ export type CompletedTradeCar = {
   trimName: string;
 };
 
+export type TradeHistoryStatus = "accepted" | "declined" | "cancelled";
+
 export type CompletedTrade = {
   id: number;
+  status: TradeHistoryStatus;
   resolvedAt: string;
   counterpartyName: string;
   /** Other member in this swap — for Trade again deep-links. */

@@ -4,6 +4,7 @@ import { tradeAgainAction, tradeAgainHref } from "./trade-history-again";
 
 const base: CompletedTrade = {
   id: 5,
+  status: "accepted",
   resolvedAt: "2026-11-09T20:00:00.000Z",
   counterpartyName: "Sam Bay",
   counterpartyUserId: 177,
@@ -40,5 +41,10 @@ describe("trade history Trade again deep-links", () => {
     const missing: CompletedTrade = { ...base, counterpartyUserId: 0 };
     expect(tradeAgainAction(missing)).toBe("hidden");
     expect(tradeAgainHref(missing)).toBeNull();
+  });
+
+  it("hides Trade again for declined or cancelled rows", () => {
+    expect(tradeAgainAction({ ...base, status: "declined" })).toBe("hidden");
+    expect(tradeAgainAction({ ...base, status: "cancelled" })).toBe("hidden");
   });
 });

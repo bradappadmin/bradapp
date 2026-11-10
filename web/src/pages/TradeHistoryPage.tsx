@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import type { CompletedTrade, CompletedTradeCar } from "../api";
 import { useAuth } from "../auth-context";
@@ -8,6 +8,13 @@ import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
 import { tradeAgainAction, tradeAgainHref } from "../trade-history-again";
+import {
+  filterTradesHistoryByStatus,
+  parseTradesHistoryStatusGroup,
+  tradeHistoryStatusLabel,
+  TRADES_HISTORY_STATUS_OPTIONS,
+  type TradesHistoryStatusGroup,
+} from "../trades-history-status-filter";
 
 /** History payload has make/model but not paint — Midnight Black keeps studio thumbs on-brand. */
 const HISTORY_STUDIO_COLOUR = "Midnight Black";
@@ -26,6 +33,36 @@ function roleBadge(youWere: CompletedTrade["youWere"]): { label: string; classNa
       };
     default: {
       const _exhaustive: never = youWere;
+      return _exhaustive;
+    }
+  }
+}
+
+function statusBadgeClass(status: CompletedTrade["status"]): string {
+  switch (status) {
+    case "accepted":
+      return "border-lime/40 bg-lime/10 text-lime";
+    case "declined":
+      return "border-rose/40 bg-rose/10 text-rose";
+    case "cancelled":
+      return "border-white/20 bg-bay-panel/60 text-steel";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+function statusRowClass(status: CompletedTrade["status"]): string {
+  switch (status) {
+    case "accepted":
+      return "border-lime/30 shadow-[inset_3px_0_0_0_rgba(163,230,53,0.85)]";
+    case "declined":
+      return "border-rose/35 shadow-[inset_3px_0_0_0_rgba(251,113,133,0.85)]";
+    case "cancelled":
+      return "border-white/15 shadow-[inset_3px_0_0_0_rgba(226,232,240,0.35)]";
+    default: {
+      const _exhaustive: never = status;
       return _exhaustive;
     }
   }
@@ -66,9 +103,17 @@ function TradeCarThumb({
 
 export function TradeHistoryPage() {
   const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusGroup = parseTradesHistoryStatusGroup(searchParams.get("status"));
   const [trades, setTrades] = useState<CompletedTrade[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const visible = useMemo(
+    () => filterTradesHistoryByStatus(trades, statusGroup),
+    [trades, statusGroup],
+  );
+  const filtersOn = statusGroup !== "all";
 
   useEffect(() => {
     if (!user) return;
@@ -99,8 +144,22 @@ export function TradeHistoryPage() {
     return <Navigate to="/signin" replace />;
   }
 
+  function setStatusGroup(next: TradesHistoryStatusGroup) {
+    const params = new URLSearchParams();
+    if (next !== "all") params.set("status", next);
+    setSearchParams(params, { replace: true });
+  }
+
+  function onClearFilters() {
+    setStatusGroup("all");
+  }
+
+  const completedCount = trades.filter((t) => t.status === "accepted").length;
+  const declinedCount = trades.filter(
+    (t) => t.status === "declined" || t.status === "cancelled",
+  ).length;
   const offered = trades.filter((t) => t.youWere === "offerer").length;
-  const accepted = trades.filter((t) => t.youWere === "receiver").length;
+  const acceptedRole = trades.filter((t) => t.youWere === "receiver").length;
 
   return (
     <div className="relative min-h-screen">
@@ -113,20 +172,23 @@ export function TradeHistoryPage() {
               Free card trades · Midnight garage
             </p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Completed trades
+              Trade history
             </h1>
             <span className="bay-brand-line mt-4 block h-1 w-24 rounded-full sm:w-28" />
             <p className="mt-4 text-sm leading-relaxed text-steel sm:text-base">
-              Accepted swaps — who you traded with and which cars changed hands. Newest first. Still
-              zero Brad Coins.
+              Resolved free swaps — completed, declined, or cancelled. Newest first. Still zero Brad
+              Coins.
             </p>
             {!loading && trades.length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2" aria-label="Completed trade summary">
+              <div className="mt-4 flex flex-wrap gap-2" aria-label="Trade history summary">
                 <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
-                  {trades.length} completed
+                  {completedCount} completed
+                </span>
+                <span className="rounded-md border border-rose/35 bg-rose/10 px-3 py-1.5 font-display text-xs font-semibold text-rose">
+                  {declinedCount} declined
                 </span>
                 <span className="rounded-md border border-white/12 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
-                  {offered} offered · {accepted} accepted
+                  {offered} offered · {acceptedRole} received
                 </span>
               </div>
             ) : null}
@@ -147,6 +209,70 @@ export function TradeHistoryPage() {
           </div>
         </header>
 
+        {trades.length > 0 || filtersOn ? (
+          <section
+            className="play-panel bay-rise-delay mt-8 rounded-md border p-4 sm:p-5"
+            aria-labelledby="trade-history-filter-heading"
+          >
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+              <h2
+                id="trade-history-filter-heading"
+                className="font-display text-lg text-mist sm:text-xl"
+              >
+                Filter status
+              </h2>
+              <p className="text-xs text-steel">Stays in the URL</p>
+            </div>
+            <div className="mt-4">
+              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-steel">Status</p>
+              <div
+                className="flex flex-wrap gap-2"
+                role="group"
+                aria-label="Filter trades by status"
+              >
+                {TRADES_HISTORY_STATUS_OPTIONS.map((option) => {
+                  const active = statusGroup === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setStatusGroup(option.id)}
+                      className={`rounded-md border px-3 py-1.5 font-display text-sm transition ${
+                        active
+                          ? "border-lime/50 bg-lime/10 text-lime"
+                          : "border-white/15 text-mist hover:border-lime/35 hover:text-lime"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-steel">
+                Declined includes cancelled offers.
+              </p>
+            </div>
+            {filtersOn ? (
+              <p className="mt-4 text-sm text-steel">
+                Showing{" "}
+                {!loading ? (
+                  <>
+                    {visible.length} of {trades.length}{" "}
+                    {trades.length === 1 ? "trade" : "trades"}
+                  </>
+                ) : (
+                  "…"
+                )}{" "}
+                ·{" "}
+                <span className="font-display text-lime">
+                  {TRADES_HISTORY_STATUS_OPTIONS.find((o) => o.id === statusGroup)?.label}
+                </span>
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
         {error ? <p className="mt-6 text-sm text-rose">{error}</p> : null}
 
@@ -154,7 +280,7 @@ export function TradeHistoryPage() {
           <div className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center">
             <p className="font-display text-lg text-mist">Quiet bay</p>
             <p className="mt-2 text-sm text-steel">
-              No completed trades yet. Offer a free swap from Trades.
+              No resolved trades yet. Offer a free swap from Trades.
             </p>
             <Link
               to="/trades"
@@ -165,19 +291,44 @@ export function TradeHistoryPage() {
           </div>
         ) : null}
 
-        {trades.length > 0 ? (
+        {!loading && trades.length > 0 && visible.length === 0 ? (
+          <div
+            className="play-panel bay-rise-delay mt-8 rounded-md border px-5 py-12 text-center"
+            role="status"
+          >
+            <p className="font-display text-xl text-mist sm:text-2xl">No matches</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
+              No{" "}
+              {statusGroup === "completed"
+                ? "completed"
+                : statusGroup === "declined"
+                  ? "declined"
+                  : ""}{" "}
+              trades in this bay yet. Clear the filter to see the full reel.
+            </p>
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="bay-cta mt-6 inline-flex items-center justify-center rounded-md bg-rose px-5 py-3 font-display text-sm font-semibold text-white transition hover:brightness-110"
+            >
+              Clear filter
+            </button>
+          </div>
+        ) : null}
+
+        {visible.length > 0 ? (
           <ul
             className="bay-rise-delay mt-8 flex flex-col gap-3"
-            aria-label="Completed free card trades"
+            aria-label="Free card trade history"
           >
-            {trades.map((trade) => {
+            {visible.map((trade) => {
               const role = roleBadge(trade.youWere);
               const again = tradeAgainAction(trade);
               const againHref = tradeAgainHref(trade);
               return (
                 <li
                   key={trade.id}
-                  className="play-panel rounded-md border border-lime/30 p-4 text-sm shadow-[inset_3px_0_0_0_rgba(163,230,53,0.85)] sm:p-5"
+                  className={`play-panel rounded-md border p-4 text-sm sm:p-5 ${statusRowClass(trade.status)}`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -190,8 +341,10 @@ export function TradeHistoryPage() {
                         >
                           {role.label}
                         </span>
-                        <span className="rounded border border-lime/40 bg-lime/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-lime">
-                          Accepted
+                        <span
+                          className={`rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${statusBadgeClass(trade.status)}`}
+                        >
+                          {tradeHistoryStatusLabel(trade.status)}
                         </span>
                       </div>
                       <p className="mt-1 text-xs text-steel">

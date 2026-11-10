@@ -7,8 +7,11 @@ export type CompletedTradeCar = {
   trimName: string;
 };
 
+export type TradeHistoryStatus = "accepted" | "declined" | "cancelled";
+
 export type CompletedTrade = {
   id: number;
+  status: TradeHistoryStatus;
   resolvedAt: string;
   counterpartyName: string;
   /** Other member in this swap — for Trade again deep-links. */
@@ -20,15 +23,16 @@ export type CompletedTrade = {
   theirCarListingId: number;
   /** True when the counterparty still owns `theirCarListingId`. */
   theirCarAvailable: boolean;
-  /** Car you gave away in this swap. */
+  /** Car you gave away in this swap (or would have, if declined/cancelled). */
   youGave: CompletedTradeCar;
-  /** Car you received in this swap. */
+  /** Car you received in this swap (or would have, if declined/cancelled). */
   youGot: CompletedTradeCar;
   youWere: "offerer" | "receiver";
 };
 
 type TradeRow = RowDataPacket & {
   id: number;
+  status: TradeHistoryStatus;
   from_user_id: number;
   to_user_id: number;
   offer_listing_id: number;
@@ -52,7 +56,7 @@ function toIso(value: Date | string | null | undefined, fallback: Date | string)
   return raw instanceof Date ? raw.toISOString() : new Date(raw).toISOString();
 }
 
-/** Accepted free card trades for this member, newest first. */
+/** Resolved free card trades (accepted, declined, cancelled) for this member, newest first. */
 export async function listCompletedTrades(
   userId: number,
   limit = 40,
@@ -62,6 +66,7 @@ export async function listCompletedTrades(
   const [rows] = await pool.query<TradeRow[]>(
     `SELECT
        t.id,
+       t.status,
        t.from_user_id,
        t.to_user_id,
        t.offer_listing_id,
@@ -85,7 +90,7 @@ export async function listCompletedTrades(
      INNER JOIN car_models ocm ON ocm.id = ol.car_model_id
      INNER JOIN listings rl ON rl.id = t.request_listing_id
      INNER JOIN car_models rcm ON rcm.id = rl.car_model_id
-     WHERE t.status = 'accepted'
+     WHERE t.status IN ('accepted', 'declined', 'cancelled')
        AND (t.from_user_id = ? OR t.to_user_id = ?)
      ORDER BY COALESCE(t.resolved_at, t.created_at) DESC, t.id DESC
      LIMIT ?`,
@@ -93,6 +98,7 @@ export async function listCompletedTrades(
   );
 
   return rows.map((row) => {
+    const status = row.status as TradeHistoryStatus;
     const youWere: "offerer" | "receiver" =
       Number(row.from_user_id) === userId ? "offerer" : "receiver";
     const offerCar: CompletedTradeCar = {
@@ -123,10 +129,12 @@ export async function listCompletedTrades(
         : row.request_owner_user_id == null
           ? null
           : Number(row.request_owner_user_id);
-    const theirCarAvailable = theirCarOwnerId === counterpartyUserId;
+    const theirCarAvailable =
+      status === "accepted" && theirCarOwnerId === counterpartyUserId;
 
     return {
       id: Number(row.id),
+      status,
       resolvedAt: toIso(row.resolved_at, row.created_at),
       counterpartyName,
       counterpartyUserId,
