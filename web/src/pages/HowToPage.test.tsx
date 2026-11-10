@@ -61,6 +61,10 @@ describe("HowToPage Midnight Garage UI", () => {
       screen.getByRole("heading", { name: "Update paint on a for-sale car" }),
     ).toBeInTheDocument();
     expect(document.getElementById("garage-forsale-paint-edit")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Update price on a for-sale car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-forsale-price-edit")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "My cars bay value strip" })).toBeInTheDocument();
     expect(document.getElementById("garage-bay-value")).not.toBeNull();
     expect(
@@ -505,6 +509,18 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Update price on a for-sale car is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Update price on a for-sale car" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("garage-forsale-price-edit")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /tap a Quick price chip \(50 \/ 100 \/ 250 \/ 500 BC\) or type any Brad Coin amount, then Update price — the car stays listed; no need to unlist/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/My cars bay value strip is the next step/i),
     ).toBeInTheDocument();
     expect(
@@ -536,6 +552,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /My cars For sale Update paint \(change colour without unlisting, live thumb\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /My cars For sale Update price \(chips or free amount without unlisting\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1285,7 +1306,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /on For sale, Update paint changes colour without unlisting \(same live thumb\)/i,
+        /on For sale, Update paint changes colour without unlisting \(same live thumb\) and Update price saves a new asking price with chips or free amount without unlisting/i,
       ),
     ).toBeInTheDocument();
     expect(

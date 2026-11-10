@@ -205,21 +205,28 @@ const STEPS: Step[] = [
   {
     id: "garage-forsale-paint-edit",
     title: "Update paint on a for-sale car",
-    body: "On My cars For sale cards, change Paint (same curated studio colours as when you list — live studio thumb and card photo) and tap Update paint — the car stays listed; no need to unlist. Quick price chips, Update price, Unlist, showcase, Compare, Find, Sort the bay, bay value, and Top Trumps peek stay. My cars bay value strip is the next step.",
+    body: "On My cars For sale cards, change Paint (same curated studio colours as when you list — live studio thumb and card photo) and tap Update paint — the car stays listed; no need to unlist. Quick price chips, Update price, Unlist, showcase, Compare, Find, Sort the bay, bay value, and Top Trumps peek stay. Update price on a for-sale car is the next step.",
+    to: "/garage",
+    cta: "Open My cars",
+  },
+  {
+    id: "garage-forsale-price-edit",
+    title: "Update price on a for-sale car",
+    body: "On My cars For sale cards, tap a Quick price chip (50 / 100 / 250 / 500 BC) or type any Brad Coin amount, then Update price — the car stays listed; no need to unlist. Update paint, Unlist, showcase, Compare, Find, Sort the bay, bay value, and Top Trumps peek stay. My cars bay value strip is the next step.",
     to: "/garage",
     cta: "Open My cars",
   },
   {
     id: "garage-bay-value",
     title: "My cars bay value strip",
-    body: "On My cars when you hold at least one car, one Midnight Garage bay strip under the hero shows owned car count and total Brad Coin value — list / fair listing prices for cars you hold now (owned and for sale). Sold history stays out of the total. The strip hides on an empty bay. Browse cars and How to sit on the strip; Find, Sort the bay, Quick price chips, Paint, Update paint on For sale, Compare, and showcase stay. Top Trumps peek on My cars is the next step.",
+    body: "On My cars when you hold at least one car, one Midnight Garage bay strip under the hero shows owned car count and total Brad Coin value — list / fair listing prices for cars you hold now (owned and for sale). Sold history stays out of the total. The strip hides on an empty bay. Browse cars and How to sit on the strip; Find, Sort the bay, Quick price chips, Paint, Update paint / Update price on For sale, Compare, and showcase stay. Top Trumps peek on My cars is the next step.",
     to: "/garage",
     cta: "Open My cars",
   },
   {
     id: "garage-trump-stats",
     title: "Top Trumps peek on My cars",
-    body: "On My cars, owned and for-sale photo-first media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars and Favourites. Bay value strip, Quick price chips, Paint, Update paint on For sale, Compare, showcase, Find, Sort the bay, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard.",
+    body: "On My cars, owned and for-sale photo-first media cards show a compact Top Trumps peek under the studio photo: Power, 0–60, and Top speed — the same strip as Cars and Favourites. Bay value strip, Quick price chips, Paint, Update paint / Update price on For sale, Compare, showcase, Find, Sort the bay, and empty/no-match CTAs stay. Tight Midnight Garage strip — not a stats dashboard.",
     to: "/garage",
     cta: "Open My cars",
   },
@@ -530,7 +537,8 @@ export function HowToPage() {
             Quick price chips (50 / 100 / 250 /
             500 BC) when listing or updating a sale, My cars Paint colour (same curated studio paints
             as admin, live thumb) when listing or updating a sale, My cars For sale Update paint
-            (change colour without unlisting, live thumb), My cars bay value strip (owned
+            (change colour without unlisting, live thumb), My cars For sale Update price (chips or
+            free amount without unlisting), My cars bay value strip (owned
             count + total BC; sold history excluded), gift Quick amount chips, Coin ledger Find entry
             plus type chips (All / Earn / Spend / Gift / Admin), admin coin-adjust Quick amount chips
             (+25 / +50 / +100 / +250 BC) for Brad and Napwood, admin inventory Sort the bay (Highest /
@@ -688,7 +696,8 @@ export function HowToPage() {
               100 / 250 / 500 BC) or free-form when listing / updating a sale; Paint colour (same
               curated studio paints as admin) with a live studio thumb — saves with List for sale /
               Update price so catalogue photos match; on For sale, Update paint changes colour
-              without unlisting (same live thumb); Compare garage cards into the same tray as Cars
+              without unlisting (same live thumb) and Update price saves a new asking price with
+              chips or free amount without unlisting; Compare garage cards into the same tray as Cars
               / Favourites; pin your showcase, and Copy garage link (same URL as profile Copy link).
             </li>
             <li>
