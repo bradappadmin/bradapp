@@ -137,8 +137,9 @@ export function LeaderboardPage() {
             </h1>
             <span className="bay-brand-line mt-4 block h-1 w-28 rounded-full sm:w-36" />
             <p className="mt-5 text-sm leading-relaxed text-steel sm:text-base">
-              Who’s richest in the bay. Ranked by Brad Coin balance; each row shows a highlight car
-              from their garage plus Top Trumps wins.
+              Who’s richest in the bay. This week’s Top Trumps cup tracks London-week wins (+
+              {weeklyCup?.prizeAmount ?? 50} BC prize). All-time ranks are by Brad Coin balance, with
+              a highlight car and career wins.
             </p>
             {!loading ? (
               <div className="mt-4 flex flex-wrap gap-2" aria-label="Leaderboard bay notes">
@@ -176,12 +177,6 @@ export function LeaderboardPage() {
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
         {loading ? <p className="mt-8 text-steel">Loading…</p> : null}
-
-        {!loading && weeklyCup ? (
-          <div className="bay-rise-delay mt-8">
-            <WeeklyCupPanel cup={weeklyCup} viewerId={user?.id} />
-          </div>
-        ) : null}
 
         <form
           onSubmit={onSubmit}
@@ -242,52 +237,59 @@ export function LeaderboardPage() {
           ) : null}
         </form>
 
-        {!loading && topThree.length > 0 ? (
-          <section
-            className="bay-rise-delay mt-8"
-            aria-label="Top three on the podium"
-          >
-            <p className="text-xs uppercase tracking-[0.2em] text-steel">Podium</p>
-            <ul className="mt-3 grid gap-3 sm:grid-cols-3">
-              {topThree.map((entry) => {
-                const isYou = Boolean(user && entry.id === user.id);
-                const isMatch = filtersOn && matchesLeaderboardMemberQuery(entry, qFromUrl);
-                return (
-                  <li key={`podium-${entry.id}`}>
-                    <Link
-                      to={`/members/${entry.id}`}
-                      className={`play-panel flex flex-col rounded-md border p-4 no-underline transition hover:border-lime/35 ${rowPanelClass(entry.rank, isYou)} ${
-                        isMatch ? "ring-2 ring-lime/45" : filtersOn ? "opacity-55" : ""
-                      }`}
-                      aria-current={isMatch ? "true" : undefined}
-                    >
-                      <span
-                        className={`inline-flex w-fit rounded-md border px-2.5 py-1 font-display text-xs font-semibold ${podiumRankClass(entry.rank)}`}
-                      >
-                        #{entry.rank}
-                      </span>
-                      <p className="mt-3 font-display text-base font-semibold text-mist">
-                        {entry.displayName}
-                        {isYou ? " (you)" : ""}
-                      </p>
-                      <p className="mt-1 font-display text-sm text-lime">
-                        {formatCoins(entry.coinBalance)}
-                      </p>
-                      {isMatch ? (
-                        <p className="mt-2 text-[10px] uppercase tracking-wide text-lime">Match</p>
-                      ) : null}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+        {!loading && (weeklyCup || topThree.length > 0) ? (
+          <div className="bay-rise-delay mt-8 grid gap-6 lg:grid-cols-2 lg:items-start">
+            {weeklyCup ? (
+              <WeeklyCupPanel cup={weeklyCup} viewerId={user?.id} />
+            ) : null}
+            {topThree.length > 0 ? (
+              <section aria-label="Top three on the podium">
+                <p className="text-xs uppercase tracking-[0.2em] text-steel">All-time podium</p>
+                <p className="mt-1 font-display text-lg text-mist sm:text-xl">Brad Coin ranks</p>
+                <ul className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                  {topThree.map((entry) => {
+                    const isYou = Boolean(user && entry.id === user.id);
+                    const isMatch = filtersOn && matchesLeaderboardMemberQuery(entry, qFromUrl);
+                    return (
+                      <li key={`podium-${entry.id}`}>
+                        <Link
+                          to={`/members/${entry.id}`}
+                          className={`play-panel flex flex-col rounded-md border p-4 no-underline transition hover:border-lime/35 ${rowPanelClass(entry.rank, isYou)} ${
+                            isMatch ? "ring-2 ring-lime/45" : filtersOn ? "opacity-55" : ""
+                          }`}
+                          aria-current={isMatch ? "true" : undefined}
+                        >
+                          <span
+                            className={`inline-flex w-fit rounded-md border px-2.5 py-1 font-display text-xs font-semibold ${podiumRankClass(entry.rank)}`}
+                          >
+                            #{entry.rank}
+                          </span>
+                          <p className="mt-3 font-display text-base font-semibold text-mist">
+                            {entry.displayName}
+                            {isYou ? " (you)" : ""}
+                          </p>
+                          <p className="mt-1 font-display text-sm text-lime">
+                            {formatCoins(entry.coinBalance)}
+                          </p>
+                          {isMatch ? (
+                            <p className="mt-2 text-[10px] uppercase tracking-wide text-lime">
+                              Match
+                            </p>
+                          ) : null}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ) : null}
+          </div>
         ) : null}
 
         <section className="bay-rise-delay mt-10" aria-labelledby="leaderboard-standings">
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="leaderboard-standings" className="font-display text-xl text-mist">
-              Standings
+              All-time standings
             </h2>
             {!loading ? (
               <p className="text-sm text-steel">

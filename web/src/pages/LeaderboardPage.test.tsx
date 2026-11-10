@@ -127,11 +127,19 @@ describe("LeaderboardPage Midnight Garage UI", () => {
     expect(await screen.findByRole("heading", { name: "Brad Coin leaderboard" })).toBeInTheDocument();
     expect(screen.getByText("Midnight garage")).toBeInTheDocument();
     expect(document.querySelector(".play-bay-glow")).not.toBeNull();
-    expect(await screen.findByLabelText("Top three on the podium")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Top Trumps cup" })).toBeInTheDocument();
-    expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Standings" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Find a member" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /This week.?s cup standings/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Europe\/London/i)).toBeInTheDocument();
+    expect(screen.getByText(/2026-W46 · \+50 BC prize/i)).toBeInTheDocument();
+    const cupStandings = screen.getByLabelText("This week Top Trumps cup standings");
+    expect(cupStandings).toBeInTheDocument();
+    expect(cupStandings).toHaveTextContent(/Bay Friend/);
+    expect(cupStandings).toHaveTextContent(/3 wins/);
+    expect(screen.getByLabelText("Top three on the podium")).toBeInTheDocument();
+    expect(screen.getByText("All-time podium")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "All-time standings" })).toBeInTheDocument();
 
     const garageLink = await screen.findByRole("link", {
       name: /Bay Friend, rank 1, open garage/i,

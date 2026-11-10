@@ -12,6 +12,7 @@ export function WeeklyCupPanel({
 }) {
   const top = cup.standings.slice(0, compact ? 5 : 10);
   const prev = cup.previousAward;
+  const heading = compact ? "Top Trumps cup" : "This week’s cup standings";
 
   return (
     <section
@@ -20,18 +21,20 @@ export function WeeklyCupPanel({
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-steel">This week</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-steel">
+            This week · Europe/London
+          </p>
           <h2 id="weekly-cup-heading" className="mt-1 font-display text-lg text-mist sm:text-xl">
-            Top Trumps cup
+            {heading}
           </h2>
         </div>
         <span className="rounded-md border border-lime/30 bg-lime/10 px-3 py-1.5 font-display text-xs font-semibold text-lime">
-          {cup.weekKey} · +{cup.prizeAmount} BC
+          {cup.weekKey} · +{cup.prizeAmount} BC prize
         </span>
       </div>
       <p className="mt-2 text-sm leading-relaxed text-steel">
-        House and PvP wins count for the Europe/London week. Last week’s top scorer (lowest id on a
-        tie) gets {cup.prizeAmount} Brad Coins once.
+        House and PvP wins count for the current London ISO week. Last week’s top scorer (lowest id
+        on a tie) gets +{cup.prizeAmount} Brad Coins once — play money only.
       </p>
 
       {prev.winnerUserId != null && prev.prizeAmount > 0 ? (
