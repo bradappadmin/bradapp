@@ -51,7 +51,7 @@ const STEPS: Step[] = [
   {
     id: "play",
     title: "Play Top Trumps",
-    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
+    body: "Put one of your cars up against the house or another member. Pick a category — higher BHP and top speed win; lower 0–60 wins. Challenge from a listing, Favourites, a public garage, Challenge to Top Trumps on the Members directory (not yourself), or Challenge to Top Trumps on the leaderboard standings and cup (not yourself), rematch on Play when you’re done, or Rematch from Match history. No car in the bay yet? Play shows an empty bay with Browse cars / My garage / Members. Playing earns Brad Coins. Win streaks pay extras: 3 wins +15 BC, 5 wins +40 BC (a loss resets the streak).",
     to: "/play",
     cta: "Open Play",
   },
@@ -65,7 +65,7 @@ const STEPS: Step[] = [
   {
     id: "trades",
     title: "Free card trades",
-    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, Offer trade from Favourites, or Offer trade on the leaderboard standings and cup (not yourself). An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
+    body: "Swap cars without spending Brad Coins. Start from Trades, a member’s garage, Offer trade on someone else’s listing, Offer trade from Favourites, Offer trade on the Members directory (not yourself), or Offer trade on the leaderboard standings and cup (not yourself). An empty inbox points you to Members or Cars. The nav Trades badge counts pending offers waiting on you. Accept or decline — photo cards show what you’re swapping. History chips filter Completed / Declined; Trade again reopens compose when they still have that car.",
     to: "/trades",
     cta: "Open Trades",
   },
@@ -120,10 +120,11 @@ export function HowToPage() {
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-steel sm:text-base">
             A short tour of the midnight garage: invites, the daily login bonus and login streak
             bonuses, Brad Coins (tap the header balance for your ledger), photo-first cars with Find,
-            listing Compare and Copy link, Favourites challenge and trade CTAs, leaderboard Challenge
-            and Offer trade, Copy garage link on member profiles, gift Quick amount chips, Top Trumps
-            streaks and this week’s cup standings, free trades, member gifts, drag races, empty-bay
-            next steps, and your bay showcase. Nothing here spends real money.
+            listing Compare and Copy link, Favourites challenge and trade CTAs, Members directory
+            Challenge and Offer trade, leaderboard Challenge and Offer trade, Copy garage link on
+            member profiles, gift Quick amount chips, Top Trumps streaks and this week’s cup
+            standings, free trades, member gifts, drag races, empty-bay next steps, and your bay
+            showcase. Nothing here spends real money.
           </p>
           {!user ? (
             <p className="mt-4 text-sm text-steel">
@@ -195,8 +196,9 @@ export function HowToPage() {
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
               </Link>{" "}
-              — Find a member + Has cars; open a garage, Copy garage link, then challenge, offer a
-              free trade, or gift Brad Coins.
+              — Find a member + Has cars; Challenge to Top Trumps or Offer trade on other directory
+              cards (sign in; hidden on your own row); open a garage, Copy garage link, or gift Brad
+              Coins.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">
@@ -210,8 +212,8 @@ export function HowToPage() {
               <Link to="/garage" className="text-lime no-underline hover:underline">
                 My cars
               </Link>{" "}
-              — Find a car, Sort the bay, garage value, list prices, pin your showcase, and Copy
-              garage link.
+              — Find a car, Sort the bay, Compare garage cards into the same tray as Cars /
+              Favourites, garage value, list prices, pin your showcase, and Copy garage link.
             </li>
             <li>
               <Link to="/favourites" className="text-lime no-underline hover:underline">
@@ -225,7 +227,8 @@ export function HowToPage() {
                 Compare
               </Link>{" "}
               — start from a listing’s Compare CTA (tray picks, opens side by side when two are
-              ready), or Favourites / Cars; empty bay sends you to Favourites or Browse cars.
+              ready), Favourites / Cars, or Compare on My cars; empty bay sends you to Favourites or
+              Browse cars.
             </li>
             <li>
               <Link to="/ledger" className="text-lime no-underline hover:underline">

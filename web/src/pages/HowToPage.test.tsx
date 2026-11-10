@@ -67,6 +67,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(screen.getByText(/cue cards and playback stay/i)).toBeInTheDocument();
     expect(screen.getByText(/listing Compare and Copy link/i)).toBeInTheDocument();
     expect(screen.getByText(/header balance for your ledger/i)).toBeInTheDocument();
+    expect(screen.getByText(/Members directory Challenge and Offer trade/i)).toBeInTheDocument();
     expect(screen.getByText(/Offer trade and Challenge to Top Trumps/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Favourites badge shows how many/i)).toBeInTheDocument();
     expect(screen.getByText(/nav Trades badge counts pending offers/i)).toBeInTheDocument();
@@ -85,8 +86,12 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Challenge to Top Trumps on the Members directory/i),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Challenge to Top Trumps on the leaderboard standings and cup/i),
     ).toBeInTheDocument();
+    expect(screen.getByText(/Offer trade on the Members directory/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Offer trade on the leaderboard standings and cup/i),
     ).toBeInTheDocument();
@@ -119,6 +124,7 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(/start from a listing.?s Compare CTA \(tray picks/i),
     ).toBeInTheDocument();
+    expect(screen.getByText(/or Compare on My cars/i)).toBeInTheDocument();
     expect(screen.getByText(/empty bay sends you to Favourites or Browse cars/i)).toBeInTheDocument();
     expect(screen.getByText(/empty inbox points to Members \/ Browse cars for sale/i)).toBeInTheDocument();
     expect(screen.getByText(/Offer trade or Challenge to Top Trumps/i)).toBeInTheDocument();
@@ -135,7 +141,14 @@ describe("HowToPage Midnight Garage UI", () => {
         /Challenge to Top Trumps or Offer trade on other members.? standings and cup/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/open a garage, Copy garage link, then challenge/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Challenge to Top Trumps or Offer trade on other directory cards/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compare garage cards into the same tray as Cars/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/pin your showcase, and Copy garage link/i)).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Open Sign up" })).toHaveAttribute("href", "/signup");
