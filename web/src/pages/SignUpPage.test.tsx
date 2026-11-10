@@ -68,4 +68,17 @@ describe("SignUpPage Midnight Garage UI", () => {
     expect(screen.getByText(/invite-only right now/i)).toBeInTheDocument();
     expect(await screen.findByText(/Invite required/i)).toBeInTheDocument();
   });
+
+  it("prefills the invite code from the signup link query", async () => {
+    render(
+      <MemoryRouter initialEntries={["/signup?invite=FAMILY-BAY-2026"]}>
+        <AuthProvider>
+          <SignUpPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const field = await screen.findByLabelText(/Family invite code \(optional\)/i);
+    expect(field).toHaveValue("FAMILY-BAY-2026");
+  });
 });

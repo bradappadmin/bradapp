@@ -23,6 +23,13 @@ export function garageSharePath(memberUserId: number): string {
   return memberProfileSharePath(memberUserId);
 }
 
+/** Signup path with a family invite code prefilled (`/signup?invite=`). */
+export function inviteSignupPath(inviteCode: string): string {
+  const code = inviteCode.trim();
+  if (!code) return "/signup";
+  return `/signup?invite=${encodeURIComponent(code)}`;
+}
+
 export function absoluteShareUrl(
   path: string,
   origin: string = typeof window !== "undefined" ? window.location.origin : "",

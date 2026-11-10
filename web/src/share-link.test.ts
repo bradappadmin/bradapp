@@ -4,18 +4,24 @@ import {
   compareSharePath,
   copyTextToClipboard,
   garageSharePath,
+  inviteSignupPath,
   listingSharePath,
   memberProfileSharePath,
   reviewSharePath,
 } from "./share-link";
 
 describe("share link", () => {
-  it("builds listing, compare, review, and member profile paths and absolute URLs", () => {
+  it("builds listing, compare, review, member profile, and invite signup paths and absolute URLs", () => {
     expect(listingSharePath(42)).toBe("/cars/42");
     expect(compareSharePath(1, 2)).toBe("/compare?a=1&b=2");
     expect(reviewSharePath(9)).toBe("/reviews/9");
     expect(memberProfileSharePath(7)).toBe("/members/7");
     expect(garageSharePath(7)).toBe("/members/7");
+    expect(inviteSignupPath("FAMILY-BAY-2026")).toBe("/signup?invite=FAMILY-BAY-2026");
+    expect(inviteSignupPath("  code/with spaces  ")).toBe(
+      "/signup?invite=code%2Fwith%20spaces",
+    );
+    expect(inviteSignupPath("")).toBe("/signup");
     expect(absoluteShareUrl("/cars/42", "https://bay.example")).toBe(
       "https://bay.example/cars/42",
     );
@@ -27,6 +33,9 @@ describe("share link", () => {
     );
     expect(absoluteShareUrl(memberProfileSharePath(7), "https://bay.example")).toBe(
       "https://bay.example/members/7",
+    );
+    expect(absoluteShareUrl(inviteSignupPath("FAMILY-BAY-2026"), "https://bay.example")).toBe(
+      "https://bay.example/signup?invite=FAMILY-BAY-2026",
     );
   });
 

@@ -12,7 +12,7 @@ import {
 } from "../../admin-invites-filter";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
-import { copyTextToClipboard } from "../../share-link";
+import { absoluteShareUrl, copyTextToClipboard, inviteSignupPath } from "../../share-link";
 import { useToast } from "../../toast-context";
 
 const fieldClass =
@@ -42,7 +42,7 @@ function AdminInvitesInner() {
   const [code, setCode] = useState("");
   const [maxUses, setMaxUses] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copied, setCopied] = useState<{ id: number; kind: "code" | "link" } | null>(null);
 
   const visible = useMemo(
     () => filterAdminInvites(invites, qFromUrl, group),
@@ -180,15 +180,40 @@ function AdminInvitesInner() {
   async function onCopy(invite: FamilyInvite) {
     const ok = await copyTextToClipboard(invite.code);
     if (ok) {
-      setCopiedId(invite.id);
+      setCopied({ id: invite.id, kind: "code" });
       setError(null);
       const note = `Copied ${invite.code}.`;
       setMessage(note);
       toast.success(note);
-      window.setTimeout(() => setCopiedId((current) => (current === invite.id ? null : current)), 2000);
+      window.setTimeout(() => {
+        setCopied((current) =>
+          current?.id === invite.id && current.kind === "code" ? null : current,
+        );
+      }, 2000);
       return;
     }
     const msg = "Could not copy — select the code manually.";
+    setError(msg);
+    toast.error(msg);
+  }
+
+  async function onCopySignupLink(invite: FamilyInvite) {
+    const url = absoluteShareUrl(inviteSignupPath(invite.code));
+    const ok = await copyTextToClipboard(url);
+    if (ok) {
+      setCopied({ id: invite.id, kind: "link" });
+      setError(null);
+      const note = "Signup link copied.";
+      setMessage(note);
+      toast.success(note);
+      window.setTimeout(() => {
+        setCopied((current) =>
+          current?.id === invite.id && current.kind === "link" ? null : current,
+        );
+      }, 2000);
+      return;
+    }
+    const msg = "Could not copy signup link.";
     setError(msg);
     toast.error(msg);
   }
@@ -411,7 +436,8 @@ function AdminInvitesInner() {
               <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
                 No invite codes match
                 {qFromUrl ? ` “${qFromUrl}”` : " that status filter"}. Try another spelling or clear
-                the filters — create, require-invite, and Copy stay ready when codes return.
+                the filters — create, require-invite, Copy, and Copy signup link stay ready when
+                codes return.
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                 <button
@@ -463,14 +489,26 @@ function AdminInvitesInner() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {isActive ? (
-                    <button
-                      type="button"
-                      onClick={() => void onCopy(invite)}
-                      aria-label={`Copy invite code ${invite.code}`}
-                      className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/10"
-                    >
-                      {copiedId === invite.id ? "Copied" : "Copy"}
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => void onCopy(invite)}
+                        aria-label={`Copy invite code ${invite.code}`}
+                        className="rounded-md border border-lime/35 bg-bay-panel/70 px-4 py-2 font-display text-sm font-semibold text-lime transition hover:border-lime/60 hover:bg-lime/10"
+                      >
+                        {copied?.id === invite.id && copied.kind === "code" ? "Copied" : "Copy"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void onCopySignupLink(invite)}
+                        aria-label={`Copy signup link for ${invite.code}`}
+                        className="rounded-md border border-white/15 px-4 py-2 font-display text-sm font-semibold text-mist transition hover:border-lime/40 hover:text-lime"
+                      >
+                        {copied?.id === invite.id && copied.kind === "link"
+                          ? "Link copied"
+                          : "Copy signup link"}
+                      </button>
+                    </>
                   ) : null}
                   {!invite.revokedAt ? (
                     <button

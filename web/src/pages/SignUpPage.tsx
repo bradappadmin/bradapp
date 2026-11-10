@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import * as api from "../api";
 import { useAuth } from "../auth-context";
 import { AuthShell } from "../components/AuthShell";
@@ -10,13 +10,19 @@ const fieldClass =
 export function SignUpPage() {
   const { user, loading, setUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteFromUrl = (searchParams.get("invite") ?? "").trim();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  const [inviteCode, setInviteCode] = useState(inviteFromUrl);
   const [requireInviteCode, setRequireInviteCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setInviteCode(inviteFromUrl);
+  }, [inviteFromUrl]);
 
   useEffect(() => {
     let cancelled = false;
