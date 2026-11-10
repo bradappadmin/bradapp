@@ -557,6 +557,23 @@ describe("HowToPage Midnight Garage UI", () => {
       ),
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Compare studio heroes motion is the next step/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Compare studio heroes motion" }),
+    ).toBeInTheDocument();
+    expect(document.getElementById("compare-heroes-motion")).not.toBeNull();
+    expect(
+      screen.getByText(
+        /the dual photo-first studio heroes soft-fade and rise in \(right side a beat later\), ease the studio photo a little larger on hover\/focus, and drift a gentle bay light/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Prefers-reduced-motion keeps the heroes still \(no entrance \/ no photo ease \/ no bay pulse\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
       screen.getByText(/Challenge from Compare is the next step/i),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Challenge from Compare" })).toBeInTheDocument();
@@ -587,6 +604,11 @@ describe("HowToPage Midnight Garage UI", () => {
     expect(
       screen.getByText(
         /Compare Top Trumps category winners \(Power \/ 0–60 \/ Top speed, Play rules\)/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Compare studio heroes motion \(entrance fade\/rise, photo ease, reduced-motion\)/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1061,7 +1083,7 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Challenge → \/play\?opponent=&theirCar= and Offer trade → \/trades\?with=&theirCar= on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
+        /dual studio heroes motion \(entrance fade\/rise, photo ease; reduced-motion keeps still\); Category winners under the studio heroes for Power \/ 0–60 \/ Top speed \(Play rules; ties neutral\); Challenge → \/play\?opponent=&theirCar= and Offer trade → \/trades\?with=&theirCar= on a member-owned hero \(hidden for self \/ house \/ missing\); empty bay sends you to Favourites or Browse cars/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -1175,7 +1197,7 @@ describe("HowToPage Midnight Garage UI", () => {
         .getAllByRole("link", { name: "Open Favourites" })
         .every((a) => a.getAttribute("href") === "/favourites"),
     ).toBe(true);
-    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByRole("link", { name: "Open Compare" }).length).toBeGreaterThanOrEqual(4);
     expect(
       screen.getAllByRole("link", { name: "Open Compare" }).every((a) => a.getAttribute("href") === "/compare"),
     ).toBe(true);
