@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,6 +8,7 @@ import { AdminCoinHistoryPage } from "./AdminCoinHistoryPage";
 vi.mock("../../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchAdminUsers: vi.fn(),
   fetchAdminCoinAdjustments: vi.fn(),
   adjustAdminCoins: vi.fn(),
@@ -165,6 +166,59 @@ describe("AdminCoinHistoryPage member search", () => {
       });
     });
     expect(await screen.findByText(/Balance corrected/i)).toBeInTheDocument();
+  });
+
+  it("fills the coin delta from quick amount chips and still accepts free-form", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/admin/coin-history?q=Sam"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/admin/coin-history" element={<AdminCoinHistoryPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const presets = await screen.findByRole("group", {
+      name: /Coin adjust presets for Sam Bay/i,
+    });
+    expect(screen.getByText("Quick amount")).toBeInTheDocument();
+    expect(within(presets).getByRole("button", { name: "+25 BC" })).toBeInTheDocument();
+    expect(within(presets).getByRole("button", { name: "+50 BC" })).toBeInTheDocument();
+    expect(within(presets).getByRole("button", { name: "+100 BC" })).toBeInTheDocument();
+    expect(within(presets).getByRole("button", { name: "+250 BC" })).toBeInTheDocument();
+
+    await user.click(within(presets).getByRole("button", { name: "+100 BC" }));
+    const delta = screen.getByLabelText(/Coin delta for Sam Bay/i);
+    expect(delta).toHaveValue(100);
+    expect(within(presets).getByRole("button", { name: "+100 BC" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(within(presets).getByRole("button", { name: "+25 BC" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    await user.clear(delta);
+    await user.type(delta, "-15");
+    expect(delta).toHaveValue(-15);
+    expect(within(presets).getByRole("button", { name: "+100 BC" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    await user.click(within(presets).getByRole("button", { name: "+50 BC" }));
+    expect(delta).toHaveValue(50);
+    await user.click(screen.getByRole("button", { name: "Adjust coins" }));
+
+    await waitFor(() => {
+      expect(api.adjustAdminCoins).toHaveBeenCalledWith(10, {
+        delta: 50,
+        note: "Admin correction",
+      });
+    });
   });
 
   it("shows No matches and Clear filters when Find yields none", async () => {

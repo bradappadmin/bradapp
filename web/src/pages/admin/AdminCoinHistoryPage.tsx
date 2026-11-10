@@ -9,6 +9,7 @@ import {
   parseAdminCoinsBalanceGroup,
   type AdminCoinsBalanceGroup,
 } from "../../admin-coins-member-filter";
+import { AdminCoinDeltaChips } from "../../components/AdminCoinDeltaChips";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
 import { formatCoins } from "../../cars";
@@ -326,40 +327,51 @@ function AdminCoinHistoryInner() {
                   <span className="font-display text-lime">{formatCoins(row.coinBalance)}</span>
                 </p>
               </div>
-              <div className="admin-panel flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:flex-wrap sm:items-end">
-                <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-28">
-                  Coin delta
-                  <input
-                    className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
-                    type="number"
-                    aria-label={`Coin delta for ${row.displayName}`}
-                    value={coinDelta[row.id] ?? ""}
-                    onChange={(e) =>
-                      setCoinDelta((prev) => ({ ...prev, [row.id]: e.target.value }))
-                    }
-                  />
-                </label>
-                <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel">
-                  Note
-                  <input
-                    className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
-                    type="text"
-                    aria-label={`Adjustment note for ${row.displayName}`}
-                    placeholder="Admin correction"
-                    value={coinNote[row.id] ?? ""}
-                    onChange={(e) =>
-                      setCoinNote((prev) => ({ ...prev, [row.id]: e.target.value }))
-                    }
-                  />
-                </label>
-                <button
-                  type="button"
+              <div className="admin-panel flex flex-col gap-3 rounded-md border p-3">
+                <AdminCoinDeltaChips
+                  memberLabel={row.displayName}
+                  value={coinDelta[row.id] ?? ""}
                   disabled={busyId === row.id}
-                  onClick={() => void adjustCoins(row.id)}
-                  className="w-full rounded-md bg-rose px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto"
-                >
-                  {busyId === row.id ? "Saving…" : "Adjust coins"}
-                </button>
+                  onSelect={(amount) =>
+                    setCoinDelta((prev) => ({ ...prev, [row.id]: String(amount) }))
+                  }
+                />
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                  <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-28">
+                    Coin delta
+                    <input
+                      className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                      type="number"
+                      inputMode="numeric"
+                      aria-label={`Coin delta for ${row.displayName}`}
+                      value={coinDelta[row.id] ?? ""}
+                      onChange={(e) =>
+                        setCoinDelta((prev) => ({ ...prev, [row.id]: e.target.value }))
+                      }
+                    />
+                  </label>
+                  <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs uppercase tracking-wide text-steel">
+                    Note
+                    <input
+                      className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                      type="text"
+                      aria-label={`Adjustment note for ${row.displayName}`}
+                      placeholder="Admin correction"
+                      value={coinNote[row.id] ?? ""}
+                      onChange={(e) =>
+                        setCoinNote((prev) => ({ ...prev, [row.id]: e.target.value }))
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    disabled={busyId === row.id}
+                    onClick={() => void adjustCoins(row.id)}
+                    className="w-full rounded-md bg-rose px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto"
+                  >
+                    {busyId === row.id ? "Saving…" : "Adjust coins"}
+                  </button>
+                </div>
               </div>
             </li>
           ))}

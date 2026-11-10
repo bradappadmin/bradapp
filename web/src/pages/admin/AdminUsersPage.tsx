@@ -9,6 +9,7 @@ import {
   type AdminAccountsGroup,
 } from "../../admin-accounts-filter";
 import { useAuth } from "../../auth-context";
+import { AdminCoinDeltaChips } from "../../components/AdminCoinDeltaChips";
 import { AdminGuard } from "../../components/AdminGuard";
 import { AdminShell } from "../../components/AdminShell";
 import { formatCoins } from "../../cars";
@@ -380,26 +381,38 @@ function AdminUsersInner() {
                   </div>
                 </div>
               </div>
-              <div className="admin-panel flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:flex-wrap sm:items-end">
-                <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-auto">
-                  Coin delta
-                  <input
-                    className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
-                    type="number"
-                    value={coinDelta[row.id] ?? ""}
-                    onChange={(e) =>
-                      setCoinDelta((prev) => ({ ...prev, [row.id]: e.target.value }))
-                    }
-                  />
-                </label>
-                <button
-                  type="button"
+              <div className="admin-panel flex flex-col gap-3 rounded-md border p-3">
+                <AdminCoinDeltaChips
+                  memberLabel={row.displayName}
+                  value={coinDelta[row.id] ?? ""}
                   disabled={busyId === row.id}
-                  onClick={() => void adjustCoins(row.id)}
-                  className="w-full rounded-md bg-rose px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 sm:w-auto"
-                >
-                  Adjust coins
-                </button>
+                  onSelect={(amount) =>
+                    setCoinDelta((prev) => ({ ...prev, [row.id]: String(amount) }))
+                  }
+                />
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                  <label className="flex w-full flex-col gap-1 text-xs uppercase tracking-wide text-steel sm:w-auto">
+                    Coin delta
+                    <input
+                      className="w-full rounded-md border border-white/10 bg-bay-deep/80 px-3 py-2 text-sm text-mist outline-none ring-lime/40 focus:ring-2 sm:w-28"
+                      type="number"
+                      inputMode="numeric"
+                      aria-label={`Coin delta for ${row.displayName}`}
+                      value={coinDelta[row.id] ?? ""}
+                      onChange={(e) =>
+                        setCoinDelta((prev) => ({ ...prev, [row.id]: e.target.value }))
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    disabled={busyId === row.id}
+                    onClick={() => void adjustCoins(row.id)}
+                    className="w-full rounded-md bg-rose px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 sm:w-auto"
+                  >
+                    Adjust coins
+                  </button>
+                </div>
               </div>
             </li>
           ))}

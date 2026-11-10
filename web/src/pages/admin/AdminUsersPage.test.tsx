@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,6 +8,7 @@ import { AdminUsersPage } from "./AdminUsersPage";
 vi.mock("../../api", () => ({
   fetchMe: vi.fn(),
   fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchFavouriteCount: vi.fn().mockResolvedValue({ count: 0 }),
   fetchAdminUsers: vi.fn(),
   patchAdminUser: vi.fn(),
   adjustAdminCoins: vi.fn(),
@@ -71,6 +72,10 @@ describe("AdminUsersPage accounts search", () => {
       },
     });
     vi.mocked(api.fetchAdminUsers).mockResolvedValue({ users: [sam, brad, frozen] });
+    vi.mocked(api.adjustAdminCoins).mockResolvedValue({
+      balance: 450,
+      ledger: [],
+    });
   });
 
   it("searches by name/email and filters with type chips", async () => {
@@ -149,6 +154,37 @@ describe("AdminUsersPage accounts search", () => {
     expect(
       screen.getByRole("searchbox", { name: /Search accounts by display name or email/i }),
     ).toHaveValue("friend");
+  });
+
+  it("fills the coin delta from quick amount chips on Accounts", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/admin/users?q=Sam"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const presets = await screen.findByRole("group", {
+      name: /Coin adjust presets for Sam Bay/i,
+    });
+    await user.click(within(presets).getByRole("button", { name: "+250 BC" }));
+    expect(screen.getByLabelText(/Coin delta for Sam Bay/i)).toHaveValue(250);
+    expect(within(presets).getByRole("button", { name: "+250 BC" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Adjust coins" }));
+    await waitFor(() => {
+      expect(api.adjustAdminCoins).toHaveBeenCalledWith(10, {
+        delta: 250,
+        note: "Admin correction",
+      });
+    });
   });
 
   it("shows No matches and Clear filters when Find yields none", async () => {
