@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { MatchHistoryItem } from "./api";
-import { matchHistoryRematchHref, matchHistoryRematchLabel } from "./match-history-rematch";
+import {
+  canMatchHistoryRematch,
+  matchHistoryRematchHref,
+  matchHistoryRematchLabel,
+} from "./match-history-rematch";
 
 const base: MatchHistoryItem = {
   id: 1,
@@ -30,7 +34,8 @@ const base: MatchHistoryItem = {
 
 describe("match history rematch deep-links", () => {
   it("sends house matches back to plain /play", () => {
-    expect(matchHistoryRematchHref(base)).toBe("/play");
+    expect(canMatchHistoryRematch(base, 2)).toBe(true);
+    expect(matchHistoryRematchHref(base, 2)).toBe("/play");
     expect(matchHistoryRematchLabel(base)).toBe("Rematch vs house");
   });
 
@@ -48,7 +53,8 @@ describe("match history rematch deep-links", () => {
         value: 450,
       },
     };
-    expect(matchHistoryRematchHref(pvp)).toBe("/play?opponent=177&theirCar=143");
+    expect(canMatchHistoryRematch(pvp, 2)).toBe(true);
+    expect(matchHistoryRematchHref(pvp, 2)).toBe("/play?opponent=177&theirCar=143");
     expect(matchHistoryRematchLabel(pvp)).toBe("Rematch");
   });
 
@@ -60,6 +66,31 @@ describe("match history rematch deep-links", () => {
       opponentUserId: 42,
       theirCar: { ...base.theirCar, listingId: null },
     };
-    expect(matchHistoryRematchHref(pvp)).toBe("/play?opponent=42");
+    expect(matchHistoryRematchHref(pvp, 2)).toBe("/play?opponent=42");
+  });
+
+  it("hides Rematch when the PvP opponent is missing", () => {
+    const pvp: MatchHistoryItem = {
+      ...base,
+      mode: "pvp",
+      opponentName: "Unknown",
+      opponentUserId: null,
+    };
+    expect(canMatchHistoryRematch(pvp, 2)).toBe(false);
+    expect(matchHistoryRematchHref(pvp, 2)).toBeNull();
+  });
+
+  it("hides Rematch when the opponent is the viewer", () => {
+    const pvp: MatchHistoryItem = {
+      ...base,
+      mode: "pvp",
+      opponentName: "Member",
+      opponentUserId: 2,
+      theirCar: { ...base.theirCar, listingId: 9 },
+    };
+    expect(canMatchHistoryRematch(pvp, 2)).toBe(false);
+    expect(matchHistoryRematchHref(pvp, 2)).toBeNull();
+    expect(canMatchHistoryRematch(pvp, 99)).toBe(true);
+    expect(matchHistoryRematchHref(pvp, 99)).toBe("/play?opponent=2&theirCar=9");
   });
 });

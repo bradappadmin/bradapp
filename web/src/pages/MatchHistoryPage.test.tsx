@@ -131,7 +131,7 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
       "href",
       "/play",
     );
-    expect(screen.getByRole("link", { name: "Rematch" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Rematch Sam Bay" })).toHaveAttribute(
       "href",
       "/play?opponent=177&theirCar=9",
     );
@@ -176,7 +176,107 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
     });
     expect(screen.getByText("vs Sam Bay")).toBeInTheDocument();
     expect(screen.queryByText("vs House")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Rematch" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rematch Sam Bay" })).toBeInTheDocument();
+  });
+
+  it("hides Rematch when the opponent is missing or is the viewer", async () => {
+    vi.mocked(api.fetchTopTrumpsHistory).mockResolvedValue({
+      matches: [
+        {
+          id: 20,
+          mode: "pvp",
+          category: "bhp",
+          createdAt: "2026-11-09T12:00:00.000Z",
+          opponentName: "Ghost",
+          opponentUserId: null,
+          yourCar: {
+            listingId: 1,
+            make: "Ford",
+            model: "Focus",
+            trimName: "ST",
+            value: 200,
+          },
+          theirCar: {
+            listingId: null,
+            make: "BMW",
+            model: "M2",
+            trimName: "",
+            value: 220,
+          },
+          result: "win",
+          coinReward: 10,
+          youWere: "challenger",
+        },
+        {
+          id: 21,
+          mode: "pvp",
+          category: "top_speed_mph",
+          createdAt: "2026-11-08T12:00:00.000Z",
+          opponentName: "Member",
+          opponentUserId: 2,
+          yourCar: {
+            listingId: 3,
+            make: "Audi",
+            model: "RS3",
+            trimName: "",
+            value: 300,
+          },
+          theirCar: {
+            listingId: 4,
+            make: "Mercedes",
+            model: "A45",
+            trimName: "",
+            value: 310,
+          },
+          result: "loss",
+          coinReward: 5,
+          youWere: "challenger",
+        },
+        {
+          id: 22,
+          mode: "house",
+          category: "zero_to_sixty_secs",
+          createdAt: "2026-11-07T12:00:00.000Z",
+          opponentName: "House",
+          opponentUserId: null,
+          yourCar: {
+            listingId: 5,
+            make: "Porsche",
+            model: "Cayman",
+            trimName: "GT4",
+            value: 400,
+          },
+          theirCar: {
+            listingId: null,
+            make: "Ferrari",
+            model: "488",
+            trimName: "",
+            value: 480,
+          },
+          result: "draw",
+          coinReward: 8,
+          youWere: "challenger",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/play/history"]}>
+        <AuthProvider>
+          <MatchHistoryPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("vs Ghost")).toBeInTheDocument();
+    expect(screen.getByText("vs Member")).toBeInTheDocument();
+    expect(screen.getByText("vs House")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Rematch Ghost/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Rematch Member/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rematch vs house" })).toHaveAttribute(
+      "href",
+      "/play",
+    );
   });
 
   it("shows Empty bay and Play when there is no history", async () => {

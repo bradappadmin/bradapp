@@ -119,6 +119,31 @@ function MatchCarThumb({
   );
 }
 
+function MatchHistoryRematchCta({
+  match,
+  viewerUserId,
+}: {
+  match: MatchHistoryItem;
+  viewerUserId: number | null;
+}) {
+  const rematchHref = matchHistoryRematchHref(match, viewerUserId);
+  if (!rematchHref) return null;
+
+  return (
+    <div className="mt-4 flex flex-wrap gap-2">
+      <Link
+        to={rematchHref}
+        className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+        aria-label={
+          match.mode === "house" ? "Rematch vs house" : `Rematch ${match.opponentName}`
+        }
+      >
+        {matchHistoryRematchLabel(match)}
+      </Link>
+    </div>
+  );
+}
+
 export function MatchHistoryPage() {
   const { user, loading: authLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -320,7 +345,8 @@ export function MatchHistoryPage() {
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
               No{" "}
               {resultGroup === "wins" ? "wins" : resultGroup === "losses" ? "losses" : "matches"} in
-              this filter. Clear the filter to see the full reel — Rematch stays on every row.
+              this filter. Clear the filter to see the full reel — Rematch stays on rows with a
+              challengable opponent.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
               <button
@@ -384,14 +410,7 @@ export function MatchHistoryPage() {
                   <MatchCarThumb car={match.yourCar} side="you" />
                   <MatchCarThumb car={match.theirCar} side="them" />
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Link
-                    to={matchHistoryRematchHref(match)}
-                    className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
-                  >
-                    {matchHistoryRematchLabel(match)}
-                  </Link>
-                </div>
+                <MatchHistoryRematchCta match={match} viewerUserId={user?.id ?? null} />
               </li>
             ))}
           </ul>
