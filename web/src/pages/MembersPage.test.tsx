@@ -173,6 +173,65 @@ describe("MembersPage Midnight Garage UI", () => {
     );
   });
 
+  it("sorts the Directory via Sort the bay and persists sort in the URL", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/members"]}>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/members"
+              element={
+                <>
+                  <MembersPage />
+                  <SearchParamsProbe />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Sort the bay")).toBeInTheDocument();
+    const sort = screen.getByRole("combobox", { name: /Sort members directory/i });
+    expect(sort).toHaveValue("name_asc");
+
+    const profileNames = () =>
+      screen
+        .getAllByRole("link")
+        .map((el) => (el.textContent ?? "").trim())
+        .filter((t) => /^(Sam Bay|Jordan Pace|Empty Eddy)$/.test(t));
+
+    expect(profileNames().slice(0, 3)).toEqual(["Empty Eddy", "Jordan Pace", "Sam Bay"]);
+
+    await user.selectOptions(sort, "cars_desc");
+    expect(sort).toHaveValue("cars_desc");
+    await waitFor(() => {
+      expect(screen.getByTestId("members-params").textContent).toContain("sort=cars_desc");
+    });
+    expect(profileNames().slice(0, 3)).toEqual(["Sam Bay", "Jordan Pace", "Empty Eddy"]);
+  });
+
+  it("reads sort from the URL on load", async () => {
+    render(
+      <MemoryRouter initialEntries={["/members?sort=cars_asc"]}>
+        <AuthProvider>
+          <MembersPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    const sort = await screen.findByRole("combobox", { name: /Sort members directory/i });
+    expect(sort).toHaveValue("cars_asc");
+    await screen.findByText("Empty Eddy");
+    const names = screen
+      .getAllByRole("link")
+      .map((el) => (el.textContent ?? "").trim())
+      .filter((t) => /^(Sam Bay|Jordan Pace|Empty Eddy)$/.test(t));
+    expect(names.slice(0, 3)).toEqual(["Empty Eddy", "Jordan Pace", "Sam Bay"]);
+  });
+
   it("shows a clear no-results state with clear CTA", async () => {
     const user = userEvent.setup();
     vi.mocked(api.fetchMembers).mockResolvedValue({ members: [], q: "zzzz" });

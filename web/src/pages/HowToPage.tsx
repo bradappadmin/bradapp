@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   {
     id: "find-sort",
     title: "Find, sort, and filter",
-    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search and Has cars. Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
+    body: "Most bays keep a Find box or chip filters in the URL so you can share the view. Cars: free-text + filters + price sort (Clear filters when nothing matches). My cars and Favourites: Find make/model plus Sort the bay. Members: name search, Has cars / Empty bay, and Sort the bay (Name A–Z / Z–A, Most / Least cars). Reviews: Find a review. Leaderboard: Find a member. Ledger: reason chips including Daily login, Login streak, and Gifts. Match history: Wins/Losses. Trades history: Completed/Declined.",
     to: "/cars",
     cta: "Try Cars search",
   },
@@ -203,9 +203,9 @@ export function HowToPage() {
               <Link to="/members" className="text-lime no-underline hover:underline">
                 Members
               </Link>{" "}
-              — Find a member + Has cars; Challenge to Top Trumps, Offer trade, or Gift Brad Coins on
-              other directory cards (sign in; hidden on your own row — Gift opens #gift-coins on
-              their garage); open a garage or Copy link on their profile.
+              — Find a member, Has cars / Empty bay, Sort the bay; Challenge to Top Trumps, Offer
+              trade, or Gift Brad Coins on other directory cards (sign in; hidden on your own row —
+              Gift opens #gift-coins on their garage); open a garage or Copy link on their profile.
             </li>
             <li>
               <Link to="/leaderboard" className="text-lime no-underline hover:underline">

@@ -163,7 +163,12 @@ describe("HowToPage Midnight Garage UI", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Challenge to Top Trumps, Offer trade, or Gift Brad Coins on other directory cards/i,
+        /Find a member, Has cars \/ Empty bay, Sort the bay; Challenge to Top Trumps/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Members: name search, Has cars \/ Empty bay, and Sort the bay \(Name A–Z \/ Z–A, Most \/ Least cars\)/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/Gift opens #gift-coins on their garage/i)).toBeInTheDocument();

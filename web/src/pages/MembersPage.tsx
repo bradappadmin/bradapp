@@ -12,6 +12,13 @@ import {
   parseMembersCarsGroup,
   type MembersCarsGroup,
 } from "../members-has-cars-filter";
+import {
+  DEFAULT_MEMBERS_SORT,
+  MEMBERS_SORT_OPTIONS,
+  parseMembersSort,
+  sortMembers,
+  type MembersSort,
+} from "../members-sort";
 
 const fieldClass =
   "w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2";
@@ -21,22 +28,24 @@ export function MembersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const qFromUrl = (searchParams.get("q") ?? "").trim();
   const group = parseMembersCarsGroup(searchParams.get("group"));
+  const sort = parseMembersSort(searchParams.get("sort"));
   const [draft, setDraft] = useState(qFromUrl);
   const [members, setMembers] = useState<MemberSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const visible = useMemo(
-    () => filterMembersByCarsGroup(members, group),
-    [members, group],
+    () => sortMembers(filterMembersByCarsGroup(members, group), sort),
+    [members, group, sort],
   );
   const filtersOn = Boolean(qFromUrl) || group !== "all";
 
-  function writeParams(nextQ: string, nextGroup: MembersCarsGroup) {
+  function writeParams(nextQ: string, nextGroup: MembersCarsGroup, nextSort: MembersSort = sort) {
     const params = new URLSearchParams();
     const q = nextQ.trim();
     if (q) params.set("q", q);
     if (nextGroup !== "all") params.set("group", nextGroup);
+    if (nextSort !== DEFAULT_MEMBERS_SORT) params.set("sort", nextSort);
     setSearchParams(params, { replace: true });
   }
 
@@ -70,31 +79,32 @@ export function MembersPage() {
     const next = draft.trim();
     if (next === qFromUrl) return;
     const timer = window.setTimeout(() => {
-      const params = new URLSearchParams();
-      if (next) params.set("q", next);
-      if (group !== "all") params.set("group", group);
-      setSearchParams(params, { replace: true });
+      writeParams(next, group, sort);
     }, 280);
     return () => window.clearTimeout(timer);
-  }, [draft, qFromUrl, group, setSearchParams]);
+  }, [draft, qFromUrl, group, sort, setSearchParams]);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    writeParams(draft, group);
+    writeParams(draft, group, sort);
   }
 
   function onClearSearch() {
     setDraft("");
-    writeParams("", group);
+    writeParams("", group, sort);
   }
 
   function onClearFilters() {
     setDraft("");
-    writeParams("", "all");
+    writeParams("", "all", DEFAULT_MEMBERS_SORT);
   }
 
   function setGroup(next: MembersCarsGroup) {
-    writeParams(qFromUrl, next);
+    writeParams(qFromUrl, next, sort);
+  }
+
+  function setSort(next: MembersSort) {
+    writeParams(qFromUrl, group, next);
   }
 
   // Find + Has cars chips stay while loading, when anyone is in the bay, or while a filter is active.
@@ -267,6 +277,35 @@ export function MembersPage() {
               </p>
             ) : null}
           </form>
+        ) : null}
+
+        {showFind ? (
+          <div
+            className="play-panel bay-rise-delay mt-6 rounded-md border p-4 sm:flex sm:items-end sm:justify-between sm:gap-4 sm:p-5"
+            aria-label="Sort members"
+          >
+            <div className="min-w-0">
+              <p className="font-display text-lg text-mist">Sort the bay</p>
+              <p className="mt-1 text-sm text-steel">
+                Name A–Z or Z–A, or most / least cars. Choice stays in the URL.
+              </p>
+            </div>
+            <label className="mt-4 flex w-full flex-col gap-1.5 text-xs uppercase tracking-wide text-steel sm:mt-0 sm:w-56">
+              Sort by
+              <select
+                className="w-full rounded-md border border-white/10 bg-bay-panel px-3 py-2.5 text-sm text-mist outline-none ring-lime/40 focus:ring-2"
+                value={sort}
+                onChange={(e) => setSort(parseMembersSort(e.target.value))}
+                aria-label="Sort members directory"
+              >
+                {MEMBERS_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         ) : null}
 
         {error ? <p className="mt-4 text-sm text-rose">{error}</p> : null}
