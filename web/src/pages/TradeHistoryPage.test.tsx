@@ -113,7 +113,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     });
   });
 
-  it("shows bay hierarchy, Trade again deep-links, and disabled when car is gone", async () => {
+  it("shows bay hierarchy and Offer again deep-links for the other party", async () => {
     render(
       <MemoryRouter initialEntries={["/trades/history"]}>
         <AuthProvider>
@@ -149,13 +149,59 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
       "/cars/42",
     );
 
-    expect(screen.getByRole("link", { name: "Trade again" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Offer again with Sam Bay" })).toHaveAttribute(
       "href",
       "/trades?with=177&theirCar=42",
     );
-    const disabled = screen.getByRole("button", { name: "Trade again" });
-    expect(disabled).toBeDisabled();
-    expect(disabled).toHaveAttribute("title", "They no longer have that car");
+    expect(screen.getByRole("link", { name: "Offer again with Casey Apex" })).toHaveAttribute(
+      "href",
+      "/trades?with=88",
+    );
+    expect(screen.getByRole("link", { name: "Offer again with Bay Friend" })).toHaveAttribute(
+      "href",
+      "/trades?with=55",
+    );
+    expect(screen.queryByRole("button", { name: /Offer again|Trade again/i })).not.toBeInTheDocument();
+  });
+
+  it("hides Offer again when the counterparty is the viewer", async () => {
+    vi.mocked(api.fetchCompletedTrades).mockResolvedValue({
+      trades: [
+        {
+          id: 9,
+          status: "accepted",
+          resolvedAt: "2026-11-09T20:00:00.000Z",
+          counterpartyName: "Member",
+          counterpartyUserId: 2,
+          theirCarListingId: 42,
+          theirCarAvailable: true,
+          youWere: "offerer",
+          youGave: {
+            listingId: 42,
+            make: "Porsche",
+            model: "911",
+            trimName: "GT3",
+          },
+          youGot: {
+            listingId: 9,
+            make: "BMW",
+            model: "M3",
+            trimName: "Competition",
+          },
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/trades/history"]}>
+        <AuthProvider>
+          <TradeHistoryPage />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/with Member/i)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Offer again/i })).not.toBeInTheDocument();
   });
 
   it("filters completed and declined with status chips in the URL", async () => {
@@ -189,7 +235,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     });
     expect(screen.getByText(/with Sam Bay/i)).toBeInTheDocument();
     expect(screen.queryByText(/with Bay Friend/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Trade again" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Offer again with Sam Bay" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Declined" }));
     await waitFor(() => {
@@ -199,7 +245,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     });
     expect(screen.getByText(/with Bay Friend/i)).toBeInTheDocument();
     expect(screen.queryByText(/with Sam Bay/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Trade again" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Offer again with Bay Friend" })).toBeInTheDocument();
   });
 
   it("shows Empty bay with Open trades and Browse members when there is no history", async () => {
@@ -220,7 +266,7 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     expect(empty.querySelector('a[href="/members"]')?.textContent).toMatch(/Browse members/i);
     expect(screen.queryByText("No matches")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Filter status" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Trade again" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Offer again/i })).not.toBeInTheDocument();
   });
 
   it("shows No matches and Clear filter when Completed/Declined yields none", async () => {
@@ -279,14 +325,14 @@ describe("TradeHistoryPage Midnight Garage UI", () => {
     expect(emptyFilter.querySelector('a[href="/members"]')?.textContent).toMatch(
       /Browse members/i,
     );
-    expect(screen.queryByRole("link", { name: "Trade again" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Offer again/i })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Clear filter" }));
     await waitFor(() => {
       expect(screen.getByTestId("trades-history-params").textContent).toBe("");
     });
     expect(screen.getByText(/with Sam Bay/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Trade again" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Offer again with Sam Bay" })).toBeInTheDocument();
     expect(screen.queryByText("No matches")).not.toBeInTheDocument();
   });
 });

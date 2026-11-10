@@ -7,7 +7,7 @@ import { listingTitle } from "../cars";
 import { CarVisual } from "../components/CarVisual";
 import { PlayBayAtmosphere } from "../components/PlayBayAtmosphere";
 import { SiteHeader } from "../components/SiteHeader";
-import { tradeAgainAction, tradeAgainHref } from "../trade-history-again";
+import { offerAgainHref, offerAgainLabel } from "../trade-history-again";
 import {
   filterTradesHistoryByStatus,
   parseTradesHistoryStatusGroup,
@@ -285,7 +285,7 @@ export function TradeHistoryPage() {
             <p className="font-display text-xl text-mist sm:text-2xl">Empty bay</p>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-steel">
               No resolved trades yet. Open Trades to offer a free swap, or browse Members for a
-              garage to trade with — Trade again shows up here after deals resolve.
+              garage to trade with — Offer again shows up here after deals resolve.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
               <Link
@@ -318,8 +318,8 @@ export function TradeHistoryPage() {
                 : statusGroup === "declined"
                   ? "declined"
                   : ""}{" "}
-              trades in this filter. Clear the filter to see the full reel — Trade again stays on
-              rows when it applies.
+              trades in this filter. Clear the filter to see the full reel — Offer again stays on
+              rows with another member.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
               <button
@@ -352,8 +352,7 @@ export function TradeHistoryPage() {
           >
             {visible.map((trade) => {
               const role = roleBadge(trade.youWere);
-              const again = tradeAgainAction(trade);
-              const againHref = tradeAgainHref(trade);
+              const againHref = offerAgainHref(trade, user?.id ?? null);
               return (
                 <li
                   key={trade.id}
@@ -391,25 +390,15 @@ export function TradeHistoryPage() {
                     </p>
                     <TradeCarThumb car={trade.youGot} side="got" />
                   </div>
-                  {again !== "hidden" ? (
+                  {againHref ? (
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {again === "offer" && againHref ? (
-                        <Link
-                          to={againHref}
-                          className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
-                        >
-                          Trade again
-                        </Link>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled
-                          title="They no longer have that car"
-                          className="cursor-not-allowed rounded-md border border-white/10 px-3 py-1.5 font-display text-sm font-semibold text-steel/60"
-                        >
-                          Trade again
-                        </button>
-                      )}
+                      <Link
+                        to={againHref}
+                        className="rounded-md border border-lime/40 bg-bay-panel/70 px-3 py-1.5 font-display text-sm font-semibold text-lime no-underline transition hover:border-lime/60 hover:bg-lime/10"
+                        aria-label={`Offer again with ${trade.counterpartyName}`}
+                      >
+                        {offerAgainLabel()}
+                      </Link>
                     </div>
                   ) : null}
                 </li>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CompletedTrade } from "./api";
-import { tradeAgainAction, tradeAgainHref } from "./trade-history-again";
+import { canOfferAgain, offerAgainHref, offerAgainLabel } from "./trade-history-again";
 
 const base: CompletedTrade = {
   id: 5,
@@ -25,26 +25,40 @@ const base: CompletedTrade = {
   },
 };
 
-describe("trade history Trade again deep-links", () => {
-  it("links compose with counterparty and their car when still owned", () => {
-    expect(tradeAgainAction(base)).toBe("offer");
-    expect(tradeAgainHref(base)).toBe("/trades?with=177&theirCar=42");
+describe("trade history Offer again deep-links", () => {
+  it("links compose with counterparty and theirCar when still owned", () => {
+    expect(canOfferAgain(base, 2)).toBe(true);
+    expect(offerAgainHref(base, 2)).toBe("/trades?with=177&theirCar=42");
+    expect(offerAgainLabel()).toBe("Offer again");
   });
 
-  it("disables when the counterparty no longer owns that car", () => {
+  it("still offers /trades?with= when that car is no longer owned", () => {
     const gone: CompletedTrade = { ...base, theirCarAvailable: false };
-    expect(tradeAgainAction(gone)).toBe("disabled");
-    expect(tradeAgainHref(gone)).toBeNull();
+    expect(canOfferAgain(gone, 2)).toBe(true);
+    expect(offerAgainHref(gone, 2)).toBe("/trades?with=177");
+  });
+
+  it("offers again on declined rows with the same counterparty", () => {
+    const declined: CompletedTrade = {
+      ...base,
+      status: "declined",
+      theirCarAvailable: false,
+    };
+    expect(canOfferAgain(declined, 2)).toBe(true);
+    expect(offerAgainHref(declined, 2)).toBe("/trades?with=177");
   });
 
   it("hides when counterparty id is missing", () => {
     const missing: CompletedTrade = { ...base, counterpartyUserId: 0 };
-    expect(tradeAgainAction(missing)).toBe("hidden");
-    expect(tradeAgainHref(missing)).toBeNull();
+    expect(canOfferAgain(missing, 2)).toBe(false);
+    expect(offerAgainHref(missing, 2)).toBeNull();
   });
 
-  it("hides Trade again for declined or cancelled rows", () => {
-    expect(tradeAgainAction({ ...base, status: "declined" })).toBe("hidden");
-    expect(tradeAgainAction({ ...base, status: "cancelled" })).toBe("hidden");
+  it("hides when the counterparty is the viewer", () => {
+    const self: CompletedTrade = { ...base, counterpartyUserId: 2 };
+    expect(canOfferAgain(self, 2)).toBe(false);
+    expect(offerAgainHref(self, 2)).toBeNull();
+    expect(canOfferAgain(self, 99)).toBe(true);
+    expect(offerAgainHref(self, 99)).toBe("/trades?with=2&theirCar=42");
   });
 });
