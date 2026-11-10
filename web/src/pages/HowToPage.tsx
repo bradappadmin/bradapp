@@ -142,9 +142,16 @@ const STEPS: Step[] = [
   {
     id: "trades-offer-again",
     title: "Offer again from Trade history",
-    body: "Open Trade history after a deal resolves. Completed/Declined chips stay in the URL. On a row with another member, Offer again deep-links Trades compose with that person ready (/trades?with=…, plus theirCar when they still own that car). Offer again hides when the other party is missing or is you — Clear filter, Open trades, and Browse members still cover empty bays.",
+    body: "Open Trade history after a deal resolves. Completed/Declined chips stay in the URL. On a row with another member, Offer again deep-links Trades compose with that person ready (/trades?with=…, plus theirCar when they still own that car). Offer again hides when the other party is missing or is you — Clear filter, Open trades, and Browse members still cover empty bays. Open partner on inbox and history is the next step.",
     to: "/trades/history",
     cta: "Open Trade history",
+  },
+  {
+    id: "trades-open-partner",
+    title: "Open partner from Trades",
+    body: "On Trades inbox (incoming or outgoing) and Trade history rows, Open partner takes you to the other party’s public garage (/members/:id). The CTA hides when the partner is missing or is you. Offer again, Accept / Decline / Cancel, Completed/Declined chips, and empty-bay CTAs stay.",
+    to: "/trades",
+    cta: "Open Trades",
   },
   {
     id: "reviews",
@@ -298,7 +305,8 @@ export function HowToPage() {
             Match history Rematch (PvP opponent deep-link or house
             → Play), Play Open profile (/members/:id when a PvP opponent is selected; hidden for house
             / self), this week’s cup standings with an Ends in countdown (Europe/London week end, +50
-            BC prize), free trades, Trade history Offer again (/trades?with=), member gifts, drag
+            BC prize), free trades, Trade history Offer again (/trades?with=), Trades Open partner
+            (/members/:id on inbox and history; hidden for self), member gifts, drag
             races with Sort reviews (Newest / Oldest, Title A–Z / Z–A) and Open car (/cars/:id) when a
             listing exists, empty-bay next steps, and your bay showcase. Nothing here spends real
             money.
@@ -382,8 +390,9 @@ export function HowToPage() {
               <Link to="/trades/history" className="text-lime no-underline hover:underline">
                 Trades history
               </Link>{" "}
-              — Completed/Declined chips; Offer again deep-links the other party into Trades
-              (/trades?with=, plus theirCar when still owned; hidden for missing or self).
+              — Completed/Declined chips; Open partner → /members/:id; Offer again deep-links the
+              other party into Trades (/trades?with=, plus theirCar when still owned; both hidden for
+              missing or self).
             </li>
             <li>
               <Link to="/members" className="text-lime no-underline hover:underline">
@@ -490,7 +499,8 @@ export function HowToPage() {
               <Link to="/trades" className="text-lime no-underline hover:underline">
                 Trades inbox
               </Link>{" "}
-              — empty inbox points to Members / Browse cars for sale; nav badge = pending offers.
+              — Open partner → /members/:id on incoming and outgoing offers (hidden for self); empty
+              inbox points to Members / Browse cars for sale; nav badge = pending offers.
             </li>
           </ul>
         </section>
