@@ -208,7 +208,7 @@ export type CarImageInput = {
 const DEMO_UNSUPPORTED_MAKES = new Set(["ferrari"]);
 
 /**
- * Builds a studio image URL for a real make/model.
+ * Builds a white-studio image URL for a real make/model.
  * Uses the public Imagin CDN customer; override with VITE_CAR_IMAGE_CUSTOMER if needed
  * (licensed keys drop the demo watermark / plate branding).
  * Returns null when the free demo customer cannot render the make.
@@ -226,7 +226,9 @@ export function carStudioImageUrl(input: CarImageInput): string | null {
     angle: input.angle ?? "23",
     zoomType: "fullscreen",
     width: String(input.width ?? 800),
-    // Transparent-capable formats sit cleanly on the bay background.
+    // White seamless studio — matches product cards/heroes across the bay.
+    backgroundColor: "255,255,255,255",
+    // Transparent-capable formats sit cleanly on the white studio plane.
     fileType: "webp",
   });
   if (tokens.modelRange) params.set("modelRange", tokens.modelRange);
@@ -236,4 +238,10 @@ export function carStudioImageUrl(input: CarImageInput): string | null {
   const paint = input.colour ? COLOUR_TO_PAINT[input.colour] : undefined;
   if (paint) params.set("paintDescription", paint);
   return `https://cdn.imagin.studio/getImage?${params.toString()}`;
+}
+
+/** True when studio URLs use a licensed Imagin customer (demo watermark / plate branding off). */
+export function usesLicensedCarStudio(): boolean {
+  const customer = (import.meta.env.VITE_CAR_IMAGE_CUSTOMER as string | undefined)?.trim();
+  return Boolean(customer && customer !== "img");
 }

@@ -76,7 +76,9 @@ describe("CarCard", () => {
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
     expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toContain("backgroundColor=255%2C255%2C255%2C255");
     expect(document.querySelector('[data-bay-frame="card"]')).not.toBeNull();
+    expect(document.querySelector('[data-studio-frame="white"]')).not.toBeNull();
     const mediaShell = document.querySelector(".car-card-media");
     expect(mediaShell).not.toBeNull();
     expect(mediaShell?.className).toMatch(/car-card-media/);

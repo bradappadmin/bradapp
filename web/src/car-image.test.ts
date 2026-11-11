@@ -4,6 +4,7 @@ import {
   paintOptionsFor,
   resolveStudioCarTokens,
   STUDIO_PAINT_COLOURS,
+  usesLicensedCarStudio,
 } from "./car-image";
 
 describe("resolveStudioCarTokens", () => {
@@ -84,6 +85,8 @@ describe("carStudioImageUrl", () => {
     expect(url).toContain("paintDescription=Red");
     expect(url).toContain("width=400");
     expect(url).toContain("fileType=webp");
+    expect(url).toContain("backgroundColor=255%2C255%2C255%2C255");
+    expect(usesLicensedCarStudio()).toBe(false);
   });
 
   it("aliases common UK makes for the studio CDN", () => {

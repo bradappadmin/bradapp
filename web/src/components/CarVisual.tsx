@@ -230,7 +230,33 @@ function bayAtmosphere(paint: CarPaint, size: "thumb" | "card" | "hero"): string
   }
 }
 
-/** Soft overhead bay rails + floor wash — photo sits in a lit garage, not a flat card. */
+/** White seamless studio behind photoreal renders — soft floor contact, no dark bay wash. */
+function whiteStudioAtmosphere(paint: CarPaint, size: "thumb" | "card" | "hero"): string {
+  switch (size) {
+    case "hero":
+      return `
+        radial-gradient(ellipse 90% 45% at 50% 100%, ${paint.glow}, transparent 58%),
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.95), transparent 70%),
+        linear-gradient(180deg, #ffffff 0%, #f4f6f8 55%, #e8ecf1 100%)
+      `;
+    case "card":
+      return `
+        radial-gradient(ellipse 85% 50% at 50% 105%, ${paint.glow}, transparent 55%),
+        linear-gradient(180deg, #ffffff 0%, #f3f5f7 48%, #e7ebf0 100%)
+      `;
+    case "thumb":
+      return `
+        radial-gradient(ellipse 80% 55% at 50% 110%, ${paint.glow}, transparent 55%),
+        linear-gradient(180deg, #ffffff 0%, #f2f4f7 100%)
+      `;
+    default: {
+      const _exhaustive: never = size;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Soft overhead bay rails + floor wash — SVG fallback stays in the lit garage. */
 function BayLighting({ paint, size }: { paint: CarPaint; size: "thumb" | "card" | "hero" }) {
   const isHero = size === "hero";
   return (
@@ -253,6 +279,18 @@ function BayLighting({ paint, size }: { paint: CarPaint; size: "thumb" | "card" 
         aria-hidden
       />
     </>
+  );
+}
+
+/** Soft contact shadow under studio photos on the white plane. */
+function StudioFloorWash({ paint, size }: { paint: CarPaint; size: "thumb" | "card" | "hero" }) {
+  const isHero = size === "hero";
+  return (
+    <div
+      className={`pointer-events-none absolute left-1/2 ${isHero ? "bottom-[5%] h-5 w-[68%] sm:h-7" : "bottom-[3%] h-2.5 w-[65%]"} -translate-x-1/2 rounded-[100%] blur-md`}
+      style={{ background: paint.glow }}
+      aria-hidden
+    />
   );
 }
 
@@ -299,7 +337,7 @@ export function CarVisual({
       alt={title ? `${title} in ${colour}` : `${make} ${model}`}
       className={
         isHero
-          ? "relative z-[1] h-auto w-full max-w-5xl object-contain object-bottom drop-shadow-[0_22px_48px_rgba(0,0,0,0.65)]"
+          ? "relative z-[1] h-auto w-full max-w-5xl object-contain object-bottom drop-shadow-[0_18px_36px_rgba(15,23,42,0.28)]"
           : isCard
             ? "relative z-[1] h-full w-full object-contain object-bottom"
             : "relative z-[1] h-full w-full object-contain object-bottom scale-[1.08]"
@@ -313,12 +351,17 @@ export function CarVisual({
     <FallbackSvg colour={colour} bodyType={bodyType} size={size} title={title} />
   );
 
+  const frameAtmosphere = showPhoto
+    ? whiteStudioAtmosphere(paint, size)
+    : bayAtmosphere(paint, size);
+
   if (isHero) {
     return (
       <div
         className={frameClass}
         data-bay-frame="hero"
-        style={{ background: bayAtmosphere(paint, "hero") }}
+        data-studio-frame={showPhoto ? "white" : "bay"}
+        style={{ background: frameAtmosphere }}
         role={title && !showPhoto ? "img" : undefined}
         aria-label={title && !showPhoto ? `${title} in ${colour}` : undefined}
       >
@@ -331,7 +374,7 @@ export function CarVisual({
           className="absolute inset-y-0 right-0 z-[2] w-px bg-gradient-to-b from-transparent via-rose/30 to-transparent sm:w-[2px]"
           aria-hidden
         />
-        <BayLighting paint={paint} size="hero" />
+        {showPhoto ? <StudioFloorWash paint={paint} size="hero" /> : <BayLighting paint={paint} size="hero" />}
         <div className="relative flex min-h-[16rem] items-end justify-center px-1 pb-0 pt-8 sm:min-h-[22rem] sm:px-3 sm:pt-12 lg:min-h-[26rem]">
           {media}
         </div>
@@ -344,10 +387,11 @@ export function CarVisual({
       <div
         className={frameClass}
         data-bay-frame="card"
-        style={{ background: bayAtmosphere(paint, "card") }}
+        data-studio-frame={showPhoto ? "white" : "bay"}
+        style={{ background: frameAtmosphere }}
         aria-hidden={showPhoto ? undefined : true}
       >
-        <BayLighting paint={paint} size="card" />
+        {showPhoto ? <StudioFloorWash paint={paint} size="card" /> : <BayLighting paint={paint} size="card" />}
         <div className="absolute inset-0 flex items-end justify-center px-1 pb-0 pt-2">{media}</div>
       </div>
     );
@@ -357,7 +401,8 @@ export function CarVisual({
     <div
       className={frameClass}
       data-bay-frame="thumb"
-      style={{ background: bayAtmosphere(paint, "thumb") }}
+      data-studio-frame={showPhoto ? "white" : "bay"}
+      style={{ background: frameAtmosphere }}
       aria-hidden={showPhoto ? undefined : true}
     >
       <span
@@ -365,7 +410,7 @@ export function CarVisual({
         style={{ backgroundColor: paint.base }}
         aria-hidden
       />
-      <BayLighting paint={paint} size="thumb" />
+      {showPhoto ? <StudioFloorWash paint={paint} size="thumb" /> : <BayLighting paint={paint} size="thumb" />}
       <div className="absolute inset-0 flex items-end justify-center p-0.5">{media}</div>
     </div>
   );
