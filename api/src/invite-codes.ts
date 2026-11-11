@@ -42,9 +42,6 @@ export function isValidInviteCodeFormat(code: string): boolean {
   return CODE_PATTERN.test(code);
 }
 
-/** Demo family walkthrough code — not a password; fine in seed. */
-export const DEMO_FAMILY_INVITE_CODE = "FAMILY-BAY-2026";
-
 export function generateInviteCode(): string {
   const token = randomBytes(4).toString("hex").toUpperCase();
   return `BAY-${token}`;
@@ -207,13 +204,27 @@ export async function consumeInviteCode(
   return { ok: true, inviteId: mapped.id };
 }
 
-/** Idempotent seed of the demo family invite (unlimited uses, never expires). */
+/**
+ * Idempotent seed of the demo family invite when DEMO_FAMILY_INVITE_CODE is set.
+ * Unlimited uses, never expires. Skips when the env var is unset or invalid.
+ */
 export async function seedDemoFamilyInvite(createdByUserId: number): Promise<void> {
+  const raw = process.env.DEMO_FAMILY_INVITE_CODE?.trim() ?? "";
+  if (!raw) {
+    return;
+  }
+  const code = normalizeInviteCode(raw);
+  if (!isValidInviteCodeFormat(code)) {
+    console.warn(
+      "[seed] Skipping demo invite: DEMO_FAMILY_INVITE_CODE failed format validation.",
+    );
+    return;
+  }
   const pool = getPool();
   await pool.query(
     `INSERT INTO family_invite_codes (code, created_by_user_id, max_uses, expires_at)
      VALUES (?, ?, NULL, NULL)
      ON DUPLICATE KEY UPDATE code = VALUES(code)`,
-    [DEMO_FAMILY_INVITE_CODE, createdByUserId],
+    [code, createdByUserId],
   );
 }

@@ -4,16 +4,21 @@ services:
     container_name: bradapp-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      # Bind to localhost only; set MYSQL_* in .env (never commit real passwords).
+      - "127.0.0.1:${MYSQL_HOST_PORT:-3306}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: bradapp_root
-      MYSQL_DATABASE: bradapp
-      MYSQL_USER: bradapp
-      MYSQL_PASSWORD: bradapp
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bradapp}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
     volumes:
       - bradapp_mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ubradapp", "-pbradapp"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD || exit 1",
+        ]
       interval: 5s
       timeout: 5s
       retries: 20

@@ -12,16 +12,14 @@ import { seedCars } from "./seed-cars.js";
 
 loadEnv();
 
-/** Brad admin seed — bcrypt hash only. Plaintext is never stored in this repo. */
+/** Brad admin identity for seed (password only from env — never a committed hash). */
 const BRAD_ADMIN_EMAIL = "bradapp.admin@gmail.com";
 const BRAD_ADMIN_NAME = "Brad";
-const BRAD_ADMIN_PASSWORD_HASH =
-  "$2a$12$EpJhNF5BOG5tE8Un1njOw.QPa6MGZJ.Hd264KxKounBEWe5q0aohm";
+const BRAD_ADMIN_BIO = "Bay host — reviews, drag races, and fair play.";
 
 /**
  * Demo family members for challenges/trades out of the box.
- * Shared bcrypt hash only in repo. Override at seed with DEMO_MEMBER_PASSWORD
- * (hashed at runtime; never logged or committed).
+ * Passwords only from DEMO_MEMBER_PASSWORD (hashed at runtime; never committed).
  */
 export const DEMO_FAMILY_MEMBERS = [
   {
@@ -44,27 +42,50 @@ export const DEMO_FAMILY_MEMBERS = [
   },
 ] as const;
 
-const BRAD_ADMIN_BIO = "Bay host — reviews, drag races, and fair play.";
+function resolveBradAdminPassword(): string | null {
+  const fromEnv =
+    process.env.BRAD_ADMIN_PASSWORD?.trim() ||
+    process.env.SEED_BRAD_ADMIN_PASSWORD?.trim() ||
+    "";
+  if (!fromEnv || fromEnv.length < 8) {
+    return null;
+  }
+  return fromEnv;
+}
 
-/** Committed fallback hash for demo members (plaintext never in this repo). */
-export const DEMO_MEMBER_PASSWORD_HASH =
-  "$2a$12$pyofT5jKX7Eq7w2jjC98p.130Irr0E1ne2t32MtocyNfFQ/1552lq";
+async function seedBradAdminAccount(): Promise<void> {
+  const pool = getPool();
+  const password = resolveBradAdminPassword();
+
+  if (password) {
+    const passwordHash = await hashPassword(password);
+    // Insert when missing; never overwrite password_hash on existing Brad.
+    await pool.query(
+      `INSERT INTO users (email, password_hash, display_name, bio, role, account_status)
+       VALUES (?, ?, ?, ?, 'admin', 'active')
+       ON DUPLICATE KEY UPDATE
+         display_name = VALUES(display_name),
+         bio = COALESCE(users.bio, VALUES(bio)),
+         role = 'admin',
+         account_status = 'active'`,
+      [BRAD_ADMIN_EMAIL, passwordHash, BRAD_ADMIN_NAME, BRAD_ADMIN_BIO],
+    );
+    return;
+  }
+
+  await pool.query(
+    `UPDATE users
+     SET display_name = ?, bio = COALESCE(bio, ?), role = 'admin', account_status = 'active'
+     WHERE email = ?`,
+    [BRAD_ADMIN_NAME, BRAD_ADMIN_BIO, BRAD_ADMIN_EMAIL],
+  );
+}
 
 export async function seedAccounts(): Promise<void> {
   await runMigrations();
   const pool = getPool();
 
-  await pool.query(
-    `INSERT INTO users (email, password_hash, display_name, bio, role, account_status)
-     VALUES (?, ?, ?, ?, 'admin', 'active')
-     ON DUPLICATE KEY UPDATE
-       password_hash = VALUES(password_hash),
-       display_name = VALUES(display_name),
-       bio = COALESCE(users.bio, VALUES(bio)),
-       role = 'admin',
-       account_status = 'active'`,
-    [BRAD_ADMIN_EMAIL, BRAD_ADMIN_PASSWORD_HASH, BRAD_ADMIN_NAME, BRAD_ADMIN_BIO],
-  );
+  await seedBradAdminAccount();
 
   const superEmail = process.env.SEED_SUPER_ADMIN_EMAIL?.trim();
   const superPassword = process.env.SEED_SUPER_ADMIN_PASSWORD;
@@ -72,11 +93,11 @@ export async function seedAccounts(): Promise<void> {
 
   if (superEmail && superPassword) {
     const passwordHash = await hashPassword(superPassword);
+    // Insert when missing; never overwrite password_hash on existing super_admin.
     await pool.query(
       `INSERT INTO users (email, password_hash, display_name, role)
        VALUES (?, ?, ?, 'super_admin')
        ON DUPLICATE KEY UPDATE
-         password_hash = VALUES(password_hash),
          display_name = VALUES(display_name),
          role = 'super_admin'`,
       [superEmail, passwordHash, superName],
@@ -137,28 +158,40 @@ async function ensureAffordableStock(minCount: number): Promise<void> {
   );
 }
 
-async function resolveDemoMemberPasswordHash(): Promise<string> {
-  const fromEnv = process.env.DEMO_MEMBER_PASSWORD;
-  if (fromEnv && fromEnv.length >= 8) {
-    return hashPassword(fromEnv);
+/** Resolves demo member password from DEMO_MEMBER_PASSWORD only (never a committed hash). */
+export async function resolveDemoMemberPasswordHash(): Promise<string | null> {
+  const fromEnv = process.env.DEMO_MEMBER_PASSWORD?.trim();
+  if (!fromEnv || fromEnv.length < 8) {
+    return null;
   }
-  return DEMO_MEMBER_PASSWORD_HASH;
+  return hashPassword(fromEnv);
 }
 
 async function seedDemoFamilyMembers(): Promise<void> {
   const pool = getPool();
   const passwordHash = await resolveDemoMemberPasswordHash();
+
   for (const member of DEMO_FAMILY_MEMBERS) {
+    if (passwordHash) {
+      // Insert when missing; never overwrite password_hash on existing demo users.
+      await pool.query(
+        `INSERT INTO users (email, password_hash, display_name, bio, role, account_status)
+         VALUES (?, ?, ?, ?, 'member', 'active')
+         ON DUPLICATE KEY UPDATE
+           display_name = VALUES(display_name),
+           bio = COALESCE(users.bio, VALUES(bio)),
+           role = 'member',
+           account_status = 'active'`,
+        [member.email, passwordHash, member.displayName, member.bio],
+      );
+      continue;
+    }
+
     await pool.query(
-      `INSERT INTO users (email, password_hash, display_name, bio, role, account_status)
-       VALUES (?, ?, ?, ?, 'member', 'active')
-       ON DUPLICATE KEY UPDATE
-         password_hash = VALUES(password_hash),
-         display_name = VALUES(display_name),
-         bio = COALESCE(users.bio, VALUES(bio)),
-         role = 'member',
-         account_status = 'active'`,
-      [member.email, passwordHash, member.displayName, member.bio],
+      `UPDATE users
+       SET display_name = ?, bio = COALESCE(users.bio, ?), role = 'member', account_status = 'active'
+       WHERE email = ?`,
+      [member.displayName, member.bio, member.email],
     );
   }
 }

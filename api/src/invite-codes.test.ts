@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEMO_FAMILY_INVITE_CODE,
   generateInviteCode,
   inviteFailureMessage,
   isValidInviteCodeFormat,
@@ -8,6 +7,9 @@ import {
   validateInviteRow,
   type InviteCodeRow,
 } from "./invite-codes.js";
+
+/** Format fixture only — not a seeded production invite. */
+const SAMPLE_INVITE_CODE = "FAMILY-BAY-2026";
 
 function sample(overrides: Partial<InviteCodeRow> = {}): InviteCodeRow {
   return {
@@ -26,8 +28,8 @@ function sample(overrides: Partial<InviteCodeRow> = {}): InviteCodeRow {
 
 describe("invite-codes helpers", () => {
   it("normalizes and validates code format", () => {
-    expect(normalizeInviteCode("  family-bay-2026 ")).toBe("FAMILY-BAY-2026");
-    expect(isValidInviteCodeFormat(DEMO_FAMILY_INVITE_CODE)).toBe(true);
+    expect(normalizeInviteCode("  family-bay-2026 ")).toBe(SAMPLE_INVITE_CODE);
+    expect(isValidInviteCodeFormat(SAMPLE_INVITE_CODE)).toBe(true);
     expect(isValidInviteCodeFormat("ab")).toBe(false);
     expect(isValidInviteCodeFormat("bad code!")).toBe(false);
     expect(generateInviteCode()).toMatch(/^BAY-[0-9A-F]{8}$/);

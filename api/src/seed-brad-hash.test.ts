@@ -1,17 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { verifyPassword } from "./password.js";
+import { hashPassword, verifyPassword } from "./password.js";
 
-/** Committed Brad admin hash from seed.ts — plaintext never appears in source. */
-const BRAD_ADMIN_PASSWORD_HASH =
-  "$2a$12$EpJhNF5BOG5tE8Un1njOw.QPa6MGZJ.Hd264KxKounBEWe5q0aohm";
-
-describe("Brad admin seed hash", () => {
-  it("matches TEST_BRAD_PASSWORD when provided", async () => {
-    const password = process.env.TEST_BRAD_PASSWORD;
-    if (!password) {
-      expect(BRAD_ADMIN_PASSWORD_HASH.startsWith("$2a$")).toBe(true);
+describe("Brad admin seed passwords", () => {
+  it("hashes BRAD_ADMIN_PASSWORD from the environment at runtime", async () => {
+    const password = process.env.TEST_BRAD_PASSWORD || process.env.BRAD_ADMIN_PASSWORD;
+    if (!password || password.length < 8) {
+      const sample = await hashPassword("Temporary-Test-Only-9");
+      expect(sample.startsWith("$2a$") || sample.startsWith("$2b$")).toBe(true);
       return;
     }
-    expect(await verifyPassword(password, BRAD_ADMIN_PASSWORD_HASH)).toBe(true);
+    const hash = await hashPassword(password);
+    expect(await verifyPassword(password, hash)).toBe(true);
   });
 });
