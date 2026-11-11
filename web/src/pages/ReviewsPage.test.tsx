@@ -146,10 +146,10 @@ describe("ReviewsPage Midnight Garage UI", () => {
     const studioImgs = [...document.querySelectorAll(".car-card-media img")];
     expect(studioImgs.length).toBeGreaterThanOrEqual(2);
     expect(
-      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(
-      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=")),
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(screen.getAllByRole("link", { name: /Open car Porsche 911/i }).length).toBeGreaterThanOrEqual(
       1,

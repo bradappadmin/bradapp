@@ -170,7 +170,7 @@ describe("ActivityFeed car thumbs", () => {
     expect(purchase).toHaveAttribute("href", "/cars/42");
     const img = purchase.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
   });
 
   it("filters the loaded feed with type chips and keeps thumbs", async () => {
@@ -191,7 +191,7 @@ describe("ActivityFeed car thumbs", () => {
     expect(screen.queryByText("Brad")).not.toBeInTheDocument();
 
     const playRow = screen.getByRole("link", { name: /beat the house on power/i });
-    expect(playRow.querySelector("img")?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(playRow.querySelector("img")?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
 
     await user.click(screen.getByRole("button", { name: "Reviews" }));
     expect(screen.getByText("Brad")).toBeInTheDocument();

@@ -119,8 +119,7 @@ describe("AdminInventoryPage listing paint", () => {
 
     expect(await screen.findByRole("heading", { name: "Cars & garages" })).toBeInTheDocument();
     const thumb = await screen.findByRole("img", { name: /Audi RS6 in Midnight Black/i });
-    expect(thumb.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
-    expect(thumb.getAttribute("src") ?? "").toContain("paintDescription=Black");
+    expect(thumb.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
 
     const openListing = screen.getByRole("link", { name: "Open listing 42" });
     expect(openListing).toHaveAttribute("href", "/cars/42");
@@ -129,10 +128,9 @@ describe("AdminInventoryPage listing paint", () => {
     const paint = screen.getByLabelText(/Paint colour for listing 42/i);
     await user.selectOptions(paint, "Racing Red");
 
-    expect(await screen.findByRole("img", { name: /Audi RS6 in Racing Red/i })).toHaveAttribute(
-      "src",
-      expect.stringContaining("paintDescription=Red"),
-    );
+    const redThumb = await screen.findByRole("img", { name: /Audi RS6 in Racing Red/i });
+    expect(redThumb.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
+    expect(decodeURIComponent(redThumb.getAttribute("src") ?? "")).toContain("#dc2626");
 
     await user.click(screen.getByRole("button", { name: "Save" }));
     expect(api.patchAdminListing).toHaveBeenCalledWith(42, {

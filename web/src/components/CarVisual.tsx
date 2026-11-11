@@ -99,14 +99,14 @@ function FallbackSvg({
       aria-label={!isHero && title ? `${title} in ${colour}` : undefined}
     >
       <defs>
-        <linearGradient id={bayGrad} x1="0" y1="0" x2="0.8" y2="1">
-          <stop offset="0%" stopColor="#1a2740" />
-          <stop offset="45%" stopColor="#0d1524" />
-          <stop offset="100%" stopColor="#070b14" />
+        <linearGradient id={bayGrad} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="55%" stopColor="#f4f6f8" />
+          <stop offset="100%" stopColor="#e8ecf1" />
         </linearGradient>
         <linearGradient id={floorGrad} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.55)" />
+          <stop offset="0%" stopColor="rgba(15,23,42,0.02)" />
+          <stop offset="100%" stopColor="rgba(15,23,42,0.08)" />
         </linearGradient>
         <linearGradient id={bodyGrad} x1="0.15" y1="0" x2="0.55" y2="1">
           <stop offset="0%" stopColor={paint.highlight} />
@@ -134,8 +134,9 @@ function FallbackSvg({
       <rect width="200" height="120" fill={`url(#${bayGrad})`} />
       <rect width="200" height="120" fill={`url(#${uid}-glow)`} />
       <rect x="0" y="86" width="200" height="34" fill={`url(#${floorGrad})`} />
-      <ellipse cx="100" cy="102" rx="78" ry="7" fill="rgba(0,0,0,0.4)" />
-      <path d={art.under} fill="rgba(0,0,0,0.55)" />
+      <ellipse cx="100" cy="102" rx="78" ry="8" fill={paint.glow} />
+      <ellipse cx="100" cy="100" rx="70" ry="5" fill="rgba(15,23,42,0.12)" />
+      <path d={art.under} fill="rgba(15,23,42,0.18)" />
       <path d={art.body} fill={`url(#${bodyGrad})`} />
       <path d={art.body} fill={`url(#${shineGrad})`} opacity={0.65} />
       {art.accent ? (

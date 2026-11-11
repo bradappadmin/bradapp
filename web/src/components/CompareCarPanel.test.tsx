@@ -35,7 +35,7 @@ describe("CompareCarPanel", () => {
     expect(heroShell?.className).toMatch(/compare-hero-motion/);
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
     expect(screen.getByRole("link", { name: "Open car Porsche 911 GT3" })).toHaveAttribute(
       "href",
       "/cars/9",

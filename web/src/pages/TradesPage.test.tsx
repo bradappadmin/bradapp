@@ -182,10 +182,10 @@ describe("TradesPage Midnight Garage UI", () => {
     const studioImgs = [...inbox.querySelectorAll(".car-card-media img")];
     expect(studioImgs.length).toBeGreaterThanOrEqual(2);
     expect(
-      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(
-      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=")),
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(screen.getByRole("link", { name: "Open car Ford Focus ST" })).toHaveAttribute(
       "href",

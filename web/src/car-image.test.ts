@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   carStudioImageUrl,
+  carStudioSvgDataUrl,
   paintOptionsFor,
   resolveStudioCarTokens,
   STUDIO_PAINT_COLOURS,
@@ -67,7 +68,8 @@ describe("resolveStudioCarTokens", () => {
 });
 
 describe("carStudioImageUrl", () => {
-  it("builds a studio URL from make, model, and paint", () => {
+  it("uses watermark-free white-studio SVG when no licensed customer is set", () => {
+    expect(usesLicensedCarStudio()).toBe(false);
     const url = carStudioImageUrl({
       make: "Audi",
       model: "RS6",
@@ -76,23 +78,24 @@ describe("carStudioImageUrl", () => {
       year: 2019,
       width: 400,
     });
-    expect(url).toContain("cdn.imagin.studio/getImage");
-    expect(url).toContain("make=audi");
-    expect(url).toContain("modelFamily=a6");
-    expect(url).toContain("modelRange=rs6");
-    expect(url).toContain("modelVariant=estate");
-    expect(url).toContain("modelYear=2019");
-    expect(url).toContain("paintDescription=Red");
-    expect(url).toContain("width=400");
-    expect(url).toContain("fileType=webp");
-    expect(url).toContain("backgroundColor=255%2C255%2C255%2C255");
-    expect(usesLicensedCarStudio()).toBe(false);
+    expect(url).toMatch(/^data:image\/svg\+xml/);
+    expect(url).not.toContain("cdn.imagin.studio");
+    expect(url).not.toContain("customer=img");
+    const decoded = decodeURIComponent(url!.replace(/^data:image\/svg\+xml;charset=utf-8,/, ""));
+    expect(decoded).toContain("#ffffff");
+    expect(decoded).toContain("#dc2626");
   });
 
-  it("aliases common UK makes for the studio CDN", () => {
-    const url = carStudioImageUrl({ make: "Vauxhall", model: "Corsa", colour: "Laser Blue" });
-    expect(url).toContain("make=opel");
-    expect(url).toContain("paintDescription=Blue");
+  it("builds the same SVG helper for UK make aliases and paint", () => {
+    const url = carStudioSvgDataUrl({
+      make: "Vauxhall",
+      model: "Corsa",
+      colour: "Laser Blue",
+      bodyType: "Hatchback",
+    });
+    expect(url).toMatch(/^data:image\/svg\+xml/);
+    const decoded = decodeURIComponent(url.replace(/^data:image\/svg\+xml;charset=utf-8,/, ""));
+    expect(decoded).toContain("#2563eb");
   });
 
   it("exposes a curated paint list that the studio helper accepts", () => {
@@ -104,14 +107,18 @@ describe("carStudioImageUrl", () => {
     expect(paintOptionsFor("Custom Blue")).toContain("Racing Red");
     for (const colour of STUDIO_PAINT_COLOURS) {
       const url = carStudioImageUrl({ make: "BMW", model: "M3", colour, bodyType: "Saloon" });
-      expect(url).toContain("paintDescription=");
-      expect(url).toContain("modelRange=m3");
+      expect(url).toMatch(/^data:image\/svg\+xml/);
     }
   });
 
-  it("skips the free demo studio URL for Ferrari (covered-car stub)", () => {
-    expect(
-      carStudioImageUrl({ make: "Ferrari", model: "SF90 Stradale", colour: "Racing Red" }),
-    ).toBeNull();
+  it("still renders Ferrari via white-studio SVG (no covered-car Imagin stub)", () => {
+    const url = carStudioImageUrl({
+      make: "Ferrari",
+      model: "SF90 Stradale",
+      colour: "Racing Red",
+      bodyType: "Coupe",
+    });
+    expect(url).toMatch(/^data:image\/svg\+xml/);
+    expect(url).not.toContain("cdn.imagin.studio");
   });
 });

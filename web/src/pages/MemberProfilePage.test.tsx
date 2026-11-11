@@ -146,7 +146,7 @@ describe("MemberProfilePage showcase garage", () => {
     ).toBe(true);
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
   });
 
   it("copies that member's profile link with a toast", async () => {

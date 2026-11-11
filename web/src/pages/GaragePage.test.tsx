@@ -240,7 +240,7 @@ describe("GaragePage Midnight Garage UI", () => {
 
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
   });
 
   it("queues owned and for-sale cars into the session compare tray", async () => {
@@ -581,7 +581,7 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(focusCard).not.toBeNull();
     const previewImgs = (focusCard as HTMLElement).querySelectorAll("img");
     expect(
-      [...previewImgs].some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=Blue")),
+      [...previewImgs].some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
 
     await user.click(updatePaint);
@@ -644,7 +644,7 @@ describe("GaragePage Midnight Garage UI", () => {
     expect(paint).toHaveValue("Laser Blue");
     const previewImgs = (listForm as HTMLElement).querySelectorAll("img");
     expect(
-      [...previewImgs].some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=Blue")),
+      [...previewImgs].some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     await user.click(within(listForm as HTMLElement).getByRole("button", { name: "List for sale" }));
 

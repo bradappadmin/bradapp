@@ -158,7 +158,7 @@ describe("LeaderboardPage Midnight Garage UI", () => {
 
     const img = garageLink.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
 
     const peeks = screen.getAllByLabelText("Top Trumps peek");
     expect(peeks.length).toBe(2);

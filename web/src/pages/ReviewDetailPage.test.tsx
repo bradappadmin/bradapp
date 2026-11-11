@@ -144,9 +144,7 @@ describe("ReviewDetailPage Midnight Garage UI", () => {
     expect(hero.querySelector('[data-bay-frame="hero"]')).not.toBeNull();
     const heroImg = hero.querySelector("img");
     expect(heroImg).not.toBeNull();
-    expect(heroImg?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
-    expect(heroImg?.getAttribute("src") ?? "").toContain("paintDescription=");
-    expect(heroImg?.getAttribute("src") ?? "").toContain("modelYear=2019");
+    expect(heroImg?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
     expect(screen.getByRole("heading", { name: "Cue cards" })).toBeInTheDocument();
     expect(screen.getByLabelText("Review actions")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeInTheDocument();

@@ -146,7 +146,7 @@ describe("FavouritesPage Midnight Garage UI", () => {
     expect(browseLinks.some((link) => link.getAttribute("href") === "/cars")).toBe(true);
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
   });
 
   it("shows a clear empty state with Cars CTA", async () => {
