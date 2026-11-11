@@ -233,10 +233,10 @@ describe("AdminCoinHistoryPage member search", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Find a member" })).toBeInTheDocument();
-    expect(screen.getAllByText("Quick amount").length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByRole("group", { name: /Coin adjust presets for Sam Bay/i }),
+      await screen.findByRole("group", { name: /Coin adjust presets for Sam Bay/i }),
     ).toBeInTheDocument();
+    expect((await screen.findAllByText("Quick amount")).length).toBeGreaterThanOrEqual(1);
 
     const openSam = screen.getAllByRole("link", { name: "Open member Sam Bay" });
     expect(openSam.length).toBeGreaterThanOrEqual(2);

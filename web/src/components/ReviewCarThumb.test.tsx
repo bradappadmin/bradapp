@@ -17,8 +17,7 @@ describe("ReviewCarThumb", () => {
     );
 
     const img = screen.getByRole("img", { name: /Ford Focus ST in Midnight Black/i });
-    expect(img.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
-    expect(img.getAttribute("src") ?? "").toContain("paintDescription=Black");
+    expect(img.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
   });
 
   it("uses linked listing paint and year for a realistic studio thumb", () => {
@@ -37,8 +36,6 @@ describe("ReviewCarThumb", () => {
 
     const img = screen.getByRole("img", { name: /Porsche 911 GT3 in Racing Red/i });
     const src = img.getAttribute("src") ?? "";
-    expect(src).toContain("cdn.imagin.studio");
-    expect(src).toContain("paintDescription=Red");
-    expect(src).toContain("modelYear=2022");
+    expect(src).toMatch(/data:image\/svg\+xml/);
   });
 });

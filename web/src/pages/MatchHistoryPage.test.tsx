@@ -119,7 +119,7 @@ describe("MatchHistoryPage Midnight Garage UI", () => {
 
     const imgs = screen.getAllByRole("img");
     expect(imgs.length).toBeGreaterThanOrEqual(2);
-    expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+    expect(imgs[0]?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
 
     expect(screen.getByRole("link", { name: /Back to Play/i })).toHaveAttribute("href", "/play");
     expect(

@@ -98,10 +98,10 @@ describe("HomePage", () => {
     const studioImgs = [...latestRegion.querySelectorAll(".car-card-media img")];
     expect(studioImgs.length).toBeGreaterThanOrEqual(1);
     expect(
-      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(
-      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription=")),
+      studioImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(screen.getByRole("link", { name: "Open car Ford Focus" })).toHaveAttribute(
       "href",
@@ -225,7 +225,7 @@ describe("HomePage", () => {
     const featuredImgs = [...featuredRegion.querySelectorAll(".car-card-media img")];
     expect(featuredImgs.length).toBeGreaterThanOrEqual(2);
     expect(
-      featuredImgs.some((img) => (img.getAttribute("src") ?? "").includes("cdn.imagin.studio")),
+      featuredImgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml")),
     ).toBe(true);
     expect(screen.getByRole("link", { name: "Open car Nissan GT-R" })).toHaveAttribute(
       "href",

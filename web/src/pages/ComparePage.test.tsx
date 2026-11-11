@@ -143,7 +143,7 @@ describe("ComparePage Midnight Garage UI", () => {
     await waitFor(() => {
       const imgs = document.querySelectorAll("img");
       expect(imgs.length).toBeGreaterThanOrEqual(2);
-      expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
+      expect(imgs[0]?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
     });
     // Top Trumps category winners under heroes — Play rules (higher Power/top speed, lower 0–60).
     expect(await screen.findByLabelText("Top Trumps winners")).toBeInTheDocument();

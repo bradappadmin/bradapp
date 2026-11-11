@@ -34,8 +34,8 @@ describe("TradeOfferPair", () => {
     expect(document.querySelectorAll(".car-card-media").length).toBe(2);
     const imgs = [...document.querySelectorAll(".car-card-media img")];
     expect(imgs.length).toBeGreaterThanOrEqual(2);
-    expect(imgs[0]?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
-    expect(imgs.some((img) => (img.getAttribute("src") ?? "").includes("paintDescription="))).toBe(
+    expect(imgs[0]?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
+    expect(imgs.some((img) => (img.getAttribute("src") ?? "").includes("data:image/svg+xml"))).toBe(
       true,
     );
   });

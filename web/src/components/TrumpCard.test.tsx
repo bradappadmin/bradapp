@@ -32,8 +32,7 @@ describe("TrumpCard", () => {
     expect(screen.getByText("Power (BHP): 591")).toBeInTheDocument();
     const img = document.querySelector("img");
     expect(img).not.toBeNull();
-    expect(img?.getAttribute("src") ?? "").toContain("cdn.imagin.studio");
-    expect(img?.getAttribute("src") ?? "").toContain("make=audi");
+    expect(img?.getAttribute("src") ?? "").toMatch(/data:image\/svg\+xml/);
     expect(document.querySelector('[data-bay-frame="card"]')).not.toBeNull();
     const card = document.querySelector("[data-trump-card]");
     expect(card).not.toBeNull();

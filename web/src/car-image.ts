@@ -1,4 +1,9 @@
-/** Studio car renders for listing cards/heroes. Falls back to local SVG art if unloadable. */
+/** Studio car renders for listing cards/heroes.
+ * Licensed Imagin customer → photoreal CDN (no demo watermark).
+ * Otherwise → self-hosted white-studio SVG data URL (never free Imagin; that watermarks).
+ */
+import { carBodyArt, carPaint } from "./car-visuals";
+
 
 /** Listing paint names the studio helper maps to Imagin paintDescription. */
 const COLOUR_TO_PAINT: Record<string, string> = {
@@ -201,24 +206,26 @@ export type CarImageInput = {
 };
 
 /**
- * Free `customer=img` returns a covered-car stub for these makes.
- * Skip the studio URL so UI falls back to Midnight Garage SVG art unless a
- * licensed `VITE_CAR_IMAGE_CUSTOMER` is configured.
- */
-const DEMO_UNSUPPORTED_MAKES = new Set(["ferrari"]);
-
-/**
- * Builds a white-studio image URL for a real make/model.
- * Uses the public Imagin CDN customer; override with VITE_CAR_IMAGE_CUSTOMER if needed
- * (licensed keys drop the demo watermark / plate branding).
- * Returns null when the free demo customer cannot render the make.
+ * Builds a watermark-free white-studio image URL for a real make/model.
+ * - Licensed `VITE_CAR_IMAGE_CUSTOMER` → Imagin CDN (white bg, no demo watermark).
+ * - Otherwise → original SVG studio data URL (never free `customer=img`, which watermarks).
  */
 export function carStudioImageUrl(input: CarImageInput): string | null {
-  const customer = (import.meta.env.VITE_CAR_IMAGE_CUSTOMER as string | undefined)?.trim() || "img";
-  const tokens = resolveStudioCarTokens(input);
-  if (customer === "img" && DEMO_UNSUPPORTED_MAKES.has(tokens.make)) {
-    return null;
+  if (usesLicensedCarStudio()) {
+    return licensedImaginStudioUrl(input);
   }
+  return carStudioSvgDataUrl(input);
+}
+
+/** True when studio URLs use a licensed Imagin customer (demo watermark / plate branding off). */
+export function usesLicensedCarStudio(): boolean {
+  const customer = (import.meta.env.VITE_CAR_IMAGE_CUSTOMER as string | undefined)?.trim();
+  return Boolean(customer && customer !== "img");
+}
+
+function licensedImaginStudioUrl(input: CarImageInput): string {
+  const customer = (import.meta.env.VITE_CAR_IMAGE_CUSTOMER as string).trim();
+  const tokens = resolveStudioCarTokens(input);
   const params = new URLSearchParams({
     customer,
     make: tokens.make,
@@ -226,9 +233,7 @@ export function carStudioImageUrl(input: CarImageInput): string | null {
     angle: input.angle ?? "23",
     zoomType: "fullscreen",
     width: String(input.width ?? 800),
-    // White seamless studio — matches product cards/heroes across the bay.
     backgroundColor: "255,255,255,255",
-    // Transparent-capable formats sit cleanly on the white studio plane.
     fileType: "webp",
   });
   if (tokens.modelRange) params.set("modelRange", tokens.modelRange);
@@ -240,8 +245,63 @@ export function carStudioImageUrl(input: CarImageInput): string | null {
   return `https://cdn.imagin.studio/getImage?${params.toString()}`;
 }
 
-/** True when studio URLs use a licensed Imagin customer (demo watermark / plate branding off). */
-export function usesLicensedCarStudio(): boolean {
-  const customer = (import.meta.env.VITE_CAR_IMAGE_CUSTOMER as string | undefined)?.trim();
-  return Boolean(customer && customer !== "img");
+/** Original white-studio SVG — photoreal-leaning ¾ car, no third-party watermark. */
+export function carStudioSvgDataUrl(input: CarImageInput): string {
+  const paint = carPaint(input.colour ?? "Arctic White");
+  const art = carBodyArt(input.bodyType);
+  const uid = "s";
+  const accent = art.accent
+    ? `<path d="${art.accent}" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.4" stroke-linecap="round"/>`
+    : "";
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="${input.width ?? 800}" role="img">
+  <defs>
+    <linearGradient id="${uid}-studio" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#f4f6f8"/>
+      <stop offset="100%" stop-color="#e8ecf1"/>
+    </linearGradient>
+    <linearGradient id="${uid}-body" x1="0.15" y1="0" x2="0.55" y2="1">
+      <stop offset="0%" stop-color="${paint.highlight}"/>
+      <stop offset="32%" stop-color="${paint.base}"/>
+      <stop offset="72%" stop-color="${paint.shade}"/>
+      <stop offset="100%" stop-color="${paint.deep}"/>
+    </linearGradient>
+    <linearGradient id="${uid}-glass" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="${paint.glassEdge}"/>
+      <stop offset="40%" stop-color="${paint.glass}"/>
+      <stop offset="100%" stop-color="rgba(6,10,18,0.82)"/>
+    </linearGradient>
+    <linearGradient id="${uid}-shine" x1="0" y1="0" x2="1" y2="0.15">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="28%" stop-color="rgba(255,255,255,0.42)"/>
+      <stop offset="48%" stop-color="rgba(255,255,255,0.1)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="120" fill="url(#${uid}-studio)"/>
+  <ellipse cx="100" cy="102" rx="78" ry="8" fill="${paint.glow}"/>
+  <ellipse cx="100" cy="100" rx="70" ry="5" fill="rgba(15,23,42,0.12)"/>
+  <path d="${art.under}" fill="rgba(15,23,42,0.18)"/>
+  <path d="${art.body}" fill="url(#${uid}-body)"/>
+  <path d="${art.body}" fill="url(#${uid}-shine)" opacity="0.7"/>
+  ${accent}
+  <path d="${art.glass}" fill="url(#${uid}-glass)" stroke="rgba(255,255,255,0.16)" stroke-width="0.9"/>
+  <path d="${art.grille}" fill="${paint.deep}" opacity="0.9"/>
+  <ellipse cx="${art.headlight.cx}" cy="${art.headlight.cy}" rx="${art.headlight.rx}" ry="${art.headlight.ry}" fill="${paint.light}" opacity="0.95"/>
+  <ellipse cx="${art.taillight.cx}" cy="${art.taillight.cy}" rx="${art.taillight.rx}" ry="${art.taillight.ry}" fill="#ef4444" opacity="0.92"/>
+  <g>
+    <ellipse cx="${art.wheels[0].cx}" cy="${art.wheels[0].cy + art.wheels[0].r * 0.22}" rx="${art.wheels[0].r * 1.05}" ry="${art.wheels[0].r * 0.22}" fill="rgba(0,0,0,0.28)"/>
+    <circle cx="${art.wheels[0].cx}" cy="${art.wheels[0].cy}" r="${art.wheels[0].r}" fill="#090c12"/>
+    <circle cx="${art.wheels[0].cx}" cy="${art.wheels[0].cy}" r="${art.wheels[0].r * 0.62}" fill="${paint.rim}"/>
+    <circle cx="${art.wheels[0].cx}" cy="${art.wheels[0].cy}" r="${art.wheels[0].r * 0.22}" fill="${paint.rim}" stroke="${paint.chrome}" stroke-width="0.8"/>
+  </g>
+  <g>
+    <ellipse cx="${art.wheels[1].cx}" cy="${art.wheels[1].cy + art.wheels[1].r * 0.22}" rx="${art.wheels[1].r * 1.05}" ry="${art.wheels[1].r * 0.22}" fill="rgba(0,0,0,0.28)"/>
+    <circle cx="${art.wheels[1].cx}" cy="${art.wheels[1].cy}" r="${art.wheels[1].r}" fill="#090c12"/>
+    <circle cx="${art.wheels[1].cx}" cy="${art.wheels[1].cy}" r="${art.wheels[1].r * 0.62}" fill="${paint.rim}"/>
+    <circle cx="${art.wheels[1].cx}" cy="${art.wheels[1].cy}" r="${art.wheels[1].r * 0.22}" fill="${paint.rim}" stroke="${paint.chrome}" stroke-width="0.8"/>
+  </g>
+</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
