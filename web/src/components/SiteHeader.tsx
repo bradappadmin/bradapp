@@ -2,12 +2,19 @@ import { useEffect, useId, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../auth-context";
 import { formatCoins } from "../cars";
+import {
+  NAV_GROUP_LABELS,
+  type NavGroup,
+  type NavItem,
+  navItemsByGroup,
+  visibleNavItems,
+} from "../nav-items";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `block rounded-md px-3 py-2.5 font-display text-sm no-underline transition md:inline-block md:rounded-none md:px-0.5 md:py-1 ${
+  `block rounded-md px-3 py-2.5 font-display text-sm no-underline transition lg:inline-block lg:rounded-none lg:px-0.5 lg:py-1 ${
     isActive
       ? "nav-link-active text-lime"
-      : "text-steel hover:bg-white/[0.03] hover:text-mist md:hover:bg-transparent"
+      : "text-steel hover:bg-white/[0.03] hover:text-mist lg:hover:bg-transparent"
   }`;
 
 function NavCountBadge({
@@ -52,6 +59,102 @@ function CoinBalanceLink({
   );
 }
 
+function NavItemLink({
+  item,
+  favouriteCount,
+  pendingTradeInbox,
+}: {
+  item: NavItem;
+  favouriteCount: number;
+  pendingTradeInbox: number;
+}) {
+  return (
+    <NavLink to={item.to} className={linkClass} end={item.to === "/cars" ? false : undefined}>
+      {item.label}
+      {item.badge === "favourites" ? (
+        <NavCountBadge
+          count={favouriteCount}
+          ariaLabel={`${favouriteCount} favourite${favouriteCount === 1 ? "" : "s"}`}
+          testId="favourites-nav-badge"
+        />
+      ) : null}
+      {item.badge === "trades" ? (
+        <NavCountBadge
+          count={pendingTradeInbox}
+          ariaLabel={`${pendingTradeInbox} pending trade offer${pendingTradeInbox === 1 ? "" : "s"}`}
+          testId="trades-inbox-badge"
+        />
+      ) : null}
+    </NavLink>
+  );
+}
+
+function DesktopNavLinks({
+  items,
+  favouriteCount,
+  pendingTradeInbox,
+  coinBalance,
+}: {
+  items: NavItem[];
+  favouriteCount: number;
+  pendingTradeInbox: number;
+  coinBalance: number | null;
+}) {
+  return (
+    <>
+      {items.map((item) => (
+        <NavItemLink
+          key={item.to}
+          item={item}
+          favouriteCount={favouriteCount}
+          pendingTradeInbox={pendingTradeInbox}
+        />
+      ))}
+      {coinBalance !== null ? (
+        <CoinBalanceLink balance={coinBalance} className="mt-1 w-fit lg:mt-0 lg:ml-1" />
+      ) : null}
+    </>
+  );
+}
+
+function MobileNavSections({
+  items,
+  favouriteCount,
+  pendingTradeInbox,
+  coinBalance,
+}: {
+  items: NavItem[];
+  favouriteCount: number;
+  pendingTradeInbox: number;
+  coinBalance: number | null;
+}) {
+  const sections = navItemsByGroup(items);
+  return (
+    <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6">
+      {sections.map((section) => (
+        <div key={section.group} className="flex flex-col gap-0.5">
+          {section.group !== "auth" ? (
+            <p className="px-3 pb-1 pt-1 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-steel/80">
+              {NAV_GROUP_LABELS[section.group as Exclude<NavGroup, "auth">]}
+            </p>
+          ) : null}
+          {section.items.map((item) => (
+            <NavItemLink
+              key={item.to}
+              item={item}
+              favouriteCount={favouriteCount}
+              pendingTradeInbox={pendingTradeInbox}
+            />
+          ))}
+        </div>
+      ))}
+      {coinBalance !== null ? (
+        <CoinBalanceLink balance={coinBalance} className="mt-1 w-fit" />
+      ) : null}
+    </div>
+  );
+}
+
 export function SiteHeader() {
   const {
     user,
@@ -64,6 +167,8 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+  const items = visibleNavItems({ signedIn: Boolean(user), isAdmin });
+  const coinBalance = user ? user.coinBalance : null;
 
   useEffect(() => {
     setMenuOpen(false);
@@ -89,76 +194,6 @@ export function SiteHeader() {
     };
   }, [menuOpen]);
 
-  const navLinks = (
-    <>
-      <NavLink to="/cars" className={linkClass} end={false}>
-        Cars
-      </NavLink>
-      <NavLink to="/compare" className={linkClass}>
-        Compare
-      </NavLink>
-      <NavLink to="/play" className={linkClass}>
-        Play
-      </NavLink>
-      <NavLink to="/reviews" className={linkClass}>
-        Reviews
-      </NavLink>
-      <NavLink to="/how-to" className={linkClass}>
-        How to
-      </NavLink>
-      <NavLink to="/members" className={linkClass}>
-        Members
-      </NavLink>
-      {user ? (
-        <>
-          <NavLink to="/leaderboard" className={linkClass}>
-            Leaderboard
-          </NavLink>
-          <NavLink to="/garage" className={linkClass}>
-            My cars
-          </NavLink>
-          <NavLink to="/favourites" className={linkClass}>
-            Favourites
-            <NavCountBadge
-              count={favouriteCount}
-              ariaLabel={`${favouriteCount} favourite${favouriteCount === 1 ? "" : "s"}`}
-              testId="favourites-nav-badge"
-            />
-          </NavLink>
-          <NavLink to="/trades" className={linkClass}>
-            Trades
-            <NavCountBadge
-              count={pendingTradeInbox}
-              ariaLabel={`${pendingTradeInbox} pending trade offer${pendingTradeInbox === 1 ? "" : "s"}`}
-              testId="trades-inbox-badge"
-            />
-          </NavLink>
-          <NavLink to="/ledger" className={linkClass}>
-            Ledger
-          </NavLink>
-          <NavLink to="/account" className={linkClass}>
-            Account
-          </NavLink>
-          {isAdmin ? (
-            <NavLink to="/admin" className={linkClass}>
-              Admin
-            </NavLink>
-          ) : null}
-          <CoinBalanceLink balance={user.coinBalance} className="mt-1 w-fit md:mt-0 md:ml-1" />
-        </>
-      ) : (
-        <>
-          <NavLink to="/signin" className={linkClass}>
-            Sign in
-          </NavLink>
-          <NavLink to="/signup" className={linkClass}>
-            Sign up
-          </NavLink>
-        </>
-      )}
-    </>
-  );
-
   return (
     <header className="nav-shell relative z-20">
       <div className="nav-shell-glow pointer-events-none absolute inset-0" aria-hidden />
@@ -175,12 +210,12 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <CoinBalanceLink balance={user.coinBalance} className="md:hidden" />
+            <CoinBalanceLink balance={user.coinBalance} className="lg:hidden" />
           ) : null}
 
           <button
             type="button"
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/15 bg-bay-panel/40 text-mist transition hover:border-lime/40 hover:text-lime md:hidden"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/15 bg-bay-panel/40 text-mist transition hover:border-lime/40 hover:text-lime lg:hidden"
             aria-expanded={menuOpen}
             aria-controls={menuId}
             aria-label={
@@ -212,8 +247,13 @@ export function SiteHeader() {
             ) : null}
           </button>
 
-          <nav className="hidden items-center gap-4 lg:gap-5 md:flex" aria-label="Primary">
-            {navLinks}
+          <nav className="hidden items-center gap-3 xl:gap-4 lg:flex" aria-label="Primary">
+            <DesktopNavLinks
+              items={items}
+              favouriteCount={favouriteCount}
+              pendingTradeInbox={pendingTradeInbox}
+              coinBalance={coinBalance}
+            />
           </nav>
         </div>
       </div>
@@ -222,16 +262,21 @@ export function SiteHeader() {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-10 bg-bay-deep/75 backdrop-blur-[2px] md:hidden"
+            className="fixed inset-0 z-10 bg-bay-deep/75 backdrop-blur-[2px] lg:hidden"
             aria-label="Close menu overlay"
             onClick={() => setMenuOpen(false)}
           />
           <nav
             id={menuId}
             aria-label="Primary mobile"
-            className="nav-shell-panel relative z-20 border-t md:hidden"
+            className="nav-shell-panel relative z-20 border-t lg:hidden"
           >
-            <div className="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-3 sm:px-6">{navLinks}</div>
+            <MobileNavSections
+              items={items}
+              favouriteCount={favouriteCount}
+              pendingTradeInbox={pendingTradeInbox}
+              coinBalance={coinBalance}
+            />
           </nav>
         </>
       ) : null}

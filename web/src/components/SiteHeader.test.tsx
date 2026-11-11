@@ -71,14 +71,51 @@ describe("SiteHeader", () => {
     expect(mobileNav).toHaveClass("nav-shell-panel");
     expect(screen.getByRole("button", { name: "Close menu" })).toBeInTheDocument();
     expect(mobileNav).toHaveTextContent("Cars");
+    expect(mobileNav).toHaveTextContent("Reviews");
+    expect(mobileNav).toHaveTextContent("Members");
     expect(mobileNav).toHaveTextContent("Compare");
     expect(mobileNav).toHaveTextContent("Play");
     expect(mobileNav).toHaveTextContent("How to");
-    expect(mobileNav).toHaveTextContent("Members");
     expect(mobileNav).toHaveTextContent("Sign in");
+    expect(mobileNav).toHaveTextContent("Explore");
+    expect(mobileNav).toHaveTextContent("Garage");
+    expect(mobileNav.textContent).toMatch(/Cars.*Reviews.*Members.*Compare.*Play.*How to.*Sign in/s);
 
-    await user.click(screen.getByRole("button", { name: "Close menu" }));
+    const hamburger = screen.getByRole("button", { name: "Close menu" });
+    expect(hamburger.className).toMatch(/lg:hidden/);
+    expect(screen.getByRole("navigation", { name: "Primary" }).className).toMatch(/lg:flex/);
+
+    await user.click(hamburger);
     expect(screen.queryByRole("navigation", { name: "Primary mobile" })).not.toBeInTheDocument();
+  });
+
+  it("renders signed-in links in product order on desktop and mobile", async () => {
+    vi.mocked(api.fetchMe).mockResolvedValue(member);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <SiteHeader />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("link", { name: /^My cars$/i })).toBeInTheDocument();
+    const desktop = screen.getByRole("navigation", { name: "Primary" });
+    expect(desktop.textContent).toMatch(
+      /Cars.*Reviews.*Members.*Leaderboard.*My cars.*Favourites.*Compare.*Play.*Trades.*Ledger.*How to.*Account/s,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    const mobileNav = screen.getByRole("navigation", { name: "Primary mobile" });
+    expect(mobileNav).toHaveTextContent("Explore");
+    expect(mobileNav).toHaveTextContent("Garage");
+    expect(mobileNav).toHaveTextContent("Play");
+    expect(mobileNav).toHaveTextContent("Account");
+    expect(mobileNav.textContent).toMatch(
+      /Cars.*Reviews.*Members.*Leaderboard.*My cars.*Favourites.*Compare.*Play.*Trades.*Ledger.*How to.*Account/s,
+    );
   });
 
   it("hides the Trades inbox badge when pending count is zero", async () => {
