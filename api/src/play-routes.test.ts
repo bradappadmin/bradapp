@@ -1,0 +1,323 @@
+import request from "supertest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { createApp } from "./app.js";
+import { closePool, getPool } from "./db.js";
+import { loadEnv } from "./env.js";
+import { seedAccounts } from "./seed.js";
+import { memberStartingCoins } from "./coins.js";
+import { PLAY_COINS, WIN_COINS } from "./top-trumps.js";
+
+loadEnv();
+
+const hasDb = Boolean(
+  process.env.DATABASE_URL?.startsWith("mysql") && process.env.SESSION_SECRET,
+);
+
+describe.runIf(hasDb)("play routes", () => {
+  const app = createApp();
+  const a = request.agent(app);
+  const b = request.agent(app);
+  const emailA = `play-a-${Date.now()}@example.com`;
+  const emailB = `play-b-${Date.now()}@example.com`;
+  let carA = 0;
+  let carB = 0;
+
+  beforeAll(async () => {
+    await seedAccounts();
+    expect((await a.post("/auth/signup").send({ email: emailA, password: "PlayPass-123!", displayName: "Player A" })).status).toBe(201);
+    expect((await b.post("/auth/signup").send({ email: emailB, password: "PlayPass-123!", displayName: "Player B" })).status).toBe(201);
+
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 30 });
+    const affordable = search.body.listings.filter(
+      (l: { coinPrice: number }) => l.coinPrice <= memberStartingCoins(),
+    );
+    expect(affordable.length).toBeGreaterThanOrEqual(2);
+    carA = affordable[0].id;
+    carB = affordable[1].id;
+    expect((await a.post(`/trade/listings/${carA}/buy`)).status).toBe(200);
+    expect((await b.post(`/trade/listings/${carB}/buy`)).status).toBe(200);
+  });
+
+  afterAll(async () => {
+    const pool = getPool();
+    await pool.query("DELETE FROM users WHERE email IN (?, ?)", [emailA, emailB]);
+    await closePool();
+  });
+
+  it("lists categories with higher/lower directions", async () => {
+    const res = await request(app).get("/play/top-trumps/categories");
+    expect(res.status).toBe(200);
+    expect(res.body.categories).toHaveLength(3);
+    expect(res.body.rewards.win).toBe(WIN_COINS);
+    expect(res.body.streakMilestones).toEqual([
+      { streak: 3, coins: 15 },
+      { streak: 5, coins: 40 },
+    ]);
+  });
+
+  it("reports win streak and updates it after house play", async () => {
+    const streakBefore = await a.get("/play/top-trumps/streak");
+    expect(streakBefore.status).toBe(200);
+    expect(typeof streakBefore.body.streak).toBe("number");
+
+    const play = await a.post("/play/top-trumps/house").send({ listingId: carA, category: "bhp" });
+    expect(play.status).toBe(201);
+    expect(play.body.winStreak).toBeTruthy();
+    expect(typeof play.body.winStreak.current).toBe("number");
+    expect(typeof play.body.winStreak.bonusAwarded).toBe("number");
+
+    if (play.body.match.winner === "challenger") {
+      expect(play.body.winStreak.current).toBe(streakBefore.body.streak + 1);
+    } else if (play.body.match.winner === "opponent") {
+      expect(play.body.winStreak.current).toBe(0);
+    } else {
+      expect(play.body.winStreak.current).toBe(streakBefore.body.streak);
+    }
+  });
+
+  it("plays Top Trumps vs the house and credits play_reward coins", async () => {
+    const before = await a.get("/trade/wallet");
+    const play = await a.post("/play/top-trumps/house").send({ listingId: carA, category: "bhp" });
+    expect(play.status).toBe(201);
+    expect(["challenger", "opponent", "draw"]).toContain(play.body.match.winner);
+    expect(play.body.match.coinReward).toBeGreaterThanOrEqual(PLAY_COINS);
+    expect(play.body.balance).toBeGreaterThanOrEqual(before.body.balance + PLAY_COINS);
+    expect(play.body.match.challenger.make).toBeTruthy();
+    expect(play.body.match.challenger.colour).toBeTruthy();
+    expect(play.body.match.challenger.bodyType).toBeTruthy();
+    expect(play.body.match.opponent.make).toBeTruthy();
+    expect(play.body.match.opponent.bodyType).toBeTruthy();
+    expect(play.body.match.opponent.colour).toBe("Midnight Black");
+
+    const wallet = await a.get("/trade/wallet");
+    expect(wallet.body.ledger.some((e: { reason: string }) => e.reason === "play_reward")).toBe(true);
+
+    const history = await a.get("/play/top-trumps/history");
+    expect(history.status).toBe(200);
+    const houseMatch = history.body.matches.find((m: { id: number }) => m.id === play.body.match.id);
+    expect(houseMatch).toBeTruthy();
+    expect(houseMatch.mode).toBe("house");
+    expect(houseMatch.opponentName).toBe("House");
+    expect(houseMatch.opponentUserId).toBeNull();
+    expect(houseMatch.category).toBe("bhp");
+    expect(houseMatch.yourCar.listingId).toBe(carA);
+    expect(houseMatch.theirCar.make).toBeTruthy();
+    expect(["win", "loss", "draw"]).toContain(houseMatch.result);
+  });
+
+  it("plays PvP Top Trumps between two owned cards", async () => {
+    const play = await a.post("/play/top-trumps/pvp").send({
+      listingId: carA,
+      opponentListingId: carB,
+      category: "zero_to_sixty_secs",
+    });
+    expect(play.status).toBe(201);
+    expect(play.body.match.mode).toBe("pvp");
+    expect(play.body.match.opponent.userId).toBeTruthy();
+    expect(play.body.match.challenger.colour).toBeTruthy();
+    expect(play.body.match.opponent.colour).toBeTruthy();
+    expect(play.body.match.opponent.bodyType).toBeTruthy();
+
+    const historyA = await a.get("/play/top-trumps/history");
+    const asChallenger = historyA.body.matches.find(
+      (m: { id: number }) => m.id === play.body.match.id,
+    );
+    expect(asChallenger.opponentName).toBe("Player B");
+    expect(asChallenger.opponentUserId).toBe(play.body.match.opponent.userId);
+    expect(asChallenger.yourCar.listingId).toBe(carA);
+    expect(asChallenger.theirCar.listingId).toBe(carB);
+
+    const meA = await a.get("/auth/me");
+    expect(meA.status).toBe(200);
+    const playerAId = meA.body.user.id as number;
+
+    const historyB = await b.get("/play/top-trumps/history");
+    const asOpponent = historyB.body.matches.find(
+      (m: { id: number }) => m.id === play.body.match.id,
+    );
+    expect(asOpponent).toBeTruthy();
+    expect(asOpponent.opponentName).toBe("Player A");
+    expect(asOpponent.opponentUserId).toBe(playerAId);
+    expect(asOpponent.yourCar.listingId).toBe(carB);
+    expect(asOpponent.theirCar.listingId).toBe(carA);
+    expect(asOpponent.youWere).toBe("opponent");
+  });
+
+  it("requires auth for Top Trumps match history", async () => {
+    const res = await request(app).get("/play/top-trumps/history");
+    expect(res.status).toBe(401);
+  });
+
+  it("allows a rematch vs the same opponent (second match, new category pick)", async () => {
+    const first = await a.post("/play/top-trumps/pvp").send({
+      listingId: carA,
+      opponentListingId: carB,
+      category: "bhp",
+    });
+    expect(first.status).toBe(201);
+    const opponentUserId = first.body.match.opponent.userId as number;
+
+    // Prefer a different owned card when the wallet can buy one; otherwise rematch with carA.
+    const wallet = await a.get("/trade/wallet");
+    const garage = await a.get("/trade/garage");
+    const ownedIds = new Set(
+      (garage.body.cars as Array<{ id: number }>).map((car) => car.id),
+    );
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 40 });
+    const next = (search.body.listings as Array<{ id: number; coinPrice: number }>).find(
+      (l) =>
+        !ownedIds.has(l.id) &&
+        l.id !== carB &&
+        l.coinPrice <= Number(wallet.body.balance),
+    );
+    let rematchListingId = carA;
+    if (next) {
+      const buy = await a.post(`/trade/listings/${next.id}/buy`);
+      if (buy.status === 200) rematchListingId = next.id;
+    }
+
+    const rematch = await a.post("/play/top-trumps/pvp").send({
+      listingId: rematchListingId,
+      opponentListingId: carB,
+      category: "top_speed_mph",
+    });
+    expect(rematch.status).toBe(201);
+    expect(rematch.body.match.mode).toBe("pvp");
+    expect(rematch.body.match.opponent.userId).toBe(opponentUserId);
+    expect(rematch.body.match.id).not.toBe(first.body.match.id);
+  });
+
+  it("creates and accepts a free card trade without moving Brad Coins", async () => {
+    const walletABefore = await a.get("/trade/wallet");
+    const walletBBefore = await b.get("/trade/wallet");
+
+    const offer = await a.post("/play/trades").send({
+      offerListingId: carA,
+      requestListingId: carB,
+    });
+    expect(offer.status).toBe(201);
+    const tradeId = offer.body.trade.id as number;
+
+    const inboxB = await b.get("/play/trades");
+    const pending = inboxB.body.trades.find(
+      (t: { id: number; status: string; toUserId: number }) =>
+        t.id === tradeId && t.status === "pending",
+    );
+    expect(pending).toBeTruthy();
+    expect(pending.offerColour).toBeTruthy();
+    expect(pending.offerBodyType).toBeTruthy();
+    expect(pending.requestColour).toBeTruthy();
+    expect(pending.requestBodyType).toBeTruthy();
+    expect(pending.offerYear).toBeGreaterThan(1990);
+    expect(pending.requestYear).toBeGreaterThan(1990);
+
+    const countBefore = await b.get("/play/trades/inbox-count");
+    expect(countBefore.status).toBe(200);
+    expect(countBefore.body.pendingIncoming).toBeGreaterThanOrEqual(1);
+
+    const countForSender = await a.get("/play/trades/inbox-count");
+    expect(countForSender.status).toBe(200);
+    expect(countForSender.body.pendingIncoming).toBe(0);
+
+    const accept = await b.post(`/play/trades/${tradeId}/accept`);
+    expect(accept.status).toBe(200);
+
+    const countAfter = await b.get("/play/trades/inbox-count");
+    expect(countAfter.body.pendingIncoming).toBe(
+      Math.max(0, Number(countBefore.body.pendingIncoming) - 1),
+    );
+
+    const garageA = await a.get("/trade/garage");
+    const garageB = await b.get("/trade/garage");
+    expect(garageA.body.cars.some((c: { id: number }) => c.id === carB)).toBe(true);
+    expect(garageB.body.cars.some((c: { id: number }) => c.id === carA)).toBe(true);
+
+    const walletAAfter = await a.get("/trade/wallet");
+    const walletBAfter = await b.get("/trade/wallet");
+    expect(walletAAfter.body.balance).toBe(walletABefore.body.balance);
+    expect(walletBAfter.body.balance).toBe(walletBBefore.body.balance);
+
+    const historyA = await a.get("/play/trades/history");
+    expect(historyA.status).toBe(200);
+    const completedA = historyA.body.trades.find((t: { id: number }) => t.id === tradeId);
+    expect(completedA).toBeTruthy();
+    expect(completedA.counterpartyName).toBe("Player B");
+    expect(completedA.youWere).toBe("offerer");
+    expect(completedA.youGave.listingId).toBe(carA);
+    expect(completedA.youGot.listingId).toBe(carB);
+    expect(completedA.theirCarListingId).toBe(carA);
+    expect(completedA.theirCarAvailable).toBe(true);
+    expect(completedA.resolvedAt).toBeTruthy();
+
+    const meB = await b.get("/auth/me");
+    expect(meB.status).toBe(200);
+    expect(completedA.counterpartyUserId).toBe(meB.body.user.id);
+
+    const historyB = await b.get("/play/trades/history");
+    const completedB = historyB.body.trades.find((t: { id: number }) => t.id === tradeId);
+    expect(completedB).toBeTruthy();
+    expect(completedB.counterpartyName).toBe("Player A");
+    expect(completedB.youWere).toBe("receiver");
+    expect(completedB.youGave.listingId).toBe(carB);
+    expect(completedB.youGot.listingId).toBe(carA);
+    expect(completedB.theirCarListingId).toBe(carB);
+    expect(completedB.theirCarAvailable).toBe(true);
+
+    const meA = await a.get("/auth/me");
+    expect(meA.status).toBe(200);
+    expect(completedB.counterpartyUserId).toBe(meA.body.user.id);
+  });
+
+  it("requires auth for completed trade history", async () => {
+    const res = await request(app).get("/play/trades/history");
+    expect(res.status).toBe(401);
+  });
+
+  it("lets the recipient decline and the sender cancel pending trades", async () => {
+    // Swap cars back via a fresh purchase path is awkward; buy two more cheap cars if available.
+    const search = await request(app).get("/cars/search").query({ sort: "price_asc", limit: 20 });
+    const walletA = await a.get("/trade/wallet");
+    const walletB = await b.get("/trade/wallet");
+    const forA = search.body.listings.find(
+      (l: { coinPrice: number; id: number }) =>
+        l.coinPrice <= walletA.body.balance && l.id !== carA && l.id !== carB,
+    );
+    const forB = search.body.listings.find(
+      (l: { coinPrice: number; id: number }) =>
+        l.coinPrice <= walletB.body.balance &&
+        l.id !== carA &&
+        l.id !== carB &&
+        l.id !== forA?.id,
+    );
+    if (!forA || !forB) {
+      expect(true).toBe(true);
+      return;
+    }
+    expect((await a.post(`/trade/listings/${forA.id}/buy`)).status).toBe(200);
+    expect((await b.post(`/trade/listings/${forB.id}/buy`)).status).toBe(200);
+
+    const declinedOffer = await a.post("/play/trades").send({
+      offerListingId: forA.id,
+      requestListingId: forB.id,
+    });
+    expect(declinedOffer.status).toBe(201);
+    const declineId = declinedOffer.body.trade.id as number;
+    expect((await b.post(`/play/trades/${declineId}/decline`)).status).toBe(200);
+    const afterDecline = await a.get("/play/trades");
+    expect(
+      afterDecline.body.trades.find((t: { id: number }) => t.id === declineId)?.status,
+    ).toBe("declined");
+
+    const cancelOffer = await a.post("/play/trades").send({
+      offerListingId: forA.id,
+      requestListingId: forB.id,
+    });
+    expect(cancelOffer.status).toBe(201);
+    const cancelId = cancelOffer.body.trade.id as number;
+    expect((await a.post(`/play/trades/${cancelId}/cancel`)).status).toBe(200);
+    const afterCancel = await a.get("/play/trades");
+    expect(
+      afterCancel.body.trades.find((t: { id: number }) => t.id === cancelId)?.status,
+    ).toBe("cancelled");
+  });
+});

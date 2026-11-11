@@ -1,0 +1,261 @@
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AuthProvider } from "../auth-context";
+import { ToastProvider } from "../toast-context";
+import { TopTrumpsPage } from "./TopTrumpsPage";
+
+vi.mock("../api", () => ({
+  fetchMe: vi.fn(),
+  fetchTradeInboxCount: vi.fn().mockResolvedValue({ pendingIncoming: 0 }),
+  fetchTopTrumpsCategories: vi.fn(),
+  fetchTopTrumpsStreak: vi.fn(),
+  fetchWeeklyCup: vi.fn(),
+  fetchGarage: vi.fn(),
+  fetchMembers: vi.fn(),
+  fetchMemberCards: vi.fn(),
+}));
+
+import * as api from "../api";
+
+describe("TopTrumpsPage Midnight Garage UI", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  beforeEach(() => {
+    vi.mocked(api.fetchMe).mockResolvedValue({
+      user: {
+        id: 2,
+        email: "member@example.com",
+        displayName: "Member",
+        bio: null,
+        role: "member",
+        coinBalance: 400,
+      },
+      dailyLogin: {
+        amount: 25,
+        claimDate: "2026-11-09",
+        claimedToday: true,
+        claimedJustNow: false,
+        balance: 400,
+      },
+    });
+    vi.mocked(api.fetchTopTrumpsCategories).mockResolvedValue({
+      categories: [
+        { id: "bhp", label: "Power (bhp)", direction: "higher" },
+        { id: "top_speed_mph", label: "Top speed", direction: "higher" },
+        { id: "zero_to_sixty_secs", label: "0–60", direction: "lower" },
+      ],
+      rewards: { win: 25, play: 5 },
+      streakMilestones: [
+        { streak: 3, coins: 15 },
+        { streak: 5, coins: 40 },
+      ],
+    });
+    vi.mocked(api.fetchTopTrumpsStreak).mockResolvedValue({
+      streak: 2,
+      milestones: [
+        { streak: 3, coins: 15 },
+        { streak: 5, coins: 40 },
+      ],
+    });
+    vi.mocked(api.fetchWeeklyCup).mockResolvedValue({
+      timezone: "Europe/London",
+      weekKey: "2026-W46",
+      weekStart: "2026-11-09T00:00:00.000Z",
+      weekEnd: "2026-11-16T00:00:00.000Z",
+      prizeAmount: 50,
+      standings: [{ userId: 2, displayName: "Member", wins: 2, rank: 1 }],
+      previousAward: {
+        weekKey: "2026-W45",
+        winnerUserId: 7,
+        displayName: "Bay Friend",
+        wins: 4,
+        prizeAmount: 50,
+        alreadyAwarded: true,
+      },
+    });
+    vi.mocked(api.fetchGarage).mockResolvedValue({
+      totalValue: 420,
+      showcaseListingId: null,
+      cars: [
+        {
+          id: 9,
+          make: "Porsche",
+          model: "911",
+          trimName: "GT3",
+          bodyType: "Coupe",
+          bhp: 502,
+          topSpeedMph: 197,
+          zeroToSixtySecs: 3.2,
+          conditionType: "used",
+          year: 2022,
+          colour: "Racing Red",
+          mileage: 12000,
+          coinPrice: 420,
+          status: "owned",
+          ownerLabel: "You",
+          garageName: "Bay",
+          garageCity: "London",
+        },
+      ],
+    });
+    vi.mocked(api.fetchMembers).mockResolvedValue({
+      members: [
+        {
+          id: 177,
+          displayName: "Sam Bay",
+          bio: null,
+          role: "member",
+          roleLabel: "Member",
+          carCount: 2,
+          coinBalance: 300,
+        },
+      ],
+    });
+    vi.mocked(api.fetchMemberCards).mockResolvedValue({ cards: [] });
+  });
+
+  it("shows bay hierarchy, House vs Challenge modes, and match history entry", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/play"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TopTrumpsPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Top Trumps" })).toBeInTheDocument();
+    expect(screen.getByText("Midnight garage")).toBeInTheDocument();
+    expect(screen.getByText(/Win \+25 BC/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Streak ×2/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Win streak")).toBeInTheDocument();
+    expect(screen.getByLabelText("Current win streak 2")).toBeInTheDocument();
+    expect(screen.getByText(/1 more win for \+15 BC/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Streak bonus thresholds")).toHaveTextContent("3 wins +15 BC");
+    expect(screen.getByLabelText("Streak bonus thresholds")).toHaveTextContent("5 wins +40 BC");
+    expect(await screen.findByRole("heading", { name: "Top Trumps cup" })).toBeInTheDocument();
+    expect(screen.getByLabelText("This week Top Trumps cup standings")).toBeInTheDocument();
+
+    const historyLinks = screen.getAllByRole("link", { name: /Match history/i });
+    expect(historyLinks.some((link) => link.getAttribute("href") === "/play/history")).toBe(true);
+
+    const house = await screen.findByRole("button", {
+      name: /Vs house.*Random house card/i,
+    });
+    const challenge = screen.getByRole("button", {
+      name: /Challenge a member.*Pick who you face/i,
+    });
+    expect(house).toHaveAttribute("aria-pressed", "true");
+    expect(challenge).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(challenge);
+    expect(challenge).toHaveAttribute("aria-pressed", "true");
+    expect(house).toHaveAttribute("aria-pressed", "false");
+    expect(await screen.findByRole("status")).toHaveTextContent(/Challenge started/i);
+    expect(screen.queryByRole("status", { name: /Empty play bay/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open profile/i })).not.toBeInTheDocument();
+  });
+
+  it("links Open profile to the PvP opponent garage from ?opponent=, hides for house", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.fetchMemberCards).mockResolvedValue({
+      cards: [
+        {
+          id: 42,
+          ownerUserId: 177,
+          ownerDisplayName: "Sam Bay",
+          make: "Ford",
+          model: "Focus",
+          trimName: "ST",
+          bodyType: "Hatchback",
+          bhp: 280,
+          topSpeedMph: 155,
+          zeroToSixtySecs: 5.7,
+          colour: "Blue",
+          year: 2019,
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/play?opponent=177"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/play" element={<TopTrumpsPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+    const openProfile = await screen.findByRole("link", { name: "Open profile Sam Bay" });
+    expect(openProfile).toHaveAttribute("href", "/members/177");
+    expect(openProfile).toHaveTextContent("Open profile");
+    expect(screen.getByRole("button", { name: /Challenge a member/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: /Vs house/i }));
+    expect(screen.queryByRole("link", { name: /Open profile/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+  });
+
+  it("hides Open profile when the opponent query is yourself", async () => {
+    render(
+      <MemoryRouter initialEntries={["/play?opponent=2"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/play" element={<TopTrumpsPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Win streak" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Challenge a member/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.queryByRole("link", { name: /Open profile/i })).not.toBeInTheDocument();
+  });
+
+  it("shows empty bay CTAs when the garage has no cars", async () => {
+    vi.mocked(api.fetchGarage).mockResolvedValue({
+      totalValue: 0,
+      showcaseListingId: null,
+      cars: [],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/play"]}>
+        <AuthProvider>
+          <ToastProvider>
+            <TopTrumpsPage />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Empty bay")).toBeInTheDocument();
+    const empty = screen.getByRole("status", { name: /Empty play bay/i });
+    expect(empty.querySelector('a[href="/cars"]')?.textContent).toMatch(/Browse cars/);
+    expect(empty.querySelector('a[href="/garage"]')?.textContent).toMatch(/My garage/);
+    expect(empty.querySelector('a[href="/members"]')?.textContent).toMatch(/Members/);
+    expect(screen.queryByRole("button", { name: /Vs house/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Win streak" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Top Trumps" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Match history/i }).length).toBeGreaterThan(0);
+  });
+});

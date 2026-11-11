@@ -1,0 +1,669 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bay: #0b1220;
+  --color-bay-deep: #070b14;
+  --color-bay-panel: #121a2b;
+  --color-rose: #f43f5e;
+  --color-lime: #a3e635;
+  --color-mist: #c7d2e5;
+  --color-steel: #8b9bb8;
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Rubik", sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    overflow-x: clip;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: clip;
+    color: var(--color-mist);
+    font-family: var(--font-body);
+    background-color: var(--color-bay-deep);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 50% -10%, rgba(244, 63, 94, 0.18), transparent 55%),
+      radial-gradient(ellipse 90% 60% at 100% 100%, rgba(163, 230, 53, 0.08), transparent 50%),
+      linear-gradient(180deg, #0b1220 0%, #070b14 100%),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.015) 0,
+        rgba(255, 255, 255, 0.015) 1px,
+        transparent 1px,
+        transparent 48px
+      );
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  /* Touch-friendly controls on phone widths */
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  @media (max-width: 639px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      min-height: 2.75rem;
+      font-size: 16px; /* avoid iOS zoom on focus */
+    }
+  }
+}
+
+@layer utilities {
+  .page-pad {
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .page-pad {
+      padding-inline: 1.5rem;
+    }
+  }
+}
+
+@keyframes bay-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bay-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(163, 230, 53, 0);
+  }
+  50% {
+    box-shadow: 0 0 28px 0 rgba(163, 230, 53, 0.18);
+  }
+}
+
+@keyframes bay-sweep {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+.bay-rise {
+  animation: bay-rise 0.55s ease-out both;
+}
+
+.bay-rise-delay {
+  animation: bay-rise 0.7s ease-out 0.12s both;
+}
+
+.bay-cta {
+  animation: bay-glow 3.2s ease-in-out infinite;
+}
+
+.bay-brand-line {
+  background: linear-gradient(90deg, #f43f5e, #a3e635, #f43f5e);
+  background-size: 200% 100%;
+  animation: bay-sweep 6s linear infinite;
+}
+
+/* Home-only bay atmosphere — rose + lime, no purple glow */
+@keyframes home-bay-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.home-bay-glow {
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 12%, rgba(244, 63, 94, 0.22), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 88% 18%, rgba(163, 230, 53, 0.12), transparent 55%),
+    radial-gradient(ellipse 90% 50% at 50% 100%, rgba(18, 40, 72, 0.55), transparent 70%);
+  animation: home-bay-pulse 7s ease-in-out infinite;
+}
+
+.home-bay-floor {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(7, 11, 20, 0.35) 40%, rgba(7, 11, 20, 0.85) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(199, 210, 229, 0.04) 0,
+      rgba(199, 210, 229, 0.04) 1px,
+      transparent 1px,
+      transparent 56px
+    ),
+    linear-gradient(180deg, transparent, rgba(244, 63, 94, 0.06));
+  mask-image: linear-gradient(180deg, transparent, #000 35%, #000);
+}
+
+.home-bay-rails {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(163, 230, 53, 0.18) 20%,
+    rgba(244, 63, 94, 0.14) 80%,
+    transparent
+  );
+}
+
+/* Shared app chrome — Midnight Garage bar (rose + lime, no purple) */
+.nav-shell {
+  border-bottom-color: rgba(199, 210, 229, 0.08);
+  background:
+    linear-gradient(180deg, rgba(18, 26, 43, 0.92) 0%, rgba(7, 11, 20, 0.88) 100%);
+  backdrop-filter: blur(12px);
+}
+
+.nav-shell-glow {
+  background:
+    radial-gradient(ellipse 55% 120% at 8% 0%, rgba(244, 63, 94, 0.16), transparent 60%),
+    radial-gradient(ellipse 40% 100% at 92% 20%, rgba(163, 230, 53, 0.1), transparent 55%),
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+}
+
+.nav-shell-panel {
+  background:
+    linear-gradient(180deg, rgba(18, 26, 43, 0.98) 0%, rgba(11, 18, 32, 0.98) 100%),
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(244, 63, 94, 0.1), transparent 65%);
+  border-top-color: rgba(199, 210, 229, 0.08);
+}
+
+.nav-link-active {
+  color: var(--color-lime);
+}
+
+@media (min-width: 768px) {
+  .nav-link-active {
+    box-shadow: inset 0 -2px 0 0 rgba(163, 230, 53, 0.85);
+  }
+}
+
+@media (max-width: 767px) {
+  .nav-link-active {
+    background: rgba(163, 230, 53, 0.08);
+    box-shadow: inset 3px 0 0 0 rgba(163, 230, 53, 0.9);
+  }
+}
+
+.nav-coin-chip {
+  border: 1px solid rgba(163, 230, 53, 0.35);
+  background: rgba(18, 26, 43, 0.65);
+  color: var(--color-lime);
+}
+
+/* Admin bay — same Midnight Garage language as member chrome */
+.admin-bay-glow {
+  background:
+    radial-gradient(ellipse 50% 80% at 12% 0%, rgba(244, 63, 94, 0.14), transparent 58%),
+    radial-gradient(ellipse 40% 70% at 88% 10%, rgba(163, 230, 53, 0.08), transparent 55%);
+}
+
+.admin-subnav {
+  border-bottom-color: rgba(199, 210, 229, 0.08);
+  background:
+    linear-gradient(180deg, rgba(18, 26, 43, 0.72) 0%, rgba(7, 11, 20, 0.45) 100%);
+}
+
+.admin-subnav-link-active {
+  color: var(--color-lime);
+  box-shadow: inset 0 -2px 0 0 rgba(163, 230, 53, 0.85);
+}
+
+.admin-panel {
+  border-color: rgba(199, 210, 229, 0.1);
+  background: rgba(18, 26, 43, 0.45);
+}
+
+.admin-row {
+  border-color: rgba(199, 210, 229, 0.08);
+  transition: background-color 0.15s ease;
+}
+
+.admin-row:hover {
+  background: rgba(18, 26, 43, 0.35);
+}
+
+/* Action toasts — Midnight Garage snackbars (rose / lime, no purple glow) */
+@keyframes bay-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bay-toast {
+  animation: bay-toast-in 0.28s ease-out both;
+  backdrop-filter: blur(10px);
+}
+
+/* Top Trumps /play bay — Midnight Garage atmosphere (rose + lime, no purple) */
+.play-bay-glow {
+  background:
+    radial-gradient(ellipse 55% 70% at 12% 0%, rgba(244, 63, 94, 0.16), transparent 58%),
+    radial-gradient(ellipse 45% 60% at 90% 8%, rgba(163, 230, 53, 0.1), transparent 55%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(18, 40, 72, 0.35), transparent 70%);
+}
+
+.play-bay-floor {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(7, 11, 20, 0.2) 40%, rgba(7, 11, 20, 0.55) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(199, 210, 229, 0.035) 0,
+      rgba(199, 210, 229, 0.035) 1px,
+      transparent 1px,
+      transparent 52px
+    );
+  mask-image: linear-gradient(180deg, transparent, #000 40%, #000);
+}
+
+.play-panel {
+  border-color: rgba(199, 210, 229, 0.1);
+  background: rgba(18, 26, 43, 0.42);
+}
+
+.play-mode-active-house {
+  border-color: rgba(163, 230, 53, 0.45);
+  background: rgba(163, 230, 53, 0.1);
+  color: var(--color-lime);
+  box-shadow: inset 0 -2px 0 0 rgba(163, 230, 53, 0.75);
+}
+
+.play-mode-active-challenge {
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.12);
+  color: #fda4af;
+  box-shadow: inset 0 -2px 0 0 rgba(244, 63, 94, 0.8);
+}
+
+.play-result-glow {
+  background:
+    radial-gradient(ellipse 70% 80% at 20% 0%, rgba(163, 230, 53, 0.1), transparent 60%),
+    radial-gradient(ellipse 60% 70% at 85% 20%, rgba(244, 63, 94, 0.08), transparent 55%);
+}
+
+/* Shared photo-first car media cards — soft bay lift, studio ease, lime/rose edge */
+.car-card-media {
+  position: relative;
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.car-card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow 0.35s ease;
+}
+
+.car-card-media:hover,
+.car-card-media:focus-within {
+  transform: translateY(-3px);
+  border-color: rgba(163, 230, 53, 0.38);
+  box-shadow:
+    0 14px 32px -16px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(244, 63, 94, 0.12);
+}
+
+.car-card-media:hover::after,
+.car-card-media:focus-within::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(163, 230, 53, 0.28),
+    inset 0 -1px 0 0 rgba(244, 63, 94, 0.2);
+}
+
+.car-card-media [data-bay-frame="card"] img,
+.car-card-media [data-bay-frame="thumb"] img {
+  transition: transform 0.5s ease;
+  transform: scale(1.1);
+  transform-origin: center bottom;
+}
+
+.car-card-media:hover [data-bay-frame="card"] img,
+.car-card-media:focus-within [data-bay-frame="card"] img,
+.car-card-media:hover [data-bay-frame="thumb"] img,
+.car-card-media:focus-within [data-bay-frame="thumb"] img {
+  transform: scale(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car-card-media,
+  .car-card-media::after,
+  .car-card-media [data-bay-frame="card"] img,
+  .car-card-media [data-bay-frame="thumb"] img {
+    transition: none;
+  }
+
+  .car-card-media:hover,
+  .car-card-media:focus-within {
+    transform: none;
+  }
+
+  .car-card-media:hover [data-bay-frame="card"] img,
+  .car-card-media:focus-within [data-bay-frame="card"] img,
+  .car-card-media:hover [data-bay-frame="thumb"] img,
+  .car-card-media:focus-within [data-bay-frame="thumb"] img {
+    transform: scale(1.1);
+  }
+}
+
+/* Listing detail studio hero — entrance, photo ease, bay light (Midnight Garage) */
+@keyframes listing-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes listing-hero-photo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes listing-hero-bay-shift {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.listing-hero-motion {
+  animation: listing-hero-rise 0.7s ease-out both;
+}
+
+.listing-hero-motion [data-bay-frame="hero"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 55% 38% at 48% 0%, rgba(163, 230, 53, 0.14), transparent 62%),
+    radial-gradient(ellipse 42% 34% at 88% 18%, rgba(244, 63, 94, 0.12), transparent 58%);
+  animation: listing-hero-bay-shift 7.5s ease-in-out infinite;
+}
+
+.listing-hero-motion [data-bay-frame="hero"] img {
+  transform-origin: center bottom;
+  animation: listing-hero-photo-in 0.85s ease-out both;
+  transition: transform 0.55s ease;
+}
+
+.listing-hero-motion:hover [data-bay-frame="hero"] img,
+.listing-hero-motion:focus-within [data-bay-frame="hero"] img {
+  transform: scale(1.035);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listing-hero-motion,
+  .listing-hero-motion [data-bay-frame="hero"] img,
+  .listing-hero-motion [data-bay-frame="hero"]::before {
+    animation: none;
+  }
+
+  .listing-hero-motion [data-bay-frame="hero"] img {
+    transition: none;
+  }
+
+  .listing-hero-motion:hover [data-bay-frame="hero"] img,
+  .listing-hero-motion:focus-within [data-bay-frame="hero"] img {
+    transform: none;
+  }
+}
+
+/* Compare dual studio heroes — entrance, photo ease, bay light (Midnight Garage) */
+@keyframes compare-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes compare-hero-photo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes compare-hero-bay-shift {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.compare-hero-motion {
+  animation: compare-hero-rise 0.7s ease-out both;
+}
+
+.compare-heroes .compare-hero-motion:nth-of-type(2) {
+  animation-delay: 0.12s;
+}
+
+.compare-hero-motion [data-bay-frame="hero"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 55% 38% at 48% 0%, rgba(163, 230, 53, 0.14), transparent 62%),
+    radial-gradient(ellipse 42% 34% at 88% 18%, rgba(244, 63, 94, 0.12), transparent 58%);
+  animation: compare-hero-bay-shift 7.5s ease-in-out infinite;
+}
+
+.compare-heroes .compare-hero-motion:nth-of-type(2) [data-bay-frame="hero"]::before {
+  animation-delay: 1.2s;
+}
+
+.compare-hero-motion [data-bay-frame="hero"] img {
+  transform-origin: center bottom;
+  animation: compare-hero-photo-in 0.85s ease-out both;
+  transition: transform 0.55s ease;
+}
+
+.compare-heroes .compare-hero-motion:nth-of-type(2) [data-bay-frame="hero"] img {
+  animation-delay: 0.12s;
+}
+
+.compare-hero-motion:hover [data-bay-frame="hero"] img,
+.compare-hero-motion:focus-within [data-bay-frame="hero"] img {
+  transform: scale(1.035);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare-hero-motion,
+  .compare-hero-motion [data-bay-frame="hero"] img,
+  .compare-hero-motion [data-bay-frame="hero"]::before {
+    animation: none;
+  }
+
+  .compare-hero-motion [data-bay-frame="hero"] img {
+    transition: none;
+  }
+
+  .compare-hero-motion:hover [data-bay-frame="hero"] img,
+  .compare-hero-motion:focus-within [data-bay-frame="hero"] img {
+    transform: none;
+  }
+}
+
+/* Play TrumpCard — entrance, photo ease, optional category/winner pulse (Midnight Garage) */
+@keyframes trump-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trump-card-photo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes trump-card-bay-shift {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes trump-card-category-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 18px rgba(163, 230, 53, 0.1);
+    border-color: rgba(163, 230, 53, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(163, 230, 53, 0.22);
+    border-color: rgba(163, 230, 53, 0.7);
+  }
+}
+
+.trump-card-motion {
+  animation: trump-card-rise 0.65s ease-out both;
+}
+
+.play-trump-cards .trump-card-motion:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.trump-card-motion [data-bay-frame="card"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 55% 38% at 48% 0%, rgba(163, 230, 53, 0.12), transparent 62%),
+    radial-gradient(ellipse 42% 34% at 88% 18%, rgba(244, 63, 94, 0.1), transparent 58%);
+  animation: trump-card-bay-shift 7s ease-in-out infinite;
+}
+
+.play-trump-cards .trump-card-motion:nth-child(2) [data-bay-frame="card"]::before {
+  animation-delay: 1.1s;
+}
+
+.trump-card-motion [data-bay-frame="card"] img {
+  transform-origin: center bottom;
+  animation: trump-card-photo-in 0.8s ease-out both;
+  transition: transform 0.5s ease;
+}
+
+.play-trump-cards .trump-card-motion:nth-child(2) [data-bay-frame="card"] img {
+  animation-delay: 0.1s;
+}
+
+.trump-card-motion:hover [data-bay-frame="card"] img,
+.trump-card-motion:focus-within [data-bay-frame="card"] img {
+  transform: scale(1.04);
+}
+
+.trump-card-motion[data-trump-highlighted="true"] {
+  animation:
+    trump-card-rise 0.65s ease-out both,
+    trump-card-category-pulse 2.4s ease-in-out 0.7s infinite;
+}
+
+.play-trump-cards .trump-card-motion[data-trump-highlighted="true"]:nth-child(2) {
+  animation-delay: 0.1s, 0.8s;
+}
+
+.trump-card-motion [data-trump-stat] {
+  transition: text-shadow 0.4s ease;
+}
+
+.trump-card-motion[data-trump-highlighted="true"] [data-trump-stat] {
+  text-shadow: 0 0 18px rgba(163, 230, 53, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trump-card-motion,
+  .trump-card-motion[data-trump-highlighted="true"],
+  .trump-card-motion [data-bay-frame="card"] img,
+  .trump-card-motion [data-bay-frame="card"]::before {
+    animation: none;
+  }
+
+  .trump-card-motion [data-bay-frame="card"] img {
+    transition: none;
+  }
+
+  .trump-card-motion:hover [data-bay-frame="card"] img,
+  .trump-card-motion:focus-within [data-bay-frame="card"] img {
+    transform: none;
+  }
+
+  .trump-card-motion[data-trump-highlighted="true"] [data-trump-stat] {
+    text-shadow: none;
+  }
+}

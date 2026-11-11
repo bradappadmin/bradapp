@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: bradapp-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: bradapp_root
+      MYSQL_DATABASE: bradapp
+      MYSQL_USER: bradapp
+      MYSQL_PASSWORD: bradapp
+    volumes:
+      - bradapp_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ubradapp", "-pbradapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  bradapp_mysql_data:

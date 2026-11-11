@@ -1,0 +1,24 @@
+{
+  "name": "bradapp",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=web",
+    "dev:api": "npm run dev --workspace=api",
+    "dev:web": "npm run dev --workspace=web",
+    "build": "npm run build --workspace=api && npm run build --workspace=web",
+    "typecheck": "npm run typecheck --workspace=api && npm run typecheck --workspace=web",
+    "test": "npm run test --workspace=api && npm run test --workspace=web",
+    "db:up": "docker compose up -d mysql",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run migrate --workspace=api",
+    "db:seed": "npm run seed --workspace=api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
