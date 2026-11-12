@@ -37,4 +37,21 @@ describe("catalogue API sample fallback", () => {
     expect(res.listing.id).toBe(1);
     expect(res.favourited).toBe(false);
   });
+
+  it("falls back when the host returns SPA HTML with HTTP 200", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response("<!doctype html><html><body>BradApp</body></html>", {
+          status: 200,
+          headers: { "Content-Type": "text/html" },
+        }),
+      ),
+    );
+    const api = await import("./api");
+    const res = await api.searchCars({});
+    expect(api.getCatalogueSource()).toBe("sample");
+    expect(res.listings.length).toBeGreaterThan(0);
+    expect(res.total).toBeGreaterThan(0);
+  });
 });

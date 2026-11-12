@@ -54,10 +54,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 /**
  * Catalogue GETs: prefer the live API, fall back to embedded sample stock when the
  * host has no MySQL/API (static publish-app) or the request fails.
+ * Static SPA hosts often rewrite unknown paths to index.html with HTTP 200 — treat
+ * non-object JSON as failure so we still show the sample bay.
  */
 async function catalogueRequest<T>(path: string, sample: () => T): Promise<T> {
   try {
     const data = await request<T>(path);
+    if (data == null || typeof data !== "object") {
+      throw new Error("invalid catalogue response");
+    }
     lastCatalogueSource = "api";
     return data;
   } catch {
