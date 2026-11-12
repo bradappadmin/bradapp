@@ -17,6 +17,7 @@ vi.mock("../api", () => ({
   fetchCarFilters: vi.fn(),
   fetchModels: vi.fn(),
   searchCars: vi.fn(),
+  getCatalogueSource: vi.fn().mockReturnValue("api"),
 }));
 
 import * as api from "../api";

@@ -1,4 +1,10 @@
 import type { CarFilters, ListingDetail, ListingSummary, SearchQuery } from "./cars";
+import {
+  sampleCarFilters,
+  sampleListing,
+  sampleModels,
+  searchSampleCars,
+} from "./catalogue-seed";
 import type { User } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
@@ -7,6 +13,15 @@ type ApiErrorBody = {
   error?: string;
   message?: string;
 };
+
+/** Whether the last catalogue read came from the live API or embedded sample stock. */
+export type CatalogueSource = "api" | "sample";
+
+let lastCatalogueSource: CatalogueSource = "api";
+
+export function getCatalogueSource(): CatalogueSource {
+  return lastCatalogueSource;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -34,6 +49,21 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   return body as T;
+}
+
+/**
+ * Catalogue GETs: prefer the live API, fall back to embedded sample stock when the
+ * host has no MySQL/API (static publish-app) or the request fails.
+ */
+async function catalogueRequest<T>(path: string, sample: () => T): Promise<T> {
+  try {
+    const data = await request<T>(path);
+    lastCatalogueSource = "api";
+    return data;
+  } catch {
+    lastCatalogueSource = "sample";
+    return sample();
+  }
 }
 
 export function signUp(input: {
@@ -220,17 +250,23 @@ function toQuery(params: SearchQuery): string {
 }
 
 export function fetchCarFilters(): Promise<{ filters: CarFilters }> {
-  return request("/cars/filters");
+  return catalogueRequest("/cars/filters", () => ({ filters: sampleCarFilters() }));
 }
 
 export function searchCars(
   params: SearchQuery,
 ): Promise<{ total: number; limit: number; offset: number; listings: ListingSummary[] }> {
-  return request(`/cars/search${toQuery(params)}`);
+  return catalogueRequest(`/cars/search${toQuery(params)}`, () => searchSampleCars(params));
 }
 
 export function fetchListing(id: number): Promise<{ listing: ListingDetail; favourited: boolean }> {
-  return request(`/cars/listings/${id}`);
+  return catalogueRequest(`/cars/listings/${id}`, () => {
+    const listing = sampleListing(id);
+    if (!listing) {
+      throw new Error("Listing not found.");
+    }
+    return { listing, favourited: false };
+  });
 }
 
 export type FavouriteCar = {
@@ -277,7 +313,9 @@ export function removeFavourite(id: number): Promise<{ ok: boolean; favourited: 
 }
 
 export function fetchModels(make?: string): Promise<{ models: string[] }> {
-  return request(`/cars/models${toQuery({ make: make ?? "" })}`);
+  return catalogueRequest(`/cars/models${toQuery({ make: make ?? "" })}`, () => ({
+    models: sampleModels(make),
+  }));
 }
 
 export type LedgerEntry = {

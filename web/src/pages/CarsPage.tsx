@@ -102,6 +102,7 @@ export function CarsPage() {
   const [loading, setLoading] = useState(true);
   const [showMore, setShowMore] = useState(false);
   const [comparePicks, setComparePicks] = useState<ComparePick[]>([]);
+  const [sampleBay, setSampleBay] = useState(false);
 
   const draft = useMemo(() => queryFromParams(searchParams), [searchParams]);
   const [form, setForm] = useState<SearchQuery>(draft);
@@ -133,7 +134,10 @@ export function CarsPage() {
   useEffect(() => {
     void api
       .fetchCarFilters()
-      .then((res) => setFilters(res.filters))
+      .then((res) => {
+        setFilters(res.filters);
+        setSampleBay(api.getCatalogueSource() === "sample");
+      })
       .catch(() => {
         setError("Could not load filters");
       });
@@ -142,8 +146,15 @@ export function CarsPage() {
   useEffect(() => {
     let cancelled = false;
     async function loadModels() {
-      const res = await api.fetchModels(form.make || undefined);
-      if (!cancelled) setModels(res.models);
+      try {
+        const res = await api.fetchModels(form.make || undefined);
+        if (!cancelled) {
+          setModels(res.models);
+          setSampleBay(api.getCatalogueSource() === "sample");
+        }
+      } catch {
+        if (!cancelled) setModels([]);
+      }
     }
     void loadModels();
     return () => {
@@ -161,6 +172,7 @@ export function CarsPage() {
         if (!cancelled) {
           setListings(res.listings);
           setTotal(res.total);
+          setSampleBay(api.getCatalogueSource() === "sample");
         }
       } catch (err) {
         if (!cancelled) {
@@ -257,6 +269,14 @@ export function CarsPage() {
               <span className="rounded-md border border-white/10 bg-bay-panel/60 px-3 py-1.5 font-display text-xs font-semibold text-mist">
                 Brad Coin prices
               </span>
+              {sampleBay ? (
+                <span
+                  className="rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 font-display text-xs font-semibold text-amber-200"
+                  title="Live API offline — showing embedded demo stock"
+                >
+                  Sample bay
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
